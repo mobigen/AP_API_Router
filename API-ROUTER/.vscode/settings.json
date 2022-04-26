@@ -1,0 +1,24 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "192.168.106.24",
+            "port": 25432,
+            "driver": "PostgreSQL",
+            "name": "DHUB",
+            "database": "dhub",
+            "username": "dhub",
+            "password": "dhub.12#"
+        },
+        {
+            "previewLimit": 50,
+            "server": "192.168.101.43",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "TEST_DHUB",
+            "database": "dhub",
+            "username": "dhub",
+            "password": "dhub.12#"
+        }
+    ]
+}
