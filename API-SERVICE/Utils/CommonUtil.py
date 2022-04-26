@@ -9,7 +9,7 @@ def get_config(root_path:str):
 
     config = configparser.ConfigParser()
     config.read(os.path.join(root_path,
-                             "AP_API_Router/API-ROUTER/conf/config.ini"), encoding='utf-8')
+                             "AP_API_Router/API-SERVICE/conf/config.ini"), encoding='utf-8')
     for section in config.sections():
         ano_cfg[section] = {}
         for option in config.options(section):
