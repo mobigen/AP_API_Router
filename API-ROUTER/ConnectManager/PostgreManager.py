@@ -42,7 +42,7 @@ class PostgreManager:
         result = []
         for row in rows:
             result.append(dict(zip(column_names, row)))
-        return result
+        return result, column_names
 
     def insert(self, table: str, into_info: List[Dict]) -> None:
         sql = make_insert_query(f"{self.schema}.{table}", into_info)
