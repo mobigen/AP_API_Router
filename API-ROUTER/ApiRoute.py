@@ -36,9 +36,10 @@ def make_res_msg(result, errorMessage, data, column_names):
     return {"result" : result, "errorMessage" : errorMessage, "body" : data, "header" : header_list}
 
 class ApiRoute:
-    def __init__(self, db_type:str, db_info: Dict) -> None:
+    def __init__(self, db_type:str, db_info: Dict, remote_info: Dict) -> None:
         self.db_type = db_type
         self.db_info = db_info
+        self.remote_info = remote_info
         
         self.router = APIRouter()
         self.set_route()
@@ -115,6 +116,17 @@ class ApiRoute:
         return ""
     
     def route_api(self, api_name:str) -> Dict:
-        # db search
-        return ""
+        # db search api
+        db = self.connect_db()
+        search_query = f'SELECT * FROM {self.db_info["schema"]}.{self.db_info["api_info_table"]} \
+                        WHERE api_name = {DataBaseUtil.convert_data(api_name)};'        
+        api_info, _ = db.select(search_query)
+
+        if len(api_info) == 0:
+            return {"result" : 0, "errorMessage" : "This is an unregistered API."}
+
+        remote_cmd = RemoteCmd(self.remote_info["host"], self.remote_info["port"], self.remote_info["id"], self.remote_info["password"])
+        return eval(remote_cmd.cmd_exec(api_info[0]["command"]))
+            
+
     
