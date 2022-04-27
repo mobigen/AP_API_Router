@@ -1,6 +1,7 @@
 import logging
 from typing import List, Dict
 import psycopg2
+from requests import options
 
 from .DataBaseUtil import make_insert_query, make_update_query, make_delete_query
 
@@ -20,7 +21,8 @@ class PostgreManager:
 
     def connect(self):
         conn = psycopg2.connect(host=self.host, port=self.port, user=self.user,
-                                password=self.password, database=self.database)
+                                password=self.password, database=self.database,
+                                options=f"-c search_path={self.schema}")
         logger.info("PostgreManager Connect.")
         return conn
 
@@ -45,17 +47,17 @@ class PostgreManager:
         return result, column_names
 
     def insert(self, table: str, into_info: List[Dict]) -> None:
-        sql = make_insert_query(f"{self.schema}.{table}", into_info)
+        sql = make_insert_query(f"{table}", into_info)
         self.execute(sql)
         logger.info(f'PostgreManager Insert Execute. ({sql})')
 
     def update(self, table: str, set_info: Dict, where_info: Dict) -> None:
-        sql = make_update_query(f"{self.schema}.{table}", set_info, where_info)
+        sql = make_update_query(f"{table}", set_info, where_info)
         self.execute(sql)
         logger.debug(f'PostgreManager Update Execute. ({sql})')
 
     def delete(self, table: str, where_info: Dict) -> None:
-        sql = make_delete_query(f"{self.schema}.{table}", where_info)
+        sql = make_delete_query(f"{table}", where_info)
         self.execute(sql)
 
         logger.debug(f'PostgreManager Delete Execute. ({sql})')

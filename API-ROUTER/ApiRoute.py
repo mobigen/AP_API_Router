@@ -116,7 +116,6 @@ class ApiRoute:
         return ""
     
     def route_api(self, api_name:str) -> Dict:
-        # db search api
         db = self.connect_db()
         search_query = f'SELECT * FROM {self.db_info["schema"]}.{self.db_info["api_info_table"]} \
                         WHERE api_name = {DataBaseUtil.convert_data(api_name)};'        
