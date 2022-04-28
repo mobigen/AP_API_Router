@@ -2,7 +2,7 @@ import logging
 from typing import List, Dict
 import psycopg2
 
-from .DataBaseUtil import make_insert_query, make_update_query, make_delete_query
+from Utils.DataBaseUtil import make_insert_query, make_update_query, make_delete_query
 
 logger = logging.getLogger()
 
@@ -20,7 +20,8 @@ class PostgreManager:
 
     def connect(self):
         conn = psycopg2.connect(host=self.host, port=self.port, user=self.user,
-                                password=self.password, database=self.database)
+                                password=self.password, database=self.database,
+                                options=f"-c search_path={self.schema}")
         logger.info("PostgreManager Connect.")
         return conn
 

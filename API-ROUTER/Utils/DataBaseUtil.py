@@ -35,3 +35,5 @@ def make_delete_query(table, where_info: Dict) -> str:
         f'{column} = {convert_data(value)}' for column, value in where_info.items()]
     sql = f'DELETE FROM {table} WHERE {",".join(where_list)};'
     return sql
+
+
