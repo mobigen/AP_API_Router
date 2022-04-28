@@ -1,10 +1,7 @@
-
-from typing import Dict
-
+from starlette import routing
 from typing import Dict, List
 
-
-class ApiRouteInfo:
+class ApiRouteConfig:
     root_path : str
     
     db_type : str
@@ -16,6 +13,6 @@ class ApiRouteInfo:
     server_port : int
     
     api_config : Dict
-    
+        
 
-config = ApiRouteInfo
+config = ApiRouteConfig

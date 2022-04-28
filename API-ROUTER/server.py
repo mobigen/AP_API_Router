@@ -3,7 +3,7 @@ import logging
 import logging.config
 from fastapi import FastAPI
 import uvicorn
-from ApiRoute.ApiRouteInfo import config
+from ApiRoute.ApiRouteConfig import config
 from Utils.CommonUtil import prepare_config
 from ApiRoute import ApiRoute
 
