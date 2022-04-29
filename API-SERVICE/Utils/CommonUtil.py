@@ -15,7 +15,7 @@ def get_config(root_path:str, config_name:str):
 
     config = configparser.ConfigParser()
     config.read(os.path.join(root_path,
-                             f"AP_API_Router/API-SERVICE/conf/{config_name}"), encoding='utf-8')
+                             f"API-SERVICE/conf/{config_name}"), encoding='utf-8')
     for section in config.sections():
         ano_cfg[section] = {}
         for option in config.options(section):
