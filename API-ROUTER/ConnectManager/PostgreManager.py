@@ -4,8 +4,7 @@ import psycopg2
 
 from Utils.DataBaseUtil import make_insert_query, make_update_query, make_delete_query
 
-logger = logging.getLogger()
-
+#logger = logging.getLogger()
 
 class PostgreManager:
     def __init__(self, host: str, port: str, user: str, password: str, database: str, schema: str) -> None:
@@ -22,14 +21,14 @@ class PostgreManager:
         conn = psycopg2.connect(host=self.host, port=self.port, user=self.user,
                                 password=self.password, database=self.database,
                                 options=f"-c search_path={self.schema}")
-        logger.info("PostgreManager Connect.")
+        print("PostgreManager Connect.")
         return conn
 
     def execute(self, sql: str) -> None:
         print(sql)
         result = self.cursor.execute(sql)
         self.conn.commit()
-        logger.info(f'PostgreManager Execute Result. (row count : {result})')
+        #print(f'PostgreManager Execute Result. (row count : {result})')
 
     def select(self, sql: str, count: int = None) -> List[Dict]:
         self.execute(sql)
@@ -38,7 +37,7 @@ class PostgreManager:
             rows = self.cursor.fetchall()
         else:
             rows = self.cursor.fetchmany(count)
-        logger.debug(f'PostgreManager Select Execute. ({sql})')
+        print(f'PostgreManager Select Execute. ({sql})')
 
         result = []
         for row in rows:
@@ -48,18 +47,18 @@ class PostgreManager:
     def insert(self, table: str, into_info: List[Dict]) -> None:
         sql = make_insert_query(f"{self.schema}.{table}", into_info)
         self.execute(sql)
-        logger.info(f'PostgreManager Insert Execute. ({sql})')
+        print(f'PostgreManager Insert Execute. ({sql})')
 
     def update(self, table: str, set_info: Dict, where_info: Dict) -> None:
         sql = make_update_query(f"{self.schema}.{table}", set_info, where_info)
         self.execute(sql)
-        logger.debug(f'PostgreManager Update Execute. ({sql})')
+        print(f'PostgreManager Update Execute. ({sql})')
 
     def delete(self, table: str, where_info: Dict) -> None:
         sql = make_delete_query(f"{self.schema}.{table}", where_info)
         self.execute(sql)
 
-        logger.debug(f'PostgreManager Delete Execute. ({sql})')
+        print(f'PostgreManager Delete Execute. ({sql})')
 
     def commit(self):
         self.conn.commit()

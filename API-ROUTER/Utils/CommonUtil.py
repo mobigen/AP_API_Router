@@ -8,7 +8,7 @@ from typing import Any
 from ApiRoute.ApiRouteConfig import config
 from ConnectManager import PostgreManager
 
-logger = logging.getLogger()
+#logger = logging.getLogger()
 
 def get_config(root_path:str, config_name:str):
     ano_cfg = {}
@@ -48,13 +48,22 @@ def connect_db(db_type, db_info):
                         user=db_info["user"], password=db_info["password"], 
                         database=db_info["database"], schema=db_info["schema"])
     else:
-        logger.error(f"Not Implemented. {db_type}")
+        print(f"Not Implemented. {db_type}")
     return db
 
-def make_res_msg(result, errorMessage, data, column_names):    
+def save_file_for_reload():
+    with open(__file__, "a") as fd:
+        fd.write(" ")
+
+def make_res_msg(result, errorMessage, data=None, column_names=None):    
     header_list = []
     for column_name in column_names:
         header = {"column_name" : column_name} 
         header_list.append(header)          
     
-    return {"result" : result, "errorMessage" : errorMessage, "body" : data, "header" : header_list}
+    result = None
+    if data == None or column_names == None:
+        result = {"result" : result, "errorMessage" : errorMessage}
+    else: 
+        result = {"result" : result, "errorMessage" : errorMessage, "body" : data, "header" : header_list}
+    return result 

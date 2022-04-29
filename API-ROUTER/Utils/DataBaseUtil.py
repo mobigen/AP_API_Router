@@ -1,7 +1,7 @@
 import logging
 from typing import List, Dict
 
-logger = logging.getLogger()
+#logger = logging.getLogger()
 
 
 def convert_data(data) -> str:
