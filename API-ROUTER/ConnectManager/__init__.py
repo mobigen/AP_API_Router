@@ -1,2 +1,2 @@
-from .PostgreManager import *
 from .RemoteCmd import *
+from .PostgreManager import *

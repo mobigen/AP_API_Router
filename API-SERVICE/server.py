@@ -1,28 +1,19 @@
 import os
 import logging
 import logging.config
-from Utils.CommonUtil import get_config
+import traceback
 from fastapi import FastAPI
 import uvicorn
+from ApiService.ApiServiceConfig import config
+from Utils.CommonUtil import prepare_config
 from ApiService import ApiService
-from pathlib import Path
-import uvicorn
+import pdb
 
-root_path = Path(os.getcwd()).parent
-logging.config.fileConfig(os.path.join(root_path, "AP_API_Router/API-SERVICE/conf/logging.conf"))
-logger = logging.getLogger()
-api_service_cfg = get_config(root_path)    
-
-db_type = api_service_cfg["default"]["db"]
-db_info = api_service_cfg[db_type]
-qury_info = api_service_cfg["select_query"]
-
+prepare_config()
+#logging.config.fileConfig(os.path.join(config.root_path, "AP_API_Router/API-ROUTER/conf/logging.conf"))
+#logger = logging.getLogger()
+api_router = ApiService()
 app = FastAPI()
-api_service = ApiService(db_type, db_info, qury_info)
-app.include_router(api_service.router)
-
-if __name__ == '__main__':    
-    host = api_service_cfg["default"]["host"]
-    port = api_service_cfg["default"]["port"]
-
-    uvicorn.run("server:app", host=host, port=int(port), reload=True)
+app.include_router(api_router.router)
+if __name__ == '__main__':
+    uvicorn.run("server:app", host=config.server_host, port=config.server_port, reload=True)

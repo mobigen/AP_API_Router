@@ -42,7 +42,7 @@ class ApiRoute:
 
         db = connect_db(config.db_type, config.db_info)
         api_info, _ = db.select('SELECT * FROM api_info;')
-        
+            
         for api in api_info:
             self.router.add_api_route(f'/api/{api["api_name"]}', self.route_api, methods=["POST"], tags=["route"])
         

@@ -3,7 +3,6 @@ import configparser
 import argparse
 import logging
 from pathlib import Path
-from tkinter.messagebox import NO
 from typing import Any
 from ApiRoute.ApiRouteConfig import config
 from ConnectManager import PostgreManager
