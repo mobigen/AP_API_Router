@@ -47,7 +47,7 @@ class ApiRoute:
             self.router.add_api_route(f'/api/{api["api_name"]}', self.route_api, methods=["POST"], tags=["route"])
         
         for api_name, api_info in config.api_config.items():
-            module_path = f'{config.root_path}/AP_API_Router/API-ROUTER/ApiList/{api_name}.py'
+            module_path = f'{config.root_path}/API-ROUTER/ApiList/{api_name}.py'
             module_name = "api"
             spec = importlib.util.spec_from_file_location(module_name, module_path)
             module = importlib.util.module_from_spec(spec)

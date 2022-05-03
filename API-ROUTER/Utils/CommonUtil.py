@@ -14,7 +14,7 @@ def get_config(root_path:str, config_name:str):
 
     config = configparser.ConfigParser()
     config.read(os.path.join(root_path,
-                             f"AP_API_Router/API-ROUTER/conf/{config_name}"), encoding='utf-8')
+                             f"API-ROUTER/conf/{config_name}"), encoding='utf-8')
     for section in config.sections():
         ano_cfg[section] = {}
         for option in config.options(section):
@@ -24,7 +24,7 @@ def get_config(root_path:str, config_name:str):
 
 def parser_params() -> Any:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str, default="192.168.101.43")
+    parser.add_argument("--host", type=str, default="127.0.0.1")
     parser.add_argument("--port", type=int, default=18000)
     parser.add_argument("--db_type", default="postgresql")
     
@@ -65,4 +65,4 @@ def make_res_msg(result, errorMessage, data=None, column_names=None):
         result = {"result" : result, "errorMessage" : errorMessage}
     else: 
         result = {"result" : result, "errorMessage" : errorMessage, "body" : data, "header" : header_list}
-    return result 
+    return result   

@@ -28,7 +28,7 @@ class PostgreManager:
         print(sql)
         result = self.cursor.execute(sql)
         self.conn.commit()
-        #print(f'PostgreManager Execute Result. (row count : {result})')
+        print(f'PostgreManager Execute Result. (row count : {result})')
 
     def select(self, sql: str, count: int = None) -> List[Dict]:
         self.execute(sql)

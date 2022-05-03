@@ -25,7 +25,7 @@ def get_config(root_path:str, config_name:str):
 
 def parser_params() -> Any:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str, default="192.168.101.43")
+    parser.add_argument("--host", type=str, default="127.0.0.1")
     parser.add_argument("--port", type=int, default=19000)
     parser.add_argument("--db_type", default="postgresql")
     
