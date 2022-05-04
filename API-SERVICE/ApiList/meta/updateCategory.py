@@ -15,9 +15,9 @@ class UpdateCategory(BaseModel):
 def api(update:UpdateCategory) -> Dict:
     db = connect_db(config.db_type, config.db_info)
     query = f'UPDATE tb_biz_meta_name\
-                SET kor_name   = {convert_data(update.parent_id)},\
-                    eng_name   = {convert_data(update.node_id)},\
-                    show_order = {convert_data(update.node_name)}\
+                SET parent_id   = {convert_data(update.parent_id)},\
+                    node_id   = {convert_data(update.node_id)},\
+                    node_name = {convert_data(update.node_name)}\
                 WHERE name_id = {convert_data(update.node_id)};'\
 
     db.execute(query)
