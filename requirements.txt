@@ -1,0 +1,6 @@
+fastapi==0.75.2
+uvicorn==0.16.0
+paramiko==2.10.3
+psycopg2==2.8.6
+requests==2.27.1
+loguru==0.5.3
