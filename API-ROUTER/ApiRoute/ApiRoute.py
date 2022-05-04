@@ -136,9 +136,9 @@ class ApiRoute:
  
             api_info = api_info[0]
             msg_type = api_info["msg_type"]
-                       
+            
+            #send API-SERVICE           
             if api_info["bypass"] == "ON":
-                #send API-SERVICE
                 method = api_info["method"]
                 url = convert_url(api_info["url"])
                 
@@ -166,15 +166,25 @@ class ApiRoute:
                         body = await request.form()
                         response = requests.put(url, data=body)                   
                 else:
-                    print("Not Implemented Method.")
+                    print("Method Not Allowed.")
                 result = response.json()
-            else: # bypass "OFF"
-                #call REMOTE FUNCTION
+            else: # bypass "OFF" - call REMOTE FUNCTION
                 remote_cmd = RemoteCmd(config.remote_info["host"], config.remote_info["port"], config.remote_info["id"], config.remote_info["password"])
-                #make command (use params + body)
-                result = remote_cmd.cmd_exec(api_info["command"])
+                command_input = ""
+                if msg_type == "JSON":
+                    input_params = await request.json()
+                    for param in api_params:
+                        try:
+                            data = input_params[param["param_name"]]
+                            command_input += f' --{param["param_name"]} {data}'
+                        except KeyError:
+                            print(f'parameter set default value. [{param["param_name"]}]')
+                            command_input += f' --{param["param_name"]} {param["default_value"]}'
+
+                cmd = f'{api_info["command"]} {command_input}'
+                result = eval(remote_cmd.cmd_exec(cmd))
         except Exception:
             print(traceback.format_exc())
         return result
     
-       
+        
