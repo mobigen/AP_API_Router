@@ -1,6 +1,7 @@
 import os
 import configparser
 import argparse
+import re
 import logging
 from pathlib import Path
 from typing import Any
@@ -38,6 +39,7 @@ def prepare_config() -> None:
     config.db_type = args.db_type
     config.server_host = args.host
     config.server_port = args.port
+    config.url_info = api_router_cfg["url_info"]
     config.db_info = api_router_cfg[config.db_type]
     config.remote_info = api_router_cfg["remote"]
 
@@ -66,3 +68,16 @@ def make_res_msg(result, errorMessage, data=None, column_names=None):
     else: 
         result = {"result" : result, "errorMessage" : errorMessage, "body" : data, "header" : header_list}
     return result                
+
+def convert_url(url:str) -> str:
+    regex = "(?<=\$).*(?=\$)"
+
+    result = re.compile(regex).search(url)
+    if result != None:
+        try:
+            sub_data = config.url_info[result.group()]
+            url = url.replace(f'${result.group()}$', sub_data)
+        except KeyError:
+            url = None
+
+    return url

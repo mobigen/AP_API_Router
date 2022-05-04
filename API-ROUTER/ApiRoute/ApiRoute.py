@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from ApiRoute.ApiRouteConfig import config
 from ConnectManager import RemoteCmd
 from Utils.DataBaseUtil import convert_data
-from Utils.CommonUtil import connect_db, make_res_msg, save_file_for_reload
+from Utils.CommonUtil import connect_db, convert_url, make_res_msg, save_file_for_reload
 from pydantic import BaseModel
 from starlette.requests import Request
 import requests
@@ -140,6 +140,8 @@ class ApiRoute:
             if api_info["bypass"] == "ON":
                 #send API-SERVICE
                 method = api_info["method"]
+                url = convert_url(api_info["url"])
+                
                 if method == "GET":
                     params_query = request.query_params
                     params_query = str(params_query)
@@ -148,21 +150,21 @@ class ApiRoute:
                         for param in params_query.split("&"):
                             parser_param = param.split("=")
                             params[parser_param[0]] = parser_param[1] 
-                    response = requests.get(api_info["url"], params=params)
+                    response = requests.get(url, params=params)
                 elif method == "POST":
                     if msg_type == "JSON":
                         body = await request.json()
-                        response = requests.post(api_info["url"], json=body)
+                        response = requests.post(url, json=body)
                     else:
                         body = await request.form()
-                        response = requests.post(api_info["url"], data=body)                        
+                        response = requests.post(url, data=body)                        
                 elif method == "PUT":
                     if msg_type == "JSON":
                         body = await request.json()
-                        response = requests.put(api_info["url"], json=body)
+                        response = requests.put(url, json=body)
                     else:
                         body = await request.form()
-                        response = requests.put(api_info["url"], data=body)                   
+                        response = requests.put(url, data=body)                   
                 else:
                     print("Not Implemented Method.")
                 result = response.json()
