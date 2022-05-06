@@ -25,4 +25,4 @@ def api() -> Dict:
         order by tbmn.name_id;"""
     meta_name = db.select(meta_name_query)
 
-    return {"result" : "", "errorMessage" : "", "data": {"body": meta_name[0]}}
+    return {"result" : "", "errorMessage" : "", "data": meta_name[0]}
