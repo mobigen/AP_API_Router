@@ -13,7 +13,7 @@ class UpdateBizMeta(BaseModel):
 def api(update: UpdateBizMeta) -> Dict:
     db = connect_db(config.db_type, config.db_info)
     for data in update.dataList:
-        query = f'UPDATE lum_test\
+        query = f'UPDATE tb_biz_meta\
                     SET item_id   = {convert_data(data["itemId"])},\
                         item_val   = {convert_data(data["itemVal"])}\
                     WHERE biz_dataset_id = {convert_data(update.bizDatasetId)} AND \
