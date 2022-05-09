@@ -1,23 +1,21 @@
-import logging
+from fastapi.logger import logger
 from typing import Dict, List
 import importlib.util
 from fastapi import APIRouter
 from ApiRoute.ApiRouteConfig import config
-from ConnectManager import RemoteCmd
 from Utils.DataBaseUtil import convert_data
-from Utils.CommonUtil import connect_db, convert_url, make_res_msg, save_file_for_reload
+from Utils.CommonUtil import connect_db, make_res_msg, save_file_for_reload
+from Utils.RouteUtil import bypass_msg, call_remote_func
 from pydantic import BaseModel
 from starlette.requests import Request
-import requests
-import traceback
 
-#logger = logging.getLogger()
 
 class ApiParam(BaseModel):
     api_name: str
     param_name: str
     data_type: str
     default_value: str
+
 
 class ApiInfo(BaseModel):
     api_name: str
@@ -29,162 +27,142 @@ class ApiInfo(BaseModel):
     bypass: str
     params: List[ApiParam]
 
+
 class ApiRoute:
     def __init__(self) -> None:
         self.router = APIRouter()
         self.set_route()
 
     def set_route(self) -> None:
-        self.router.add_api_route("/api/getApiList", self.get_api_list, methods=["GET"])
+        self.router.add_api_route(
+            "/api/getApiList", self.get_api_list, methods=["GET"])
         self.router.add_api_route("/api/getApi", self.get_api, methods=["GET"])
-        self.router.add_api_route("/api/setApi", self.set_api, methods=["POST"])
-        self.router.add_api_route("/api/delApi", self.del_api, methods=["POST"])
+        self.router.add_api_route(
+            "/api/setApi", self.set_api, methods=["POST"])
+        self.router.add_api_route(
+            "/api/delApi", self.del_api, methods=["POST"])
 
         db = connect_db(config.db_type, config.db_info)
         api_info, _ = db.select('SELECT * FROM api_info;')
-            
+
         for api in api_info:
-            self.router.add_api_route(f'/route/{api["api_name"]}', self.route_api, methods=[api["method"]], tags=["route"])
-        
+            self.router.add_api_route(
+                f'/route/{api["api_name"]}', self.route_api, methods=[api["method"]], tags=["route"])
+
         for api_name, api_info in config.api_config.items():
-            module_path = f'{config.root_path}/API-ROUTER/ApiList/{api_name}.py'
+            module_path = f'{config.root_path}/API-ROUTER/ApiList/{api_info["sub_dir"]}/{api_name}.py'
             module_name = "api"
-            spec = importlib.util.spec_from_file_location(module_name, module_path)
+            spec = importlib.util.spec_from_file_location(
+                module_name, module_path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
-            self.router.add_api_route(f'{api_info["url_prefix"]}/{api_info["sub_dir"]}/{api_name}', module.api, methods=[api_info["method"]], tags=["service"])
-        
+            self.router.add_api_route(f'{api_info["url_prefix"]}/{api_info["sub_dir"]}/{api_name}',
+                                      module.api, methods=[api_info["method"]], tags=["service"])
 
     def get_api_list(self) -> Dict:
         api_info_query = f'SELECT * FROM api_info;'
         api_params_query = f'SELECT * FROM api_params;'
-        
-        db = connect_db(config.db_type, config.db_info)
+        try:
+            db = connect_db(config.db_type, config.db_info)
 
-        api_info, column_names = db.select(api_info_query)
-        api_info = make_res_msg("", "", api_info, column_names)
-        
-        api_params, column_names = db.select(api_params_query)
-        api_params = make_res_msg("", "", api_params, column_names)
+            api_info, column_names = db.select(api_info_query)
+            api_params, column_names = db.select(api_params_query)
+        except Exception as err:
+            # make error response
+            logger.error(err)
+        else:
+            api_info = make_res_msg("", "", api_info, column_names)
+            api_params = make_res_msg("", "", api_params, column_names)
 
-        return {"api_info" : api_info, "api_params" : api_params}
-    
-    
-    def get_api(self, api_name:str) -> Dict:
+        return {"api_info": api_info, "api_params": api_params}
+
+    def get_api(self, api_name: str) -> Dict:
         api_info_query = f'SELECT * FROM api_info WHERE api_name = {convert_data(api_name)};'
         api_params_query = f'SELECT * FROM api_params WHERE api_name = {convert_data(api_name)};'
+        try:
+            db = connect_db(config.db_type, config.db_info)
+            api_info, column_names = db.select(api_info_query)
+            api_params, column_names = db.select(api_params_query)
+        except Exception as err:
+            # make error response
+            logger.error(err)
+        else:
+            api_info = make_res_msg("", "", api_info, column_names)
+            api_params = make_res_msg("", "", api_params, column_names)
 
-        db = connect_db(config.db_type, config.db_info)
-                            
-        api_info, column_names = db.select(api_info_query)
-        api_info = make_res_msg("", "", api_info, column_names)
-                            
-        api_params, column_names = db.select(api_params_query)
-        api_params = make_res_msg("", "", api_params, column_names)
+        return {"api_info": api_info, "api_params": api_params}
 
-        return {"api_info" : api_info, "api_params" : api_params}
-    
-        
-    def set_api(self, api_info:ApiInfo) -> Dict:
-        db = connect_db(config.db_type, config.db_info)
-        
-        insert_api_info = {}
-        insert_api_params = []
-        for key, value in api_info.__dict__.items():
-            if key == "params":
-                for param in value:
-                    insert_api_params.append(param.__dict__)
-            else:
-                insert_api_info[key] = value
+    def set_api(self, api_info: ApiInfo) -> Dict:
+        try:
+            db = connect_db(config.db_type, config.db_info)
 
-        db.insert("api_info", [insert_api_info])
+            insert_api_info = {}
+            insert_api_params = []
+            for key, value in api_info.__dict__.items():
+                if key == "params":
+                    for param in value:
+                        insert_api_params.append(param.__dict__)
+                else:
+                    insert_api_info[key] = value
 
-        if len(insert_api_params) != 0:
-            db.insert("api_params", insert_api_params)
-        
-        save_file_for_reload()
-            
-        return {"API_NAME : set_api"}      
+            db.insert("api_info", [insert_api_info])
 
-    def del_api(self, api_name:str) -> Dict:
-        db = connect_db(config.db_type, config.db_info)
+            if len(insert_api_params) != 0:
+                db.insert("api_params", insert_api_params)
+        except Exception as err:
+            # make error response
+            logger.error(err)
+        else:
+            save_file_for_reload()
 
-        db.delete("api_info", {"api_name" : api_name})
-        db.delete("api_params", {"api_name" : api_name})
+        return {"API_NAME : set_api"}
 
-        save_file_for_reload()
+    def del_api(self, api_name: str) -> Dict:
+        try:
+            db = connect_db(config.db_type, config.db_info)
+
+            db.delete("api_info", {"api_name": api_name})
+            db.delete("api_params", {"api_name": api_name})
+        except Exception as err:
+            # make error response
+            logger.error(err)
+        else:
+            save_file_for_reload()
 
         return {"API_NAME : del_api"}
 
-    async def route_api(self, request:Request) -> Dict:
-        result = None
+    async def route_api(self, request: Request) -> Dict:
+        api_name = request.url.path.split("/")[-1]
+        method = request.method
+        api_info_query = f'SELECT * FROM api_info WHERE api_name = {convert_data(api_name)};'
+        api_params_query = f'SELECT * FROM api_params WHERE api_name = {convert_data(api_name)};'
+
+        logger.debug(f'API Name : {api_name}, Method : {method}')
+
         try:
-            api_name = request.url.path.split("/")[-1]
-            method = request.method
-            api_info_query = f'SELECT * FROM api_info WHERE api_name = {convert_data(api_name)};'        
-            api_params_query = f'SELECT * FROM api_params WHERE api_name = {convert_data(api_name)};'
-
-            print(f'api_name : {api_name}')
-            print(f'method : {method}')
-
-            db = connect_db(config.db_type, config.db_info)        
+            db = connect_db(config.db_type, config.db_info)
             api_info, _ = db.select(api_info_query)
             api_params, _ = db.select(api_params_query)
-        
+        except Exception as err:
+            # make error response
+            logger.error(err)
+        else:
             if len(api_info) == 0:
-                return {"result" : 0, "errorMessage" : "This is an unregistered API."}
- 
+                return {"result": 0, "errorMessage": "This is an unregistered API."}
+
             api_info = api_info[0]
             msg_type = api_info["msg_type"]
-            
-            #send API-SERVICE           
-            if api_info["bypass"] == "ON":
-                method = api_info["method"]
-                url = convert_url(api_info["url"])
-                
-                if method == "GET":
-                    params_query = request.query_params
-                    params_query = str(params_query)
-                    params = {}
-                    if len(params_query) != 0:
-                        for param in params_query.split("&"):
-                            parser_param = param.split("=")
-                            params[parser_param[0]] = parser_param[1] 
-                    response = requests.get(url, params=params)
-                elif method == "POST":
-                    if msg_type == "JSON":
-                        body = await request.json()
-                        response = requests.post(url, json=body)
-                    else:
-                        body = await request.form()
-                        response = requests.post(url, data=body)                        
-                elif method == "PUT":
-                    if msg_type == "JSON":
-                        body = await request.json()
-                        response = requests.put(url, json=body)
-                    else:
-                        body = await request.form()
-                        response = requests.put(url, data=body)                   
-                else:
-                    print("Method Not Allowed.")
-                result = response.json()
-            else: # bypass "OFF" - call REMOTE FUNCTION
-                remote_cmd = RemoteCmd(config.remote_info["host"], config.remote_info["port"], config.remote_info["id"], config.remote_info["password"])
-                command_input = ""
-                if msg_type == "JSON":
-                    input_params = await request.json()
-                    for param in api_params:
-                        try:
-                            data = input_params[param["param_name"]]
-                            command_input += f' --{param["param_name"]} {data}'
-                        except KeyError:
-                            print(f'parameter set default value. [{param["param_name"]}]')
-                            command_input += f' --{param["param_name"]} {param["default_value"]}'
 
-                cmd = f'{api_info["command"]} {command_input}'
-                result = eval(remote_cmd.cmd_exec(cmd))
-        except Exception:
-            print(traceback.format_exc())
+            body = None
+            if msg_type == "JSON":
+                body = await request.json()
+            elif msg_type == "BINARY":
+                body = await request.form()
+
+            params_query = str(request.query_params)
+            if api_info["bypass"] == "ON":
+                result = bypass_msg(api_info, params_query, body)
+            else:
+                result = call_remote_func(api_info, api_params, body)
+
         return result
-    
-        

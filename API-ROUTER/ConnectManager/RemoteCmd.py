@@ -1,4 +1,5 @@
 import paramiko
+from fastapi.logger import logger
 
 
 class RemoteCmd:

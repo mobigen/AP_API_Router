@@ -1,7 +1,5 @@
-import logging
+from fastapi.logger import logger
 from typing import List, Dict
-
-#logger = logging.getLogger()
 
 
 def convert_data(data) -> str:
@@ -35,5 +33,3 @@ def make_delete_query(table, where_info: Dict) -> str:
         f'{column} = {convert_data(value)}' for column, value in where_info.items()]
     sql = f'DELETE FROM {table} WHERE {",".join(where_list)};'
     return sql
-
-
