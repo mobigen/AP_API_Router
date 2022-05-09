@@ -3,10 +3,11 @@ from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
 
-'''
-    <!-- meta form list 목록 조회-->
-    <select id="getBizMetaList" resultType="java.util.Map">
-        select T.biz_dataset_id      as rowId,
+
+def api() -> Dict:
+    db = connect_db(config.db_type, config.db_info)
+    meta_name_query = """
+            select T.biz_dataset_id      as rowId,
                array_agg(T.item_val) as data,
                array_agg(T.item_id)  as columnKey
         from (select biz_dataset_id, tbm.item_id, tbm.item_val, tbmm.name_id, kor_name, eng_name
@@ -16,10 +17,10 @@ from Utils.DataBaseUtil import convert_data
               order by biz_dataset_id, item_id) T
         group by biz_dataset_id
         order by biz_dataset_id;
-    </select>
-'''
+    """
+    bizmeta_list = db.select(meta_name_query)
+    
+    v_meta_name_query = "SELECT * FROM v_biz_meta_name;"
+    v_meta_name = db.select(v_meta_name_query)
 
-def api() -> Dict:
-    db = connect_db(config.db_type, config.db_info)
-
-    return {"API_NAME" : "TEST"}
+    return {"result" : "", "errorMessage" : "", "data": {"body": bizmeta_list[0],"header":v_meta_name[0]}}

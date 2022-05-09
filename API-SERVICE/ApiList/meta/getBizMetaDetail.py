@@ -4,7 +4,6 @@ from typing import Dict
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
-from loguru import logger
 
 def api(data_set_id:str) -> Dict:
     db = connect_db(config.db_type, config.db_info)
@@ -22,6 +21,9 @@ def api(data_set_id:str) -> Dict:
                     order by biz_dataset_id, item_id) T\
             group by biz_dataset_id\
             order by biz_dataset_id;'
-    result = db.select(query)
-    logger.debug(result)
-    return {"API_NAME" : "TEST"}
+    biz_meta_detail = db.select(query)
+    
+    v_meta_name_query = "SELECT * FROM v_biz_meta_name;"
+    v_meta_name = db.select(v_meta_name_query)
+
+    return {"result" : "", "errorMessage" : "", "data": {"body": biz_meta_detail[0],"header":v_meta_name[0]}}
