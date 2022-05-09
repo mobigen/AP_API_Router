@@ -23,7 +23,7 @@ def api(data_set_id:str) -> Dict:
             order by biz_dataset_id;'
     biz_meta_detail = db.select(query)
     
-    v_meta_map_query = "SELECT kor_name,eng_name,name_id FROM tb_biz_meta_name;"
-    v_meta_map = db.select(v_meta_map_query)
+    v_meta_name_query = "SELECT * FROM v_biz_meta_name;"
+    v_meta_name = db.select(v_meta_name_query)
 
-    return {"result" : "", "errorMessage" : "", "data": {"body": biz_meta_detail[0],"header":v_meta_map[0]}}
+    return {"result" : "", "errorMessage" : "", "data": {"body": biz_meta_detail[0],"header":v_meta_name[0]}}
