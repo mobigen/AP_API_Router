@@ -3,6 +3,8 @@ from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
+from fastapi.logger import logger
+
 
 class UpdatetMetaName(BaseModel):
     subscribed: bool
@@ -12,7 +14,8 @@ class UpdatetMetaName(BaseModel):
     name_id: str
     type: int
 
-def api(update:UpdatetMetaName) -> Dict:
+
+def api(update: UpdatetMetaName) -> Dict:
     db = connect_db(config.db_type, config.db_info)
     query = f'UPDATE tb_biz_meta_name\
                 SET kor_name   = {convert_data(update.kor_name)},\
@@ -22,4 +25,4 @@ def api(update:UpdatetMetaName) -> Dict:
                 WHERE name_id = {convert_data(update.name_id)};'\
 
     db.execute(query)
-    return {"result" : "", "errorMessage" : ""}
+    return {"result": "", "errorMessage": ""}

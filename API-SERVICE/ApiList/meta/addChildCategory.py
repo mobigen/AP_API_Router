@@ -4,6 +4,7 @@ from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
+from fastapi.logger import logger
 
 
 class addChildCategory(BaseModel):
@@ -12,10 +13,10 @@ class addChildCategory(BaseModel):
 
 
 # todo: 수정 필요
-def api(insert:addChildCategory) -> Dict:
+def api(insert: addChildCategory) -> Dict:
     db = connect_db(config.db_type, config.db_info)
     query = f'INSERT INTO tb_category (node_name, parent_id, node_id)\
               VALUES ({convert_data(insert.node_name)},{convert_data(insert.parent_id)},{convert_data(uuid.uuid4())});'
 
     db.execute(query)
-    return {"result" : "", "errorMessage" : ""}
+    return {"result": "", "errorMessage": ""}

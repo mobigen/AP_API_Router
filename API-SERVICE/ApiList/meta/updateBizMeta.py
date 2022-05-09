@@ -3,6 +3,7 @@ from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
+from fastapi.logger import logger
 
 
 class UpdateBizMeta(BaseModel):
@@ -10,6 +11,8 @@ class UpdateBizMeta(BaseModel):
     dataList: list
 
 # todo: 질문 후 수정 필요
+
+
 def api(update: UpdateBizMeta) -> Dict:
     db = connect_db(config.db_type, config.db_info)
     for data in update.dataList:
@@ -20,4 +23,4 @@ def api(update: UpdateBizMeta) -> Dict:
                           item_id = {convert_data(update.data["itemId"])};'
 
         db.execute(query)
-    return {"result" : "", "errorMessage" : ""}
+    return {"result": "", "errorMessage": ""}

@@ -1,12 +1,7 @@
-import logging
-from typing import Dict, List
 import importlib.util
+from fastapi.logger import logger
 from fastapi import APIRouter
 from ApiService.ApiServiceConfig import config
-from Utils.DataBaseUtil import convert_data
-import traceback
-
-#logger = logging.getLogger()
 
 class ApiService:
     def __init__(self) -> None:

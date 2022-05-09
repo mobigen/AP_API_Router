@@ -1,7 +1,7 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db
-from Utils.DataBaseUtil import convert_data
+from fastapi.logger import logger
 
 
 def api() -> Dict:
@@ -25,4 +25,4 @@ def api() -> Dict:
         order by tbmn.name_id;"""
     meta_name = db.select(meta_name_query)
 
-    return {"result" : "", "errorMessage" : "", "data": meta_name[0]}
+    return {"result": "", "errorMessage": "", "data": meta_name[0]}

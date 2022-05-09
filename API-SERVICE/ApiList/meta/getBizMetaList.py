@@ -1,7 +1,7 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db
-from Utils.DataBaseUtil import convert_data
+from fastapi.logger import logger
 
 
 def api() -> Dict:
@@ -19,8 +19,8 @@ def api() -> Dict:
         order by biz_dataset_id;
     """
     bizmeta_list = db.select(meta_name_query)
-    
+
     v_meta_name_query = "SELECT * FROM v_biz_meta_name;"
     v_meta_name = db.select(v_meta_name_query)
 
-    return {"result" : "", "errorMessage" : "", "data": {"body": bizmeta_list[0],"header":v_meta_name[0]}}
+    return {"result": "", "errorMessage": "", "data": {"body": bizmeta_list[0], "header": v_meta_name[0]}}
