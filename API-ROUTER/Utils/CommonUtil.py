@@ -75,3 +75,4 @@ def make_res_msg(result, errorMessage, data=None, column_names=None):
         result = {"result": result, "errorMessage": errorMessage,
                   "body": data, "header": header_list}
     return result
+          

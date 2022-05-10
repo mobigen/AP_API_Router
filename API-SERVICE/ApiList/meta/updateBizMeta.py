@@ -20,7 +20,7 @@ def api(update: UpdateBizMeta) -> Dict:
                     SET item_id   = {convert_data(data["itemId"])},\
                         item_val   = {convert_data(data["itemVal"])}\
                     WHERE biz_dataset_id = {convert_data(update.bizDatasetId)} AND \
-                          item_id = {convert_data(update.data["itemId"])};'
+                          item_id = {convert_data(data["itemId"])};'
 
         db.execute(query)
     return {"result": "", "errorMessage": ""}
