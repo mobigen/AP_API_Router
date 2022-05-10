@@ -14,12 +14,19 @@ class UpdateCategory(BaseModel):
 
 # todo: 수정 필요
 def api(update: UpdateCategory) -> Dict:
-    db = connect_db(config.db_type, config.db_info)
     query = f'UPDATE tb_category\
                 SET parent_id   = {convert_data(uuid.uuid4())},\
                     node_id   = {convert_data(update.node_id)},\
                     node_name = {convert_data(update.node_name)}\
                 WHERE node_id = {convert_data(update.node_id)};'
-
-    db.execute(query)
-    return {"result": "", "errorMessage": ""}
+    try:
+        db = connect_db(config.db_type, config.db_info)
+        db.execute(query)
+    except Exception as err:
+        # make error response
+        result = {"result": 0, "errorMessage": err}
+        logger.error(err)
+    else:
+        # make response
+        result = {"result": 1, "errorMessage": err}
+    return result

@@ -7,6 +7,8 @@ from tkinter.messagebox import NO
 from typing import Any
 from ApiService.ApiServiceConfig import config
 from ConnectManager import PostgreManager
+from retry import retry
+import psycopg2
 
 
 def get_config(root_path: str, config_name: str):
@@ -43,6 +45,7 @@ def prepare_config() -> None:
     config.db_info = api_router_cfg[config.db_type]
 
 
+@retry(psycopg2.OperationalError, delay=1, tries=3)
 def connect_db(db_type, db_info):
     if db_type == "postgresql":
         db = PostgreManager(host=db_info["host"], port=db_info["port"],

@@ -5,7 +5,6 @@ from fastapi.logger import logger
 
 
 def api() -> Dict:
-    db = connect_db(config.db_type, config.db_info)
     meta_name_query = """
             select T.biz_dataset_id      as rowId,
                array_agg(T.item_val) as data,
@@ -18,9 +17,18 @@ def api() -> Dict:
         group by biz_dataset_id
         order by biz_dataset_id;
     """
-    bizmeta_list = db.select(meta_name_query)
-
     v_meta_name_query = "SELECT * FROM v_biz_meta_name;"
-    v_meta_name = db.select(v_meta_name_query)
 
-    return {"result": "", "errorMessage": "", "data": {"body": bizmeta_list[0], "header": v_meta_name[0]}}
+    try:
+        db = connect_db(config.db_type, config.db_info)
+        bizmeta_list = db.select(meta_name_query)
+        v_meta_name = db.select(v_meta_name_query)
+    except Exception as err:
+        # make error response
+        result = {"result": 0, "errorMessage": err}
+        logger.error(err)
+    else:
+        # make response
+        result = {"result": "", "errorMessage": "", "data": {
+            "body": bizmeta_list[0], "header": v_meta_name[0]}}
+    return result

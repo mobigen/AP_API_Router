@@ -16,7 +16,6 @@ class UpdatetMetaName(BaseModel):
 
 
 def api(update: UpdatetMetaName) -> Dict:
-    db = connect_db(config.db_type, config.db_info)
     query = f'UPDATE tb_biz_meta_name\
                 SET kor_name   = {convert_data(update.kor_name)},\
                     eng_name   = {convert_data(update.eng_name)},\
@@ -24,5 +23,14 @@ def api(update: UpdatetMetaName) -> Dict:
                     type= {convert_data(update.type)}\
                 WHERE name_id = {convert_data(update.name_id)};'\
 
-    db.execute(query)
-    return {"result": "", "errorMessage": ""}
+    try:
+        db = connect_db(config.db_type, config.db_info)
+        db.execute(query)
+    except Exception as err:
+        # make error response
+        result = {"result": 0, "errorMessage": err}
+        logger.error(err)
+    else:
+        # make response
+        result = {"result": 1, "errorMessage": err}
+    return result

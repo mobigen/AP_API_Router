@@ -151,15 +151,21 @@ class ApiRoute:
                 return {"result": 0, "errorMessage": "This is an unregistered API."}
 
             api_info = api_info[0]
-            msg_type = api_info["msg_type"]
+            #msg_type = api_info["msg_type"]
 
-            body = None
-            if msg_type == "JSON":
+            content_type = request.headers.get("Content-Type")
+
+            if content_type == "application/json":
+                # if msg_type == "JSON":
                 body = await request.json()
-            elif msg_type == "BINARY":
-                body = await request.form()
+                api_info["msg_type"] = "JSON"
+            else:
+                # elif msg_type == "BINARY":
+                body = await request.body()
+                api_info["msg_type"] = "BINARY"
 
             params_query = str(request.query_params)
+
             if api_info["bypass"] == "ON":
                 result = bypass_msg(api_info, params_query, body)
             else:

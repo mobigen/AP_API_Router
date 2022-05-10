@@ -16,9 +16,17 @@ class InsertMetaName(BaseModel):
 
 
 def api(insert: InsertMetaName) -> Dict:
-    db = connect_db(config.db_type, config.db_info)
     query = f'INSERT INTO tb_biz_meta_name (kor_name, eng_name, show_order, name_id, type)\
                 VALUES ({convert_data(insert.kor_name)}, {convert_data(insert.eng_name)}, {convert_data(insert.show_order)},\
                 (SELECT concat(\'i\', CAST(substring(max(name_id), 2) AS INT) + 1) AS name_id FROM tb_biz_meta_name), {convert_data(insert.type)});'
-    db.execute(query)
-    return {"result": "", "errorMessage": ""}
+    try:
+        db = connect_db(config.db_type, config.db_info)
+        db.execute(query)
+    except Exception as err:
+        # make error response
+        result = {"result": 0, "errorMessage": err}
+        logger.error(err)
+    else:
+        # make response
+        result = {"result": 1, "errorMessage": err}
+    return result

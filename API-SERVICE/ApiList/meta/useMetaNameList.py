@@ -5,7 +5,6 @@ from fastapi.logger import logger
 
 
 def api() -> Dict:
-    db = connect_db(config.db_type, config.db_info)
     meta_name_query = """        
         select                
             case
@@ -23,6 +22,15 @@ def api() -> Dict:
             tbmn.name_id
         from tb_biz_meta_name tbmn
         order by tbmn.name_id;"""
-    meta_name = db.select(meta_name_query)
 
-    return {"result": "", "errorMessage": "", "data": meta_name[0]}
+    try:
+        db = connect_db(config.db_type, config.db_info)
+        meta_name = db.select(meta_name_query)
+    except Exception as err:
+        # make error response
+        result = {"result": 0, "errorMessage": err}
+        logger.error(err)
+    else:
+        # make response
+        result = {"result": "", "errorMessage": "", "data": meta_name[0]}
+    return result

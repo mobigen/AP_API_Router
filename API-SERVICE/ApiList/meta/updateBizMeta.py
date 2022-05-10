@@ -14,13 +14,21 @@ class UpdateBizMeta(BaseModel):
 
 
 def api(update: UpdateBizMeta) -> Dict:
-    db = connect_db(config.db_type, config.db_info)
-    for data in update.dataList:
-        query = f'UPDATE tb_biz_meta\
-                    SET item_id   = {convert_data(data["itemId"])},\
-                        item_val   = {convert_data(data["itemVal"])}\
-                    WHERE biz_dataset_id = {convert_data(update.bizDatasetId)} AND \
-                          item_id = {convert_data(data["itemId"])};'
+    try:
+        db = connect_db(config.db_type, config.db_info)
+        for data in update.dataList:
+            query = f'UPDATE tb_biz_meta\
+                        SET item_id   = {convert_data(data["itemId"])},\
+                            item_val   = {convert_data(data["itemVal"])}\
+                        WHERE biz_dataset_id = {convert_data(update.bizDatasetId)} AND \
+                            item_id = {convert_data(data["itemId"])};'
 
-        db.execute(query)
-    return {"result": "", "errorMessage": ""}
+            db.execute(query)
+    except Exception as err:
+        # make error response
+        result = {"result": 0, "errorMessage": err}
+        logger.error(err)
+    else:
+        # make response
+        result = {"result": 1, "errorMessage": err}
+    return result
