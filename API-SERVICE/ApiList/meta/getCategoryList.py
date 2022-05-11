@@ -6,7 +6,7 @@ from fastapi.logger import logger
 
 def api() -> Dict:
     category_query = "select * \
-                      from metasch.tb_category \
+                      from meta.tb_category \
                       order by parent_id, node_id;"
 
     try:

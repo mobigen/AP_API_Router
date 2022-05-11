@@ -154,7 +154,7 @@ class ApiRoute:
             #msg_type = api_info["msg_type"]
 
             content_type = request.headers.get("Content-Type")
-
+            logger.error(f'content_type : {content_type}')
             if content_type == "application/json":
                 # if msg_type == "JSON":
                 body = await request.json()

@@ -10,9 +10,9 @@ def api() -> Dict:
                array_agg(T.item_val) as data,
                array_agg(T.item_id)  as columnKey
         from (select biz_dataset_id, tbm.item_id, tbm.item_val, tbmm.name_id, kor_name, eng_name
-              from metasch.tb_biz_meta tbm
-                       right join metasch.tb_biz_meta_map tbmm on tbm.item_id = tbmm.item_id
-                       left join metasch.tb_biz_meta_name tbmn on tbmm.name_id = tbmn.name_id
+              from meta.tb_biz_meta tbm
+                       right join meta.tb_biz_meta_map tbmm on tbm.item_id = tbmm.item_id
+                       left join meta.tb_biz_meta_name tbmn on tbmm.name_id = tbmn.name_id
               order by biz_dataset_id, item_id) T
         group by biz_dataset_id
         order by biz_dataset_id;

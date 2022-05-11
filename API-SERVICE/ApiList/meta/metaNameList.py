@@ -8,7 +8,7 @@ def api(perPage: int, curPage: int) -> Dict:
     curPage = curPage - 1
     meta_name_query = f"""
     select *
-    from metasch.tb_biz_meta_name as p
+    from meta.tb_biz_meta_name as p
       join (SELECT kor_name,
             eng_name,
             show_order,

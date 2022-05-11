@@ -32,5 +32,5 @@ def api(update: UpdatetMetaName) -> Dict:
         logger.error(err)
     else:
         # make response
-        result = {"result": 1, "errorMessage": err}
+        result = {"result": 1, "errorMessage": ""}
     return result
