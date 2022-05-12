@@ -20,7 +20,7 @@ def api(datasetId: str) -> Dict:
                     order by biz_dataset_id, item_id) T\
             group by biz_dataset_id\
             order by biz_dataset_id;'
-    v_meta_name_query = "SELECT * FROM v_biz_meta_name;"
+    v_meta_name_query = "SELECT * FROM v_biz_meta;"
 
     try:
         db = connect_db(config.db_type, config.db_info)
