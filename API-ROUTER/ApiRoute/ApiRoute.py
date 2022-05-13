@@ -35,19 +35,19 @@ class ApiRoute:
 
     def set_route(self) -> None:
         self.router.add_api_route(
-            "/api/getApiList", self.get_api_list, methods=["GET"])
-        self.router.add_api_route("/api/getApi", self.get_api, methods=["GET"])
+            "/api/getApiList", self.get_api_list, methods=["GET"], tags=["API Info"])
+        self.router.add_api_route("/api/getApi", self.get_api, methods=["GET"], tags=["API Info"])
         self.router.add_api_route(
-            "/api/setApi", self.set_api, methods=["POST"])
+            "/api/setApi", self.set_api, methods=["POST"], tags=["API Info"])
         self.router.add_api_route(
-            "/api/delApi", self.del_api, methods=["POST"])
+            "/api/delApi", self.del_api, methods=["POST"], tags=["API Info"])
 
         db = connect_db(config.db_type, config.db_info)
         api_info, _ = db.select('SELECT * FROM api_info;')
 
         for api in api_info:
             self.router.add_api_route(
-                f'/route/{api["api_name"]}', self.route_api, methods=[api["method"]], tags=["route"])
+                f'/route/{api["category"]}/{api["api_name"]}', self.route_api, methods=[api["method"]], tags=[f'Route Category ({api["category"]})'])
 
         for api_name, api_info in config.api_config.items():
             module_path = f'{config.root_path}/API-ROUTER/ApiList/{api_info["sub_dir"]}/{api_name}.py'
@@ -68,13 +68,14 @@ class ApiRoute:
             api_info, column_names = db.select(api_info_query)
             api_params, column_names = db.select(api_params_query)
         except Exception as err:
-            # make error response
+            result = {"result": 0, "errorMessage": err}
             logger.error(err)
         else:
             api_info = make_res_msg("", "", api_info, column_names)
             api_params = make_res_msg("", "", api_params, column_names)
+            result = {"api_info": api_info, "api_params": api_params}
 
-        return {"api_info": api_info, "api_params": api_params}
+        return result
 
     def get_api(self, api_name: str) -> Dict:
         api_info_query = f'SELECT * FROM api_info WHERE api_name = {convert_data(api_name)};'
@@ -84,13 +85,14 @@ class ApiRoute:
             api_info, column_names = db.select(api_info_query)
             api_params, column_names = db.select(api_params_query)
         except Exception as err:
-            # make error response
+            result = {"result": 0, "errorMessage": err}
             logger.error(err)
         else:
             api_info = make_res_msg("", "", api_info, column_names)
             api_params = make_res_msg("", "", api_params, column_names)
+            result = {"api_info": api_info, "api_params": api_params}
 
-        return {"api_info": api_info, "api_params": api_params}
+        return result
 
     def set_api(self, api_info: ApiInfo) -> Dict:
         try:
@@ -110,12 +112,13 @@ class ApiRoute:
             if len(insert_api_params) != 0:
                 db.insert("api_params", insert_api_params)
         except Exception as err:
-            # make error response
+            result = {"result": 0, "errorMessage": err}
             logger.error(err)
         else:
             save_file_for_reload()
+            result = {"result": 1, "errorMessage": ""}
 
-        return {"API_NAME : set_api"}
+        return result
 
     def del_api(self, api_name: str) -> Dict:
         try:
@@ -124,48 +127,50 @@ class ApiRoute:
             db.delete("api_info", {"api_name": api_name})
             db.delete("api_params", {"api_name": api_name})
         except Exception as err:
-            # make error response
+            result = {"result": 0, "errorMessage": err}
             logger.error(err)
         else:
             save_file_for_reload()
+            result = {"result": 1, "errorMessage": ""}
 
-        return {"API_NAME : del_api"}
+        return result
 
     async def route_api(self, request: Request) -> Dict:
         api_name = request.url.path.split("/")[-1]
         method = request.method
+        content_type = request.headers.get("Content-Type")
+
+        logger.debug(f'Req - API Name : {api_name}, Method : {method}, Content-Type : {content_type}')
+
         api_info_query = f'SELECT * FROM api_info WHERE api_name = {convert_data(api_name)};'
         api_params_query = f'SELECT * FROM api_params WHERE api_name = {convert_data(api_name)};'
-
-        logger.debug(f'API Name : {api_name}, Method : {method}')
 
         try:
             db = connect_db(config.db_type, config.db_info)
             api_info, _ = db.select(api_info_query)
             api_params, _ = db.select(api_params_query)
         except Exception as err:
-            # make error response
+            result = {"result": 0, "errorMessage": err}
             logger.error(err)
         else:
             if len(api_info) == 0:
                 return {"result": 0, "errorMessage": "This is an unregistered API."}
 
-            api_info = api_info[0]
-            #msg_type = api_info["msg_type"]
-
-            content_type = request.headers.get("Content-Type")
-            logger.error(f'content_type : {content_type}')
+            api_info = api_info[0]            
             if content_type == "application/json":
-                # if msg_type == "JSON":
                 body = await request.json()
                 api_info["msg_type"] = "JSON"
             else:
-                # elif msg_type == "BINARY":
                 body = await request.body()
                 api_info["msg_type"] = "BINARY"
 
             params_query = str(request.query_params)
 
+            logger.debug(f'Req - body : {body}, query params : {params_query}')
+
+            logger.debug(f'DB - api_info : {api_info}')
+            logger.debug(f'DB - api_params : {api_params}')
+            
             if api_info["bypass"] == "ON":
                 result = bypass_msg(api_info, params_query, body)
             else:

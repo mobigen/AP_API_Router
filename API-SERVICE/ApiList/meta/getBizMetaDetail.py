@@ -27,11 +27,9 @@ def api(datasetId: str) -> Dict:
         biz_meta_detail = db.select(query)
         v_meta_name = db.select(v_meta_name_query)
     except Exception as err:
-        # make error response
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        # make response
-        result = {"result": "", "errorMessage": "", "data": {
+        result = {"result": 1, "errorMessage": "", "data": {
             "body": biz_meta_detail[0], "header": v_meta_name[0]}}
     return result

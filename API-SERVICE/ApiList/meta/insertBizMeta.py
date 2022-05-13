@@ -20,10 +20,8 @@ def api(biz_meta_list: list) -> Dict:
 
         biz_meta_list = db.select(biz_meta_query)[0]
     except Exception as err:
-        # make error response
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        # make response
         result = biz_meta_list
     return result

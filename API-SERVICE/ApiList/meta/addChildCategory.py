@@ -1,6 +1,5 @@
-from tkinter import E
 import uuid
-from typing import Dict, Optional
+from typing import Dict
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
@@ -22,7 +21,6 @@ def api(insert: addChildCategory) -> Dict:
         db = connect_db(config.db_type, config.db_info)
         db.execute(query)
     except Exception as err:
-        # make error response
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:

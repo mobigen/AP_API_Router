@@ -25,10 +25,8 @@ def api(update: UpdateBizMeta) -> Dict:
 
             db.execute(query)
     except Exception as err:
-        # make error response
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        # make response
         result = {"result": 1, "errorMessage": ""}
     return result

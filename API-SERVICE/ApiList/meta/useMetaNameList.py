@@ -27,10 +27,8 @@ def api() -> Dict:
         db = connect_db(config.db_type, config.db_info)
         meta_name = db.select(meta_name_query)
     except Exception as err:
-        # make error response
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        # make response
-        result = {"result": "", "errorMessage": "", "data": meta_name[0]}
+        result = {"result": 1, "errorMessage": "", "data": meta_name[0]}
     return result

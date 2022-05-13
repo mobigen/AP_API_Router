@@ -15,11 +15,9 @@ def api() -> Dict:
         meta_map = db.select(meta_map_query)
         v_meta_map = db.select(v_meta_map_query)
     except Exception as err:
-        # make error response
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        # make response
         result = {"result": "", "errorMessage": "", "data": {
             "body": meta_map[0], "header": v_meta_map[0]}}
     return result

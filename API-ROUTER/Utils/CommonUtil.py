@@ -9,7 +9,6 @@ from ConnectManager import PostgreManager
 from retry import retry
 import psycopg2
 
-
 def get_config(root_path: str, config_name: str):
     ano_cfg = {}
 

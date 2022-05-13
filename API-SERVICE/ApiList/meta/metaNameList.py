@@ -37,11 +37,9 @@ def api(perPage: int, curPage: int) -> Dict:
         total_cnt = db.select(total_cnt_query)
         v_meta_name = db.select(v_meta_name_query)
     except Exception as err:
-        # make error response
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        # make response
         data = total_cnt[0][0]
         data.update({"body": meta_name[0], "header": v_meta_name[0]})
         result = {"result": "", "errorMessage": "", "data": data}

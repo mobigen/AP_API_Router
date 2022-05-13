@@ -23,10 +23,8 @@ def api() -> Dict:
         meta_map_list = db.select(meta_map_query)[0]
     # 수정 해야함
     except Exception as err:
-        # make error response
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        # make response
         result = meta_map_list
     return result
