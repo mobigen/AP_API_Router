@@ -22,18 +22,25 @@ def convert_url(url: str) -> str:
     return url
 
 
-def make_url(server_name, url):
-    return url
+def make_url(server_name: str, url: str):
+    print(server_name, url, config.api_server_info)
+    for server_info in config.api_server_info:
+        if server_info["name"] == server_name:
+            if len(server_info["ip_port"]) != 0:
+                return f'http://{server_info["ip_port"]}{url}'
+            else:
+                return f'http://{server_info["domain"]}{url}'
+    return None
 
 
 def bypass_msg(api_info, params_query, body):
     method = api_info["method"]
     msg_type = api_info["msg_type"]
 
-    url = convert_url(api_info["url"])
-    #url = make_url(api_info["category"], url)
+    #url = convert_url(api_info["url"])
+    url = make_url(api_info["category"], api_info["url"])
     if url == None:
-        return {"result": 0, "errorMessage": "The key does not exist."}
+        return {"result": 0, "errorMessage": "The server info does not exist."}
 
     if method == "GET":
         params = {}

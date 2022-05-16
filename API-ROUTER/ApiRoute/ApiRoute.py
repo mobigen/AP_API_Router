@@ -62,6 +62,8 @@ class ApiRoute:
         db = connect_db(config.db_type, config.db_info)
         api_info, _ = db.select('SELECT * FROM api_info;')
 
+        config.api_server_info, _ = db.select('SELECT * FROM api_server_info')
+
         for api in api_info:
             self.router.add_api_route(
                 f'/route/{api["category"]}/{api["api_name"]}', self.route_api, methods=[api["method"]], tags=[f'Route Category ({api["category"]})'])
@@ -84,6 +86,8 @@ class ApiRoute:
             result = {"result": 0, "errorMessage": err}
             logger.error(err)
         else:
+            config.api_server_info, _ = db.select(
+                'SELECT * FROM api_server_info')
             result = {"result": 1, "errorMessage": ""}
 
         return result
@@ -122,6 +126,8 @@ class ApiRoute:
             result = {"result": 0, "errorMessage": err}
             logger.error(err)
         else:
+            config.api_server_info, _ = db.select(
+                'SELECT * FROM api_server_info')
             result = {"result": 1, "errorMessage": ""}
 
         return result

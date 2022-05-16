@@ -13,6 +13,7 @@ class ApiRouteConfig:
     server_port: int
 
     api_config: Dict
+    api_server_info: List[Dict]
 
 
 config = ApiRouteConfig
