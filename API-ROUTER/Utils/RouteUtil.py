@@ -8,7 +8,7 @@ from ConnectManager import RemoteCmd
 def convert_url(url: str) -> str:
     regex = "(?<=\$).*(?=\$)"
 
-    logger.debug(f'Send Request Origin Url : {url}')    
+    logger.debug(f'Send Request Origin Url : {url}')
     result = re.compile(regex).search(url)
     if result != None:
         try:
@@ -18,7 +18,11 @@ def convert_url(url: str) -> str:
             url = None
         else:
             url = url.replace(f'${result.group()}$', sub_data)
-    logger.debug(f'Send Request Convert Url : {url}')    
+    logger.debug(f'Send Request Convert Url : {url}')
+    return url
+
+
+def make_url(server_name, url):
     return url
 
 
@@ -27,6 +31,7 @@ def bypass_msg(api_info, params_query, body):
     msg_type = api_info["msg_type"]
 
     url = convert_url(api_info["url"])
+    #url = make_url(api_info["category"], url)
     if url == None:
         return {"result": 0, "errorMessage": "The key does not exist."}
 
@@ -50,7 +55,7 @@ def bypass_msg(api_info, params_query, body):
     else:
         logger.error(f'Method Not Allowed. {method}')
         return {"result": 0, "errorMessage": "Method Not Allowed."}
-    #print(response.__dict__)
+    # print(response.__dict__)
     return response.json()
 
 

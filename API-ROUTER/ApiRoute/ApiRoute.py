@@ -1,3 +1,4 @@
+from tkinter import E
 from fastapi.logger import logger
 from typing import Dict, List
 import importlib.util
@@ -8,6 +9,12 @@ from Utils.CommonUtil import connect_db, make_res_msg, save_file_for_reload
 from Utils.RouteUtil import bypass_msg, call_remote_func
 from pydantic import BaseModel
 from starlette.requests import Request
+
+
+class ApiServerInfo(BaseModel):
+    name: str
+    ip_port: str
+    domain: str
 
 
 class ApiParam(BaseModel):
@@ -36,11 +43,21 @@ class ApiRoute:
     def set_route(self) -> None:
         self.router.add_api_route(
             "/api/getApiList", self.get_api_list, methods=["GET"], tags=["API Info"])
-        self.router.add_api_route("/api/getApi", self.get_api, methods=["GET"], tags=["API Info"])
+        self.router.add_api_route(
+            "/api/getApi", self.get_api, methods=["GET"], tags=["API Info"])
         self.router.add_api_route(
             "/api/setApi", self.set_api, methods=["POST"], tags=["API Info"])
         self.router.add_api_route(
             "/api/delApi", self.del_api, methods=["POST"], tags=["API Info"])
+
+        self.router.add_api_route(
+            "/api/getServerInfoList", self.get_server_info_list, methods=["GET"], tags=["API Server Info"])
+        self.router.add_api_route(
+            "/api/getServerInfo", self.get_server_info, methods=["GET"], tags=["API Server Info"])
+        self.router.add_api_route(
+            "/api/setServerInfo", self.set_server_info, methods=["POST"], tags=["API Server Info"])
+        self.router.add_api_route(
+            "/api/delServerInfo", self.del_server_info, methods=["POST"], tags=["API Server Info"])
 
         db = connect_db(config.db_type, config.db_info)
         api_info, _ = db.select('SELECT * FROM api_info;')
@@ -58,6 +75,56 @@ class ApiRoute:
             spec.loader.exec_module(module)
             self.router.add_api_route(f'{api_info["url_prefix"]}/{api_info["sub_dir"]}/{api_name}',
                                       module.api, methods=[api_info["method"]], tags=["service"])
+
+    def set_server_info(self, api_server_info: ApiServerInfo):
+        try:
+            db = connect_db(config.db_type, config.db_info)
+            db.insert("api_server_info", [api_server_info.__dict__])
+        except Exception as err:
+            result = {"result": 0, "errorMessage": err}
+            logger.error(err)
+        else:
+            result = {"result": 1, "errorMessage": ""}
+
+        return result
+
+    def get_server_info_list(self):
+        try:
+            db = connect_db(config.db_type, config.db_info)
+            api_server_info, _ = db.select(f'SELECT * FROM api_server_info;')
+        except Exception as err:
+            result = {"result": 0, "errorMessage": err}
+            logger.error(err)
+        else:
+            result = {"api_server_info": api_server_info}
+
+        return result
+
+    def get_server_info(self, server_name: str):
+        try:
+            db = connect_db(config.db_type, config.db_info)
+            api_server_info, _ = db.select(
+                f'SELECT * FROM api_server_info WHERE name = {convert_data(server_name)};')
+        except Exception as err:
+            result = {"result": 0, "errorMessage": err}
+            logger.error(err)
+        else:
+            result = {"api_server_info": api_server_info}
+
+        return result
+
+    def del_server_info(self, server_name: str):
+        try:
+            db = connect_db(config.db_type, config.db_info)
+
+            db.delete("api_server_info", {"name": server_name})
+        except Exception as err:
+            result = {"result": 0, "errorMessage": err}
+            logger.error(err)
+        else:
+            result = {"result": 1, "errorMessage": ""}
+
+        return result
 
     def get_api_list(self) -> Dict:
         api_info_query = f'SELECT * FROM api_info;'
@@ -140,7 +207,8 @@ class ApiRoute:
         method = request.method
         content_type = request.headers.get("Content-Type")
 
-        logger.debug(f'Req - API Name : {api_name}, Method : {method}, Content-Type : {content_type}')
+        logger.debug(
+            f'Req - API Name : {api_name}, Method : {method}, Content-Type : {content_type}')
 
         api_info_query = f'SELECT * FROM api_info WHERE api_name = {convert_data(api_name)};'
         api_params_query = f'SELECT * FROM api_params WHERE api_name = {convert_data(api_name)};'
@@ -156,7 +224,7 @@ class ApiRoute:
             if len(api_info) == 0:
                 return {"result": 0, "errorMessage": "This is an unregistered API."}
 
-            api_info = api_info[0]            
+            api_info = api_info[0]
             if content_type == "application/json":
                 body = await request.json()
                 api_info["msg_type"] = "JSON"
@@ -170,7 +238,7 @@ class ApiRoute:
 
             logger.debug(f'DB - api_info : {api_info}')
             logger.debug(f'DB - api_params : {api_params}')
-            
+
             if api_info["bypass"] == "ON":
                 result = bypass_msg(api_info, params_query, body)
             else:
