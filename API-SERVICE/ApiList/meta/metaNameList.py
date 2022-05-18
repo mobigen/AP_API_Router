@@ -11,22 +11,22 @@ def api(perPage: int, curPage: int) -> Dict:
             *
         from tb_biz_meta_name as p
         join (
-            SELECT kor_name,
-                   eng_name,
-                   show_order,
-                   name_id,
+            SELECT KOR_NM,
+                   ENG_NM,
+                   SHOW_ODRG,
+                   NM_ID,
                    (case
-                       when type = 0 then 'text'
-                       when type = 1 then 'int'
-                       when type = 2 then 'binary'
+                       when TYPE = 0 then 'text'
+                       when TYPE = 1 then 'int'
+                       when TYPE = 2 then 'binary'
                        end
-                    ) as type,
-                    ROW_NUMBER () OVER (ORDER BY name_id DESC) as rowNo
+                    ) as TYPE,
+                    ROW_NUMBER () OVER (ORDER BY NM_ID DESC) as rowNo
             FROM tb_biz_meta_name
-            order by name_id
+            order by NM_ID
             limit {perPage}
             offset ({perPage} * {curPage})
-        ) as t on p.name_id = t.name_id
+        ) as t on p.NM_ID = t.NM_ID
     """
     total_cnt_query = "SELECT count(*) as totalCount FROM tb_biz_meta_name"
     v_meta_name_query = "SELECT * FROM v_biz_meta_name;"

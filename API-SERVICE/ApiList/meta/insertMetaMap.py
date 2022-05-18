@@ -6,20 +6,20 @@ from Utils.DataBaseUtil import convert_data
 
 
 def api() -> Dict:
-    view_col = ["biz_dataset_id"]
+    view_col = ["BIZ_DATASET_ID"]
     drop_view_query = "DROP VIEW v_biz_meta_wrap"
     truncate_query = "TRUNCATE tb_biz_meta_map;"
-    meta_name_query = "SELECT name_id FROM tb_biz_meta_name;"
+    meta_name_query = "SELECT NM_ID FROM tb_biz_meta_name;"
     meta_map_query = "SELECT * FROM tb_biz_meta_map"
     map_item_query = """
         select distinct 
-            cast(meta_map.item_id as INT) as item_id,
-            tbmn.eng_name as eng_name
+            cast(meta_map.ITEM_ID as INT) as item_id,
+            tbmn.ENG_NM as eng_name
         from
             tb_biz_meta_name tbmn
         left join tb_biz_meta_map meta_map on
-            tbmn.name_id = meta_map.name_id
-        order by item_id asc
+            tbmn.NM_ID = meta_map.NM_ID
+        order by ITEM_ID asc
     """
 
     try:
@@ -30,15 +30,15 @@ def api() -> Dict:
 
         # insert meta map
         for i, meta_name in enumerate(meta_name_list):
-            query = f'INSERT INTO tb_biz_meta_map (item_id,name_id)\
-                        VALUES ({convert_data(i + 1)},{convert_data(meta_name["name_id"])});'
+            query = f'INSERT INTO tb_biz_meta_map (ITEM_ID,NM_ID)\
+                        VALUES ({convert_data(i + 1)},{convert_data(meta_name["NM_ID"])});'
             db.execute(query)
 
         # create view v_biz_meta_wrap
         meta_map_item = db.select(map_item_query)[0]
         for i,meta_map in enumerate(meta_map_item):
-            eng_name = meta_map["eng_name"]
-            col_format = f"\t\tmax(case when item_id = {convert_data(i + 1)} then item_val end) as {eng_name}"
+            eng_name = meta_map["ENG_NM"]
+            col_format = f"\t\tmax(case when ITEM_ID = {convert_data(i + 1)} then ITEM_VAL end) as {eng_name}"
             view_col.append(col_format)
 
         view_col = ',\n'.join(view_col)

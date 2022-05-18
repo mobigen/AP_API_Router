@@ -2,26 +2,26 @@ from typing import Dict
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi.logger import logger
 
 
 class UpdatetMetaName(BaseModel):
     subscribed: bool
-    kor_name: str
-    eng_name: str
-    show_order: int
-    name_id: str
-    type: int
+    KOR_NM: str = Field(alias="kor_name")
+    ENG_NM: str = Field(alias="eng_name")
+    SHOW_ODRG: int = Field(alias="show_order")
+    NM_ID: str = Field(alias="name_id")
+    TYPE: int = Field(alias="type")
 
 
 def api(update: UpdatetMetaName) -> Dict:
     query = f'UPDATE tb_biz_meta_name\
-                SET kor_name   = {convert_data(update.kor_name)},\
-                    eng_name   = {convert_data(update.eng_name)},\
-                    show_order = {convert_data(update.show_order)},\
-                    type= {convert_data(update.type)}\
-                WHERE name_id = {convert_data(update.name_id)};'\
+                SET KOR_NM = {convert_data(update.KOR_NM)},\
+                    ENG_NM   = {convert_data(update.ENG_NM)},\
+                    SHOW_ODRG = {convert_data(update.SHOW_ODRG)},\
+                    TYPE= {convert_data(update.TYPE)}\
+                WHERE NM_ID = {convert_data(update.NM_ID)};'\
 
     try:
         db = connect_db(config.db_type, config.db_info)

@@ -6,8 +6,8 @@ from fastapi.logger import logger
 
 def api() -> Dict:
     category_query = "select * \
-                      from meta.tb_category \
-                      order by parent_id, node_id;"
+                      from tb_category \
+                      order by PRNTS_ID, NODE_ID;"
 
     try:
         db = connect_db(config.db_type, config.db_info)

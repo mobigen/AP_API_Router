@@ -10,8 +10,6 @@ class UpdateBizMeta(BaseModel):
     bizDatasetId: str
     dataList: list
 
-# todo: 질문 후 수정 필요
-
 
 def api(update: UpdateBizMeta) -> Dict:
     try:
