@@ -8,17 +8,17 @@ from typing import Dict
 
 
 class UpdateCategory(BaseModel):
-    NODE_ID: str = Field(alias="NODE_ID")
-    NODE_NAME: str = Field(alias="NODE_NAME")
+    node_id: str = Field(alias="node_id")
+    node_nm: str = Field(alias="node_name")
 
 
 # todo: 수정 필요
 def api(update: UpdateCategory) -> Dict:
     query = f'UPDATE tb_category\
-                SET PRNTS_ID   = {convert_data(uuid.uuid4())},\
-                    NODE_ID   = {convert_data(update.NODE_ID)},\
-                    NODE_NAME = {convert_data(update.NODE_NAME)}\
-                WHERE NODE_ID = {convert_data(update.NODE_ID)};'
+                SET "PRNTS_ID"   = {convert_data(uuid.uuid4())},\
+                    "NODE_ID"   = {convert_data(update.node_id)},\
+                    "NODE_NM" = {convert_data(update.node_nm)}\
+                WHERE "NODE_ID" = {convert_data(update.node_id)};'
     try:
         db = connect_db(config.db_type, config.db_info)
         db.execute(query)

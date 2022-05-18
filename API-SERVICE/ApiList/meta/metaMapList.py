@@ -5,9 +5,17 @@ from fastapi.logger import logger
 
 
 def api() -> Dict:
-    meta_map_query = "SELECT tbmn.KOR_NM, tbmn.ENG_NM, tbmm.ITEM_ID, tbmm.NM_ID\
-                        FROM tb_biz_meta_name tbmn\
-                        JOIN tb_biz_meta_map tbmm ON tbmn.NM_ID = tbmm.NM_ID"
+    meta_map_query = """
+    select
+        tbmn."KOR_NM",
+        tbmn."ENG_NM",
+        tbmm."ITEM_ID",
+        tbmm."NM_ID"
+    from
+        tb_biz_meta_name as tbmn
+    join tb_biz_meta_map as tbmm
+    on tbmm."NM_ID" = tbmn."NM_ID";
+    """
     v_meta_map_query = "SELECT * FROM v_biz_meta_map;"
 
     try:

@@ -8,13 +8,13 @@ from fastapi.logger import logger
 
 def api(biz_meta_list: list) -> Dict:
     uid = uuid.uuid4()
-    biz_meta_query = "SELECT ITEM_ID as itemId, ITEM_VAL as itemVal FROM tb_biz_meta;"
+    biz_meta_query = 'SELECT "ITEM_ID" as itemId, "ITEM_VAL" as itemVal FROM tb_biz_meta;'
 
     try:
         db = connect_db(config.db_type, config.db_info)
         for biz_meta in biz_meta_list:
-            query = f'INSERT INTO tb_biz_meta (BIZ_DATASET_ID,ITEM_ID,ITEM_VAL)\
-                    VALUES ({convert_data(uid)},{convert_data(biz_meta["itemId"])},{convert_data(biz_meta["itemVal"])});'
+            query = 'INSERT INTO tb_biz_meta ("BIZ_DATASET_ID", "ITEM_ID", "ITEM_VAL" )' + \
+                    f'VALUES ({convert_data(uid)},{convert_data(biz_meta["itemId"])},{convert_data(biz_meta["itemVal"])});'
 
             db.execute(query)
 

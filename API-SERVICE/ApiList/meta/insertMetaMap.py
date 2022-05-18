@@ -6,20 +6,20 @@ from Utils.DataBaseUtil import convert_data
 
 
 def api() -> Dict:
-    view_col = ["BIZ_DATASET_ID"]
+    view_col = ['"BIZ_DATASET_ID"']
     drop_view_query = "DROP VIEW v_biz_meta_wrap"
     truncate_query = "TRUNCATE tb_biz_meta_map;"
-    meta_name_query = "SELECT NM_ID FROM tb_biz_meta_name;"
+    meta_name_query = 'SELECT "NM_ID" FROM tb_biz_meta_name;'
     meta_map_query = "SELECT * FROM tb_biz_meta_map"
     map_item_query = """
         select distinct 
-            cast(meta_map.ITEM_ID as INT) as item_id,
-            tbmn.ENG_NM as eng_name
+            cast(meta_map."ITEM_ID" as INT) as item_id,
+            tbmn."ENG_NM"
         from
             tb_biz_meta_name tbmn
         left join tb_biz_meta_map meta_map on
-            tbmn.NM_ID = meta_map.NM_ID
-        order by ITEM_ID asc
+            tbmn."NM_ID" = meta_map."NM_ID"
+        order by item_id asc
     """
 
     try:
@@ -30,7 +30,7 @@ def api() -> Dict:
 
         # insert meta map
         for i, meta_name in enumerate(meta_name_list):
-            query = f'INSERT INTO tb_biz_meta_map (ITEM_ID,NM_ID)\
+            query = f'INSERT INTO tb_biz_meta_map ("ITEM_ID","NM_ID")\
                         VALUES ({convert_data(i + 1)},{convert_data(meta_name["NM_ID"])});'
             db.execute(query)
 
@@ -38,7 +38,7 @@ def api() -> Dict:
         meta_map_item = db.select(map_item_query)[0]
         for i,meta_map in enumerate(meta_map_item):
             eng_name = meta_map["ENG_NM"]
-            col_format = f"\t\tmax(case when ITEM_ID = {convert_data(i + 1)} then ITEM_VAL end) as {eng_name}"
+            col_format = f'\t\tmax(case when "ITEM_ID" = {convert_data(i + 1)} then "ITEM_VAL" end) as {eng_name}'
             view_col.append(col_format)
 
         view_col = ',\n'.join(view_col)
@@ -47,7 +47,7 @@ def api() -> Dict:
             select
                 {view_col}
             from tb_biz_meta
-            group by biz_dataset_id
+            group by "BIZ_DATASET_ID"
         """
         db.execute(ddl_dataset_id)
 

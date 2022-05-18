@@ -8,20 +8,20 @@ from fastapi.logger import logger
 
 class UpdatetMetaName(BaseModel):
     subscribed: bool
-    KOR_NM: str = Field(alias="kor_name")
-    ENG_NM: str = Field(alias="eng_name")
-    SHOW_ODRG: int = Field(alias="show_order")
-    NM_ID: str = Field(alias="name_id")
-    TYPE: int = Field(alias="type")
+    kor_nm: str = Field(alias="kor_name")
+    eng_nm: str = Field(alias="eng_name")
+    show_odrg: int = Field(alias="show_order")
+    nm_id: str = Field(alias="name_id")
+    type: int = Field(alias="type")
 
 
 def api(update: UpdatetMetaName) -> Dict:
     query = f'UPDATE tb_biz_meta_name\
-                SET KOR_NM = {convert_data(update.KOR_NM)},\
-                    ENG_NM   = {convert_data(update.ENG_NM)},\
-                    SHOW_ODRG = {convert_data(update.SHOW_ODRG)},\
-                    TYPE= {convert_data(update.TYPE)}\
-                WHERE NM_ID = {convert_data(update.NM_ID)};'\
+                SET "KOR_NM" = {convert_data(update.kor_nm)},\
+                    "ENG_NM"   = {convert_data(update.eng_nm)},\
+                    "SHOW_ODRG" = {convert_data(update.show_odrg)},\
+                    "TYPE"= {convert_data(update.type)}\
+                WHERE "NM_ID" = {convert_data(update.nm_id)};'
 
     try:
         db = connect_db(config.db_type, config.db_info)

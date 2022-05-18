@@ -16,10 +16,10 @@ def api(update: UpdateBizMeta) -> Dict:
         db = connect_db(config.db_type, config.db_info)
         for data in update.dataList:
             query = f'UPDATE tb_biz_meta\
-                        SET item_id   = {convert_data(data["itemId"])},\
-                            item_val   = {convert_data(data["itemVal"])}\
-                        WHERE biz_dataset_id = {convert_data(update.bizDatasetId)} AND \
-                            item_id = {convert_data(data["itemId"])};'
+                        SET "ITEM_ID"   = {convert_data(data["itemId"])},\
+                            "ITEM_VAL"   = {convert_data(data["itemVal"])}\
+                        WHERE "BIZ_DATASET_ID" = {convert_data(update.bizDatasetId)} AND \
+                            "ITEM_ID" = {convert_data(data["itemId"])};'
 
             db.execute(query)
     except Exception as err:
