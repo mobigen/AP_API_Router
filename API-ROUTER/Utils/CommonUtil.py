@@ -3,11 +3,14 @@ import configparser
 import argparse
 from fastapi.logger import logger
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 from ApiRoute.ApiRouteConfig import config
 from ConnectManager import PostgreManager
 from retry import retry
 import psycopg2
+import jwt
+import base64
+
 
 def get_config(root_path: str, config_name: str):
     ano_cfg = {}
@@ -43,6 +46,7 @@ def prepare_config() -> None:
     config.url_info = api_router_cfg["url_info"]
     config.db_info = api_router_cfg[config.db_type]
     config.remote_info = api_router_cfg["remote"]
+    config.secret_info = api_router_cfg["secret_info"]
 
 
 @retry(psycopg2.OperationalError, delay=1, tries=3)
@@ -74,4 +78,12 @@ def make_res_msg(result, errorMessage, data=None, column_names=None):
         result = {"result": result, "errorMessage": errorMessage,
                   "body": data, "header": header_list}
     return result
-           
+
+
+def get_user_info(headers: Dict):
+    user_info = None
+    if config.secret_info["name"] in headers:
+        user_info = jwt.decode(headers[config.secret_info["name"]],
+                               config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
+    logger.debug(f'user info : {user_info}')
+    return user_info

@@ -1,11 +1,10 @@
-from tkinter import E
 from fastapi.logger import logger
 from typing import Dict, List
 import importlib.util
 from fastapi import APIRouter
 from ApiRoute.ApiRouteConfig import config
 from Utils.DataBaseUtil import convert_data
-from Utils.CommonUtil import connect_db, make_res_msg, save_file_for_reload
+from Utils.CommonUtil import connect_db, make_res_msg, get_user_info, save_file_for_reload
 from Utils.RouteUtil import bypass_msg, call_remote_func
 from pydantic import BaseModel
 from starlette.requests import Request
@@ -28,7 +27,6 @@ class ApiInfo(BaseModel):
     api_name: str
     category: str
     url: str
-    msg_type: str
     method: str
     command: str
     bypass: str
@@ -212,6 +210,8 @@ class ApiRoute:
         api_name = request.url.path.split("/")[-1]
         method = request.method
         content_type = request.headers.get("Content-Type")
+
+        user_info = get_user_info(request.headers)
 
         logger.debug(
             f'Req - API Name : {api_name}, Method : {method}, Content-Type : {content_type}')

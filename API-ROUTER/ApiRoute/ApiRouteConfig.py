@@ -15,5 +15,7 @@ class ApiRouteConfig:
     api_config: Dict
     api_server_info: List[Dict]
 
+    secret_info: Dict
+
 
 config = ApiRouteConfig
