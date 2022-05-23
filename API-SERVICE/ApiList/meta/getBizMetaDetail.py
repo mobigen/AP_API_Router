@@ -1,11 +1,14 @@
 from fastapi.logger import logger
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_token_info
 from Utils.DataBaseUtil import convert_data
+from starlette.requests import Request
 
 
-def api(BIZ_DATASET_ID: str) -> Dict:
+def api(BIZ_DATASET_ID: str, request: Request) -> Dict:
+    user_info = get_token_info(request.headers)
+
     query = f'''select T."BIZ_DATASET_ID" as "rowId",
                 array_agg(T."KOR_NM") as "KOR_NM",
                 array_agg(T."ENG_NM") as "ENG_NM",

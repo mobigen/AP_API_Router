@@ -1,5 +1,4 @@
-/API-ROUTER/.vscode/
-/.idea/
 /venv/
 __pycache__/
 .DS_Store
+.idea

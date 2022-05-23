@@ -1,12 +1,15 @@
 import uuid
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_token_info
 from Utils.DataBaseUtil import convert_data
 from fastapi.logger import logger
+from starlette.requests import Request
 
 
-def api(biz_meta_list: list) -> Dict:
+def api(biz_meta_list: list, request: Request) -> Dict:
+    user_info = get_token_info(request.headers)
+
     uid = uuid.uuid4()
     biz_meta_query = 'SELECT "ITEM_ID" as itemId, "ITEM_VAL" as itemVal FROM tb_biz_meta;'
 

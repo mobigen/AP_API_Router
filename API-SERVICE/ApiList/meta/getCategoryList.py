@@ -1,10 +1,13 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_token_info
 from fastapi.logger import logger
+from starlette.requests import Request
 
 
-def api() -> Dict:
+def api(request: Request) -> Dict:
+    user_info = get_token_info(request.headers)
+
     category_query = 'select * \
                       from tb_category \
                       order by "PRNTS_ID", "NODE_ID";'

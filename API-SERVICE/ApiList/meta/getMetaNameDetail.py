@@ -1,11 +1,14 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_token_info
 from Utils.DataBaseUtil import convert_data
 from fastapi.logger import logger
+from starlette.requests import Request
 
 
-def api(NM_ID: str) -> Dict:
+def api(NM_ID: str, request: Request) -> Dict:
+    user_info = get_token_info(request.headers)
+
     query = f'SELECT * FROM tb_biz_meta_name WHERE "NM_ID" = {convert_data(NM_ID)}'
 
     try:

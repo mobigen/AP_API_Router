@@ -1,9 +1,10 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_token_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
 from fastapi.logger import logger
+from starlette.requests import Request
 
 
 class UpdateBizMeta(BaseModel):
@@ -11,7 +12,9 @@ class UpdateBizMeta(BaseModel):
     dataList: list
 
 
-def api(update: UpdateBizMeta) -> Dict:
+def api(update: UpdateBizMeta, request: Request) -> Dict:
+    user_info = get_token_info(request.headers)
+
     try:
         db = connect_db(config.db_type, config.db_info)
         for data in update.dataList:

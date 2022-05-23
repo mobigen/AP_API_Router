@@ -1,11 +1,14 @@
 from fastapi.logger import logger
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_token_info
 from Utils.DataBaseUtil import convert_data
+from starlette.requests import Request
 
 
-def api() -> Dict:
+def api(request: Request) -> Dict:
+    user_info = get_token_info(request.headers)
+
     view_col = ['"BIZ_DATASET_ID"']
     drop_view_query = "DROP VIEW v_biz_meta_wrap"
     truncate_query = "TRUNCATE tb_biz_meta_map;"
