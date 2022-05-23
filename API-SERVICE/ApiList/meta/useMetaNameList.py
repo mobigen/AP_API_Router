@@ -18,7 +18,7 @@ def api() -> Dict:
                 when tbmn."TYPE" = 0 then 'text'
                 when tbmn."TYPE" = 1 then 'int'
                 when tbmn."TYPE" = 2 then 'binary'
-                end as type,
+                end as "TYPE",
             tbmn."NM_ID"
         from tb_biz_meta_name tbmn
         order by tbmn."NM_ID";"""

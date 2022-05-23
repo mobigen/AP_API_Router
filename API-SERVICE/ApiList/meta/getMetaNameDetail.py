@@ -5,8 +5,8 @@ from Utils.DataBaseUtil import convert_data
 from fastapi.logger import logger
 
 
-def api(nameId: str) -> Dict:
-    query = f'SELECT * FROM tb_biz_meta_name WHERE "NM_ID" = {convert_data(nameId)}'
+def api(NM_ID: str) -> Dict:
+    query = f'SELECT * FROM tb_biz_meta_name WHERE "NM_ID" = {convert_data(NM_ID)}'
 
     try:
         db = connect_db(config.db_type, config.db_info)

@@ -7,7 +7,7 @@ from fastapi.logger import logger
 
 
 class UpdateBizMeta(BaseModel):
-    bizDatasetId: str
+    BIZ_DATASET_ID: str
     dataList: list
 
 
@@ -18,7 +18,7 @@ def api(update: UpdateBizMeta) -> Dict:
             query = f'UPDATE tb_biz_meta\
                         SET "ITEM_ID"   = {convert_data(data["itemId"])},\
                             "ITEM_VAL"   = {convert_data(data["itemVal"])}\
-                        WHERE "BIZ_DATASET_ID" = {convert_data(update.bizDatasetId)} AND \
+                        WHERE "BIZ_DATASET_ID" = {convert_data(update.BIZ_DATASET_ID)} AND \
                             "ITEM_ID" = {convert_data(data["itemId"])};'
 
             db.execute(query)

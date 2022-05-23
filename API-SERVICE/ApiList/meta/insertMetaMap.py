@@ -13,13 +13,13 @@ def api() -> Dict:
     meta_map_query = "SELECT * FROM tb_biz_meta_map"
     map_item_query = """
         select distinct 
-            cast(meta_map."ITEM_ID" as INT) as item_id,
+            cast(meta_map."ITEM_ID" as INT) as ITEM_ID,
             tbmn."ENG_NM"
         from
             tb_biz_meta_name tbmn
         left join tb_biz_meta_map meta_map on
             tbmn."NM_ID" = meta_map."NM_ID"
-        order by item_id asc
+        order by ITEM_ID asc
     """
 
     try:

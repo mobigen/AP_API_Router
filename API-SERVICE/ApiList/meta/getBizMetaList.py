@@ -11,7 +11,7 @@ def api() -> Dict:
                array_agg(T."ITEM_ID")  as columnKey
         from (select "BIZ_DATASET_ID", tbm."ITEM_ID", tbm."ITEM_VAL", tbmm."NM_ID", "KOR_NM", "ENG_NM"
               from tb_biz_meta tbm
-                       right join tb_biz_meta_map tbmm on tbm."ITEM_ID" = tbmm."ITEM_ID"
+                       left join tb_biz_meta_map tbmm on tbm."ITEM_ID" = tbmm."ITEM_ID"
                        left join tb_biz_meta_name tbmn on tbmm."NM_ID" = tbmn."NM_ID"
               order by "BIZ_DATASET_ID", "ITEM_ID") T
         group by "BIZ_DATASET_ID"

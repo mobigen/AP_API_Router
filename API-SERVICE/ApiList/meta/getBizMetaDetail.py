@@ -5,7 +5,7 @@ from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
 
 
-def api(datasetId: str) -> Dict:
+def api(BIZ_DATASET_ID: str) -> Dict:
     query = f'''select T."BIZ_DATASET_ID" as "rowId",
                 array_agg(T."KOR_NM") as "KOR_NM",
                 array_agg(T."ENG_NM") as "ENG_NM",
@@ -23,7 +23,7 @@ def api(datasetId: str) -> Dict:
                     from tb_biz_meta tbm
                         right join tb_biz_meta_map tbmm on tbm."ITEM_ID" = tbmm."ITEM_ID"
                         left join tb_biz_meta_name tbmn on tbmm."NM_ID" = tbmn."NM_ID"
-                    where "BIZ_DATASET_ID" = {convert_data(datasetId)}
+                    where "BIZ_DATASET_ID" = {convert_data(BIZ_DATASET_ID)}
                     order by "BIZ_DATASET_ID", "ITEM_ID") T
             group by "BIZ_DATASET_ID"
             order by "BIZ_DATASET_ID";'''

@@ -13,8 +13,9 @@ def api(biz_meta_list: list) -> Dict:
     try:
         db = connect_db(config.db_type, config.db_info)
         for biz_meta in biz_meta_list:
+            item_id, item_val = tuple(biz_meta.values())
             query = 'INSERT INTO tb_biz_meta ("BIZ_DATASET_ID", "ITEM_ID", "ITEM_VAL" )' + \
-                    f'VALUES ({convert_data(uid)},{convert_data(biz_meta["itemId"])},{convert_data(biz_meta["itemVal"])});'
+                    f'VALUES ({convert_data(uid)},{convert_data(item_id)},{convert_data(item_val)});'
 
             db.execute(query)
 
