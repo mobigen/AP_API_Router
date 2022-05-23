@@ -136,14 +136,14 @@ class ApiRoute:
         try:
             db = connect_db(config.db_type, config.db_info)
 
-            api_info, column_names = db.select(api_info_query)
-            api_params, column_names = db.select(api_params_query)
+            api_info, info_column_names = db.select(api_info_query)
+            api_params, params_column_names = db.select(api_params_query)
         except Exception as err:
             result = {"result": 0, "errorMessage": err}
             logger.error(err)
         else:
-            api_info = make_res_msg("", "", api_info, column_names)
-            api_params = make_res_msg("", "", api_params, column_names)
+            api_info = make_res_msg("", "", api_info, info_column_names)
+            api_params = make_res_msg("", "", api_params, params_column_names)
             result = {"api_info": api_info, "api_params": api_params}
 
         return result
@@ -153,14 +153,14 @@ class ApiRoute:
         api_params_query = f'SELECT * FROM api_params WHERE api_name = {convert_data(api_name)};'
         try:
             db = connect_db(config.db_type, config.db_info)
-            api_info, column_names = db.select(api_info_query)
-            api_params, column_names = db.select(api_params_query)
+            api_info, info_column_names = db.select(api_info_query)
+            api_params, params_column_names = db.select(api_params_query)
         except Exception as err:
             result = {"result": 0, "errorMessage": err}
             logger.error(err)
         else:
-            api_info = make_res_msg("", "", api_info, column_names)
-            api_params = make_res_msg("", "", api_params, column_names)
+            api_info = make_res_msg("", "", api_info, info_column_names)
+            api_params = make_res_msg("", "", api_params, params_column_names)
             result = {"api_info": api_info, "api_params": api_params}
 
         return result
