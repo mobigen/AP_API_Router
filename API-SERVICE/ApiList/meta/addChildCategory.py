@@ -9,8 +9,8 @@ from starlette.requests import Request
 
 
 class addChildCategory(BaseModel):
-    PRNTS_ID: str
-    NODE_NM: str
+    parent_id: str
+    node_name: str
 
 
 # todo: 수정 필요
@@ -18,7 +18,7 @@ def api(insert: addChildCategory, request: Request) -> Dict:
     user_info = get_token_info(request.headers)
 
     query = f'INSERT INTO tb_category ("NODE_NM", "PRNTS_ID", "NODE_ID")\
-              VALUES ({convert_data(insert.NODE_NM)},{convert_data(insert.PRNTS_ID)},{convert_data(uuid.uuid4())});'
+              VALUES ({convert_data(insert.node_name)},{convert_data(insert.parent_id)},{convert_data(uuid.uuid4())});'
 
     try:
         db = connect_db(config.db_type, config.db_info)

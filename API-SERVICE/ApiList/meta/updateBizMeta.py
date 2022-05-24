@@ -8,7 +8,7 @@ from starlette.requests import Request
 
 
 class UpdateBizMeta(BaseModel):
-    BIZ_DATASET_ID: str
+    bizDatasetId: str
     dataList: list
 
 

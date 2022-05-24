@@ -6,7 +6,7 @@ from Utils.DataBaseUtil import convert_data
 from starlette.requests import Request
 
 
-def api(BIZ_DATASET_ID: str, request: Request) -> Dict:
+def api(datasetId: str, request: Request) -> Dict:
     user_info = get_token_info(request.headers)
 
     query = f'''select T."BIZ_DATASET_ID" as "rowId",
@@ -26,7 +26,7 @@ def api(BIZ_DATASET_ID: str, request: Request) -> Dict:
                     from tb_biz_meta tbm
                         right join tb_biz_meta_map tbmm on tbm."ITEM_ID" = tbmm."ITEM_ID"
                         left join tb_biz_meta_name tbmn on tbmm."NM_ID" = tbmn."NM_ID"
-                    where "BIZ_DATASET_ID" = {convert_data(BIZ_DATASET_ID)}
+                    where "BIZ_DATASET_ID" = {convert_data(datasetId)}
                     order by "BIZ_DATASET_ID", "ITEM_ID") T
             group by "BIZ_DATASET_ID"
             order by "BIZ_DATASET_ID";'''
