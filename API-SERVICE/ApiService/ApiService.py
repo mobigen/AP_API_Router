@@ -3,6 +3,7 @@ from fastapi.logger import logger
 from fastapi import APIRouter
 from ApiService.ApiServiceConfig import config
 
+
 class ApiService:
     def __init__(self) -> None:
         self.router = APIRouter()

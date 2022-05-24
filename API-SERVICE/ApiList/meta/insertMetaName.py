@@ -13,7 +13,7 @@ class InsertMetaName(BaseModel):
     eng_name: str
     show_order: int
     name_id: str
-    TYPE: int = Field(alias="type") # 예약어 때문에 alias로 처리
+    TYPE: int = Field(alias="type")  # 예약어 때문에 alias 처리
 
 
 def api(insert: InsertMetaName, request: Request) -> Dict:

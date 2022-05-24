@@ -1,29 +1,10 @@
 import requests
-import re
 from fastapi.logger import logger
 from ApiRoute.ApiRouteConfig import config
 from ConnectManager import RemoteCmd
 
 
-def convert_url(url: str) -> str:
-    regex = "(?<=\$).*(?=\$)"
-
-    logger.debug(f'Send Request Origin Url : {url}')
-    result = re.compile(regex).search(url)
-    if result != None:
-        try:
-            sub_data = config.url_info[result.group()]
-        except KeyError:
-            logger.error(f'The key does not exist. {result.group()}')
-            url = None
-        else:
-            url = url.replace(f'${result.group()}$', sub_data)
-    logger.debug(f'Send Request Convert Url : {url}')
-    return url
-
-
 def make_url(server_name: str, url: str):
-    print(server_name, url, config.api_server_info)
     for server_info in config.api_server_info:
         if server_info["name"] == server_name:
             if len(server_info["ip_port"]) != 0:
@@ -37,9 +18,8 @@ def bypass_msg(api_info, params_query, body):
     method = api_info["method"]
     msg_type = api_info["msg_type"]
 
-    #url = convert_url(api_info["url"])
     url = make_url(api_info["category"], api_info["url"])
-    if url == None:
+    if url is None:
         return {"result": 0, "errorMessage": "The server info does not exist."}
 
     if method == "GET":
@@ -62,7 +42,6 @@ def bypass_msg(api_info, params_query, body):
     else:
         logger.error(f'Method Not Allowed. {method}')
         return {"result": 0, "errorMessage": "Method Not Allowed."}
-    # print(response.__dict__)
     return response.json()
 
 

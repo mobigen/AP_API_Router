@@ -1,29 +1,27 @@
 import os
 import configparser
 import argparse
-
 import starlette.datastructures
 from fastapi.logger import logger
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 from ApiRoute.ApiRouteConfig import config
-from ConnectManager import PostgreManager
+from ConnectManager import PostgresManager
 from retry import retry
 import psycopg2
 import jwt
-import base64
 
 
 def get_config(root_path: str, config_name: str):
     ano_cfg = {}
 
-    config = configparser.ConfigParser()
-    config.read(os.path.join(root_path,
-                             f"API-ROUTER/conf/{config_name}"), encoding='utf-8')
-    for section in config.sections():
+    conf = configparser.ConfigParser()
+    conf.read(os.path.join(root_path,
+                           f"API-ROUTER/conf/{config_name}"), encoding='utf-8')
+    for section in conf.sections():
         ano_cfg[section] = {}
-        for option in config.options(section):
-            ano_cfg[section][option] = config.get(section, option)
+        for option in conf.options(section):
+            ano_cfg[section][option] = conf.get(section, option)
 
     return ano_cfg
 
@@ -54,9 +52,9 @@ def prepare_config() -> None:
 @retry(psycopg2.OperationalError, delay=1, tries=3)
 def connect_db(db_type, db_info):
     if db_type == "postgresql":
-        db = PostgreManager(host=db_info["host"], port=db_info["port"],
-                            user=db_info["user"], password=db_info["password"],
-                            database=db_info["database"], schema=db_info["schema"])
+        db = PostgresManager(host=db_info["host"], port=db_info["port"],
+                             user=db_info["user"], password=db_info["password"],
+                             database=db_info["database"], schema=db_info["schema"])
     else:
         raise Exception(f'Not Implemented. ({db_type})')
     return db
@@ -67,19 +65,18 @@ def save_file_for_reload():
         fd.write(" ")
 
 
-def make_res_msg(result, errorMessage, data=None, column_names=None):
+def make_res_msg(result, err_msg, data=None, column_names=None):
     header_list = []
     for column_name in column_names:
         header = {"column_name": column_name}
         header_list.append(header)
 
-    result = None
-    if data == None or column_names == None:
-        result = {"result": result, "errorMessage": errorMessage}
+    if data is None or column_names is None:
+        res_msg = {"result": result, "errorMessage": err_msg}
     else:
-        result = {"result": result, "errorMessage": errorMessage,
-                  "body": data, "header": header_list}
-    return result
+        res_msg = {"result": result, "errorMessage": err_msg,
+                   "body": data, "header": header_list}
+    return res_msg
 
 
 def get_token_info(headers: starlette.datastructures.Headers):
