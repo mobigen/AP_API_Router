@@ -1,13 +1,24 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_token_info
 from fastapi.logger import logger
+from starlette.requests import Request
 
 
-def api() -> Dict:
-    meta_map_query = "SELECT tbmn.kor_name, tbmn.eng_name, tbmm.item_id, tbmm.name_id\
-                        FROM tb_biz_meta_name tbmn\
-                        JOIN tb_biz_meta_map tbmm ON tbmn.name_id = tbmm.name_id"
+def api(request: Request) -> Dict:
+    user_info = get_token_info(request.headers)
+
+    meta_map_query = """
+    select
+        tbmn."KOR_NM",
+        tbmn."ENG_NM",
+        tbmm."ITEM_ID",
+        tbmm."NM_ID"
+    from
+        tb_biz_meta_name as tbmn
+    join tb_biz_meta_map as tbmm
+    on tbmm."NM_ID" = tbmn."NM_ID";
+    """
     v_meta_map_query = "SELECT * FROM v_biz_meta_map;"
 
     try:

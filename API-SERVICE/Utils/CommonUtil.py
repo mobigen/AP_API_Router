@@ -1,14 +1,16 @@
 import os
 import configparser
 import argparse
+
+import starlette.datastructures
 from fastapi.logger import logger
 from pathlib import Path
-from tkinter.messagebox import NO
-from typing import Any
+from typing import Any, Dict
 from ApiService.ApiServiceConfig import config
 from ConnectManager import PostgreManager
 from retry import retry
 import psycopg2
+import jwt
 
 
 def get_config(root_path: str, config_name: str):
@@ -43,6 +45,7 @@ def prepare_config() -> None:
     config.server_host = args.host
     config.server_port = args.port
     config.db_info = api_router_cfg[config.db_type]
+    config.secret_info = api_router_cfg["secret_info"]
 
 
 @retry(psycopg2.OperationalError, delay=1, tries=3)
@@ -74,3 +77,12 @@ def make_res_msg(result, errorMessage, data=None, column_names=None):
         result = {"result": result, "errorMessage": errorMessage,
                   "body": data, "header": header_list}
     return result
+
+
+def get_token_info(headers: starlette.datastructures.Headers):
+    user_info = None
+    if config.secret_info["name"] in headers:
+        user_info = jwt.decode(headers[config.secret_info["name"]],
+                               config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
+    logger.debug(f'user info : {user_info}')
+    return user_info

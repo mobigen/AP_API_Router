@@ -14,5 +14,7 @@ class ApiServiceConfig:
 
     api_config: Dict
 
+    secret_info: Dict
+
 
 config = ApiServiceConfig

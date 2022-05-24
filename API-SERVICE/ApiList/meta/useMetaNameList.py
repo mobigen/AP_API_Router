@@ -1,27 +1,30 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_token_info
 from fastapi.logger import logger
+from starlette.requests import Request
 
 
-def api() -> Dict:
+def api(request: Request) -> Dict:
+    user_info = get_token_info(request.headers)
+
     meta_name_query = """        
         select                
             case
-                when (select tbmm.name_id from tb_biz_meta_map tbmm where tbmn.name_id = tbmm.name_id) is null then 0
+                when (select tbmm."NM_ID" from tb_biz_meta_map tbmm where tbmn."NM_ID" = tbmm."NM_ID") is null then 0
                 else 1
                 end as use_meta,
-            tbmn.kor_name,
-            tbmn.eng_name,
-            tbmn.show_order,
+            tbmn."KOR_NM",
+            tbmn."ENG_NM",
+            tbmn."SHOW_ODRG",
             case
-                when tbmn.type = 0 then 'text'
-                when tbmn.type = 1 then 'int'
-                when tbmn.type = 2 then 'binary'
-                end as type,
-            tbmn.name_id
+                when tbmn."TYPE" = 0 then 'text'
+                when tbmn."TYPE" = 1 then 'int'
+                when tbmn."TYPE" = 2 then 'binary'
+                end as "TYPE",
+            tbmn."NM_ID"
         from tb_biz_meta_name tbmn
-        order by tbmn.name_id;"""
+        order by tbmn."NM_ID";"""
 
     try:
         db = connect_db(config.db_type, config.db_info)

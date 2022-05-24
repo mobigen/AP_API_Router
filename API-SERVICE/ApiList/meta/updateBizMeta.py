@@ -1,27 +1,28 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_token_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
 from fastapi.logger import logger
+from starlette.requests import Request
 
 
 class UpdateBizMeta(BaseModel):
     bizDatasetId: str
     dataList: list
 
-# todo: 질문 후 수정 필요
 
+def api(update: UpdateBizMeta, request: Request) -> Dict:
+    user_info = get_token_info(request.headers)
 
-def api(update: UpdateBizMeta) -> Dict:
     try:
         db = connect_db(config.db_type, config.db_info)
         for data in update.dataList:
             query = f'UPDATE tb_biz_meta\
-                        SET item_id   = {convert_data(data["itemId"])},\
-                            item_val   = {convert_data(data["itemVal"])}\
-                        WHERE biz_dataset_id = {convert_data(update.bizDatasetId)} AND \
-                            item_id = {convert_data(data["itemId"])};'
+                        SET "ITEM_ID"   = {convert_data(data["itemId"])},\
+                            "ITEM_VAL"   = {convert_data(data["itemVal"])}\
+                        WHERE "BIZ_DATASET_ID" = {convert_data(update.BIZ_DATASET_ID)} AND \
+                            "ITEM_ID" = {convert_data(data["itemId"])};'
 
             db.execute(query)
     except Exception as err:

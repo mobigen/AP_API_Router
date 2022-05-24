@@ -1,20 +1,24 @@
 import uuid
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_token_info
 from Utils.DataBaseUtil import convert_data
 from fastapi.logger import logger
+from starlette.requests import Request
 
 
-def api(biz_meta_list: list) -> Dict:
+def api(biz_meta_list: list, request: Request) -> Dict:
+    user_info = get_token_info(request.headers)
+
     uid = uuid.uuid4()
-    biz_meta_query = "SELECT item_id as itemId, item_val as itemVal FROM tb_biz_meta;"
+    biz_meta_query = 'SELECT "ITEM_ID" as itemId, "ITEM_VAL" as itemVal FROM tb_biz_meta;'
 
     try:
         db = connect_db(config.db_type, config.db_info)
         for biz_meta in biz_meta_list:
-            query = f'INSERT INTO tb_biz_meta (biz_dataset_id,item_id,item_val)\
-                    VALUES ({convert_data(uid)},{convert_data(biz_meta["itemId"])},{convert_data(biz_meta["itemVal"])});'
+            item_id, item_val = tuple(biz_meta.values())
+            query = 'INSERT INTO tb_biz_meta ("BIZ_DATASET_ID", "ITEM_ID", "ITEM_VAL" )' + \
+                    f'VALUES ({convert_data(uid)},{convert_data(item_id)},{convert_data(item_val)});'
 
             db.execute(query)
 
