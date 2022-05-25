@@ -6,19 +6,19 @@ from ConnectManager import RemoteCmd
 
 def make_url(server_name: str, url: str):
     for server_info in config.api_server_info:
-        if server_info["name"] == server_name:
-            if len(server_info["ip_port"]) != 0:
-                return f'http://{server_info["ip_port"]}{url}'
+        if server_info["NM"] == server_name:
+            if len(server_info["IP_ADR"]) != 0:
+                return f'http://{server_info["IP_ADR"]}{url}'
             else:
-                return f'http://{server_info["domain"]}{url}'
+                return f'http://{server_info["DOMN_NM"]}{url}'
     return None
 
 
 def bypass_msg(api_info, params_query, body):
-    method = api_info["method"]
-    msg_type = api_info["msg_type"]
+    method = api_info["METH"]
+    msg_type = api_info["MSG_TYPE"]
 
-    url = make_url(api_info["category"], api_info["url"])
+    url = make_url(api_info["CTGRY"], api_info["URL"])
     if url is None:
         return {"result": 0, "errorMessage": "The server info does not exist."}
 
@@ -46,7 +46,7 @@ def bypass_msg(api_info, params_query, body):
 
 
 def call_remote_func(api_info, api_params, input_params):
-    msg_type = api_info["msg_type"]
+    msg_type = api_info["MSG_TYPE"]
 
     remote_cmd = RemoteCmd(
         config.remote_info["host"], config.remote_info["port"], config.remote_info["id"], config.remote_info["password"])
