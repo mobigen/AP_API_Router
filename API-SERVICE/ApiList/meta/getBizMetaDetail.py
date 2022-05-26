@@ -1,7 +1,7 @@
 from fastapi.logger import logger
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info
+from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
 from Utils.DataBaseUtil import convert_data
 from starlette.requests import Request
 
@@ -41,6 +41,5 @@ def api(datasetId: str, request: Request) -> Dict:
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        result = {"result": 1, "errorMessage": "", "data": {
-            "body": biz_meta_detail[0], "header": v_meta_name[0]}}
+        result = make_res_msg(1, "", biz_meta_detail[0], v_meta_name[0])
     return result
