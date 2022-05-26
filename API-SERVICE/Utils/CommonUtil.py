@@ -73,7 +73,7 @@ def make_res_msg(result, err_msg, data=None, column_names=None):
         res_msg = {"result": result, "errorMessage": err_msg}
     else:
         res_msg = {"result": result, "errorMessage": err_msg,
-                   "body": data, "header": header_list}
+                   "data": {"body": data, "header": header_list}}
     return res_msg
 
 
