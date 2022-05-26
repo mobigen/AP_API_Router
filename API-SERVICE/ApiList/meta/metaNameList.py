@@ -11,7 +11,7 @@ def api(perPage: int, curPage: int, request: Request) -> Dict:
     curPage = curPage - 1
     meta_name_query = f"""
         select
-            *
+            p.*
         from tb_biz_meta_name as p
         join (
             SELECT "KOR_NM",
@@ -32,13 +32,11 @@ def api(perPage: int, curPage: int, request: Request) -> Dict:
         ) as t on p."NM_ID" = t."NM_ID"
     """
     total_cnt_query = "SELECT count(*) as totalCount FROM tb_biz_meta_name"
-    v_meta_name_query = "SELECT * FROM v_biz_meta_name;"
 
     try:
         db = connect_db(config.db_type, config.db_info)
         meta_name = db.select(meta_name_query)
         total_cnt = db.select(total_cnt_query)
-        v_meta_name = db.select(v_meta_name_query)
     except Exception as err:
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
