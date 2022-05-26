@@ -43,7 +43,6 @@ def prepare_config() -> None:
     config.db_type = args.db_type
     config.server_host = args.host
     config.server_port = args.port
-    config.url_info = api_router_cfg["url_info"]
     config.db_info = api_router_cfg[config.db_type]
     config.remote_info = api_router_cfg["remote"]
     config.secret_info = api_router_cfg["secret_info"]
@@ -84,9 +83,12 @@ def get_token_info(headers: starlette.datastructures.Headers):
     if config.secret_info["name"] in headers:
         try:
             user_info = jwt.decode(headers[config.secret_info["name"]],
-                               config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
+                                   config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
         except Exception as err:
             logger.error(err)
     logger.debug(f'user info : {user_info}')
     return user_info
-             
+
+
+def exist_check():
+    pass
