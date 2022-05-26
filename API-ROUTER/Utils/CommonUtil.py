@@ -82,8 +82,11 @@ def make_res_msg(result, err_msg, data=None, column_names=None):
 def get_token_info(headers: starlette.datastructures.Headers):
     user_info = None
     if config.secret_info["name"] in headers:
-        user_info = jwt.decode(headers[config.secret_info["name"]],
+        try:
+            user_info = jwt.decode(headers[config.secret_info["name"]],
                                config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
+        except Exception as err:
+            logger.error(err)
     logger.debug(f'user info : {user_info}')
     return user_info
              

@@ -187,13 +187,12 @@ class ApiRoute:
                                               {convert_data(insert_api_info["URL"])}, {convert_data(insert_api_info["METH"])}, \
                                               {convert_data(insert_api_info["CMD"])}, {convert_data(insert_api_info["MODE"])});'
             db.execute(api_info_query)
-            print(insert_api_params)
-            if len(insert_api_params) != 0:
-                for param in insert_api_params:
-                    api_params_query = f'INSERT INTO api_params ("API_NM", "NM", "DATA_TYPE", "DEFLT_VAL") \
-                                                VALUES ({convert_data(param["API_NM"])}, {convert_data(param["NM"])}, \
-                                                        {convert_data(param["DATA_TYPE"])}, {convert_data(param["DEFLT_VAL"])});'
-                    db.execute(api_params_query)
+
+            for param in insert_api_params:
+                api_params_query = f'INSERT INTO api_params ("API_NM", "NM", "DATA_TYPE", "DEFLT_VAL") \
+                                            VALUES ({convert_data(param["API_NM"])}, {convert_data(param["NM"])}, \
+                                                    {convert_data(param["DATA_TYPE"])}, {convert_data(param["DEFLT_VAL"])});'
+                db.execute(api_params_query)
         except Exception as err:
             result = {"result": 0, "errorMessage": err}
             logger.error(err)
