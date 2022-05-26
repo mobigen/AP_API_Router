@@ -1,6 +1,6 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info
+from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
 from fastapi.logger import logger
 from starlette.requests import Request
 
@@ -43,7 +43,6 @@ def api(perPage: int, curPage: int, request: Request) -> Dict:
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        data = total_cnt[0][0]
-        data.update({"body": meta_name[0], "header": v_meta_name[0]})
-        result = {"result": "", "errorMessage": "", "data": data}
+        result = make_res_msg(1, "", meta_name[0], meta_name[1])
+        result["data"].update(total_cnt[0][0])
     return result
