@@ -10,9 +10,9 @@ def api(request: Request, datasetId: str = None) -> Dict:
     user_info = get_token_info(request.headers)
 
     if datasetId is None:
-        v_meta_wrap_query = f"SELECT * FROM v_biz_meta_wrap LIMIT 1;"
+        v_meta_wrap_query = f'SELECT * FROM v_biz_meta_wrap LIMIT 1;'
     else:
-        v_meta_wrap_query = f"SELECT * FROM v_biz_meta_wrap WHERE BIZ_DATASET_ID = {convert_data(datasetId)}"
+        v_meta_wrap_query = f'SELECT * FROM v_biz_meta_wrap WHERE "BIZ_DATASET_ID" = {convert_data(datasetId)}'
 
     try:
         db = connect_db(config.db_type, config.db_info)
@@ -25,5 +25,5 @@ def api(request: Request, datasetId: str = None) -> Dict:
         if datasetId is None:
             result = make_res_msg(1,"",{},meta_wrap[1])
         else:
-            result = make_res_msg(1,"",meta_wrap[0],meta_wrap[1])
+            result = make_res_msg(1,"",meta_wrap[0][0],meta_wrap[1])
     return result
