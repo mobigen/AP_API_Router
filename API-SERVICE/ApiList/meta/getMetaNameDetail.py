@@ -21,7 +21,7 @@ def api(request: Request,nameId:str=None) -> Dict:
         logger.error(err)
     else:
         if nameId is None:
-            result = make_res_msg(1, "", "","")
+            result = make_res_msg(1, "", {}, "")
             result["data"]["header"] = meta_name[0]
         else:
             result = make_res_msg(1, "", meta_name[0][0], meta_name[1])
