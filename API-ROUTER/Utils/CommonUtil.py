@@ -86,4 +86,4 @@ def get_token_info(headers: starlette.datastructures.Headers):
                                config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
     logger.debug(f'user info : {user_info}')
     return user_info
-    
+             
