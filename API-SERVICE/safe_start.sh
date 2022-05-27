@@ -4,10 +4,10 @@ router_port=$2
 
 input() {
     if [[ $router_host == "" ]];then
-        router_host=192.168.101.44
+        router_host=192.168.100.126
     fi
     if [[ $router_port == "" ]];then
-        router_port=19000
+        router_port=9014
     fi
 }
 
@@ -41,9 +41,9 @@ uvicorn_stop() {
 
 router_start() {
     source_path="$( cd "$( dirname "$0" )" && pwd -P )"
-    router_exec="nohup python ${source_path}/server.py --host ${router_host} --port ${router_port} 1> /dev/null 2>&1 &"
+    router_exec="nohup python3.8 ${source_path}/server.py --host ${router_host} --port ${router_port} 1> /dev/null 2>&1 &"
     echo "Start Command : ${router_exec}"
-    nohup python ${source_path}/server.py --host ${router_host} --port ${router_port} 1> /dev/null 2>&1 &
+    nohup python3.8 ${source_path}/server.py --host ${router_host} --port ${router_port} 1> /dev/null 2>&1 &
 }
 
 echo "########## Safe Start (${app_name}) ##########"
