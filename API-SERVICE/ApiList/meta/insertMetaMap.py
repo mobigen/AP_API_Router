@@ -32,8 +32,8 @@ def api(map_list: list ,request: Request) -> Dict:
 
         for meta_map in map_list:
             logger.info(meta_map)
-            db.execute(map_insert_query.format(convert_data(meta_map["itemId"]),
-                                               convert_data(meta_map["nameId"])))
+            db.execute(map_insert_query.format(convert_data(meta_map["ITEM_ID"]),
+                                               convert_data(meta_map["NM_ID"])))
 
         # create view v_biz_meta_wrap
         meta_map_item = db.select(map_item_query)[0]
