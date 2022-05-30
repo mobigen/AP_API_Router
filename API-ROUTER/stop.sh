@@ -4,10 +4,10 @@ router_port=$2
 
 input() {
     if [[ $router_host == "" ]];then
-        router_host=192.168.101.43
+        router_host=192.168.100.126
     fi
     if [[ $router_port == "" ]];then
-        router_port=18000
+        router_port=9010
     fi
 }
 
