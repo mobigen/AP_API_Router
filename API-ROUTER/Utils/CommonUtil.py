@@ -10,6 +10,8 @@ from ConnectManager import PostgresManager
 from retry import retry
 import psycopg2
 import jwt
+import sys
+import traceback
 
 
 def get_config(root_path: str, config_name: str):
@@ -86,9 +88,14 @@ def get_token_info(headers: starlette.datastructures.Headers):
                                    config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
         except Exception as err:
             logger.error(err)
-    logger.debug(f'user info : {user_info}')
+    logger.debug(f'User Info : {user_info}')
     return user_info
 
 
-def exist_check():
-    pass
+def get_exception_info():
+    # Get current system
+    ex_type, ex_value, ex_traceback = sys.exc_info()
+    trace_back = traceback.extract_tb(ex_traceback)
+    trace_log = [trace for trace in trace_back]
+
+    return ex_type.__name__, ex_value, trace_log

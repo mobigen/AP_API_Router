@@ -1,16 +1,21 @@
 import requests
 from fastapi.logger import logger
+from urllib.parse import ParseResult
 from ApiRoute.ApiRouteConfig import config
 from ConnectManager import RemoteCmd
 
 
-def make_url(server_name: str, url: str):
+def make_url(server_name: str, url_path: str):
     for server_info in config.api_server_info:
         if server_info["NM"] == server_name:
             if len(server_info["IP_ADR"]) != 0:
-                return f'http://{server_info["IP_ADR"]}{url}'
+                netloc = server_info["IP_ADR"]
             else:
-                return f'http://{server_info["DOMN_NM"]}{url}'
+                netloc = server_info["DOMN_NM"]
+            url = ParseResult(
+                scheme="http", netloc=netloc, path=url_path, params="", query="", fragment="")
+            logger.debug(f"Message Passing Url : {url.geturl()}")
+            return url.geturl()
     return None
 
 
