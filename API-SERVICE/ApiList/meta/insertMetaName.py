@@ -12,9 +12,6 @@ class InsertMetaName(BaseModel):
     KOR_NM: str
     ENG_NM: str
     TYPE: int
-    # SHOW_ODRG: int
-    # NM_ID: str
-
 
 
 def api(insert: InsertMetaName, request: Request) -> Dict:
