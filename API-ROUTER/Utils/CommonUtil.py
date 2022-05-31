@@ -93,9 +93,9 @@ def get_token_info(headers: starlette.datastructures.Headers):
 
 
 def get_exception_info():
-    # Get current system
     ex_type, ex_value, ex_traceback = sys.exc_info()
     trace_back = traceback.extract_tb(ex_traceback)
     trace_log = [trace for trace in trace_back]
 
     return ex_type.__name__, ex_value, trace_log
+ 
