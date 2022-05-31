@@ -269,17 +269,18 @@ class ApiRoute:
 
     async def route_api(self, request: Request) -> Dict:
         api_name = request.url.path.split("/")[-1]
+        category = request.url.path.split("/")[-2]
         method = request.method
         content_type = request.headers.get("Content-Type")
 
         user_info = get_token_info(request.headers)
 
         logger.debug(
-            f'Req - API Name : {api_name}, Method : {method}, Content-Type : {content_type}')
+            f'Req - API Name : {api_name}, Category : {category}, Method : {method}, Content-Type : {content_type}')
         try:
             db = connect_db(config.db_type, config.db_info)
             api_info, _ = db.select(
-                f'SELECT * FROM api_info WHERE "API_NM" = {convert_data(api_name)};')
+                f'SELECT * FROM api_info WHERE "API_NM" = {convert_data(api_name)} AND "CTGRY" = {convert_data(category)};')
             api_params, _ = db.select(
                 f'SELECT * FROM api_params WHERE "API_NM" = {convert_data(api_name)};')
         except Exception:
