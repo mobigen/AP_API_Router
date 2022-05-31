@@ -6,13 +6,13 @@ from Utils.DataBaseUtil import convert_data
 from starlette.requests import Request
 
 
-def api(request: Request) -> Dict:
+def api(map_list: list ,request: Request) -> Dict:
     user_info = get_token_info(request.headers)
 
     view_col = ['"BIZ_DATASET_ID"']
     drop_view_query = "DROP VIEW v_biz_meta_wrap"
     truncate_query = "TRUNCATE tb_biz_meta_map;"
-    meta_name_query = 'SELECT "NM_ID" FROM tb_biz_meta_name;'
+    map_insert_query = 'INSERT INTO tb_biz_meta_map ("ITEM_ID", "NM_ID") VALUES ({0}, {1});'
     meta_map_query = "SELECT * FROM tb_biz_meta_map"
     map_item_query = """
         select distinct 
@@ -29,13 +29,11 @@ def api(request: Request) -> Dict:
         db = connect_db(config.db_type, config.db_info)
         db.execute(drop_view_query)
         db.execute(truncate_query)
-        meta_name_list = db.select(meta_name_query)[0]
 
-        # insert meta map
-        for i, meta_name in enumerate(meta_name_list):
-            query = f'INSERT INTO tb_biz_meta_map ("ITEM_ID","NM_ID")\
-                        VALUES ({convert_data(i + 1)},{convert_data(meta_name["NM_ID"])});'
-            db.execute(query)
+        for meta_map in map_list:
+            logger.info(meta_map)
+            db.execute(map_insert_query.format(convert_data(meta_map["ITEM_ID"]),
+                                               convert_data(meta_map["NM_ID"])))
 
         # create view v_biz_meta_wrap
         meta_map_item = db.select(map_item_query)[0]
