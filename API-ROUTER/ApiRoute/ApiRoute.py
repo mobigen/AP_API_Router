@@ -288,9 +288,9 @@ class ApiRoute:
             api_info_query = f'UPDATE api_info SET "URL"={convert_data(update_api_info["URL"])}, \
                                                    "METH"={convert_data(update_api_info["METH"])}, \
                                                    "CMD"={convert_data(update_api_info["CMD"])}, \
-                                                   "MODE"= {convert_data(update_api_info["MODE"])} \
-                                               WHERE "API_NM"={convert_data(update_api_info["API_NM"])} AND \
-                                                     "CTGRY"={convert_data(update_api_info["CTGRY"])};'
+                                                   "MODE"= {convert_data(update_api_info["MODE"])}, \
+                                                   "CTGRY"={convert_data(update_api_info["CTGRY"])} \
+                                               WHERE "API_NM"={convert_data(update_api_info["API_NM"])};'
             db.execute(api_info_query)
 
             for param in update_api_params:
@@ -316,8 +316,7 @@ class ApiRoute:
 
             db.execute(
                 f'DELETE FROM api_info WHERE "API_NM" = {convert_data(API_NM)};')
-            db.execute(
-                f'DELETE FROM api_params WHERE  "API_NM" = {convert_data(API_NM)};')
+
         except Exception:
             ex_type, ex_value, trace_log = get_exception_info()
             logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"

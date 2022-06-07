@@ -98,4 +98,4 @@ def get_exception_info():
     trace_log = [trace for trace in trace_back]
 
     return ex_type.__name__, ex_value, trace_log
-        
+              
