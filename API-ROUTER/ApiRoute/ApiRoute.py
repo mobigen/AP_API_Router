@@ -175,7 +175,7 @@ class ApiRoute:
             db = connect_db(config.db_type, config.db_info)
 
             api_info, info_column_names = db.select(
-                f'SELECT "API_NM", "CTGRY", "URL", "METH", "CMD", "MODE" FROM api_info ORDER BY "IDX";')
+                f'SELECT "API_NM", "CTGRY", "URL", "METH", "CMD", "MODE" FROM api_info ORDER BY "NO";')
             api_params, params_column_names = db.select(
                 f'SELECT * FROM api_params ORDER BY "API_NM", "NM";')
         except Exception:
@@ -196,7 +196,7 @@ class ApiRoute:
         try:
             db = connect_db(config.db_type, config.db_info)
             api_info, info_column_names = db.select(
-                f'SELECT "API_NM", "CTGRY", "URL", "METH", "CMD", "MODE" FROM api_info WHERE "CTGRY" = {convert_data(CTGRY)} ORDER BY "IDX";')
+                f'SELECT "API_NM", "CTGRY", "URL", "METH", "CMD", "MODE" FROM api_info WHERE "CTGRY" = {convert_data(CTGRY)} ORDER BY "NO";')
 
             for info in api_info:
                 logger.debug(f'INFO : {info["API_NM"]}')
