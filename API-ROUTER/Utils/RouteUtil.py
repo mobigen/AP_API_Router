@@ -1,4 +1,5 @@
 import requests
+import aiohttp
 from fastapi.logger import logger
 from urllib.parse import ParseResult
 from ApiRoute.ApiRouteConfig import config
@@ -19,7 +20,7 @@ def make_url(server_name: str, url_path: str):
     return None
 
 
-def bypass_msg(api_info, params_query, body):
+async def bypass_msg(api_info, params_query, body):
     method = api_info["METH"]
     msg_type = api_info["MSG_TYPE"]
 
@@ -27,27 +28,34 @@ def bypass_msg(api_info, params_query, body):
     if url is None:
         return {"result": 0, "errorMessage": "The server info does not exist."}
 
-    if method == "GET":
-        params = {}
-        if len(params_query) != 0:
-            for param in params_query.split("&"):
-                parser_param = param.split("=")
-                params[parser_param[0]] = parser_param[1]
-        response = requests.get(url, params=params)
-    elif method == "POST":
-        if msg_type == "JSON":
-            response = requests.post(url, json=body)
+    async with aiohttp.ClientSession() as session:
+        if method == "GET":
+            params = {}
+            if len(params_query) != 0:
+                for param in params_query.split("&"):
+                    parser_param = param.split("=")
+                    params[parser_param[0]] = parser_param[1]
+
+            async with session.get(url, params=params) as response:
+                result = await response.json()
+        elif method == "POST":
+            if msg_type == "JSON":
+                async with session.post(url, json=body) as response:
+                    result = await response.json()
+            else:
+                async with session.post(url, data=body) as response:
+                    result = await response.json()
+        elif method == "PUT":
+            if msg_type == "JSON":
+                async with session.put(url, json=body) as response:
+                    result = await response.json()
+            else:
+                async with session.put(url, data=body) as response:
+                    result = await response.json()
         else:
-            response = requests.post(url, data=body)
-    elif method == "PUT":
-        if msg_type == "JSON":
-            response = requests.put(url, json=body)
-        else:
-            response = requests.put(url, data=body)
-    else:
-        logger.error(f'Method Not Allowed. {method}')
-        return {"result": 0, "errorMessage": "Method Not Allowed."}
-    return response.json()
+            logger.error(f'Method Not Allowed. {method}')
+            result = {"result": 0, "errorMessage": "Method Not Allowed."}
+    return result
 
 
 def call_remote_func(api_info, api_params, input_params):
@@ -68,4 +76,5 @@ def call_remote_func(api_info, api_params, input_params):
 
     cmd = f'{api_info["command"]} {command_input}'
     result = eval(remote_cmd.cmd_exec(cmd))
+
     return result

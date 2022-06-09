@@ -371,7 +371,7 @@ class ApiRoute:
             logger.debug(
                 f'MODE : {api_info["MODE"]}, content_type : {content_type}')
             if api_info["MODE"] == "MESSAGE PASSING":
-                result = bypass_msg(api_info, params_query, body)
+                result = await bypass_msg(api_info, params_query, body)
             else:
                 result = call_remote_func(api_info, api_params, body)
 
