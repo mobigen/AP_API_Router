@@ -1,4 +1,3 @@
-import requests
 import aiohttp
 from fastapi.logger import logger
 from urllib.parse import ParseResult
@@ -58,7 +57,7 @@ async def bypass_msg(api_info, params_query, body):
     return result
 
 
-def call_remote_func(api_info, api_params, input_params):
+async def call_remote_func(api_info, api_params, input_params):
     msg_type = api_info["MSG_TYPE"]
 
     remote_cmd = RemoteCmd(
@@ -74,7 +73,6 @@ def call_remote_func(api_info, api_params, input_params):
                     f'parameter set default value. [{param["param_name"]}]')
                 command_input += f' --{param["param_name"]} {param["default_value"]}'
 
-    cmd = f'{api_info["command"]} {command_input}'
+    cmd = f'{api_info["CMD"]} {command_input}'
     result = eval(remote_cmd.cmd_exec(cmd))
-
     return result

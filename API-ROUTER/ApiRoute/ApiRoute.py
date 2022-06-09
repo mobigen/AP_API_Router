@@ -276,29 +276,29 @@ class ApiRoute:
         try:
             db = connect_db(config.db_type, config.db_info)
 
-            update_api_info = {}
-            update_api_params = []
+            insert_api_info = {}
+            insert_api_params = []
             for key, value in api_info.__dict__.items():
                 if key == "PARAMS":
                     for param in value:
-                        update_api_params.append(param.__dict__)
+                        insert_api_params.append(param.__dict__)
                 else:
-                    update_api_info[key] = value
+                    insert_api_info[key] = value
+            db.execute(
+                f'DELETE FROM api_info WHERE "API_NM" = {convert_data(insert_api_info["API_NM"])};')
 
-            api_info_query = f'UPDATE api_info SET "URL"={convert_data(update_api_info["URL"])}, \
-                                                   "METH"={convert_data(update_api_info["METH"])}, \
-                                                   "CMD"={convert_data(update_api_info["CMD"])}, \
-                                                   "MODE"= {convert_data(update_api_info["MODE"])}, \
-                                                   "CTGRY"={convert_data(update_api_info["CTGRY"])} \
-                                               WHERE "API_NM"={convert_data(update_api_info["API_NM"])};'
+            api_info_query = f'INSERT INTO api_info ("API_NM", "CTGRY", "URL", "METH", "CMD", "MODE") \
+                                      VALUES ({convert_data(insert_api_info["API_NM"])}, {convert_data(insert_api_info["CTGRY"])}, \
+                                              {convert_data(insert_api_info["URL"])}, {convert_data(insert_api_info["METH"])}, \
+                                              {convert_data(insert_api_info["CMD"])}, {convert_data(insert_api_info["MODE"])});'
             db.execute(api_info_query)
 
-            for param in update_api_params:
-                api_params_query = f'UPDATE api_params SET "DATA_TYPE"={convert_data(param["DATA_TYPE"])}, \
-                                                           "DEFLT_VAL"={convert_data(param["DEFLT_VAL"])} \
-                                                       WHERE "API_NM"={convert_data(param["API_NM"])} AND \
-                                                             "NM"={convert_data(param["NM"])};'
+            for param in insert_api_params:
+                api_params_query = f'INSERT INTO api_params ("API_NM", "NM", "DATA_TYPE", "DEFLT_VAL") \
+                                            VALUES ({convert_data(param["API_NM"])}, {convert_data(param["NM"])}, \
+                                                    {convert_data(param["DATA_TYPE"])}, {convert_data(param["DEFLT_VAL"])});'
                 db.execute(api_params_query)
+
         except Exception:
             ex_type, ex_value, trace_log = get_exception_info()
             logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
@@ -373,6 +373,5 @@ class ApiRoute:
             if api_info["MODE"] == "MESSAGE PASSING":
                 result = await bypass_msg(api_info, params_query, body)
             else:
-                result = call_remote_func(api_info, api_params, body)
-
+                result = await call_remote_func(api_info, api_params, body)
         return result
