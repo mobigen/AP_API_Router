@@ -1,8 +1,8 @@
+import asyncssh
 import aiohttp
 from fastapi.logger import logger
 from urllib.parse import ParseResult
 from ApiRoute.ApiRouteConfig import config
-from ConnectManager import RemoteCmd
 
 
 def make_url(server_name: str, url_path: str):
@@ -57,11 +57,17 @@ async def bypass_msg(api_info, params_query, body):
     return result
 
 
+async def run_cmd(cmd):
+    async with asyncssh.connect(host=config.remote_info["host"], port=int(config.remote_info["port"]),
+                                username=config.remote_info["id"], password=config.remote_info["password"]) as conn:
+        result = await conn.run(cmd, check=True)
+        logger.debug(f'Command Result : {result.stdout}')
+    return result.stdout
+
+
 async def call_remote_func(api_info, api_params, input_params):
     msg_type = api_info["MSG_TYPE"]
 
-    remote_cmd = RemoteCmd(
-        config.remote_info["host"], config.remote_info["port"], config.remote_info["id"], config.remote_info["password"])
     command_input = ""
     if msg_type == "JSON":
         for param in api_params:
@@ -69,10 +75,15 @@ async def call_remote_func(api_info, api_params, input_params):
                 data = input_params[param["param_name"]]
                 command_input += f' --{param["param_name"]} {data}'
             except KeyError:
-                print(
+                logger.error(
                     f'parameter set default value. [{param["param_name"]}]')
                 command_input += f' --{param["param_name"]} {param["default_value"]}'
 
     cmd = f'{api_info["CMD"]} {command_input}'
-    result = eval(remote_cmd.cmd_exec(cmd))
-    return result
+
+    try:
+        result = await run_cmd(cmd)
+    except (OSError, asyncssh.Error) as exc:
+        logger.error(f'SSH connection failed: {str(exc)}')
+
+    return eval(result)
