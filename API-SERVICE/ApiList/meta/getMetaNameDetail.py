@@ -6,7 +6,7 @@ from fastapi.logger import logger
 from starlette.requests import Request
 
 
-def api(request: Request,nameId:str=None) -> Dict:
+def api(request: Request, nameId: str = None) -> Dict:
     user_info = get_token_info(request.headers)
     if nameId is None:
         query = f"SELECT * FROM v_biz_meta_name"
@@ -14,7 +14,7 @@ def api(request: Request,nameId:str=None) -> Dict:
         query = f'SELECT * FROM tb_biz_meta_name WHERE "NM_ID" = {convert_data(nameId)}'
 
     try:
-        db = connect_db(config.db_type, config.db_info)
+        db = connect_db(config.db_info)
         meta_name = db.select(query)
     except Exception as err:
         result = {"result": 0, "errorMessage": err}

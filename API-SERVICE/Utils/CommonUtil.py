@@ -30,7 +30,7 @@ def parser_params() -> Any:
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default="127.0.0.1")
     parser.add_argument("--port", type=int, default=19000)
-    parser.add_argument("--db_type", default="postgresql")
+    parser.add_argument("--category", default="meta")
 
     return parser.parse_args()
 
@@ -40,21 +40,19 @@ def prepare_config() -> None:
     config.root_path = Path(os.getcwd()).parent
     api_router_cfg = get_config(config.root_path, "config.ini")
     config.api_config = get_config(config.root_path, "api_config.ini")
-    config.db_type = args.db_type
+    config.category = args.category
     config.server_host = args.host
     config.server_port = args.port
-    config.db_info = api_router_cfg[config.db_type]
+    config.db_info = api_router_cfg[config.category]
     config.secret_info = api_router_cfg["secret_info"]
 
 
 @retry(psycopg2.OperationalError, delay=1, tries=3)
-def connect_db(db_type, db_info):
-    if db_type == "postgresql":
-        db = PostgresManager(host=db_info["host"], port=db_info["port"],
-                             user=db_info["user"], password=db_info["password"],
-                             database=db_info["database"], schema=db_info["schema"])
-    else:
-        raise Exception(f'Not Implemented. ({db_type})')
+def connect_db(db_info):
+    db = PostgresManager(host=db_info["host"], port=db_info["port"],
+                         user=db_info["user"], password=db_info["password"],
+                         database=db_info["database"], schema=db_info["schema"])
+
     return db
 
 

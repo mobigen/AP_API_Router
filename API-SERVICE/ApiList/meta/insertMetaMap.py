@@ -6,7 +6,7 @@ from Utils.DataBaseUtil import convert_data
 from starlette.requests import Request
 
 
-def api(map_list: list ,request: Request) -> Dict:
+def api(map_list: list, request: Request) -> Dict:
     user_info = get_token_info(request.headers)
 
     view_col = ['"BIZ_DATASET_ID"']
@@ -26,7 +26,7 @@ def api(map_list: list ,request: Request) -> Dict:
     """
 
     try:
-        db = connect_db(config.db_type, config.db_info)
+        db = connect_db(config.db_info)
         db.execute(drop_view_query)
         db.execute(truncate_query)
 
@@ -37,7 +37,7 @@ def api(map_list: list ,request: Request) -> Dict:
 
         # create view v_biz_meta_wrap
         meta_map_item = db.select(map_item_query)[0]
-        for i,meta_map in enumerate(meta_map_item):
+        for i, meta_map in enumerate(meta_map_item):
             eng_name = meta_map["ENG_NM"]
             col_format = f'\t\tmax(case when "ITEM_ID" = {convert_data(i + 1)} then "ITEM_VAL" end) as {eng_name}'
             view_col.append(col_format)

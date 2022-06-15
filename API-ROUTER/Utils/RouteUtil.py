@@ -3,6 +3,7 @@ import aiohttp
 from fastapi.logger import logger
 from urllib.parse import ParseResult
 from ApiRoute.ApiRouteConfig import config
+from typing import Dict
 
 
 def make_url(server_name: str, url_path: str):
@@ -57,7 +58,7 @@ async def bypass_msg(api_info, params_query, body):
     return result
 
 
-async def run_cmd(cmd):
+async def run_cmd(cmd: str):
     async with asyncssh.connect(host=config.remote_info["host"], port=int(config.remote_info["port"]),
                                 username=config.remote_info["id"], password=config.remote_info["password"]) as conn:
         result = await conn.run(cmd, check=True)
@@ -65,7 +66,7 @@ async def run_cmd(cmd):
     return result.stdout
 
 
-async def call_remote_func(api_info, api_params, input_params):
+async def call_remote_func(api_info, api_params, input_params) -> Dict:
     msg_type = api_info["MSG_TYPE"]
 
     command_input = ""

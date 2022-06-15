@@ -21,7 +21,7 @@ def api(insert: InsertMetaName, request: Request) -> Dict:
               VALUES ({convert_data(insert.KOR_NM)}, {convert_data(insert.ENG_NM)}, 0,\
               {convert_data(uuid.uuid4())}, {convert_data(insert.TYPE)});'
     try:
-        db = connect_db(config.db_type, config.db_info)
+        db = connect_db(config.db_info)
         db.execute(query)
     except Exception as err:
         result = {"result": 0, "errorMessage": err}

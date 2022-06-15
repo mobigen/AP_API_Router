@@ -22,7 +22,7 @@ def api(request: Request) -> Dict:
     # v_meta_map_query = "SELECT * FROM v_biz_meta_map;"
 
     try:
-        db = connect_db(config.db_type, config.db_info)
+        db = connect_db(config.db_info)
         meta_map = db.select(meta_map_query)
         # v_meta_map = db.select(v_meta_map_query)
     except Exception as err:

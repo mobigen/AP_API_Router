@@ -11,4 +11,4 @@ app.include_router(api_router.router)
 
 if __name__ == '__main__':
     uvicorn.run("server:app", host=config.server_host, port=config.server_port,
-                reload=True, log_config=f'{config.root_path}/API-SERVICE/conf/logging.conf')
+                reload=True, log_config=f'{config.root_path}/API-SERVICE/conf/{config.category}_logging.conf')

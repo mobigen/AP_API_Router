@@ -15,7 +15,7 @@ def api(request: Request, datasetId: str = None) -> Dict:
         v_meta_wrap_query = f'SELECT * FROM v_biz_meta_wrap WHERE "BIZ_DATASET_ID" = {convert_data(datasetId)}'
 
     try:
-        db = connect_db(config.db_type, config.db_info)
+        db = connect_db(config.db_info)
         meta_wrap = db.select(v_meta_wrap_query)
         # v_meta_name = db.select(v_meta_name_query)
     except Exception as err:
@@ -23,7 +23,7 @@ def api(request: Request, datasetId: str = None) -> Dict:
         logger.error(err)
     else:
         if datasetId is None:
-            result = make_res_msg(1,"",{},meta_wrap[1])
+            result = make_res_msg(1, "", {}, meta_wrap[1])
         else:
-            result = make_res_msg(1,"",meta_wrap[0][0],meta_wrap[1])
+            result = make_res_msg(1, "", meta_wrap[0][0], meta_wrap[1])
     return result

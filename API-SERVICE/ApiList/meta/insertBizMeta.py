@@ -14,7 +14,7 @@ def api(biz_meta_list: list, request: Request) -> Dict:
     biz_meta_query = 'SELECT "ITEM_ID" as itemId, "ITEM_VAL" as itemVal FROM tb_biz_meta;'
 
     try:
-        db = connect_db(config.db_type, config.db_info)
+        db = connect_db(config.db_info)
         for biz_meta in biz_meta_list:
             item_id, item_val = tuple(biz_meta.values())
             query = 'INSERT INTO tb_biz_meta ("BIZ_DATASET_ID", "ITEM_ID", "ITEM_VAL" )' + \

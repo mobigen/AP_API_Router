@@ -82,7 +82,7 @@ class ApiRoute:
             self.router.add_api_route(f'{api_info["url_prefix"]}/{api_info["sub_dir"]}/{api_name}',
                                       module.api, methods=[api_info["method"]], tags=["service"])
 
-    def set_server_info(self, api_server_info: ApiServerInfo):
+    def set_server_info(self, api_server_info: ApiServerInfo) -> Dict:
         api_server_info = api_server_info.__dict__
         api_server_info_query = f'INSERT INTO api_server_info ("NM", "IP_ADR", "DOMN_NM") \
                                         VALUES ({convert_data(api_server_info["NM"])}, \
@@ -103,7 +103,7 @@ class ApiRoute:
 
         return result
 
-    def update_server_info(self, api_server_info: ApiServerInfo):
+    def update_server_info(self, api_server_info: ApiServerInfo) -> Dict:
         api_server_info = api_server_info.__dict__
         api_server_info_query = f'UPDATE api_server_info SET "IP_ADR"={convert_data(api_server_info["IP_ADR"])}, \
                                                              "DOMN_NM"={convert_data(api_server_info["DOMN_NM"])} \
@@ -123,7 +123,7 @@ class ApiRoute:
 
         return result
 
-    def get_server_info_list(self):
+    def get_server_info_list(self) -> Dict:
         try:
             db = connect_db(config.db_type, config.db_info)
             api_server_info, _ = db.select(
@@ -138,7 +138,7 @@ class ApiRoute:
 
         return result
 
-    def get_server_info(self, NM: str):
+    def get_server_info(self, NM: str) -> Dict:
         try:
             db = connect_db(config.db_type, config.db_info)
             api_server_info, _ = db.select(
@@ -153,7 +153,7 @@ class ApiRoute:
 
         return result
 
-    def del_server_info(self, NM: str):
+    def del_server_info(self, NM: str) -> Dict:
         try:
             db = connect_db(config.db_type, config.db_info)
             db.execute(
@@ -190,7 +190,7 @@ class ApiRoute:
 
         return result
 
-    def get_api_category_list(self, CTGRY: str):
+    def get_api_category_list(self, CTGRY: str) -> Dict:
         api_params_list = []
         params_columns = []
         try:
@@ -272,7 +272,7 @@ class ApiRoute:
 
         return result
 
-    def update_api(self, api_info: ApiInfo):
+    def update_api(self, api_info: ApiInfo) -> Dict:
         try:
             db = connect_db(config.db_type, config.db_info)
 

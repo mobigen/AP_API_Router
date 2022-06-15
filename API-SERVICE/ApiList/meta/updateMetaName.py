@@ -26,7 +26,7 @@ def api(update: UpdatetMetaName, request: Request) -> Dict:
                 WHERE "NM_ID" = {convert_data(update.NM_ID)};'
 
     try:
-        db = connect_db(config.db_type, config.db_info)
+        db = connect_db(config.db_info)
         db.execute(query)
     except Exception as err:
         result = {"result": 0, "errorMessage": err}

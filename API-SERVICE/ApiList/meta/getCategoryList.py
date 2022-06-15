@@ -13,7 +13,7 @@ def api(request: Request) -> Dict:
                       order by "PRNTS_ID", "NODE_ID";'
 
     try:
-        db = connect_db(config.db_type, config.db_info)
+        db = connect_db(config.db_info)
         category_list = db.select(category_query)[0]
     except Exception as err:
         result = {"result": 0, "errorMessage": err}

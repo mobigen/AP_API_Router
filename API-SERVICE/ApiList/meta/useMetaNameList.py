@@ -27,7 +27,7 @@ def api(request: Request) -> Dict:
         order by tbmn."NM_ID";"""
 
     try:
-        db = connect_db(config.db_type, config.db_info)
+        db = connect_db(config.db_info)
         meta_name = db.select(meta_name_query)
     except Exception as err:
         result = {"result": 0, "errorMessage": err}

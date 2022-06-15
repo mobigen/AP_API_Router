@@ -34,7 +34,7 @@ def api(perPage: int, curPage: int, request: Request) -> Dict:
     total_cnt_query = "SELECT count(*) as totalCount FROM tb_biz_meta_name"
 
     try:
-        db = connect_db(config.db_type, config.db_info)
+        db = connect_db(config.db_info)
         meta_name = db.select(meta_name_query)
         total_cnt = db.select(total_cnt_query)
     except Exception as err:

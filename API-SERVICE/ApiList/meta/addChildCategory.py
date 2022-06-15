@@ -21,7 +21,7 @@ def api(insert: addChildCategory, request: Request) -> Dict:
               VALUES ({convert_data(insert.NODE_NM)},{convert_data(insert.PRNTS_ID)},{convert_data(uuid.uuid4())});'
 
     try:
-        db = connect_db(config.db_type, config.db_info)
+        db = connect_db(config.db_info)
         db.execute(query)
     except Exception as err:
         result = {"result": 0, "errorMessage": err}
