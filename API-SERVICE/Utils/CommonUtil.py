@@ -38,8 +38,10 @@ def parser_params() -> Any:
 def prepare_config() -> None:
     args = parser_params()
     config.root_path = Path(os.getcwd()).parent
-    api_router_cfg = get_config(config.root_path, "config.ini")
-    config.api_config = get_config(config.root_path, "api_config.ini")
+    api_router_cfg = get_config(
+        config.root_path, f"{args.category}/config.ini")
+    config.api_config = get_config(
+        config.root_path, f"{args.category}/api_config.ini")
     config.category = args.category
     config.server_host = args.host
     config.server_port = args.port

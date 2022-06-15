@@ -6,12 +6,12 @@ from starlette.requests import Request
 from Utils.DataBaseUtil import convert_data
 
 
-def api(group_id, request: Request) -> Dict:
+def api(groupId, request: Request) -> Dict:
     user_info = get_token_info(request.headers)
 
     get_code_info_query = f'select code_id, code_nm \
                             from tb_code_detail \
-                            where code_group_id = {convert_data(group_id)};'
+                            where code_group_id = {convert_data(groupId)};'
 
     try:
         db = connect_db(config.db_info)
@@ -20,5 +20,5 @@ def api(group_id, request: Request) -> Dict:
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        result = make_res_msg(1, "", code_info[0], code_info[1])
+        result = code_info[0]
     return result

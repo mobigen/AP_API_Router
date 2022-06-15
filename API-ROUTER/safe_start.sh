@@ -50,10 +50,6 @@ echo "########## Safe Start (${app_name}) ##########"
 echo "========== STOP ${app_name} =========="
 input
 
-source_path="$( cd "$( dirname "$0" )" && pwd -P )"
-make_dir="${source_path}/log"
-mkdir $make_dir
-
 router_stop
 sleep 2
 uvicorn_stop
