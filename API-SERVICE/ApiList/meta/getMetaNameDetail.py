@@ -11,7 +11,7 @@ def api(request: Request, nameId: str = None) -> Dict:
     if nameId is None:
         query = f"SELECT * FROM v_biz_meta_name"
     else:
-        query = f'SELECT * FROM tb_biz_meta_name WHERE "NM_ID" = {convert_data(nameId)}'
+        query = f'SELECT * FROM tb_biz_meta_name WHERE nm_id = {convert_data(nameId)}'
 
     try:
         db = connect_db(config.db_info)

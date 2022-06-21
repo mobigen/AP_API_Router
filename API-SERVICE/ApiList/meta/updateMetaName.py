@@ -2,28 +2,28 @@ from typing import Dict
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_token_info
 from Utils.DataBaseUtil import convert_data
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi.logger import logger
 from starlette.requests import Request
 
 
 class UpdatetMetaName(BaseModel):
-    KOR_NM: str
-    ENG_NM: str
-    SHOW_ODRG: int
-    NM_ID: str
-    TYPE: int
+    kor_nm: str
+    eng_nm: str
+    show_odrg: int
+    nm_id: str
+    TYPE: int = Field(alias="type")
 
 
 def api(update: UpdatetMetaName, request: Request) -> Dict:
     user_info = get_token_info(request.headers)
 
     query = f'UPDATE tb_biz_meta_name\
-                SET "KOR_NM" = {convert_data(update.KOR_NM)},\
-                    "ENG_NM"   = {convert_data(update.ENG_NM)},\
-                    "SHOW_ODRG" = {convert_data(update.SHOW_ODRG)},\
-                    "TYPE"= {convert_data(update.TYPE)}\
-                WHERE "NM_ID" = {convert_data(update.NM_ID)};'
+                SET kor_nm = {convert_data(update.kor_nm)},\
+                    eng_nm   = {convert_data(update.eng_nm)},\
+                    show_odrg = {convert_data(update.show_odrg)},\
+                    type = {convert_data(update.TYPE)}\
+                WHERE nm_id = {convert_data(update.nm_id)};'
 
     try:
         db = connect_db(config.db_info)

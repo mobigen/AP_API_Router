@@ -5,20 +5,22 @@ from fastapi.logger import logger
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_token_info
 from Utils.DataBaseUtil import convert_data
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from starlette.requests import Request
 
 
 class InsertMetaName(BaseModel):
-    KOR_NM: str
-    ENG_NM: str
-    TYPE: int
+    kor_nm: str
+    eng_nm: str
+    TYPE: int = Field(alias="type")
 
 
 def api(insert: InsertMetaName, request: Request) -> Dict:
-    # ENG_NM 중복 체크, 특수문자 체크
-    
     user_info = get_token_info(request.headers)
+
+    query = f'INSERT INTO tb_biz_meta_name (kor_nm, eng_nm, show_odrg, nm_id, type)\
+              VALUES ({convert_data(insert.kor_nm)}, {convert_data(insert.eng_nm.lower())}, 0,\
+                      {convert_data(uuid.uuid4())}, {convert_data(insert.TYPE)});'
     symbol_list = list(map(str,string.punctuation))
     symbol_list.remove("_")
     symbol_list.remove("'")
