@@ -60,7 +60,8 @@ def api(insert: NmIdList, request: Request) -> Dict:
                                                convert_data(nm_id)))
 
         # drop view v_biz_meta_wrap
-        db.execute(drop_view_query)
+        db.execute(drop_view_wrap_query)
+        db.execute(drop_view_meta_query)
 
         # create view v_biz_meta_wrap
         meta_map_item = db.select(map_item_query)[0]
@@ -78,6 +79,7 @@ def api(insert: NmIdList, request: Request) -> Dict:
             group by biz_dataset_id
         """
         db.execute(ddl_dataset_id)
+        db.execute(create_view_meta_query)
 
         # return data
         meta_map_list = db.select(meta_map_query)[0]
