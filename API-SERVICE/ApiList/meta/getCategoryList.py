@@ -10,7 +10,7 @@ def api(request: Request) -> Dict:
 
     category_query = 'select * \
                       from tb_category \
-                      order by "PRNTS_ID", "NODE_ID";'
+                      order by prnts_id, node_id;'
 
     try:
         db = connect_db(config.db_info)

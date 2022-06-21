@@ -11,20 +11,20 @@ def api(request: Request) -> Dict:
     meta_name_query = """        
         select                
             case
-                when (select tbmm."NM_ID" from tb_biz_meta_map tbmm where tbmn."NM_ID" = tbmm."NM_ID") is null then 0
+                when (select tbmm.nm_id from tb_biz_meta_map tbmm where tbmn.nm_id = tbmm.nm_id) is null then 0
                 else 1
                 end as use_meta,
-            tbmn."KOR_NM",
-            tbmn."ENG_NM",
-            tbmn."SHOW_ODRG",
+            tbmn.kor_nm,
+            tbmn.eng_nm,
+            tbmn.show_odrg,
             case
-                when tbmn."TYPE" = 0 then 'text'
-                when tbmn."TYPE" = 1 then 'int'
-                when tbmn."TYPE" = 2 then 'binary'
-                end as "TYPE",
-            tbmn."NM_ID"
+                when tbmn.type = 0 then 'text'
+                when tbmn.type = 1 then 'int'
+                when tbmn.type = 2 then 'binary'
+                end as type,
+            tbmn.nm_id
         from tb_biz_meta_name tbmn
-        order by tbmn."NM_ID";"""
+        order by tbmn.nm_id;"""
 
     try:
         db = connect_db(config.db_info)

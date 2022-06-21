@@ -9,8 +9,8 @@ from starlette.requests import Request
 
 
 class UpdateCategory(BaseModel):
-    NODE_ID: str
-    NODE_NM: str
+    node_id: str
+    node_nm: str
 
 
 # todo: 수정 필요
@@ -18,10 +18,10 @@ def api(update: UpdateCategory, request: Request) -> Dict:
     user_info = get_token_info(request.headers)
 
     query = f'UPDATE tb_category\
-                SET "PRNTS_ID"   = {convert_data(uuid.uuid4())},\
-                    "NODE_ID"   = {convert_data(update.NODE_ID)},\
-                    "NODE_NM" = {convert_data(update.NODE_NM)}\
-                WHERE "NODE_ID" = {convert_data(update.NODE_ID)};'
+                SET prnts_id   = {convert_data(uuid.uuid4())},\
+                    node_id   = {convert_data(update.node_id)},\
+                    node_nm = {convert_data(update.node_nm)}\
+                WHERE node_id = {convert_data(update.node_id)};'
     try:
         db = connect_db(config.db_info)
         db.execute(query)

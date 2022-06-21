@@ -12,7 +12,7 @@ def api(request: Request, datasetId: str = None) -> Dict:
     if datasetId is None:
         v_meta_wrap_query = f'SELECT * FROM v_biz_meta_wrap LIMIT 1;'
     else:
-        v_meta_wrap_query = f'SELECT * FROM v_biz_meta_wrap WHERE "BIZ_DATASET_ID" = {convert_data(datasetId)}'
+        v_meta_wrap_query = f'SELECT * FROM v_biz_meta_wrap WHERE biz_dataset_id = {convert_data(datasetId)}'
 
     try:
         db = connect_db(config.db_info)
