@@ -63,10 +63,14 @@ def save_file_for_reload():
         fd.write(" ")
 
 
-def make_res_msg(result, err_msg, data=None, column_names=None):
+def make_res_msg(result, err_msg, data=None, column_names=None, kor_column_names=None):
     header_list = []
-    for column_name in column_names:
-        header = {"column_name": column_name}
+    for index, column_name in enumerate(column_names):
+        if kor_column_names:
+            header = {"column_name": column_name,
+                      "kor_column_name": kor_column_names[index]}
+        else:
+            header = {"column_name": column_name}
         header_list.append(header)
 
     if data is None or column_names is None:

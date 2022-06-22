@@ -25,5 +25,16 @@ def api(request: Request, datasetId: str = None) -> Dict:
         if datasetId is None:
             result = make_res_msg(1, "", {}, meta_wrap[1])
         else:
-            result = make_res_msg(1, "", meta_wrap[0][0], meta_wrap[1])
+            kor_nm_list = []
+            name_list, _ = db.select(f'SELECT eng_nm, kor_nm FROM v_biz_meta;')
+            name_info = {}
+            for name in name_list:
+                name_info[name['eng_nm']] = name['kor_nm']
+            for eng_nm in meta_wrap[1]:
+                if eng_nm in name_info:
+                    kor_nm_list.append(name_info[eng_nm])
+                else:
+                    kor_nm_list.append("")
+            result = make_res_msg(
+                1, "", meta_wrap[0][0], meta_wrap[1], kor_nm_list)
     return result
