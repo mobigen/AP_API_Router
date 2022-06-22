@@ -8,11 +8,11 @@ from typing import Dict
 
 def make_url(server_name: str, url_path: str):
     for server_info in config.api_server_info:
-        if server_info["NM"] == server_name:
-            if len(server_info["IP_ADR"]) != 0:
-                netloc = server_info["IP_ADR"]
+        if server_info["nm"] == server_name:
+            if len(server_info["ip_adr"]) != 0:
+                netloc = server_info["ip_adr"]
             else:
-                netloc = server_info["DOMN_NM"]
+                netloc = server_info["domn_nm"]
             url = ParseResult(
                 scheme="http", netloc=netloc, path=url_path, params="", query="", fragment="")
             logger.debug(f"Message Passing Url : {url.geturl()}")
@@ -21,10 +21,10 @@ def make_url(server_name: str, url_path: str):
 
 
 async def bypass_msg(api_info, params_query, body):
-    method = api_info["METH"]
-    msg_type = api_info["MSG_TYPE"]
+    method = api_info["meth"]
+    msg_type = api_info["msg_type"]
 
-    url = make_url(api_info["CTGRY"], api_info["URL"])
+    url = make_url(api_info["ctgry"], api_info["url"])
     if url is None:
         return {"result": 0, "errorMessage": "The server info does not exist."}
 
@@ -67,7 +67,7 @@ async def run_cmd(cmd: str):
 
 
 async def call_remote_func(api_info, api_params, input_params) -> Dict:
-    msg_type = api_info["MSG_TYPE"]
+    msg_type = api_info["msg_type"]
 
     command_input = ""
     if msg_type == "JSON":
@@ -80,7 +80,7 @@ async def call_remote_func(api_info, api_params, input_params) -> Dict:
                     f'parameter set default value. [{param["param_name"]}]')
                 command_input += f' --{param["param_name"]} {param["default_value"]}'
 
-    cmd = f'{api_info["CMD"]} {command_input}'
+    cmd = f'{api_info["cmd"]} {command_input}'
 
     try:
         result = await run_cmd(cmd)

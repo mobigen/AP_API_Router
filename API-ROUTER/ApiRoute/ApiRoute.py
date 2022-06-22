@@ -11,27 +11,27 @@ from starlette.requests import Request
 
 
 class ApiServerInfo(BaseModel):
-    NM: str
-    IP_ADR: str
-    DOMN_NM: str
+    nm: str
+    ip_adr: str
+    domn_nm: str
 
 
 class ApiParam(BaseModel):
-    API_NM: str
-    NM: str
-    DATA_TYPE: str
-    DEFLT_VAL: str
+    api_nm: str
+    nm: str
+    data_type: str
+    deflt_val: str
 
 
 class ApiInfo(BaseModel):
-    API_NM: str
-    CTGRY: str
-    ROUTE_URL: str
-    URL: str
-    METH: str
-    CMD: str
-    MODE: str
-    PARAMS: List[ApiParam]
+    api_nm: str
+    ctgry: str
+    route_url: str
+    url: str
+    meth: str
+    cmd: str
+    mode: str
+    params: List[ApiParam]
 
 
 class ApiRoute:
@@ -71,8 +71,8 @@ class ApiRoute:
 
         for api in api_info:
             self.router.add_api_route(
-                api["ROUTE_URL"], self.route_api, methods=[api["METH"]], tags=[f'Route Category ({api["CTGRY"]})'])
-            # f'/route/{api["CTGRY"]}/{api["API_NM"]}', self.route_api, methods=[api["METH"]], tags=[f'Route Category ({api["CTGRY"]})'])
+                api["route_url"], self.route_api, methods=[api["meth"]], tags=[f'Route Category ({api["ctgry"]})'])
+            # f'/route/{api["ctgry"]}/{api["api_nm"]}', self.route_api, methods=[api["meth"]], tags=[f'Route Category ({api["ctgry"]})'])
 
         for api_name, api_info in config.api_config.items():
             module_path = f'{config.root_path}/API-ROUTER/ApiList/{api_info["sub_dir"]}/{api_name}.py'
@@ -86,10 +86,10 @@ class ApiRoute:
 
     def set_server_info(self, api_server_info: ApiServerInfo) -> Dict:
         api_server_info = api_server_info.__dict__
-        api_server_info_query = f'INSERT INTO api_server_info ("NM", "IP_ADR", "DOMN_NM") \
-                                        VALUES ({convert_data(api_server_info["NM"])}, \
-                                                {convert_data(api_server_info["IP_ADR"])}, \
-                                                {convert_data(api_server_info["DOMN_NM"])});'
+        api_server_info_query = f'INSERT INTO api_server_info (nm, ip_adr, domn_nm) \
+                                        VALUES ({convert_data(api_server_info["nm"])}, \
+                                                {convert_data(api_server_info["ip_adr"])}, \
+                                                {convert_data(api_server_info["domn_nm"])});'
         try:
             db = connect_db(config.db_type, config.db_info)
             db.execute(api_server_info_query)
@@ -107,9 +107,9 @@ class ApiRoute:
 
     def update_server_info(self, api_server_info: ApiServerInfo) -> Dict:
         api_server_info = api_server_info.__dict__
-        api_server_info_query = f'UPDATE api_server_info SET "IP_ADR"={convert_data(api_server_info["IP_ADR"])}, \
-                                                             "DOMN_NM"={convert_data(api_server_info["DOMN_NM"])} \
-                                                         WHERE "NM"={convert_data(api_server_info["NM"])};'
+        api_server_info_query = f'UPDATE api_server_info SET ip_adr={convert_data(api_server_info["ip_adr"])}, \
+                                                             domn_nm={convert_data(api_server_info["domn_nm"])} \
+                                                         WHERE nm={convert_data(api_server_info["nm"])};'
         try:
             db = connect_db(config.db_type, config.db_info)
             db.execute(api_server_info_query)
@@ -129,7 +129,7 @@ class ApiRoute:
         try:
             db = connect_db(config.db_type, config.db_info)
             api_server_info, _ = db.select(
-                'SELECT * FROM api_server_info ORDER BY "NM";')
+                'SELECT * FROM api_server_info ORDER BY nm;')
         except Exception:
             ex_type, ex_value, trace_log = get_exception_info()
             logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
@@ -140,11 +140,11 @@ class ApiRoute:
 
         return result
 
-    def get_server_info(self, NM: str) -> Dict:
+    def get_server_info(self, nm: str) -> Dict:
         try:
             db = connect_db(config.db_type, config.db_info)
             api_server_info, _ = db.select(
-                f'SELECT * FROM api_server_info WHERE "NM" = {convert_data(NM)};')
+                f'SELECT * FROM api_server_info WHERE nm = {convert_data(nm)};')
         except Exception:
             ex_type, ex_value, trace_log = get_exception_info()
             logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
@@ -155,11 +155,11 @@ class ApiRoute:
 
         return result
 
-    def del_server_info(self, NM: str) -> Dict:
+    def del_server_info(self, nm: str) -> Dict:
         try:
             db = connect_db(config.db_type, config.db_info)
             db.execute(
-                f'DELETE FROM api_server_info WHERE "NM" = {convert_data(NM)};')
+                f'DELETE FROM api_server_info WHERE nm = {convert_data(nm)};')
         except Exception:
             ex_type, ex_value, trace_log = get_exception_info()
             logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
@@ -177,9 +177,9 @@ class ApiRoute:
             db = connect_db(config.db_type, config.db_info)
 
             api_info, info_column_names = db.select(
-                f'SELECT "API_NM", "CTGRY", "ROUTE_URL", "URL", "METH", "CMD", "MODE" FROM api_info ORDER BY "NO";')
+                f'SELECT api_nm, ctgry, route_url, url, meth, cmd, mode FROM api_info ORDER BY no;')
             api_params, params_column_names = db.select(
-                f'SELECT * FROM api_params ORDER BY "API_NM", "NM";')
+                f'SELECT * FROM api_params ORDER BY api_nm, nm;')
         except Exception:
             ex_type, ex_value, trace_log = get_exception_info()
             logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
@@ -192,18 +192,18 @@ class ApiRoute:
 
         return result
 
-    def get_api_category_list(self, CTGRY: str) -> Dict:
+    def get_api_category_list(self, ctgry: str) -> Dict:
         api_params_list = []
         params_columns = []
         try:
             db = connect_db(config.db_type, config.db_info)
             api_info, info_column_names = db.select(
-                f'SELECT "API_NM", "CTGRY", "ROUTE_URL", "URL", "METH", "CMD", "MODE" FROM api_info WHERE "CTGRY" = {convert_data(CTGRY)} ORDER BY "NO";')
+                f'SELECT api_nm, ctgry, route_url, url, meth, cmd, mode FROM api_info WHERE ctgry = {convert_data(ctgry)} ORDER BY no;')
 
             for info in api_info:
-                logger.debug(f'INFO : {info["API_NM"]}')
+                logger.debug(f'INFO : {info["api_nm"]}')
                 api_params, params_column_names = db.select(
-                    f'SELECT * FROM api_params WHERE "API_NM" = {convert_data(info["API_NM"])} ORDER BY "NM";')
+                    f'SELECT * FROM api_params WHERE api_nm = {convert_data(info["api_nm"])} ORDER BY nm;')
                 if len(api_params) != 0:
                     api_params_list.extend(api_params)
                     params_columns = params_column_names
@@ -220,13 +220,13 @@ class ApiRoute:
 
         return result
 
-    def get_api(self, API_NM: str) -> Dict:
+    def get_api(self, api_nm: str) -> Dict:
         try:
             db = connect_db(config.db_type, config.db_info)
             api_info, info_column_names = db.select(
-                f'SELECT * FROM api_info WHERE "API_NM" = {convert_data(API_NM)};')
+                f'SELECT * FROM api_info WHERE api_nm = {convert_data(api_nm)};')
             api_params, params_column_names = db.select(
-                f'SELECT * FROM api_params WHERE "API_NM" = {convert_data(API_NM)} ORDER BY "NM";')
+                f'SELECT * FROM api_params WHERE api_nm = {convert_data(api_nm)} ORDER BY nm;')
         except Exception:
             ex_type, ex_value, trace_log = get_exception_info()
             logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
@@ -246,23 +246,23 @@ class ApiRoute:
             insert_api_info = {}
             insert_api_params = []
             for key, value in api_info.__dict__.items():
-                if key == "PARAMS":
+                if key == "params":
                     for param in value:
                         insert_api_params.append(param.__dict__)
                 else:
                     insert_api_info[key] = value
 
-            api_info_query = f'INSERT INTO api_info ("API_NM", "CTGRY", "ROUTE_URL", "URL", "METH", "CMD", "MODE") \
-                                      VALUES ({convert_data(insert_api_info["API_NM"])}, {convert_data(insert_api_info["CTGRY"])}, \
-                                              {convert_data(insert_api_info["ROUTE_URL"])}, {convert_data(insert_api_info["URL"])}, \
-                                              {convert_data(insert_api_info["METH"])}, {convert_data(insert_api_info["CMD"])}, \
-                                              {convert_data(insert_api_info["MODE"])});'
+            api_info_query = f'INSERT INTO api_info (api_nm, ctgry, route_url, url, meth, cmd, mode) \
+                                      VALUES ({convert_data(insert_api_info["api_nm"])}, {convert_data(insert_api_info["ctgry"])}, \
+                                              {convert_data(insert_api_info["route_url"])}, {convert_data(insert_api_info["url"])}, \
+                                              {convert_data(insert_api_info["meth"])}, {convert_data(insert_api_info["cmd"])}, \
+                                              {convert_data(insert_api_info["mode"])});'
             db.execute(api_info_query)
 
             for param in insert_api_params:
-                api_params_query = f'INSERT INTO api_params ("API_NM", "NM", "DATA_TYPE", "DEFLT_VAL") \
-                                            VALUES ({convert_data(param["API_NM"])}, {convert_data(param["NM"])}, \
-                                                    {convert_data(param["DATA_TYPE"])}, {convert_data(param["DEFLT_VAL"])});'
+                api_params_query = f'INSERT INTO api_params (api_nm, nm, data_type, deflt_val) \
+                                            VALUES ({convert_data(param["api_nm"])}, {convert_data(param["nm"])}, \
+                                                    {convert_data(param["data_type"])}, {convert_data(param["deflt_val"])});'
                 db.execute(api_params_query)
         except Exception:
             ex_type, ex_value, trace_log = get_exception_info()
@@ -282,26 +282,26 @@ class ApiRoute:
             insert_api_info = {}
             insert_api_params = []
             for key, value in api_info.__dict__.items():
-                if key == "PARAMS":
+                if key == "params":
                     for param in value:
                         insert_api_params.append(param.__dict__)
                 else:
                     insert_api_info[key] = value
             db.execute(
-                f'DELETE FROM api_info WHERE "API_NM" = {convert_data(insert_api_info["API_NM"])};')
+                f'DELETE FROM api_info WHERE api_nm = {convert_data(insert_api_info["api_nm"])};')
 
-            api_info_query = f'INSERT INTO api_info ("API_NM", "CTGRY", "ROUTE_URL", "URL", "METH", "CMD", "MODE") \
-                                      VALUES ({convert_data(insert_api_info["API_NM"])}, {convert_data(insert_api_info["CTGRY"])}, \
-                                              {convert_data(insert_api_info["ROUTE_URL"])}, {convert_data(insert_api_info["URL"])}, \
-                                              {convert_data(insert_api_info["METH"])}, {convert_data(insert_api_info["CMD"])}, \
-                                              {convert_data(insert_api_info["MODE"])});'
+            api_info_query = f'INSERT INTO api_info (api_nm, ctgry, route_url, url, meth, cmd, mode) \
+                                      VALUES ({convert_data(insert_api_info["api_nm"])}, {convert_data(insert_api_info["ctgry"])}, \
+                                              {convert_data(insert_api_info["route_url"])}, {convert_data(insert_api_info["url"])}, \
+                                              {convert_data(insert_api_info["meth"])}, {convert_data(insert_api_info["cmd"])}, \
+                                              {convert_data(insert_api_info["mode"])});'
 
             db.execute(api_info_query)
 
             for param in insert_api_params:
-                api_params_query = f'INSERT INTO api_params ("API_NM", "NM", "DATA_TYPE", "DEFLT_VAL") \
-                                            VALUES ({convert_data(param["API_NM"])}, {convert_data(param["NM"])}, \
-                                                    {convert_data(param["DATA_TYPE"])}, {convert_data(param["DEFLT_VAL"])});'
+                api_params_query = f'INSERT INTO api_params (api_nm, nm, data_type, deflt_val) \
+                                            VALUES ({convert_data(param["api_nm"])}, {convert_data(param["nm"])}, \
+                                                    {convert_data(param["data_type"])}, {convert_data(param["deflt_val"])});'
                 db.execute(api_params_query)
 
         except Exception:
@@ -315,12 +315,12 @@ class ApiRoute:
 
         return result
 
-    def del_api(self, API_NM: str) -> Dict:
+    def del_api(self, api_nm: str) -> Dict:
         try:
             db = connect_db(config.db_type, config.db_info)
 
             db.execute(
-                f'DELETE FROM api_info WHERE "API_NM" = {convert_data(API_NM)};')
+                f'DELETE FROM api_info WHERE api_nm = {convert_data(api_nm)};')
 
         except Exception:
             ex_type, ex_value, trace_log = get_exception_info()
@@ -342,10 +342,10 @@ class ApiRoute:
         try:
             db = connect_db(config.db_type, config.db_info)
             api_info, _ = db.select(
-                f'SELECT * FROM api_info WHERE "ROUTE_URL" = {convert_data(route_url)};')
+                f'SELECT * FROM api_info WHERE route_url = {convert_data(route_url)};')
             api_info = api_info[0]
             api_params, _ = db.select(
-                f'SELECT * FROM api_params WHERE "API_NM" = {convert_data(api_info["API_NM"])};')
+                f'SELECT * FROM api_params WHERE api_nm = {convert_data(api_info["api_nm"])};')
         except Exception:
             ex_type, ex_value, trace_log = get_exception_info()
             logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
@@ -357,10 +357,10 @@ class ApiRoute:
 
             if content_type == "application/json":
                 body = await request.json()
-                api_info["MSG_TYPE"] = "JSON"
+                api_info["msg_type"] = "JSON"
             else:
                 body = await request.body()
-                api_info["MSG_TYPE"] = "BINARY"
+                api_info["msg_type"] = "BINARY"
 
             params_query = str(request.query_params)
 
@@ -370,8 +370,8 @@ class ApiRoute:
             logger.debug(f'DB - api_params : {api_params}')
 
             logger.debug(
-                f'MODE : {api_info["MODE"]}, content_type : {content_type}')
-            if api_info["MODE"] == "MESSAGE PASSING":
+                f'mode : {api_info["mode"]}, content_type : {content_type}')
+            if api_info["mode"] == "MESSAGE PASSING":
                 result = await bypass_msg(api_info, params_query, body)
             else:
                 result = await call_remote_func(api_info, api_params, body)
