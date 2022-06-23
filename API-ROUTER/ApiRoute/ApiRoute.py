@@ -8,6 +8,7 @@ from Utils.CommonUtil import connect_db, make_res_msg, get_token_info, save_file
 from Utils.RouteUtil import bypass_msg, call_remote_func
 from pydantic import BaseModel
 from starlette.requests import Request
+from urllib import parse
 
 
 class ApiServerInfo(BaseModel):
@@ -336,6 +337,11 @@ class ApiRoute:
     async def route_api(self, request: Request) -> Dict:
         route_url = request.url.path
         content_type = request.headers.get("Content-Type")
+        headers = dict(request.headers)
+        del(headers["content-length"])
+        del(headers["user-agent"])
+
+        logger.debug(f'Request Headers : {headers}')
 
         user_info = get_token_info(request.headers)
 
@@ -362,9 +368,9 @@ class ApiRoute:
                 body = await request.body()
                 api_info["msg_type"] = "BINARY"
 
-            params_query = str(request.query_params)
-
-            logger.debug(f'Req - body : {body}, query params : {params_query}')
+            params_query = parse.unquote(str(request.query_params))
+            logger.debug(
+                f'Req - body : {body}, query params : {params_query}')
 
             logger.debug(f'DB - api_info : {api_info}')
             logger.debug(f'DB - api_params : {api_params}')
@@ -372,7 +378,7 @@ class ApiRoute:
             logger.debug(
                 f'mode : {api_info["mode"]}, content_type : {content_type}')
             if api_info["mode"] == "MESSAGE PASSING":
-                result = await bypass_msg(api_info, params_query, body)
+                result = await bypass_msg(api_info, params_query, body, headers)
             else:
                 result = await call_remote_func(api_info, api_params, body)
         return result

@@ -20,7 +20,7 @@ def make_url(server_name: str, url_path: str):
     return None
 
 
-async def bypass_msg(api_info, params_query, body):
+async def bypass_msg(api_info, params_query, body, headers):
     method = api_info["meth"]
     msg_type = api_info["msg_type"]
 
@@ -36,21 +36,14 @@ async def bypass_msg(api_info, params_query, body):
                     parser_param = param.split("=")
                     params[parser_param[0]] = parser_param[1]
 
-            async with session.get(url, params=params) as response:
+            async with session.get(url, params=params, headers=headers) as response:
                 result = await response.json()
         elif method == "POST":
             if msg_type == "JSON":
-                async with session.post(url, json=body) as response:
+                async with session.post(url, json=body, headers=headers) as response:
                     result = await response.json()
             else:
-                async with session.post(url, data=body) as response:
-                    result = await response.json()
-        elif method == "PUT":
-            if msg_type == "JSON":
-                async with session.put(url, json=body) as response:
-                    result = await response.json()
-            else:
-                async with session.put(url, data=body) as response:
+                async with session.post(url, data=body, headers=headers) as response:
                     result = await response.json()
         else:
             logger.error(f'Method Not Allowed. {method}')
