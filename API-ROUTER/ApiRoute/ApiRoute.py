@@ -71,8 +71,9 @@ class ApiRoute:
         config.api_server_info, _ = db.select('SELECT * FROM api_server_info')
 
         for api in api_info:
+            method = str(api["meth"]).split(",")
             self.router.add_api_route(
-                api["route_url"], self.route_api, methods=[api["meth"]], tags=[f'Route Category ({api["ctgry"]})'])
+                api["route_url"], self.route_api, methods=method, tags=[f'Route Category ({api["ctgry"]})'])
             # f'/route/{api["ctgry"]}/{api["api_nm"]}', self.route_api, methods=[api["meth"]], tags=[f'Route Category ({api["ctgry"]})'])
 
         for api_name, api_info in config.api_config.items():
@@ -336,6 +337,7 @@ class ApiRoute:
 
     async def route_api(self, request: Request) -> Dict:
         route_url = request.url.path
+        method = request.method
         content_type = request.headers.get("Content-Type")
         headers = dict(request.headers)
         logger.error(request.headers)
@@ -375,6 +377,7 @@ class ApiRoute:
             logger.debug(
                 f'Req - body : {body}, query params : {params_query}')
 
+            api_info["meth"] = method
             logger.debug(f'DB - api_info : {api_info}')
             logger.debug(f'DB - api_params : {api_params}')
 
