@@ -338,8 +338,11 @@ class ApiRoute:
         route_url = request.url.path
         content_type = request.headers.get("Content-Type")
         headers = dict(request.headers)
-        del(headers["content-length"])
-        del(headers["user-agent"])
+        logger.error(request.headers)
+        if headers.get("content-length"):
+            del(headers["content-length"])
+        if headers.get("user-agent"):
+            del(headers["user-agent"])
 
         logger.debug(f'Request Headers : {headers}')
 
