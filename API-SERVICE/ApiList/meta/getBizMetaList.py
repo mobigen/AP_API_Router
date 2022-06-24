@@ -15,6 +15,7 @@ def api(request: Request,
     user_info = get_token_info(request.headers)
     curPage = curPage - 1
     v_biz_meta_query = "SELECT kor_nm,eng_nm,nm_id FROM v_biz_meta"
+    total_cnt_query = "SELECT count(*) as cnt FROM v_biz_meta_wrap"
     v_meta_wrap_query = """
         select
             *,
@@ -28,6 +29,7 @@ def api(request: Request,
 
     try:
         db = connect_db(config.db_info)
+        total_cnt = db.select(total_cnt_query)
 
         if len(keyWordList):
             order_condition = str()
@@ -52,17 +54,15 @@ def api(request: Request,
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        if len(meta_map[0]):
-            body = []
-            for meta_data in meta_wrap[0]:
-                meta_dataset = dict()
-                meta_dataset["data"] = list(meta_data.values())
-                meta_dataset["columnkey"] = list(meta_data.keys())
-                meta_dataset["biz_dataset_id"] = meta_data["biz_dataset_id"]
-                body.append(meta_dataset)
+        if len(meta_wrap[0]):
+            body = {"totalcount": total_cnt[0][0]['cnt']}
+            body["searchList"] = [meta_data for meta_data in meta_wrap[0]]
 
-            result = make_res_msg(1,"",body,meta_map[0])
+            result = {"result":1,"errorMessage":"","data":body}
+            # result = make_res_msg(1,"",body,"")
         else:
-            result = make_res_msg(1,"",meta_map[0],meta_map[1])
+            body = {"totalcount": total_cnt[0][0]['cnt'], "searchList":meta_wrap[0]}
+            result = {"result":1,"errorMessage":"","data":body}
+            # result = make_res_msg(1,"",meta_wrap[0])
 
     return result
