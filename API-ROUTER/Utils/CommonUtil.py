@@ -4,7 +4,7 @@ import argparse
 import starlette.datastructures
 from fastapi.logger import logger
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List
 from ApiRoute.ApiRouteConfig import config
 from ConnectManager import PostgresManager
 from retry import retry
@@ -98,4 +98,10 @@ def get_exception_info():
     trace_log = [trace for trace in trace_back]
 
     return ex_type.__name__, ex_value, trace_log
-                              
+
+
+def delete_headers(headers: Dict, delete_header: List) -> Dict:
+    for delete in delete_header:
+        if headers.get(delete):
+            del(headers[delete])
+    return headers

@@ -4,7 +4,7 @@ import importlib.util
 from fastapi import APIRouter
 from ApiRoute.ApiRouteConfig import config
 from Utils.DataBaseUtil import convert_data
-from Utils.CommonUtil import connect_db, make_res_msg, get_token_info, save_file_for_reload, get_exception_info
+from Utils.CommonUtil import connect_db, make_res_msg, get_token_info, save_file_for_reload, get_exception_info, delete_headers
 from Utils.RouteUtil import bypass_msg, call_remote_func
 from pydantic import BaseModel
 from starlette.requests import Request
@@ -74,7 +74,6 @@ class ApiRoute:
             method = str(api["meth"]).split(",")
             self.router.add_api_route(
                 api["route_url"], self.route_api, methods=method, tags=[f'Route Category ({api["ctgry"]})'])
-            # f'/route/{api["ctgry"]}/{api["api_nm"]}', self.route_api, methods=[api["meth"]], tags=[f'Route Category ({api["ctgry"]})'])
 
         for api_name, api_info in config.api_config.items():
             module_path = f'{config.root_path}/API-ROUTER/ApiList/{api_info["sub_dir"]}/{api_name}.py'
@@ -339,13 +338,10 @@ class ApiRoute:
         route_url = request.url.path
         method = request.method
         content_type = request.headers.get("Content-Type")
-        headers = dict(request.headers)
-        logger.error(request.headers)
-        if headers.get("content-length"):
-            del(headers["content-length"])
-        if headers.get("user-agent"):
-            del(headers["user-agent"])
 
+        logger.error(f"BEFORE : {dict(request.headers)}")
+        headers = delete_headers(dict(request.headers), [
+                                 "content-length", "user-agent"])
         logger.debug(f'Request Headers : {headers}')
 
         user_info = get_token_info(request.headers)
