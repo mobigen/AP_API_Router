@@ -20,16 +20,9 @@ def api(request: Request) -> Dict:
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        kor_nm_list = []
-        name_info = {}
         column_info, _ = db.select(get_column_info)
+        kor_nm_list = [map_data["kor_nm"] for map_data in column_info]
+        eng_nm_list = [map_data["eng_nm"] for map_data in column_info]
 
-        for name in column_info:
-            name_info[name['eng_nm']] = name['kor_nm']
-        for eng_nm in eng_columns:
-            if eng_nm in name_info:
-                kor_nm_list.append(name_info[eng_nm])
-            else:
-                kor_nm_list.append("")
-        result = make_res_msg(1, "", use_data, eng_columns, kor_nm_list)
+        result = make_res_msg(1, "", use_data, eng_nm_list, kor_nm_list)
     return result
