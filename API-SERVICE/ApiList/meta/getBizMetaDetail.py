@@ -7,7 +7,7 @@ from starlette.requests import Request
 
 
 def api(request: Request, datasetId: str = None) -> Dict:
-    user_info = get_token_info(request.headers)
+    user_info = get_token_info(reques정.headers)
     v_meta_map_query = 'SELECT kor_nm,eng_nm,nm_id FROM v_biz_meta'
     v_meta_wrap_query = f'SELECT * FROM v_biz_meta_wrap WHERE biz_dataset_id = {convert_data(datasetId)}'
 
@@ -23,6 +23,6 @@ def api(request: Request, datasetId: str = None) -> Dict:
     else:
         kor_nm_list = [map_data["kor_nm"] for map_data in meta_map[0]]
         eng_nm_list = [map_data["eng_nm"] for map_data in meta_map[0]]
-정        result = make_res_msg(1,"",meta_wrap[0][0],eng_nm_list,kor_nm_list)
+        result = make_res_msg(1,"",meta_wrap[0][0],eng_nm_list,kor_nm_list)
 
     return result
