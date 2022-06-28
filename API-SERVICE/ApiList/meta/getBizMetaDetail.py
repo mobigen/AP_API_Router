@@ -23,6 +23,6 @@ def api(request: Request, datasetId: str = None) -> Dict:
     else:
         kor_nm_list = [map_data["kor_nm"] for map_data in meta_map[0]]
         eng_nm_list = [map_data["eng_nm"] for map_data in meta_map[0]]
-        result = make_res_msg(1,"",meta_wrap[0],eng_nm_list,kor_nm_list)
+정        result = make_res_msg(1,"",meta_wrap[0][0],eng_nm_list,kor_nm_list)
 
     return result
