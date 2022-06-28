@@ -1,6 +1,4 @@
 from typing import Dict
-
-from regex import P
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
 from Utils.DataBaseUtil import convert_data
