@@ -7,7 +7,7 @@ from starlette.requests import Request
 
 
 def api(request: Request, datasetId: str = None) -> Dict:
-    user_info = get_token_info(reques정.headers)
+    user_info = get_token_info(request.headers)
     v_meta_map_query = 'SELECT kor_nm,eng_nm,nm_id FROM v_biz_meta'
     v_meta_wrap_query = f'SELECT * FROM v_biz_meta_wrap WHERE biz_dataset_id = {convert_data(datasetId)}'
 
