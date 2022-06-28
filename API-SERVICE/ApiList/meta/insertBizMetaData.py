@@ -45,7 +45,7 @@ def api(biz_meta_data: insertBizMetaData, request: Request) -> Dict:
         biz_meta_data = biz_meta_data.dict()
         insert_values = []
         for info in column_info:
-            values = f'({convert_data(uid)}, {convert_data(info["item_id"])}, {convert_data(info["eng_nm"])})'
+            values = f'({convert_data(uid)}, {convert_data(info["item_id"])}, {convert_data(biz_meta_data[info["eng_nm"]])})'
             insert_values.append(values)
 
         insert_meta_query = f'INSERT INTO tb_biz_meta (biz_dataset_id, item_id, item_val) \
@@ -56,5 +56,5 @@ def api(biz_meta_data: insertBizMetaData, request: Request) -> Dict:
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        result = {"result": 1, "errorMessage": err}
+        result = {"result": 1, "errorMessage": ""}
     return result
