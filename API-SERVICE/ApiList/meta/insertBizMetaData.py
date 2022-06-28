@@ -50,7 +50,6 @@ def api(biz_meta_data: insertBizMetaData, request: Request) -> Dict:
 
         insert_meta_query = f'INSERT INTO tb_biz_meta (biz_dataset_id, item_id, item_val) \
                                      VALUES {",".join(insert_values)};'
-        logger.error(insert_meta_query)
         db.execute(insert_meta_query)
     except Exception as err:
         result = {"result": 0, "errorMessage": err}
