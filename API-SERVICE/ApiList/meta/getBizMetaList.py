@@ -1,8 +1,6 @@
 from lib2to3.pytree import convert
-from typing import Dict,List
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
-from fastapi import Query
 from fastapi.logger import logger
 from starlette.requests import Request
 
@@ -10,9 +8,9 @@ from starlette.requests import Request
 def api(request: Request,
         perPage: int,
         curPage: int,
-        keywordList1: str = "",
-        keywordList2: str = "",
-        keywordList3: str = ""):
+        keyword1: str = "",
+        keyword2: str = "",
+        keyword3: str = ""):
 
     user_info = get_token_info(request.headers)
     curPage = curPage - 1
@@ -31,7 +29,7 @@ def api(request: Request,
 
     try:
         db = connect_db(config.db_info)
-        search_word_list = [keywordList1,keywordList2,keywordList3]
+        search_word_list = [keyword1, keyword2, keyword3]
         if any(search_word_list):
             order_condition = str()
             search_condition = "data_nm like '%{0}%'"
