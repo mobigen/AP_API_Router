@@ -77,7 +77,7 @@ class ApiRoute:
                 api["route_url"], self.route_api, methods=method, tags=[f'Route Category ({api["ctgry"]})'])
 
         for api_name, api_info in config.api_config.items():
-            module_path = f'{config.root_path}/API-ROUTER/ApiList/{api_info["sub_dir"]}/{api_name}.py'
+            module_path = f'{config.root_path}/ApiList/{api_info["sub_dir"]}/{api_name}.py'
             module_name = "api"
             spec = importlib.util.spec_from_file_location(
                 module_name, module_path)
@@ -175,6 +175,7 @@ class ApiRoute:
         return result
 
     def get_api_list(self) -> Dict:
+        # logger.error("TEST")
         try:
             db = connect_db(config.db_type, config.db_info)
 
