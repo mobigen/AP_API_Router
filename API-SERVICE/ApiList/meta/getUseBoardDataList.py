@@ -14,7 +14,7 @@ def api(request: Request) -> Dict:
 
     try:
         db = connect_db(config.db_info)
-        use_data, eng_columns = db.select(get_use_data_query)
+        use_data, _ = db.select(get_use_data_query)
         logger.error(f'USE DATA : {use_data}')
     except Exception as err:
         result = {"result": 0, "errorMessage": err}
