@@ -20,5 +20,5 @@ def api(groupId, request: Request) -> Dict:
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        result = make_res_msg(1, "", code_info[0], code_info[1])
+        result = {"result": 1, "errorMessage": "", "data": code_info[0]}
     return result
