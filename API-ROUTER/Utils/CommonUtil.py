@@ -48,7 +48,7 @@ def parser_params() -> Any:
 
 def prepare_config() -> None:
     args=parser_params()
-    config.root_path=str(Path(os.path.dirname(os.path.abspath(__file__))).parent) #Path(os.getcwd()).parent
+    config.root_path=str(Path(os.path.dirname(os.path.abspath(__file__))).parent)
     api_router_cfg=get_config("config.ini")
     config.api_config=get_config("api_config.ini")
     config.db_type=args.db_type
