@@ -58,7 +58,6 @@ def api(request: Request,
         logger.error(err)
         return result
     else:
-        logger.info(code_list[0])
         if len(code_list[0]):
             result = {"totalcount": total_cnt[0][0]['cnt']}
             result["list"] = [{"code_id": code_detail["code_id"], "code_nm": code_detail["code_nm"]}
