@@ -12,12 +12,24 @@ import psycopg2
 import jwt
 
 
-def get_config(root_path: str, config_name: str):
+def set_log_path():
+    parser = configparser.ConfigParser()
+    parser.read(
+        f'{config.root_path}/conf/{config.category}/logging.conf', encoding='utf-8')
+
+    parser.set("handler_rotatingFileHandler", "args",
+               f"('{config.root_path}/log/{config.category}/{config.category}.log', 'a', 20000000, 10)")
+
+    with open(f'{config.root_path}/conf/{config.category}/logging.conf', 'w') as f:
+        parser.write(f)
+
+
+def get_config(config_name: str):
     ano_cfg = {}
 
     conf = configparser.ConfigParser()
-    conf.read(os.path.join(root_path,
-                           f"API-SERVICE/conf/{config_name}"), encoding='utf-8')
+    config_path = config.root_path+f"/conf/{config.category}/{config_name}"
+    conf.read(config_path, encoding='utf-8')
     for section in conf.sections():
         ano_cfg[section] = {}
         for option in conf.options(section):
@@ -37,12 +49,11 @@ def parser_params() -> Any:
 
 def prepare_config() -> None:
     args = parser_params()
-    config.root_path = Path(os.getcwd()).parent
-    api_router_cfg = get_config(
-        config.root_path, f"{args.category}/config.ini")
-    config.api_config = get_config(
-        config.root_path, f"{args.category}/api_config.ini")
+    config.root_path = str(
+        Path(os.path.dirname(os.path.abspath(__file__))).parent)
     config.category = args.category
+    api_router_cfg = get_config("config.ini")
+    config.api_config = get_config("api_config.ini")
     config.server_host = args.host
     config.server_port = args.port
     config.db_info = api_router_cfg[config.category]
