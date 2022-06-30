@@ -56,6 +56,7 @@ def api(request: Request,
     except Exception as err:
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
+        return result
     else:
         logger.info(code_list[0])
         if len(code_list[0]):
