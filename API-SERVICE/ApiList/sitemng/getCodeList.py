@@ -60,11 +60,11 @@ def api(request: Request,
         logger.error(err)
         return result
     else:
+        code_info = []
         if len(code_list[0]):
-            body = {"totalcount": total_cnt[0][0]['cnt']}
-            body["list"] = [{"code_id": code_detail["code_id"], "code_nm": code_detail["code_nm"]}
-                            for code_detail in code_list[0]]
-        else:
-            body = {"totalcount": total_cnt[0][0]['cnt'], "list": code_list[0]}
+            code_info = [{"code_id": code_detail["code_id"], "code_nm": code_detail["code_nm"]}
+                         for code_detail in code_list[0]]
+
+        body = {"totalcount": total_cnt[0][0]['cnt'], "list": code_info}
         result = {"result": 1, "errorMessage": "", "data": body}
         return result
