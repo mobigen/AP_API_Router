@@ -29,8 +29,10 @@ def api(request: Request,
     try:
         db = connect_db(config.db_info)
 
-        code_list_query = code_list_query + f" WHERE code_group_id = {convert_data(gropId)}"
-        total_cnt_query = total_cnt_query + f" WHERE code_group_id = {convert_data(gropId)}"
+        code_list_query = code_list_query + \
+            f" WHERE code_group_id = {convert_data(gropId)}"
+        total_cnt_query = total_cnt_query + \
+            f" WHERE code_group_id = {convert_data(gropId)}"
 
         if len(keyword):
             order_condition = f"code_nm similar to '%{keyword}%' "
@@ -59,11 +61,10 @@ def api(request: Request,
         return result
     else:
         if len(code_list[0]):
-            result = {"totalcount": total_cnt[0][0]['cnt']}
-            result["list"] = [{"code_id": code_detail["code_id"], "code_nm": code_detail["code_nm"]}
-                              for code_detail in code_list[0]]
-            return result
+            body = {"totalcount": total_cnt[0][0]['cnt']}
+            body["list"] = [{"code_id": code_detail["code_id"], "code_nm": code_detail["code_nm"]}
+                            for code_detail in code_list[0]]
         else:
             body = {"totalcount": total_cnt[0][0]['cnt'], "list": code_list[0]}
-            result = {"result": 1, "errorMessage": "", "data": body}
-            return result
+        result = {"result": 1, "errorMessage": "", "data": body}
+        return result
