@@ -59,12 +59,11 @@ def api(request: Request,
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:
-        body = {"totalcount": total_cnt[0][0]['cnt']}
+        search_list = []
         if len(meta_wrap[0]):
-            body["searchList"] = [meta_data for meta_data in meta_wrap[0]]
-        else:
-            body["searchList"] = meta_wrap[0]
+            search_list = [meta_data for meta_data in meta_wrap[0]]
 
-        result = {"result":1,"errorMessage":"","data":body}
+        body = {"totalcount": total_cnt[0][0]['cnt'], "searchList": search_list}
+        result = {"result": 1, "errorMessage": "", "data": body}
 
     return result
