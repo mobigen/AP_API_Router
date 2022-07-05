@@ -1,4 +1,3 @@
-from lib2to3.pytree import convert
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
 from fastapi.logger import logger
@@ -31,29 +30,25 @@ def api(request: Request,
         db = connect_db(config.db_info)
         search_word_list = [keyword1, keyword2, keyword3]
         if any(search_word_list):
-            order_condition = str()
-            search_condition = "data_nm like '%{0}%'"
-            v_meta_wrap_query = v_meta_wrap_query + " WHERE "
-            total_cnt_query = total_cnt_query + " WHERE "
+            order_condition = []
+            search_condition = []
 
-            # 검색 조건 추가
             for word in search_word_list:
-                order_condition = order_condition + f"data_nm similar to '%{word}%' and "
-                v_meta_wrap_query = v_meta_wrap_query + search_condition.format(word) + " and "
-                total_cnt_query = total_cnt_query + search_condition.format(word) + " and "
+                order_condition.append(f"data_nm similar to '%{word}%'")
+                search_condition.append(f"data_nm like '%{word}%'")
 
-        # 마지막 ' and ' 삭제
-            v_meta_wrap_query = v_meta_wrap_query[:-5]
-            total_cnt_query = total_cnt_query[:-5]
-            v_meta_wrap_query = v_meta_wrap_query.format(order_condition[:-5] + " desc")
+            total_cnt_query = f'{total_cnt_query} WHERE {" and ".join(search_condition)}'
+            v_meta_wrap_query = f'{v_meta_wrap_query} WHERE {" and ".join(search_condition)}'
+
+            v_meta_wrap_query = v_meta_wrap_query.format(
+                f'{" and ".join(order_condition)} desc')
         else:
             v_meta_wrap_query = v_meta_wrap_query.format("biz_dataset_id")
 
-        v_meta_wrap_query = v_meta_wrap_query + f" limit {perPage}  offset ({perPage} * {curPage})"
-        meta_wrap = db.select(v_meta_wrap_query)
+        v_meta_wrap_query = f"{v_meta_wrap_query} limit {perPage}  offset ({perPage} * {curPage})"
 
+        meta_wrap = db.select(v_meta_wrap_query)
         total_cnt = db.select(total_cnt_query)
-        # meta_map = db.select(v_biz_meta_query)
 
     except Exception as err:
         result = {"result": 0, "errorMessage": err}
