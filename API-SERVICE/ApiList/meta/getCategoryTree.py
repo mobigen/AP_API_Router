@@ -1,8 +1,6 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
-from Utils.DataBaseUtil import convert_data
-from pydantic import BaseModel
 from fastapi.logger import logger
 from starlette.requests import Request
 

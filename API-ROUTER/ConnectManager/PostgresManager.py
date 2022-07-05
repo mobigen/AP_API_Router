@@ -19,7 +19,7 @@ class PostgresManager:
         conn = psycopg2.connect(host=self.host, port=self.port, user=self.user,
                                 password=self.password, database=self.database,
                                 options=f"-c search_path={self.schema}")
-        logger.debug("PostgresManager Connect.")
+        logger.info("PostgresManager Connect.")
         return conn
 
     def execute(self, sql: str) -> None:
@@ -33,7 +33,7 @@ class PostgresManager:
             rows = self.cursor.fetchall()
         else:
             rows = self.cursor.fetchmany(count)
-        logger.debug(f'PostgresManager Select Execute. ({sql})')
+        logger.info(f'PostgresManager Select Execute. ({sql})')
 
         result = []
         for row in rows:
@@ -43,17 +43,17 @@ class PostgresManager:
     def insert(self, table: str, into_info: List[Dict]) -> None:
         sql = make_insert_query(f"{self.schema}.{table}", into_info)
         self.execute(sql)
-        logger.debug(f'PostgresManager Insert Execute. ({sql})')
+        logger.info(f'PostgresManager Insert Execute. ({sql})')
 
     def update(self, table: str, set_info: Dict, where_info: Dict) -> None:
         sql = make_update_query(f"{self.schema}.{table}", set_info, where_info)
         self.execute(sql)
-        logger.debug(f'PostgresManager Update Execute. ({sql})')
+        logger.info(f'PostgresManager Update Execute. ({sql})')
 
     def delete(self, table: str, where_info: Dict) -> None:
         sql = make_delete_query(f"{self.schema}.{table}", where_info)
         self.execute(sql)
-        logger.debug(f'PostgresManager Delete Execute. ({sql})')
+        logger.info(f'PostgresManager Delete Execute. ({sql})')
 
     def commit(self):
         self.conn.commit()

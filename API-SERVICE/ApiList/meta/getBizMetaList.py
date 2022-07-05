@@ -1,6 +1,5 @@
-from lib2to3.pytree import convert
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
+from Utils.CommonUtil import connect_db, get_token_info
 from fastapi.logger import logger
 from starlette.requests import Request
 
@@ -68,7 +67,8 @@ def api(request: Request,
         if len(meta_wrap[0]):
             search_list = [meta_data for meta_data in meta_wrap[0]]
 
-        body = {"totalcount": total_cnt[0][0]['cnt'], "searchList": search_list}
+        body = {"totalcount": total_cnt[0][0]
+                ['cnt'], "searchList": search_list}
         result = {"result": 1, "errorMessage": "", "data": body}
 
     return result

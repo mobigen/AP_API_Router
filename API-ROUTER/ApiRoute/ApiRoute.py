@@ -204,7 +204,7 @@ class ApiRoute:
                 f'SELECT api_nm, ctgry, route_url, url, meth, cmd, mode FROM tb_api_info WHERE ctgry = {convert_data(ctgry)} ORDER BY no;')
 
             for info in api_info:
-                logger.debug(f'INFO : {info["api_nm"]}')
+                logger.info(f'INFO : {info["api_nm"]}')
                 api_params, params_column_names = db.select(
                     f'SELECT * FROM tb_api_params WHERE api_nm = {convert_data(info["api_nm"])} ORDER BY nm;')
                 if len(api_params) != 0:
@@ -344,7 +344,7 @@ class ApiRoute:
         logger.error(f"BEFORE : {dict(request.headers)}")
         headers = delete_headers(dict(request.headers), [
                                  "content-length", "user-agent"])
-        logger.debug(f'Request Headers : {headers}')
+        logger.info(f'Request Headers : {headers}')
 
         user_info = get_token_info(request.headers)
 
@@ -372,14 +372,14 @@ class ApiRoute:
                 api_info["msg_type"] = "BINARY"
 
             params_query = parse.unquote(str(request.query_params))
-            logger.debug(
+            logger.info(
                 f'Req - body : {body}, query params : {params_query}')
 
             api_info["meth"] = method
-            logger.debug(f'DB - api_info : {api_info}')
-            logger.debug(f'DB - api_params : {api_params}')
+            logger.info(f'DB - api_info : {api_info}')
+            logger.info(f'DB - api_params : {api_params}')
 
-            logger.debug(
+            logger.info(
                 f'mode : {api_info["mode"]}, content_type : {content_type}')
             if api_info["mode"] == "MESSAGE PASSING":
                 result = await bypass_msg(api_info, params_query, body, headers)

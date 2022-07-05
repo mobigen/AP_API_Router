@@ -1,5 +1,4 @@
 from typing import Dict
-import uuid
 from fastapi.logger import logger
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_token_info

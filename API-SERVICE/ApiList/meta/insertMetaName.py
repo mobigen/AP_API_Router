@@ -21,7 +21,7 @@ def api(insert: InsertMetaName, request: Request) -> Dict:
     insert_meta_name = f'INSERT INTO tb_biz_meta_name (kor_nm, eng_nm, show_odrg, nm_id, type)\
               VALUES ({convert_data(insert.kor_nm)}, {convert_data(insert.eng_nm.lower())}, 0,\
                       {convert_data(uuid.uuid4())}, {convert_data(insert.TYPE)});'
-    symbol_list = list(map(str,string.punctuation))
+    symbol_list = list(map(str, string.punctuation))
     symbol_list.remove("_")
     symbol_list.remove("'")
     symbol_list.remove('"')
@@ -30,7 +30,7 @@ def api(insert: InsertMetaName, request: Request) -> Dict:
     try:
         db = connect_db(config.db_info)
         eng_nm_list = db.select(select_eng_nm)[0]
-        logger.debug(eng_nm_list)
+        logger.info(eng_nm_list)
 
         # 중복 체크
         if len(eng_nm_list):
@@ -39,7 +39,7 @@ def api(insert: InsertMetaName, request: Request) -> Dict:
                 raise ValueError
 
         # 특수문자 체크
-        if list(filter(lambda eng_nm: eng_nm in symbol_list,insert.eng_nm)):
+        if list(filter(lambda eng_nm: eng_nm in symbol_list, insert.eng_nm)):
             raise ValueError
 
         db.execute(insert_meta_name)
