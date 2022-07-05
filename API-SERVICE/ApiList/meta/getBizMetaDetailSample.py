@@ -12,10 +12,10 @@ def csv_to_dict(sample_contents: str):
     sample_contents = sample_contents.replace("\uFEFF", "")
     data_list = []
     f_sample_contents = StringIO(sample_contents)
-    with f_sample_contents as f_csv:
-        csvReader = csv.DictReader(f_csv)
-        for row in csvReader:
-            data_list.append(row)
+    csvReader = csv.DictReader(f_sample_contents)
+    for row in csvReader:
+        data_list.append(row)
+    f_sample_contents.close()
     return data_list, data_list[0].keys()
 
 
