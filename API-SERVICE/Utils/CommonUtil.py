@@ -97,5 +97,5 @@ def get_token_info(headers: starlette.datastructures.Headers):
     if config.secret_info["name"] in headers:
         user_info = jwt.decode(headers[config.secret_info["name"]],
                                config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
-    logger.debug(f'user info : {user_info}')
+    logger.info(f'user info : {user_info}')
     return user_info

@@ -15,7 +15,7 @@ def make_url(server_name: str, url_path: str):
                 netloc = server_info["domn_nm"]
             url = ParseResult(
                 scheme="http", netloc=netloc, path=url_path, params="", query="", fragment="")
-            logger.debug(f"Message Passing Url : {url.geturl()}")
+            logger.info(f"Message Passing Url : {url.geturl()}")
             return url.geturl()
     return None
 
@@ -55,7 +55,7 @@ async def run_cmd(cmd: str):
     async with asyncssh.connect(host=config.remote_info["host"], port=int(config.remote_info["port"]),
                                 username=config.remote_info["id"], password=config.remote_info["password"]) as conn:
         result = await conn.run(cmd, check=True)
-        logger.debug(f'Command Result : {result.stdout}')
+        logger.info(f'Command Result : {result.stdout}')
     return result.stdout
 
 

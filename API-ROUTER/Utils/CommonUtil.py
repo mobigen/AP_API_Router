@@ -97,7 +97,7 @@ def get_token_info(headers: starlette.datastructures.Headers):
                                    config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
         except Exception as err:
             logger.error(err)
-    logger.debug(f'User Info : {user_info}')
+    logger.info(f'User Info : {user_info}')
     return user_info
 
 
