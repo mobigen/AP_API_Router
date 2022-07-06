@@ -1,14 +1,11 @@
 from typing import Dict
 from fastapi.logger import logger
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
+from Utils.CommonUtil import connect_db, make_res_msg
 from Utils.DataBaseUtil import convert_data
-from starlette.requests import Request
 
 
-def api(apyr: str, request: Request) -> Dict:
-    user_info = get_token_info(request.headers)
-
+def api(apyr: str) -> Dict:
     get_use_data_query = f'SELECT * FROM tb_board_use WHERE apyr = {convert_data(apyr)};'
     get_column_info = f"SELECT eng_nm, kor_nm FROM tb_board_column_info \
                                               WHERE table_id = (SELECT id FROM tb_board_name WHERE table_nm = 'tb_board_use');"

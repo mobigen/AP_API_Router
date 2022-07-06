@@ -1,10 +1,9 @@
 import uuid
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info
+from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
 from fastapi.logger import logger
-from starlette.requests import Request
 from pydantic import BaseModel
 
 
@@ -32,9 +31,7 @@ class insertBizMetaData(BaseModel):
     data_desc: str
 
 
-def api(biz_meta_data: insertBizMetaData, request: Request) -> Dict:
-    user_info = get_token_info(request.headers)
-
+def api(biz_meta_data: insertBizMetaData) -> Dict:
     uid = uuid.uuid4()
     get_column_info = 'SELECT item_id, eng_nm FROM v_biz_meta;'
 

@@ -1,15 +1,10 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
-from Utils.DataBaseUtil import convert_data
-from pydantic import BaseModel
+from Utils.CommonUtil import connect_db, make_res_msg
 from fastapi.logger import logger
-from starlette.requests import Request
 
 
-def api(request: Request) -> Dict:
-    user_info = get_token_info(request.headers)
-
+def api() -> Dict:
     get_category_list = "SELECT * FROM tb_category;"
 
     try:

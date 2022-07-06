@@ -3,10 +3,9 @@ import string
 from typing import Dict
 from fastapi.logger import logger
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info
+from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel, Field
-from starlette.requests import Request
 
 
 class InsertMetaName(BaseModel):
@@ -15,12 +14,10 @@ class InsertMetaName(BaseModel):
     TYPE: int = Field(alias="type")
 
 
-def api(insert: InsertMetaName, request: Request) -> Dict:
-    user_info = get_token_info(request.headers)
-
+def api(insert: InsertMetaName) -> Dict:
     insert_meta_name = f'INSERT INTO tb_biz_meta_name (kor_nm, eng_nm, show_odrg, nm_id, type)\
-              VALUES ({convert_data(insert.kor_nm)}, {convert_data(insert.eng_nm.lower())}, 0,\
-                      {convert_data(uuid.uuid4())}, {convert_data(insert.TYPE)});'
+                                VALUES ({convert_data(insert.kor_nm)}, {convert_data(insert.eng_nm.lower())}, 0,\
+                                        {convert_data(uuid.uuid4())}, {convert_data(insert.TYPE)});'
     symbol_list = list(map(str, string.punctuation))
     symbol_list.remove("_")
     symbol_list.remove("'")
@@ -44,9 +41,6 @@ def api(insert: InsertMetaName, request: Request) -> Dict:
 
         db.execute(insert_meta_name)
     except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
-    except ValueError as err:
         result = {"result": 0, "errorMessage": err}
         logger.error(err)
     else:

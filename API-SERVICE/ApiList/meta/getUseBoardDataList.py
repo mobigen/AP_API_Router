@@ -1,13 +1,10 @@
 from typing import Dict
 from fastapi.logger import logger
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
-from starlette.requests import Request
+from Utils.CommonUtil import connect_db, make_res_msg
 
 
-def api(request: Request) -> Dict:
-    user_info = get_token_info(request.headers)
-
+def api() -> Dict:
     get_use_data_query = f'SELECT * FROM tb_board_use;'
     get_column_info = f"SELECT eng_nm, kor_nm FROM tb_board_column_info \
                                               WHERE table_id = (SELECT id FROM tb_board_name WHERE table_nm = 'tb_board_use');"
@@ -15,7 +12,6 @@ def api(request: Request) -> Dict:
     try:
         db = connect_db(config.db_info)
         use_data, _ = db.select(get_use_data_query)
-        logger.error(f'USE DATA : {use_data}')
     except Exception as err:
         result = {"result": 0, "errorMessage": err}
         logger.error(err)

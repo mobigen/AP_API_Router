@@ -18,31 +18,26 @@ def api(insert: NmIdList, request: Request) -> Dict:
     view_col = ['biz_dataset_id']
     drop_view_wrap_query = "DROP VIEW IF EXISTS v_biz_meta_wrap"
     drop_view_meta_query = "DROP VIEW IF EXISTS v_biz_meta"
-    create_view_meta_query = """
-    CREATE OR REPLACE VIEW v_biz_meta
-        AS SELECT tbmm.nm_id AS nm_id,
-            tbmn.kor_nm AS kor_nm,
-            tbmn.eng_nm AS eng_nm,
-            tbmm.item_id as item_id
-    FROM tb_biz_meta_map tbmm
-         INNER JOIN tb_biz_meta_name tbmn ON tbmm.nm_id = tbmn.nm_id;
-    """
+    create_view_meta_query = "CREATE OR REPLACE VIEW v_biz_meta \
+                                AS SELECT tbmm.nm_id AS nm_id, \
+                                          tbmn.kor_nm AS kor_nm, \
+                                          tbmn.eng_nm AS eng_nm, \
+                                          tbmm.item_id as item_id \
+                              FROM tb_biz_meta_map tbmm \
+                                  INNER JOIN tb_biz_meta_name tbmn ON tbmm.nm_id = tbmn.nm_id;"
     delete_map_query = 'DELETE FROM tb_biz_meta_map WHERE nm_id = {0}'
-
     map_insert_query = 'INSERT INTO tb_biz_meta_map (item_id, nm_id) VALUES ({0}, {1});'
     meta_map_query = "SELECT * FROM tb_biz_meta_map"
     nm_id_query = 'SELECT nm_id FROM tb_biz_meta_map'
 
-    map_item_query = """
-        select distinct
-            meta_map.item_id,
-            tbmn.eng_nm
-        from
-            tb_biz_meta_name tbmn
-        left join tb_biz_meta_map meta_map on
-            tbmn.nm_id = meta_map.nm_id
-        where item_id IS NOT NULL
-    """
+    map_item_query = "SELECT distinct \
+                         meta_map.item_id,\
+                         tbmn.eng_nm\
+                     FROM\
+                         tb_biz_meta_name tbmn\
+                     LEFT JOIN tb_biz_meta_map meta_map ON\
+                         tbmn.nm_id = meta_map.nm_id\
+                     WHERE item_id IS NOT NULL"
 
     try:
         db = connect_db(config.db_info)
@@ -71,13 +66,11 @@ def api(insert: NmIdList, request: Request) -> Dict:
             view_col.append(col_format)
 
         view_col = ',\n'.join(view_col)
-        ddl_dataset_id = f"""
-            create view v_biz_meta_wrap as
-            select
-                {view_col}
-            from tb_biz_meta
-            group by biz_dataset_id
-        """
+        ddl_dataset_id = f"CREATE VIEW v_biz_meta_wrap AS\
+                          SELECT\
+                              {view_col}\
+                          FROM tb_biz_meta\
+                          GROUP BY biz_dataset_id"
         db.execute(ddl_dataset_id)
         db.execute(create_view_meta_query)
 

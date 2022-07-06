@@ -1,11 +1,10 @@
 import uuid
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info
+from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
 from fastapi.logger import logger
 from typing import Dict
-from starlette.requests import Request
 
 
 class UpdateCategory(BaseModel):
@@ -14,9 +13,7 @@ class UpdateCategory(BaseModel):
 
 
 # todo: 수정 필요
-def api(update: UpdateCategory, request: Request) -> Dict:
-    user_info = get_token_info(request.headers)
-
+def api(update: UpdateCategory) -> Dict:
     query = f'UPDATE tb_category\
                 SET prnts_id   = {convert_data(uuid.uuid4())},\
                     node_id   = {convert_data(update.node_id)},\

@@ -1,16 +1,11 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info
+from Utils.CommonUtil import connect_db
 from fastapi.logger import logger
-from starlette.requests import Request
 
 
-def api(request: Request) -> Dict:
-    user_info = get_token_info(request.headers)
-
-    category_query = 'select * \
-                      from tb_category \
-                      order by prnts_id, node_id;'
+def api() -> Dict:
+    category_query = 'SELECT * FROM tb_category ORDER BY prnts_id, node_id;'
 
     try:
         db = connect_db(config.db_info)
