@@ -2,10 +2,9 @@ from typing import Dict
 import uuid
 from fastapi.logger import logger
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info
+from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
-from starlette.requests import Request
 from datetime import datetime, timedelta
 
 
@@ -15,8 +14,7 @@ class insertUseBoardData(BaseModel):
     apy_sbst: str
 
 
-def api(use_board_data: insertUseBoardData, request: Request) -> Dict:
-    user_info = get_token_info(request.headers)
+def api(use_board_data: insertUseBoardData) -> Dict:
     get_biz_meta_query = f'SELECT * FROM v_biz_meta_wrap \
                                     WHERE biz_dataset_id = {convert_data(use_board_data.biz_dataset_id)};'
 

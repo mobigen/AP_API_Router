@@ -1,30 +1,17 @@
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
+from Utils.CommonUtil import connect_db
 from fastapi.logger import logger
-from starlette.requests import Request
 
 
-def api(request: Request,
-        perPage: int,
+def api(perPage: int,
         curPage: int,
         keyword1: str = "",
         keyword2: str = "",
         keyword3: str = ""):
 
-    user_info = get_token_info(request.headers)
     curPage = curPage - 1
-    v_biz_meta_query = "SELECT kor_nm,eng_nm,nm_id FROM v_biz_meta"
     total_cnt_query = "SELECT count(*) as cnt FROM v_biz_meta_wrap"
-    v_meta_wrap_query = """
-        select
-            *,
-            row_number () over (
-        order by
-            {0}
-            ) as rowNo
-        from
-            v_biz_meta_wrap
-    """
+    v_meta_wrap_query = "SELECT *, row_number () OVER (ORDER BY {0}) AS rowNo FROM v_biz_meta_wrap"
 
     try:
         db = connect_db(config.db_info)

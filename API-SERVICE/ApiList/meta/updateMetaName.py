@@ -1,10 +1,9 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info
+from Utils.CommonUtil import connect_db
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel, Field
 from fastapi.logger import logger
-from starlette.requests import Request
 
 
 class UpdatetMetaName(BaseModel):
@@ -15,9 +14,7 @@ class UpdatetMetaName(BaseModel):
     TYPE: int = Field(alias="type")
 
 
-def api(update: UpdatetMetaName, request: Request) -> Dict:
-    user_info = get_token_info(request.headers)
-
+def api(update: UpdatetMetaName) -> Dict:
     query = f'UPDATE tb_biz_meta_name\
                 SET kor_nm = {convert_data(update.kor_nm)},\
                     eng_nm   = {convert_data(update.eng_nm)},\

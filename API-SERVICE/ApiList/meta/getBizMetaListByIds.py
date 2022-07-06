@@ -1,13 +1,11 @@
 from fastapi.logger import logger
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
+from Utils.CommonUtil import connect_db, make_res_msg
 from Utils.DataBaseUtil import convert_data
-from starlette.requests import Request
 
 
-def api(request: Request, datasetIdList: str) -> Dict:
-    user_info = get_token_info(request.headers)
+def api(datasetIdList: str) -> Dict:
     v_meta_wrap_query = 'SELECT * FROM v_biz_meta_wrap WHERE biz_dataset_id in ({0})'
 
     try:
