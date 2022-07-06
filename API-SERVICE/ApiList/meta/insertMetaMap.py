@@ -1,10 +1,8 @@
 import uuid
 from typing import Dict
 from pydantic import BaseModel
-from fastapi.logger import logger
-from starlette.requests import Request
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info
+from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 
 
@@ -12,9 +10,7 @@ class NmIdList(BaseModel):
     nm_id_list: list
 
 
-def api(insert: NmIdList, request: Request) -> Dict:
-    user_info = get_token_info(request.headers)
-
+def api(insert: NmIdList) -> Dict:
     view_col = ['biz_dataset_id']
     drop_view_wrap_query = "DROP VIEW IF EXISTS v_biz_meta_wrap"
     drop_view_meta_query = "DROP VIEW IF EXISTS v_biz_meta"
@@ -77,9 +73,9 @@ def api(insert: NmIdList, request: Request) -> Dict:
         # return data
         meta_map_list = db.select(meta_map_query)[0]
 
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         result = meta_map_list
     return result

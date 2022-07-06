@@ -1,7 +1,6 @@
-from fastapi.logger import logger
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, make_res_msg
+from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
 from Utils.DataBaseUtil import convert_data
 
 
@@ -14,10 +13,9 @@ def api(datasetId: str = None) -> Dict:
         meta_wrap = db.select(v_meta_wrap_query)
         meta_map = db.select(v_meta_map_query)
 
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
-
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         kor_nm_list = [map_data["kor_nm"] for map_data in meta_map[0]]
         eng_nm_list = [map_data["eng_nm"] for map_data in meta_map[0]]

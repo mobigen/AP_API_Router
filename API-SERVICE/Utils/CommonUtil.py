@@ -10,6 +10,8 @@ from ConnectManager import PostgresManager
 from retry import retry
 import psycopg2
 import jwt
+import sys
+import traceback
 
 
 def set_log_path():
@@ -99,3 +101,12 @@ def get_token_info(headers: starlette.datastructures.Headers):
                                config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
     logger.info(f'user info : {user_info}')
     return user_info
+
+
+def get_exception_info():
+    ex_type, ex_value, ex_traceback = sys.exc_info()
+    trace_back = traceback.extract_tb(ex_traceback)
+    trace_log = "\n".join([str(trace) for trace in trace_back])
+    logger.error(
+        f'\n- Exception Type : {ex_type}\n- Exception Message : {str(ex_value).strip()}\n- Exception Log : \n{trace_log}')
+    return ex_type.__name__

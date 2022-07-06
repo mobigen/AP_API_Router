@@ -1,7 +1,6 @@
 from typing import Dict
-from fastapi.logger import logger
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, make_res_msg
+from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
 
 
 def api() -> Dict:
@@ -12,9 +11,9 @@ def api() -> Dict:
     try:
         db = connect_db(config.db_info)
         use_data, _ = db.select(get_use_data_query)
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         column_info, _ = db.select(get_column_info)
         kor_nm_list = [map_data["kor_nm"] for map_data in column_info]
