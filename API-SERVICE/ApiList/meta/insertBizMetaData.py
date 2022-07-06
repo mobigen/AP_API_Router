@@ -1,9 +1,8 @@
 import uuid
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
-from fastapi.logger import logger
 from pydantic import BaseModel
 
 
@@ -48,9 +47,9 @@ def api(biz_meta_data: insertBizMetaData) -> Dict:
         insert_meta_query = f'INSERT INTO tb_biz_meta (biz_dataset_id, item_id, item_val) \
                                      VALUES {",".join(insert_values)};'
         db.execute(insert_meta_query)
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         result = {"result": 1, "errorMessage": ""}
     return result

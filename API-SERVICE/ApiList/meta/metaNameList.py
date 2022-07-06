@@ -1,7 +1,6 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, make_res_msg
-from fastapi.logger import logger
+from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
 
 
 def api(perPage: int, curPage: int) -> Dict:
@@ -32,9 +31,9 @@ def api(perPage: int, curPage: int) -> Dict:
         db = connect_db(config.db_info)
         meta_name = db.select(meta_name_query)
         total_cnt = db.select(total_cnt_query)
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         result = make_res_msg(1, "", meta_name[0], meta_name[1])
         result["data"].update(total_cnt[0][0])

@@ -1,7 +1,6 @@
-from fastapi.logger import logger
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, make_res_msg
+from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
 from Utils.DataBaseUtil import convert_data
 
 
@@ -11,11 +10,9 @@ def api(datasetId: str = None) -> Dict:
     try:
         db = connect_db(config.db_info)
         meta_dq = db.select(v_meta_dq_query)
-        logger.error(meta_dq)
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
-
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         result = make_res_msg(1, "", meta_dq[0], meta_dq[1])
 

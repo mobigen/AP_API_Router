@@ -1,9 +1,8 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
-from fastapi.logger import logger
 
 
 class UpdateBizMeta(BaseModel):
@@ -22,9 +21,9 @@ def api(update: UpdateBizMeta) -> Dict:
                             item_id = {convert_data(data["itemId"])};'
 
             db.execute(query)
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         result = {"result": 1, "errorMessage": ""}
     return result

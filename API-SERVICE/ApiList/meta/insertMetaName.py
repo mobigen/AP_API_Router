@@ -1,9 +1,8 @@
 import uuid
 import string
 from typing import Dict
-from fastapi.logger import logger
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel, Field
 
@@ -27,7 +26,6 @@ def api(insert: InsertMetaName) -> Dict:
     try:
         db = connect_db(config.db_info)
         eng_nm_list = db.select(select_eng_nm)[0]
-        logger.info(eng_nm_list)
 
         # 중복 체크
         if len(eng_nm_list):
@@ -40,9 +38,9 @@ def api(insert: InsertMetaName) -> Dict:
             raise ValueError
 
         db.execute(insert_meta_name)
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         result = {"result": 1, "errorMessage": ""}
     return result

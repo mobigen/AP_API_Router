@@ -1,7 +1,6 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, make_res_msg
-from fastapi.logger import logger
+from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
 
 
 def api() -> Dict:
@@ -33,9 +32,9 @@ def api() -> Dict:
                 if main_category == "ROOT":
                     continue
                 result_category[main_category] = sub_category
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         result = make_res_msg(1, "", result_category, [])
 

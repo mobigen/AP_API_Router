@@ -1,10 +1,9 @@
 import uuid
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
-from fastapi.logger import logger
 
 
 class addChildCategory(BaseModel):
@@ -20,9 +19,9 @@ def api(insert: addChildCategory) -> Dict:
     try:
         db = connect_db(config.db_info)
         db.execute(query)
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         result = {"result": 1, "errorMessage": ""}
     return result

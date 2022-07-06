@@ -1,7 +1,6 @@
-from fastapi.logger import logger
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, make_res_msg
+from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from io import StringIO
 import csv
@@ -24,9 +23,9 @@ def api(datasetId: str = None) -> Dict:
         db = connect_db(config.db_info)
         meta_sample, _ = db.select(v_meta_sample_query)
         data_list, column_list = csv_to_dict(meta_sample[0]["sample_contents"])
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         result = make_res_msg(1, "", data_list, column_list)
 
