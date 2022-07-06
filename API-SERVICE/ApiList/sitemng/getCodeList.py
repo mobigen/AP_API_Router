@@ -1,56 +1,39 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_token_info, make_res_msg
+from Utils.CommonUtil import connect_db
 from fastapi.logger import logger
-from starlette.requests import Request
 from Utils.DataBaseUtil import convert_data
 
 
-def api(request: Request,
-        perPage: int,
+def api(perPage: int,
         curPage: int,
         gropId: str,
-        keyword: str = ""):
+        keyword: str = "") -> Dict:
 
-    user_info = get_token_info(request.headers)
     curPage = curPage - 1
-    total_cnt_query = "SELECT count(*) as cnt FROM tb_code_detail"
-    code_list_query = """
-        select
-            *,
-            row_number () over (
-        order by
-            {0}
-            ) as rowNo
-        from
-            tb_code_detail
-    """
+    total_cnt_query = "SELECT count(*) AS cnt FROM tb_code_detail"
+    code_list_query = "SELECT *, row_number () OVER (ORDER BY {0}) AS rowNo FROM tb_code_detail"
 
     try:
         db = connect_db(config.db_info)
-
-        code_list_query = code_list_query + \
-            f" WHERE code_group_id = {convert_data(gropId)}"
-        total_cnt_query = total_cnt_query + \
-            f" WHERE code_group_id = {convert_data(gropId)}"
+        common_condition = f" WHERE code_group_id = {convert_data(gropId)}"
+        code_list_query = code_list_query + common_condition
+        total_cnt_query = total_cnt_query + common_condition
 
         if len(keyword):
-            order_condition = f"code_nm similar to '%{keyword}%' "
-            search_condition = f"and code_nm like '%{keyword}%'"
-            # 검색 조건 추가
+            # keyword 검색 조건 추가
+            order_condition = f"code_nm SIMILAR to '%{keyword}%' DESC"
+            search_condition = f"AND code_nm LIKE '%{keyword}%'"
+
             code_list_query = code_list_query + search_condition
             total_cnt_query = total_cnt_query + search_condition
-
-            # 마지막 ' and ' 삭제
-            code_list_query = code_list_query.format(
-                order_condition + " desc")
+            code_list_query = code_list_query.format(order_condition)
         else:
-            order_condition = "reg_date asc"
+            order_condition = "reg_date ASC"
             code_list_query = code_list_query.format(order_condition)
 
-        paging_condition = f" limit {perPage}  offset ({perPage} * {curPage})"
+        paging_condition = f" LIMIT {perPage}  OFFSET ({perPage} * {curPage})"
         code_list_query = code_list_query + paging_condition
-        logger.info(code_list_query)
 
         code_list = db.select(code_list_query)
         total_cnt = db.select(total_cnt_query)
