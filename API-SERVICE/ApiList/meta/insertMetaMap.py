@@ -11,7 +11,7 @@ class NmIdList(BaseModel):
 
 
 def api(insert: NmIdList) -> Dict:
-    view_col = ['biz_dataset_id']
+    view_col = ["biz_dataset_id"]
     drop_view_wrap_query = "DROP VIEW IF EXISTS v_biz_meta_wrap"
     drop_view_meta_query = "DROP VIEW IF EXISTS v_biz_meta"
     create_view_meta_query = "CREATE OR REPLACE VIEW v_biz_meta \
@@ -21,12 +21,12 @@ def api(insert: NmIdList) -> Dict:
                                           tbmm.item_id as item_id \
                               FROM tb_biz_meta_map tbmm \
                                   INNER JOIN tb_biz_meta_name tbmn ON tbmm.nm_id = tbmn.nm_id;"
-    delete_map_query = 'DELETE FROM tb_biz_meta_map WHERE nm_id = {0}'
-    map_insert_query = 'INSERT INTO tb_biz_meta_map (item_id, nm_id) VALUES ({0}, {1});'
+    delete_map_query = "DELETE FROM tb_biz_meta_map WHERE nm_id = {0}"
+    map_insert_query = "INSERT INTO tb_biz_meta_map (item_id, nm_id) VALUES ({0}, {1});"
     meta_map_query = "SELECT * FROM tb_biz_meta_map"
-    nm_id_query = 'SELECT nm_id FROM tb_biz_meta_map'
+    nm_id_query = "SELECT nm_id FROM tb_biz_meta_map"
 
-    map_item_query = "SELECT distinct \
+    map_item_query = "SELECT DISTINCT \
                          meta_map.item_id,\
                          tbmn.eng_nm\
                      FROM\
@@ -35,6 +35,11 @@ def api(insert: NmIdList) -> Dict:
                          tbmn.nm_id = meta_map.nm_id\
                      WHERE item_id IS NOT NULL"
 
+    ddl_dataset_id = "CREATE VIEW v_biz_meta_wrap AS\
+                          SELECT\
+                              {0}\
+                          FROM tb_biz_meta\
+                          GROUP BY biz_dataset_id"
     try:
         db = connect_db(config.db_info)
 
@@ -56,18 +61,11 @@ def api(insert: NmIdList) -> Dict:
 
         # create view v_biz_meta_wrap
         meta_map_item = db.select(map_item_query)[0]
-        for i, meta_map in enumerate(meta_map_item):
-            col_format = f'\t\tmax(case when item_id = {convert_data(meta_map["item_id"])} ' \
-                         f'then item_val end) as {meta_map["eng_nm"]}'
-            view_col.append(col_format)
+        col_format = "\t\tMAX(CASE WHEN item_id = {0} THEN item_val END) AS {1}"
+        view_col = view_col + [col_format.format(convert_data(meta_map["item_id"]), meta_map["eng_nm"])
+                               for meta_map in meta_map_item]
 
-        view_col = ',\n'.join(view_col)
-        ddl_dataset_id = f"CREATE VIEW v_biz_meta_wrap AS\
-                          SELECT\
-                              {view_col}\
-                          FROM tb_biz_meta\
-                          GROUP BY biz_dataset_id"
-        db.execute(ddl_dataset_id)
+        db.execute(ddl_dataset_id.format(",\n".join(view_col)))
         db.execute(create_view_meta_query)
 
         # return data
