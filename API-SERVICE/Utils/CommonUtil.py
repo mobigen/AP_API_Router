@@ -117,7 +117,7 @@ def get_exception_info():
 def convert_error_message(exception_name: str):
     error_message = None
     if exception_name == "UniqueViolation":
-        error_message = "A value that already exists."
+        error_message = "UNIQUE_VIOLATION"
     else:
         error_message = exception_name
 
