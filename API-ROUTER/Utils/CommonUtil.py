@@ -104,9 +104,10 @@ def get_token_info(headers: starlette.datastructures.Headers):
 def get_exception_info():
     ex_type, ex_value, ex_traceback = sys.exc_info()
     trace_back = traceback.extract_tb(ex_traceback)
-    trace_log = [trace for trace in trace_back]
-
-    return ex_type.__name__, ex_value, trace_log
+    trace_log = "\n".join([str(trace) for trace in trace_back])
+    logger.error(
+        f'\n- Exception Type : {ex_type}\n- Exception Message : {str(ex_value).strip()}\n- Exception Log : \n{trace_log}')
+    return ex_type.__name__
 
 
 def delete_headers(headers: Dict, delete_header: List) -> Dict:

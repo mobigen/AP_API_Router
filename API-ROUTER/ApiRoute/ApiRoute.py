@@ -96,10 +96,8 @@ class ApiRoute:
             db = connect_db(config.db_type, config.db_info)
             db.execute(api_server_info_query)
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             config.api_server_info, _ = db.select(
                 'SELECT * FROM tb_api_server_info;')
@@ -116,10 +114,8 @@ class ApiRoute:
             db = connect_db(config.db_type, config.db_info)
             db.execute(api_server_info_query)
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             config.api_server_info, _ = db.select(
                 'SELECT * FROM tb_api_server_info;')
@@ -133,10 +129,8 @@ class ApiRoute:
             api_server_info, _ = db.select(
                 'SELECT * FROM tb_api_server_info ORDER BY nm;')
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             result = {"api_server_info": api_server_info}
 
@@ -148,10 +142,8 @@ class ApiRoute:
             api_server_info, _ = db.select(
                 f'SELECT * FROM tb_api_server_info WHERE nm = {convert_data(nm)};')
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             result = {"api_server_info": api_server_info}
 
@@ -163,10 +155,8 @@ class ApiRoute:
             db.execute(
                 f'DELETE FROM tb_api_server_info WHERE nm = {convert_data(nm)};')
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             config.api_server_info, _ = db.select(
                 'SELECT * FROM tb_api_server_info;')
@@ -184,10 +174,8 @@ class ApiRoute:
             api_params, params_column_names = db.select(
                 f'SELECT * FROM tb_api_params ORDER BY api_nm, nm;')
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             api_info = make_res_msg("", "", api_info, info_column_names)
             api_params = make_res_msg("", "", api_params, params_column_names)
@@ -211,10 +199,8 @@ class ApiRoute:
                     api_params_list.extend(api_params)
                     params_columns = params_column_names
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             api_info = make_res_msg("", "", api_info, info_column_names)
             api_params = make_res_msg(
@@ -231,10 +217,8 @@ class ApiRoute:
             api_params, params_column_names = db.select(
                 f'SELECT * FROM tb_api_params WHERE api_nm = {convert_data(api_nm)} ORDER BY nm;')
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             api_info = make_res_msg("", "", api_info, info_column_names)
             api_params = make_res_msg("", "", api_params, params_column_names)
@@ -268,10 +252,8 @@ class ApiRoute:
                                                     {convert_data(param["data_type"])}, {convert_data(param["deflt_val"])});'
                 db.execute(api_params_query)
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             save_file_for_reload()
             result = {"result": 1, "errorMessage": ""}
@@ -308,10 +290,8 @@ class ApiRoute:
                 db.execute(api_params_query)
 
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             save_file_for_reload()
             result = {"result": 1, "errorMessage": ""}
@@ -326,10 +306,8 @@ class ApiRoute:
                 f'DELETE FROM tb_api_info WHERE api_nm = {convert_data(api_nm)};')
 
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             save_file_for_reload()
             result = {"result": 1, "errorMessage": ""}
@@ -341,12 +319,10 @@ class ApiRoute:
         method = request.method
         content_type = request.headers.get("Content-Type")
 
-        logger.error(f"BEFORE : {dict(request.headers)}")
+        logger.info(f"Origin Req Headers : {dict(request.headers)}")
         headers = delete_headers(dict(request.headers), [
                                  "content-length", "user-agent"])
-        logger.info(f'Request Headers : {headers}')
-
-        user_info = get_token_info(request.headers)
+        logger.info(f'Modify Req Headers : {headers}')
 
         try:
             db = connect_db(config.db_type, config.db_info)
@@ -356,10 +332,8 @@ class ApiRoute:
             api_params, _ = db.select(
                 f'SELECT * FROM tb_api_params WHERE api_nm = {convert_data(api_info["api_nm"])};')
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             if len(api_info) == 0:
                 return {"result": 0, "errorMessage": "This is an unregistered API."}

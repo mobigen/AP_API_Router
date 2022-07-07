@@ -33,7 +33,7 @@ class PostgresManager:
             rows = self.cursor.fetchall()
         else:
             rows = self.cursor.fetchmany(count)
-        logger.info(f'PostgresManager Select Execute. ({sql})')
+        #logger.info(f'PostgresManager Select Execute. ({sql})')
 
         result = []
         for row in rows:

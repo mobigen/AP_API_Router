@@ -1,3 +1,4 @@
+from ast import Str
 import os
 import configparser
 import argparse
@@ -111,3 +112,13 @@ def get_exception_info():
     logger.error(
         f'\n- Exception Type : {ex_type}\n- Exception Message : {str(ex_value).strip()}\n- Exception Log : \n{trace_log}')
     return ex_type.__name__
+
+
+def convert_error_message(exception_name: str):
+    error_message = None
+    if exception_name == "UniqueViolation":
+        error_message = "A value that already exists."
+    else:
+        error_message = exception_name
+
+    return error_message

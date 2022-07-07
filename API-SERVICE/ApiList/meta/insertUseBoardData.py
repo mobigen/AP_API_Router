@@ -2,7 +2,7 @@ from typing import Dict
 import uuid
 from fastapi.logger import logger
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_exception_info
+from Utils.CommonUtil import connect_db, get_exception_info, convert_error_message
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
 from datetime import datetime, timedelta
@@ -47,7 +47,8 @@ def api(use_board_data: insertUseBoardData) -> Dict:
         db.execute(insert_use_data_query)
     except Exception:
         except_name = get_exception_info()
-        result = {"result": 0, "errorMessage": except_name}
+        result = {"result": 0,
+                  "errorMessage": convert_error_message(except_name)}
     else:
         result = {"result": 1, "errorMessage": ""}
 
