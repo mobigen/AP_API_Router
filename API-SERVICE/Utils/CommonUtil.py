@@ -45,6 +45,7 @@ def parser_params() -> Any:
     parser.add_argument("--host", type=str, default="127.0.0.1")
     parser.add_argument("--port", type=int, default=19000)
     parser.add_argument("--category", default="meta")
+    parser.add_argument("--db_type", default="test")
 
     return parser.parse_args()
 
@@ -58,7 +59,8 @@ def prepare_config() -> None:
     config.api_config = get_config("api_config.ini")
     config.server_host = args.host
     config.server_port = args.port
-    config.db_info = api_router_cfg[config.category]
+    config.db_type = f'{args.db_type}_db'
+    config.db_info = api_router_cfg[config.db_type]
     config.secret_info = api_router_cfg["secret_info"]
 
 
@@ -110,3 +112,13 @@ def get_exception_info():
     logger.error(
         f'\n- Exception Type : {ex_type}\n- Exception Message : {str(ex_value).strip()}\n- Exception Log : \n{trace_log}')
     return ex_type.__name__
+
+
+def convert_error_message(exception_name: str):
+    error_message = None
+    if exception_name == "UniqueViolation":
+        error_message = "UNIQUE_VIOLATION"
+    else:
+        error_message = exception_name
+
+    return error_message

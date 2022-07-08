@@ -5,6 +5,8 @@ class ApiServiceConfig:
     root_path: str
 
     category: str
+
+    db_type: str
     db_info: Dict
 
     remote_info: Dict

@@ -2,6 +2,7 @@ app_name=API-Service
 router_host=$1
 router_port=$2
 category=$3
+router_db=$4
 
 input() {
     if [[ $router_host == "" ]];then
@@ -12,6 +13,9 @@ input() {
     fi
     if [[ $category == "" ]];then
         category=meta
+    fi
+    if [[ $router_db == "" ]];then
+        router_db=test
     fi
 }
 
@@ -45,9 +49,9 @@ uvicorn_stop() {
 
 router_start() {
     source_path="$( cd "$( dirname "$0" )" && pwd -P )"
-    router_exec="nohup python3.8 ${source_path}/server.py --host ${router_host} --port ${router_port} --category ${category} 1> /dev/null 2>&1 &"
+    router_exec="nohup python3.8 ${source_path}/server.py --host ${router_host} --port ${router_port} --category ${category} --db_type ${router_db} 1> /dev/null 2>&1 &"
     echo "Start Command : ${router_exec}"
-    nohup python3.8 ${source_path}/server.py --host ${router_host} --port ${router_port} --category ${category} 1> /dev/null 2>&1 &
+    nohup python3.8 ${source_path}/server.py --host ${router_host} --port ${router_port} --category ${category} --db_type ${router_db} 1> /dev/null 2>&1 &
 }
 
 echo "########## Safe Start (${app_name}) ##########"

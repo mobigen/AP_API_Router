@@ -65,7 +65,7 @@ class ApiRoute:
         self.router.add_api_route(
             "/api/delServerInfo", self.del_server_info, methods=["POST"], tags=["API Server Info"])
 
-        db = connect_db(config.db_type, config.db_info)
+        db = connect_db(config.db_info)
         api_info, _ = db.select('SELECT * FROM tb_api_info;')
 
         config.api_server_info, _ = db.select(
@@ -93,7 +93,7 @@ class ApiRoute:
                                                 {convert_data(api_server_info["ip_adr"])}, \
                                                 {convert_data(api_server_info["domn_nm"])});'
         try:
-            db = connect_db(config.db_type, config.db_info)
+            db = connect_db(config.db_info)
             db.execute(api_server_info_query)
         except Exception:
             ex_type, ex_value, trace_log = get_exception_info()
@@ -113,7 +113,7 @@ class ApiRoute:
                                                              domn_nm={convert_data(api_server_info["domn_nm"])} \
                                                          WHERE nm={convert_data(api_server_info["nm"])};'
         try:
-            db = connect_db(config.db_type, config.db_info)
+            db = connect_db(config.db_info)
             db.execute(api_server_info_query)
         except Exception:
             ex_type, ex_value, trace_log = get_exception_info()
@@ -129,7 +129,7 @@ class ApiRoute:
 
     def get_server_info_list(self) -> Dict:
         try:
-            db = connect_db(config.db_type, config.db_info)
+            db = connect_db(config.db_info)
             api_server_info, _ = db.select(
                 'SELECT * FROM tb_api_server_info ORDER BY nm;')
         except Exception:
@@ -144,7 +144,7 @@ class ApiRoute:
 
     def get_server_info(self, nm: str) -> Dict:
         try:
-            db = connect_db(config.db_type, config.db_info)
+            db = connect_db(config.db_info)
             api_server_info, _ = db.select(
                 f'SELECT * FROM tb_api_server_info WHERE nm = {convert_data(nm)};')
         except Exception:
@@ -159,7 +159,7 @@ class ApiRoute:
 
     def del_server_info(self, nm: str) -> Dict:
         try:
-            db = connect_db(config.db_type, config.db_info)
+            db = connect_db(config.db_info)
             db.execute(
                 f'DELETE FROM tb_api_server_info WHERE nm = {convert_data(nm)};')
         except Exception:
@@ -177,7 +177,7 @@ class ApiRoute:
     def get_api_list(self) -> Dict:
         # logger.error("TEST")
         try:
-            db = connect_db(config.db_type, config.db_info)
+            db = connect_db(config.db_info)
 
             api_info, info_column_names = db.select(
                 f'SELECT api_nm, ctgry, route_url, url, meth, cmd, mode FROM tb_api_info ORDER BY no;')
@@ -199,7 +199,7 @@ class ApiRoute:
         api_params_list = []
         params_columns = []
         try:
-            db = connect_db(config.db_type, config.db_info)
+            db = connect_db(config.db_info)
             api_info, info_column_names = db.select(
                 f'SELECT api_nm, ctgry, route_url, url, meth, cmd, mode FROM tb_api_info WHERE ctgry = {convert_data(ctgry)} ORDER BY no;')
 
@@ -225,7 +225,7 @@ class ApiRoute:
 
     def get_api(self, api_nm: str) -> Dict:
         try:
-            db = connect_db(config.db_type, config.db_info)
+            db = connect_db(config.db_info)
             api_info, info_column_names = db.select(
                 f'SELECT * FROM tb_api_info WHERE api_nm = {convert_data(api_nm)};')
             api_params, params_column_names = db.select(
@@ -244,7 +244,7 @@ class ApiRoute:
 
     def set_api(self, api_info: ApiInfo) -> Dict:
         try:
-            db = connect_db(config.db_type, config.db_info)
+            db = connect_db(config.db_info)
 
             insert_api_info = {}
             insert_api_params = []
@@ -280,7 +280,7 @@ class ApiRoute:
 
     def update_api(self, api_info: ApiInfo) -> Dict:
         try:
-            db = connect_db(config.db_type, config.db_info)
+            db = connect_db(config.db_info)
 
             insert_api_info = {}
             insert_api_params = []
@@ -320,7 +320,7 @@ class ApiRoute:
 
     def del_api(self, api_nm: str) -> Dict:
         try:
-            db = connect_db(config.db_type, config.db_info)
+            db = connect_db(config.db_info)
 
             db.execute(
                 f'DELETE FROM tb_api_info WHERE api_nm = {convert_data(api_nm)};')
@@ -343,13 +343,13 @@ class ApiRoute:
 
         logger.error(f"BEFORE : {dict(request.headers)}")
         headers = delete_headers(dict(request.headers), [
-                                 "content-length", "user-agent"])
+            "content-length", "user-agent"])
         logger.info(f'Request Headers : {headers}')
 
         user_info = get_token_info(request.headers)
 
         try:
-            db = connect_db(config.db_type, config.db_info)
+            db = connect_db(config.db_info)
             api_info, _ = db.select(
                 f'SELECT * FROM tb_api_info WHERE route_url = {convert_data(route_url)};')
             api_info = api_info[0]
