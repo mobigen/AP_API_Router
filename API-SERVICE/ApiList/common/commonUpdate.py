@@ -7,24 +7,19 @@ from pydantic import BaseModel
 
 class commonUpdate(BaseModel):
     table_nm: str
+    key: str
     data: Dict
 
 
-'''
-{
-    "key": "value"
-}
-'''
-
-
 def api(common: commonUpdate) -> Dict:
-    columns = ", ".join(common.data.keys())
-    values = ", ".join(map(convert_data, common.data.values()))
-    insert_query = f'INSERT INTO {common.table_nm} ({columns}) VALUES ({values});'
+    update_data = [
+        f'{key} = {convert_data(value)}' for key, value in common.data.items()]
+    update_query = f'UPDATE {common.table_nm} SET {",".join(update_data)}\
+                                              WHERE {common.key} = {convert_data(common.data.get(common.key))};'
 
     try:
         db = connect_db(config.db_info)
-        db.execute(insert_query)
+        db.execute(update_query)
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}

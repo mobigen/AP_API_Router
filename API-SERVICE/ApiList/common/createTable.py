@@ -16,6 +16,10 @@ class createTable(BaseModel):
 # constraint : primary key, unique, not null
 default_info = {
     "default_columns": [
+
+    ]
+}
+'''
         {
             "eng_nm": "use_dataset_id",
             "kor_nm": "활용 데이터셋 아이디",
@@ -29,8 +33,7 @@ default_info = {
             "length": 64,
             "constraint": ["not null"]
         }
-    ]
-}
+'''
 
 
 def get_type(data_type, length=None):

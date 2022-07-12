@@ -7,29 +7,16 @@ from pydantic import BaseModel
 
 class commonDelete(BaseModel):
     table_nm: str
+    key: str
     data: Dict
 
 
-'''
-{
-    "key": "value",
-    "data": {
-        "data1":"",
-        "data2":"",
-        ...
-    }
-}
-'''
-
-
 def api(common: commonDelete) -> Dict:
-    columns = ", ".join(common.data.keys())
-    values = ", ".join(map(convert_data, common.data.values()))
-    insert_query = f'INSERT INTO {common.table_nm} ({columns}) VALUES ({values});'
+    delete_query = f'DELETE FROM {common.table_nm} WHERE {common.key} = {convert_data(common.data.get(common.key))};'
 
     try:
         db = connect_db(config.db_info)
-        db.execute(insert_query)
+        db.execute(delete_query)
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
