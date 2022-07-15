@@ -1,7 +1,6 @@
 import psycopg2
 from typing import List, Dict, Tuple, Any
 from fastapi.logger import logger
-from Utils.CommonUtil import get_exception_info
 from Utils.DataBaseUtil import make_insert_query, make_update_query, make_delete_query
 
 
@@ -28,16 +27,16 @@ class PostgresManager:
         self.conn.commit()
         logger.info(f'PostgresManager Execute Result. ({sql})')
 
-    def multiple_excute(self, sql_list: list):
+    def multiple_excute(self, sql_list: list) -> None:
         try:
-            for sql in sql_list:
+            for index, sql in enumerate(sql_list):
+                logger.info(
+                    f'PostgresManager Multiple Execute. ({index}. {sql})')
                 self.cursor.execute(sql)
-        except Exception:
-            self.conn.rollback()
-            except_name = get_exception_info()
-            raise Exception(except_name)
-        else:
             self.conn.commit()
+        except (Exception, psycopg2.DatabaseError):
+            self.conn.rollback()
+            raise psycopg2.DatabaseError
 
     def select(self, sql: str, count: int = None) -> Tuple[List[Dict[Any, Any]], List[Any]]:
         self.execute(sql)
