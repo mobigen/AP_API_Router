@@ -1,7 +1,7 @@
 from typing import Dict, List
 from fastapi.logger import logger
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
 
@@ -62,21 +62,6 @@ xid : 트랜잭션 식별자 타입
 '''
 
 
-def get_type(data_type, length=None):
-    if data_type == "number":
-        column_type = "int4"
-    elif data_type == "string":
-        if length:
-            column_type = f'varchar({length})'
-        else:
-            column_type = "varchar"
-    elif data_type == "time":
-        column_type = "timestamp"
-    else:
-        raise Exception(f"Invalid type ({data_type})")
-    return column_type
-
-
 def api(add_table_columns: List[addTableColumn]) -> Dict:
     try:
         db = connect_db(config.db_info)
@@ -95,9 +80,9 @@ def api(add_table_columns: List[addTableColumn]) -> Dict:
                                                 {convert_data(add_table_column.kor_nm)}, \
                                                 {convert_data(add_table_column.eng_nm)});'
             db.execute(column_info_query)
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         result = {"result": 1, "errorMessage": ""}
 

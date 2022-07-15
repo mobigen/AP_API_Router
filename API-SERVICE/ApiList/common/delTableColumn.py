@@ -1,7 +1,7 @@
 from typing import Dict
 from fastapi.logger import logger
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
 
@@ -30,9 +30,9 @@ def api(del_table_column: delTableColumn) -> Dict:
         column_info_query = f'DELETE FROM tb_table_column_info WHERE eng_nm={convert_data(del_table_column.eng_nm)} \
                                                 AND table_id={convert_data(table_id)};'
         db.execute(column_info_query)
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         result = {"result": 1, "errorMessage": ""}
 

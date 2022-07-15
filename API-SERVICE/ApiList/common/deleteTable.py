@@ -1,7 +1,7 @@
 from typing import Dict
 from fastapi.logger import logger
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db
+from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
 
@@ -22,9 +22,9 @@ def api(delete_table: deleteTable) -> Dict:
         db = connect_db(config.db_info)
         db.execute(drop_query)
         db.execute(delete_board_name)
-    except Exception as err:
-        result = {"result": 0, "errorMessage": err}
-        logger.error(err)
+    except Exception:
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
     else:
         result = {"result": 1, "errorMessage": ""}
 
