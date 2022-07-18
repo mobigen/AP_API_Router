@@ -25,7 +25,7 @@ def api(use_board_data: insertUseBoardData) -> Dict:
         use_dataset_id = uuid.uuid4()
         use_st_dt = datetime.today().strftime("%Y-%m-%d")
         exp_date = (datetime.today() + timedelta(30)).strftime("%Y-%m-%d")
-        trt_sttus = "처리중"
+        trt_sttus = "접수중"
         use_tmscnt = 1
         apy_sbst = use_board_data.apy_sbst
 
