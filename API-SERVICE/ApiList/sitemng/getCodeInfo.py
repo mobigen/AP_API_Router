@@ -5,7 +5,7 @@ from Utils.DataBaseUtil import convert_data
 
 
 def api(groupId) -> Dict:
-    get_code_info_query = f'SELECT code_id, code_nm \
+    get_code_info_query = f'SELECT code_id, code_nm, data_1, data_2 \
                                 FROM tb_code_detail \
                             WHERE code_group_id = {convert_data(groupId)};'
     try:
@@ -17,7 +17,7 @@ def api(groupId) -> Dict:
     else:
         code_info = []
         if len(code_list[0]):
-            code_info = [{"code_id": code_detail["code_id"], "code_nm": code_detail["code_nm"]}
+            code_info = [{"code_id": code_detail["code_id"], "code_nm": code_detail["code_nm"], "data_1": code_detail["data_1"], "data_2": code_detail["data_2"]}
                          for code_detail in code_list[0]]
 
         body = {"list": code_info}
