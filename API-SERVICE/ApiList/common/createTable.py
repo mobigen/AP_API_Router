@@ -36,28 +36,11 @@ default_info = {
 '''
 
 
-def get_type(data_type, length=None):
-    if data_type == "number":
-        column_type = "int4"
-    elif data_type == "string":
-        if length:
-            column_type = f'varchar({length})'
-        else:
-            column_type = "varchar"
-    elif data_type == "time":
-        column_type = "timestamp"
-    else:
-        raise Exception(f"Invalid type ({data_type})")
-    return column_type
-
-
 def make_default_column(default_info):
     default_columns = ["idx serial4 not null"]
     for info in default_info:
-        length = info.get("length")
-        column_type = get_type(info["type"], length)
         default_columns.append(
-            f'{info["eng_nm"]} {column_type} {" ".join(info["constraint"])}')
+            f'{info["eng_nm"]} {info["type"]} {" ".join(info["constraint"])}')
 
     return default_columns
 
