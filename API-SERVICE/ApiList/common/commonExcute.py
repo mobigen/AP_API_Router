@@ -5,14 +5,14 @@ from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
 
 
-class commonMultiExcute(BaseModel):
+class commonExcute(BaseModel):
     method: str
     table_nm: str
     data: Dict
     key: Optional[str] = None
 
 
-def make_query(excute: commonMultiExcute):
+def make_query(excute: commonExcute):
     method = excute.method
     query = None
     if method == "INSERT":
@@ -31,7 +31,7 @@ def make_query(excute: commonMultiExcute):
     return query
 
 
-def api(excute_list: List[commonMultiExcute]) -> Dict:
+def api(excute_list: List[commonExcute]) -> Dict:
     query_list = []
     try:
         for excute in excute_list:
