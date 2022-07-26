@@ -3,7 +3,9 @@ from typing import List, Dict
 
 
 def convert_data(data) -> str:
-    return f'\'{str(data)}\''
+    if data == "now()" or data == "NOW()":
+        return data
+    return f'\'{str(data).strip()}\''
 
 
 def make_table_info_query(db: str, table: str) -> str:

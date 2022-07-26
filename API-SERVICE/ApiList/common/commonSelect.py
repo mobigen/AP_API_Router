@@ -15,6 +15,7 @@ class whereInfo(BaseModel):
     table_nm: str
     key: str
     value: str
+    compare_op: str
     op: Optional[str] = ""
 
 
@@ -38,6 +39,24 @@ class commonMatchSelect(BaseModel):
     page_info: Optional[pageInfo] = None
 
 
+def convert_compare_op(compare_str):
+    if compare_str == "Equal":
+        compare_op = "="
+    elif compare_str == "Not Equal":
+        compare_op = "!="
+    elif compare_str == "Greater Than":
+        compare_op = ">"
+    elif compare_str == "Greater Than or Equal":
+        compare_op = ">="
+    elif compare_str == "Less Than":
+        compare_op = "<"
+    elif compare_str == "Less Than or Equal":
+        compare_op = "<="
+    else:
+        compare_op = compare_str
+    return compare_op
+
+
 def make_select_query(select_info: commonMatchSelect):
     join, where, order, page = "", "", "", ""
     join_info, where_info, order_info, page_info = select_info.join_info, select_info.where_info, select_info.order_info, select_info.page_info
@@ -46,7 +65,13 @@ def make_select_query(select_info: commonMatchSelect):
     if where_info:
         where = "WHERE "
         for info in where_info:
-            where = f'{where} {info.op} {info.table_nm}.{info.key} = {convert_data(info.value)}'
+            if info.compare_op == "IN" or info.compare_op == "NOT IN":
+                value_list = ", ".join(
+                    map(convert_data, info.value.split(",")))
+                value = f'( {value_list} )'
+            else:
+                value = convert_data(info.value)
+            where = f'{where} {info.op} {info.table_nm}.{info.key} {convert_compare_op(info.compare_op)} {value}'
     if order_info:
         order = f'ORDER BY {order_info.table_nm}.{order_info.key} {order_info.order}'
     if page_info:

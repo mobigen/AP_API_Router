@@ -1,8 +1,8 @@
 from typing import Dict, List, Optional
+from pydantic import BaseModel
 from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
-from pydantic import BaseModel
 
 
 class commonExcute(BaseModel):
