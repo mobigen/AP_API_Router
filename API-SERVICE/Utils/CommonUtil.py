@@ -9,6 +9,7 @@ from ApiService.ApiServiceConfig import config
 from ConnectManager import PostgresManager
 from retry import retry
 import psycopg2
+from psycopg2 import pool
 import jwt
 import sys
 import traceback
@@ -61,15 +62,22 @@ def prepare_config() -> None:
     config.server_port = args.port
     config.db_type = f'{args.db_type}_db'
     config.db_info = api_router_cfg[config.db_type]
+    config.conn_pool = make_connection_pool(config.db_info)
     config.secret_info = api_router_cfg["secret_info"]
 
 
-@retry(psycopg2.OperationalError, delay=1, tries=3)
-def connect_db(db_info):
-    db = PostgresManager(host=db_info["host"], port=db_info["port"],
-                         user=db_info["user"], password=db_info["password"],
-                         database=db_info["database"], schema=db_info["schema"])
+def make_connection_pool(db_info):
+    conn_pool = pool.SimpleConnectionPool(1, 20, user=db_info["user"],
+                                          password=db_info["password"],
+                                          host=db_info["host"],
+                                          port=db_info["port"],
+                                          database=db_info["database"],
+                                          options=f'-c search_path={db_info["schema"]}', connect_timeout=10)
+    return conn_pool
 
+
+def connect_db(db_info):
+    db = PostgresManager()
     return db
 
 

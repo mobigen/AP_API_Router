@@ -1,4 +1,5 @@
 from typing import Dict, List
+from psycopg2 import pool
 
 
 class ApiServiceConfig:
@@ -17,6 +18,7 @@ class ApiServiceConfig:
     api_config: Dict
 
     secret_info: Dict
+    conn_pool: pool.SimpleConnectionPool
 
 
 config = ApiServiceConfig

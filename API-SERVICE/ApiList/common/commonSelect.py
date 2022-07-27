@@ -11,12 +11,21 @@ class joinInfo(BaseModel):
     key: str
 
 
+class subWhereInfo(BaseModel):
+    table_nm: str
+    key: str
+    value: str
+    compare_op: str
+    op: Optional[str] = ""
+
+
 class whereInfo(BaseModel):
     table_nm: str
     key: str
     value: str
     compare_op: str
     op: Optional[str] = ""
+    sub: Optional[List[subWhereInfo]] = None
 
 
 class orderInfo(BaseModel):
@@ -57,27 +66,38 @@ def convert_compare_op(compare_str):
     return compare_op
 
 
+def make_where_info(where):
+    if where.compare_op == "IN" or where.compare_op == "NOT IN":
+        value_list = ", ".join(
+            map(convert_data, where.value.split(",")))
+        value = f'( {value_list} )'
+    else:
+        value = convert_data(where.value)
+    return value
+
+
 def make_select_query(select_info: commonMatchSelect):
     join, where, order, page = "", "", "", ""
     join_info, where_info, order_info, page_info = select_info.join_info, select_info.where_info, select_info.order_info, select_info.page_info
     if join_info:
         join = f'JOIN {join_info.table_nm} ON {select_info.table_nm}.{select_info.key} = {join_info.table_nm}.{join_info.key}'
     if where_info:
-        where = "WHERE "
         for info in where_info:
-            if info.compare_op == "IN" or info.compare_op == "NOT IN":
-                value_list = ", ".join(
-                    map(convert_data, info.value.split(",")))
-                value = f'( {value_list} )'
+            value = make_where_info(info)
+            if info.sub:
+                sub_where = f"{info.table_nm}.{info.key} {convert_compare_op(info.compare_op)} {value}"
+                for sub_info in info.sub:
+                    sub_value = make_where_info(sub_info)
+                    sub_where = f"{sub_where} {sub_info.op} {sub_info.table_nm}.{sub_info.key} {convert_compare_op(sub_info.compare_op)} {sub_value}"
+                where = f'{where} {info.op} ({sub_where})'
             else:
-                value = convert_data(info.value)
-            where = f'{where} {info.op} {info.table_nm}.{info.key} {convert_compare_op(info.compare_op)} {value}'
+                where = f'{where} {info.op} {info.table_nm}.{info.key} {convert_compare_op(info.compare_op)} {value}'
+        where = f'WHERE {where}'
     if order_info:
         order = f'ORDER BY {order_info.table_nm}.{order_info.key} {order_info.order}'
     if page_info:
         page = f'LIMIT {page_info.per_page} OFFSET ({page_info.per_page} * {page_info.cur_page - 1})'
-    query = f'SELECT * FROM {select_info.table_nm} {join} {where} {order} {page};'
-    return query
+    return f'SELECT * FROM {select_info.table_nm} {join} {where} {order} {page};'
 
 
 def api(select_info: commonMatchSelect) -> Dict:
