@@ -97,22 +97,22 @@ def make_select_query(select_info: commonMatchSelect):
         order = f'ORDER BY {order_info.table_nm}.{order_info.key} {order_info.order}'
     if page_info:
         page = f'LIMIT {page_info.per_page} OFFSET ({page_info.per_page} * {page_info.cur_page - 1})'
-    return f'SELECT * FROM {select_info.table_nm} {join} {where} {order} {page};'
+    select_query = f'SELECT * FROM {select_info.table_nm} {join} {where} {order} {page};'
+    count_query = f'SELECT count(*) FROM {select_info.table_nm} {join} {where};'
+    return select_query, count_query
 
 
 def api(select_info: commonMatchSelect) -> Dict:
     get_column_info = f"SELECT eng_nm, kor_nm FROM tb_table_column_info \
                                               WHERE table_id = (SELECT id FROM tb_table_list WHERE table_nm = {convert_data(select_info.table_nm)});"
-    get_query = make_select_query(select_info)
+    get_query, total_cnt_query = make_select_query(select_info)
     logger.info(f'Get Query : {get_query}')
 
     try:
         db = connect_db(config.db_info)
         select_data, _ = db.select(get_query)
         if select_info.page_info:
-            total_cnt_query = f"SELECT count(*) AS totalCount FROM {select_info.table_nm};"
             total_cnt = db.select(total_cnt_query)
-
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
