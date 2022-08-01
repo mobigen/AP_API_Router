@@ -104,7 +104,7 @@ def make_select_query(select_info: commonMatchSelect):
 
 def api(select_info: commonMatchSelect) -> Dict:
     get_column_info = f"SELECT eng_nm, kor_nm FROM tb_table_column_info \
-                                              WHERE table_id = (SELECT id FROM tb_table_list WHERE table_nm = {convert_data(select_info.table_nm)});"
+                                              WHERE table_id = (SELECT table_id FROM tb_table_list WHERE table_nm = {convert_data(select_info.table_nm)});"
     get_query, total_cnt_query = make_select_query(select_info)
     logger.info(f'Get Query : {get_query}')
 

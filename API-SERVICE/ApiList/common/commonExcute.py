@@ -9,11 +9,12 @@ class commonExcute(BaseModel):
     method: str
     table_nm: str
     data: Dict
-    key: Optional[str] = None
+    key: Optional[List[str]] = None
 
 
 def make_query(excute: commonExcute):
     method = excute.method
+    where = []
     query = None
     if method == "INSERT":
         columns = ", ".join(excute.data.keys())
@@ -22,10 +23,14 @@ def make_query(excute: commonExcute):
     elif method == "UPDATE":
         update_data = [
             f'{key} = {convert_data(value)}' for key, value in excute.data.items()]
+        for key in excute.key:
+            where.append(f'{key} = {convert_data(excute.data.get(key))}')
         query = f'UPDATE {excute.table_nm} SET {",".join(update_data)}\
-                                           WHERE {excute.key} = {convert_data(excute.data.get(excute.key))};'
+                                           WHERE {" AND ".join(where)};'
     elif method == "DELETE":
-        query = f'DELETE FROM {excute.table_nm} WHERE {excute.key} = {convert_data(excute.data.get(excute.key))};'
+        for key in excute.key:
+            where.append(f'{key} = {convert_data(excute.data.get(key))}')
+        query = f'DELETE FROM {excute.table_nm} WHERE {" AND ".join(where)};'
     else:
         raise ValueError(f"Invalid Method. ({method}))")
     return query
