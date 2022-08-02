@@ -7,14 +7,11 @@ from pydantic import BaseModel
 
 
 class insertBizMetaData(BaseModel):
-    adm_dep: str
     rqt_dep: str
     admr_nm: str
     rqt_nm: str
     ctgry: str
     reg_date: str
-    ltst_amd_dt: str
-    prv_shap: str
     file_size: str
     open_scope: str
     data_shap: str
@@ -28,6 +25,17 @@ class insertBizMetaData(BaseModel):
     updt_nxt_date: str
     data_nm: str
     data_desc: str
+    adm_dep: str
+    ltst_amd_dt: str
+    prv_shap: str
+    adm_dep_hp: str
+    lang: str
+    file_type: str
+    updt_date: str
+    copyright: str
+    license: str
+    render_url: str
+    file_read_authority: str
 
 
 def api(biz_meta_data: insertBizMetaData) -> Dict:
