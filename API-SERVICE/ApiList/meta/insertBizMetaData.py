@@ -7,35 +7,28 @@ from pydantic import BaseModel
 
 
 class insertBizMetaData(BaseModel):
-    rqt_dep: str
+    adm_dep: str
+    adm_dep_hp: str
     admr_nm: str
-    rqt_nm: str
+    copyright: str
     ctgry: str
-    reg_date: str
-    file_size: str
-    open_scope: str
+    data_desc: str
+    data_nm: str
+    data_prv_desk: str
     data_shap: str
+    data_updt_cyc: str
+    file_read_authority: str
+    file_type: str
+    kywrd: str
+    lang: str
+    license: str
+    reg_date: str
+    retv_num: str
+    rqt_dep: str
     src_sys: str
     src_url: str
-    kywrd: str
-    data_prv_desk: str
-    data_updt_cyc: str
-    law_evl_conf_yn: str
-    scrty_evl_conf_yn: str
-    updt_nxt_date: str
-    data_nm: str
-    data_desc: str
-    adm_dep: str
-    ltst_amd_dt: str
-    prv_shap: str
-    adm_dep_hp: str
-    lang: str
-    file_type: str
     updt_date: str
-    copyright: str
-    license: str
-    render_url: str
-    file_read_authority: str
+    updt_nxt_date: str
 
 
 def api(biz_meta_data: insertBizMetaData) -> Dict:
