@@ -5,6 +5,8 @@ from typing import List, Dict
 def convert_data(data) -> str:
     if data == "now()" or data == "NOW()":
         return data
+    if data[0] == "`":
+        return data[1:]
     return f'\'{str(data).strip()}\''
 
 
