@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container my-3">
+    <h2 class="border-bottom py-2">
+      <div class="row my-3">
+        <div class="col-4">
+          <a href="{% url 'api:create_api' %}" class="btn btn-primary">API 생성</a>
+        </div>
+        <div class="col-4"></div>
+        <div class="col-4">
+          <div class="input-group">
+            <input type="text" id="search_kw" class="form-control" placeholder="API 키워드" value="{{ kw|default_if_none:'' }}">
+            <div class="input-group-append">
+              <button class="btn btn-primary" type="button" id="btn_search">검색</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </h2>
+    <div class="table-responsive-sm">
+      <table class="table table-bordered">
+        <thead>
+          <tr class="thead-dark">
+            <th>카테고리명</th>
+            <th>API명</th>
+            <th>Method</th>
+            <th>동작방식</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if api_list %}
+            {% for api in api_list %}
+              <tr>
+                <td>
+                  <a href="{% url 'api:category_list' %}">{{ api.ctgry.nm }}</a>
+                </td>
+                <td>
+                  <a href="{% url 'api:update_api' api.api_nm %}">{{ api.api_nm }}</a>
+                </td>
+                <td>{{ api.meth }}</td>
+                <td>{{ api.mode }}</td>
+                <td>
+                  <a href="{% url 'api:delete_api' api.api_nm %}">삭제</a>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colsapn="3">등록된 API가 없습니다.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!-- 페이징처리 시작 -->
+  <ul class="pagination justify-content-center">
+    <!-- 이전페이지 -->
+    {% if api_list.has_previous %}
+      <li class="page-item">
+        <a class="page-link" data-page="{{ question_list.previous_page_number }}" href="javascript:void(0)">이전</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <a class="page-link" tabindex="-1" aria-disabled="true" href="javascript:void(0)">이전</a>
+      </li>
+    {% endif %}
+    <!-- 페이지리스트 -->
+    {% for page_number in api_list.paginator.page_range %}
+      {% if page_number == api_list.number %}
+        <li class="page-item active" aria-current="page">
+          <a class="page-link" data-page="{{ page_number }}" href="javascript:void(0)">{{ page_number }}</a>
+        </li>
+      {% else %}
+        <li class="page-item">
+          <a class="page-link" data-page="{{ page_number }}" href="javascript:void(0)">{{ page_number }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+    <!-- 다음페이지 -->
+    {% if api_list.has_next %}
+      <li class="page-item">
+        <a class="page-link" data-page="{{ question_list.next_page_number }}" href="javascript:void(0)">다음</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <a class="page-link" tabindex="-1" aria-disabled="true" href="javascript:void(0)">다음</a>
+      </li>
+    {% endif %}
+  </ul>
+  <!-- 페이징처리 끝 -->
+  <form id="searchForm" method="get" action="{% url 'api:api_list' %}">
+    <input type="hidden" id="kw" name="kw" value="{{ kw|default_if_none:'' }}">
+    <input type="hidden" id="page" name="page" value="{{ page }}">
+  </form>
+{% endblock %}
+
+{% block script %}
+  <script type='text/javascript'>
+    const page_elements = document.getElementsByClassName("page-link");
+    Array
+      .from(page_elements)
+      .forEach(function (element) {
+        element.addEventListener('click', function () {
+          document
+            .getElementById('page')
+            .value = this.dataset.page;
+          document
+            .getElementById('searchForm')
+            .submit();
+        });
+      });
+    const btn_search = document.getElementById("btn_search");
+    btn_search.addEventListener('click', function () {
+      document
+        .getElementById('kw')
+        .value = document
+        .getElementById('search_kw')
+        .value;
+      document
+        .getElementById('page')
+        .value = 1; // 검색버튼을 클릭할 경우 1페이지부터 조회한다.
+      document
+        .getElementById('searchForm')
+        .submit();
+    });
+  </script>
+{% endblock %}

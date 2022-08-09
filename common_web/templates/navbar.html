@@ -1,0 +1,36 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="{% url 'table:table_list' %}">Common</a>
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-toggle="collapse"
+    data-target="#navbarNavAltMarkup"
+    aria-controls="navbarNavAltMarkup"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-link" href="{% url 'table:table_list' %}">Table</a>
+      <li class="nav-item dropdown">
+        <a
+          class="nav-link dropdown-toggle"
+          href="#"
+          role="button"
+          data-toggle="dropdown"
+          aria-expanded="false"
+        >
+          API
+        </a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="{% url 'api:api_list' %}">API</a>
+          <a class="dropdown-item" href="{% url 'api:category_list' %}"
+            >Category</a
+          >
+        </div>
+      </li>
+    </div>
+  </div>
+</nav>

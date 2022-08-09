@@ -1,0 +1,20 @@
+{% extends 'base.html'%}
+{% block content %}
+
+  <h2 class="border-bottom py-2">카테고리 생성/수정</h2>
+
+  <div class="container ml-2"></form>
+  <form class="my-3" method="post">
+    <div class="form-group col-md-6">
+      <label for="nm">카테고리명</label>
+      <input type="text" class="form-control" name="nm" id="nm" value="{{ form.nm.value|default_if_none:'' }}"/>
+    </div>
+    <div class="form-group col-md-6">
+      <label for="ip_adr">IP</label>
+      <input type="text" class="form-control" name="ip_adr" id="ip_adr" value="{{ form.ip_adr.value|default_if_none:'' }}"/>
+    </div>
+    <input type="submit" value="실행" class="btn btn-primary"/>
+    <a href="{% url 'api:category_list' %}" class="btn btn-primary">취소</a>
+  </form>
+</div>
+{% endblock %}

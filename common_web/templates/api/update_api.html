@@ -1,0 +1,147 @@
+{% extends 'base.html'%}
+{% block content %}
+  <div class="container my-3">
+
+    <div class="row">
+      <div class="col">
+        <h2 class="border-bottom py-2">API 변경</h2>
+        <form class="my-3" method="post">
+          <div class="form-group col">
+            <label for="api_nm">API명</label>
+            {% if form.api_nm.value %}
+              <input type="text" class="form-control" name="api_nm" id="api_nm" value="{{ form.api_nm.value|default_if_none:'' }}" readonly="readonly"/>
+            {% else %}
+              <input type="text" class="form-control" name="api_nm" id="api_nm" value="{{ form.api_nm.value|default_if_none:'' }}"/>
+            {% endif %}
+          </div>
+
+          <div class="form-group col">
+            <label for="route_url">Route URL</label>
+            <input type="text" class="form-control" name="route_url" id="route_url" value="{{ form.route_url.value|default_if_none:'' }}"/>
+          </div>
+
+          <div class="form-group col">
+            <label for="url">Service URL</label>
+            <input type="text" class="form-control" name="url" id="url" value="{{ form.url.value|default_if_none:'' }}"/>
+          </div>
+
+          <div class="form-group col">
+            <label for="cmd">Remote CMD</label>
+            <input type="text" class="form-control" name="cmd" id="cmd" value="{{ form.cmd.value|default_if_none:'' }}"/>
+          </div>
+
+          <div class="form-group col">
+            <label for="mode">동작방식</label>
+            <select class="form-control" name="mode" id="mode">
+              {% for choice in form.mode.field.choices %}
+                {% if choice.1 == form.mode.value %}
+                  <option selected="selected" value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% else %}
+                  <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group col">
+            <label for="meth">Method</label>
+            <select class="form-control" name="meth" id="meth">
+              {% for choice in form.meth.field.choices %}
+                {% if choice.1 == form.meth.value %}
+                  <option selected="selected" value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% else %}
+                  <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group col">
+            <label for="ctgry">카테고리명</label>
+            <select class="form-control" name="ctgry" id="ctgry">
+              {% for choice in form.ctgry.field.choices %}
+                {% if choice.1 == form.ctgry.value %}
+                  <option selected="selected" value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% else %}
+                  <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <input type="submit" value="변경" class="btn btn-primary"/>
+          <a href="{% url 'api:api_list' %}" class="btn btn-primary">취소</a>
+        </form>
+      </div>
+
+      <div class="col">
+        <h2 class="border-bottom py-2">API 파라미터 생성</h2>
+        <form class="post-form my-3" action="{% url 'api:create_param' api_nm %}" method="post">
+
+          <div class="form-group col">
+            <input type="hidden" class="form-control" name="api_nm" id="api_nm" value="{{ form.api_nm.value }}"/>
+          </div>
+          {% if form.mode.value == "REMOTE CALL" %}
+            <div class="form-group col">
+              <label for="nm">파라미터명</label>
+              <input type="text" class="form-control" name="nm" id="nm" value="{{ form.nm.value|default_if_none:'' }}"/>
+            </div>
+            <div class="form-group col">
+              <label for="data_type">데이터타입</label>
+              <input type="text" class="form-control" name="data_type" id="data_type" value="{{ form.data_type.value|default_if_none:'' }}"/>
+            </div>
+            <div class="form-group col">
+              <label for="deflt_val">디폴트값</label>
+              <input type="text" class="form-control" name="deflt_val" id="deflt_val" value="{{ form.deflt_val.value|default_if_none:'' }}"/>
+            </div>
+            <input type="submit" value="생성" class="btn btn-primary"/>
+          {% else %}
+            <div class="form-group col">
+              <label for="nm">파라미터명</label>
+              <input type="text" class="form-control" name="nm" id="nm" value="{{ form.nm.value|default_if_none:'' }}" disabled="disabled"/>
+            </div>
+            <div class="form-group col">
+              <label for="data_type">데이터타입</label>
+              <input type="text" class="form-control" name="data_type" id="data_type" value="{{ form.data_type.value|default_if_none:'' }}" disabled="disabled"/>
+            </div>
+            <div class="form-group col">
+              <label for="deflt_val">디폴트값</label>
+              <input type="text" class="form-control" name="deflt_val" id="deflt_val" value="{{ form.deflt_val.value|default_if_none:'' }}" disabled="disabled"/>
+            </div>
+            <input type="submit" value="생성" class="btn btn-primary" disabled="disabled"/>
+          {% endif %}
+        </form>
+
+        <h2 class="border-bottom py-2">파라미터 리스트</h2>
+        <table class="table table-bordered">
+          <thead>
+            <tr class="thead-dark">
+              <th>파라미터명</th>
+              <th>데이터타입</th>
+              <th>디플트값</th>
+              <th>삭제</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if param_list %}
+              {% for param in param_list %}
+                <tr>
+                  <td>{{ param.nm }}</td>
+                  <td>{{ param.data_type }}</td>
+                  <td>{{ param.deflt_val }}</td>
+                  <td>
+                    <a href="{% url 'api:delete_param' api_nm=api_nm nm=param.nm %}">삭제</a>
+                  </td>
+
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <strong>* 등록된 API Param 이 없습니다. *</strong>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

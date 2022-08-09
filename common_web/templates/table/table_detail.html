@@ -1,0 +1,56 @@
+{% extends 'base.html'%}
+{% block content %}
+  <div class="container my-3">
+    <h2 class="border-bottom py-2">컬럼 생성 (테이블명:
+      {{ table.table_nm }})</h2>
+
+    <form method="post">
+      <div class="form-group col-md-6">
+        <label for="eng_nm">컬럼명(영어)</label>
+        <input type="text" class="form-control" name="eng_nm" id="eng_nm" value="{{ form.eng_nm.value|default_if_none:'' }}"/>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="kor_nm">컬럼명(한글)</label>
+        <input type="text" class="form-control" name="kor_nm" id="kor_nm" value="{{ form.kor_nm.value|default_if_none:'' }}"/>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="data_type">데이터 타입</label>
+        <input type="text" class="form-control" name="data_type" id="data_type" value="{{ form.data_type.value|default_if_none:'' }}"/>
+      </div>
+      <input type="submit" value="컬럼 추가" class="btn btn-primary"/>
+    </form>
+
+    <h2 class="border-bottom py-2">컬럼 리스트</h2>
+
+    <table class="table table-bordered">
+      <thead>
+        <tr class="thead-dark">
+          <th>컬렴명(영어)</th>
+          <th>컬럼명(한글)</th>
+          <th>데이터 타입</th>
+          <th>삭제</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if column_list %}
+          {% for column in column_list %}
+            <tr>
+              <td>{{ column.eng_nm }}</td>
+              <td>{{ column.kor_nm }}</td>
+              <td>{{ column.data_type }}</td>
+              <td>
+                <a href="{% url 'table:delete_column' table_id=table.table_id eng_nm=column.eng_nm %}">삭제</a>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colsapn="3">등록된 컬럼이 없습니다.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

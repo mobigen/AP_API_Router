@@ -1,0 +1,73 @@
+{% extends 'base.html'%}
+{% block content %}
+  <div class="container ml-2">
+
+    <h2 class="border-bottom py-2">API 생성</h2>
+    <form class="my-3" method="post">
+      <div class="form-group col-md-6">
+        <label for="api_nm">API명</label>
+        {% if form.api_nm.value %}
+          <input type="text" class="form-control" name="api_nm" id="api_nm" value="{{ form.api_nm.value|default_if_none:'' }}" readonly="readonly"/>
+        {% else %}
+          <input type="text" class="form-control" name="api_nm" id="api_nm" value="{{ form.api_nm.value|default_if_none:'' }}"/>
+        {% endif %}
+      </div>
+
+      <div class="form-group col-md-6">
+        <label for="route_url">Route URL</label>
+        <input type="text" class="form-control" name="route_url" id="route_url" value="{{ form.route_url.value|default_if_none:'' }}"/>
+      </div>
+
+      <div class="form-group col-md-6">
+        <label for="url">Service URL</label>
+        <input type="text" class="form-control" name="url" id="url" value="{{ form.url.value|default_if_none:'' }}"/>
+      </div>
+
+      <div class="form-group col-md-6">
+        <label for="cmd">Remote CMD</label>
+        <input type="text" class="form-control" name="cmd" id="cmd" value="{{ form.cmd.value|default_if_none:'' }}"/>
+      </div>
+
+      <div class="form-group col-md-6">
+        <label for="mode">동작방식</label>
+        <select class="form-control" name="mode" id="mode">
+          {% for choice in form.mode.field.choices %}
+            {% if choice.1 == form.mode.value %}
+              <option selected="selected" value="{{ choice.0 }}">{{ choice.1 }}</option>
+            {% else %}
+              <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group col-md-6">
+        <label for="meth">Method</label>
+        <select class="form-control" name="meth" id="meth">
+          {% for choice in form.meth.field.choices %}
+            {% if choice.1 == form.meth.value %}
+              <option selected="selected" value="{{ choice.0 }}">{{ choice.1 }}</option>
+            {% else %}
+              <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group col-md-6">
+        <label for="ctgry">카테고리명</label>
+        <select class="form-control" name="ctgry" id="ctgry">
+          {% for choice in form.ctgry.field.choices %}
+            {% if choice.1 == form.ctgry.value %}
+              <option selected="selected" value="{{ choice.0 }}">{{ choice.1 }}</option>
+            {% else %}
+              <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      <input type="submit" value="생성" class="btn btn-primary"/>
+      <a href="{% url 'api:api_list' %}" class="btn btn-primary">취소</a>
+    </form>
+  </div>
+{% endblock %}

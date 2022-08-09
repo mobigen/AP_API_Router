@@ -1,0 +1,44 @@
+{% extends 'base.html'%}
+{% block content %}
+  <div class="container my-3">
+    <div class="container my-3">
+
+      <h2 class="border-bottom py-2">
+        <a href="{% url 'api:api_detail' %}" class="btn btn-primary">카테고리 생성</a>
+      </h2>
+      <table class="table table-bordered">
+        <thead>
+          <tr class="thead-dark">
+            <th>카테고리명</th>
+            <th>API명</th>
+            <th>Method</th>
+            <th>동작방식</th>
+            <th>Remote CMD</th>
+            <th>동작방식</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if category_list %}
+            {% for category in category_list %}
+              <tr>
+                <td>{{ category.nm }}</td>
+                <td>{{ category.ip_adr }}</td>
+                <td>
+                  <a href="{% url 'api:update_category' category.nm %}">수정</a>
+                </td>
+                <td>
+                  <a href="{% url 'api:delete_category' category.nm %}">삭제</a>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colsapn="3">등록된 카테고리가 없습니다.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
