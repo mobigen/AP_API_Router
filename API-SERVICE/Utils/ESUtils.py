@@ -79,7 +79,7 @@ class ESSearch:
     def set_match(self, operator: str = None):
         must_query_list = []
         if len(self.keyword_dict.values()):
-            if len(self.keyword_dict["match"]) and operator is not None:
+            if len(self.keyword_dict["match"]) and operator in ["or","OR"]:
                 op_query_dict = make_query("data_nm", "query", ' '.join(self.keyword_dict["match"]))
                 op_query_dict["data_nm"]["operator"] = operator
                 term = make_query("match", "data_nm", op_query_dict["data_nm"])
