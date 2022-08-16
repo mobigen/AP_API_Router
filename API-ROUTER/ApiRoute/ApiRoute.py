@@ -1,3 +1,4 @@
+from cgitb import reset
 from fastapi.logger import logger
 from typing import Dict, List
 import importlib.util
@@ -64,6 +65,9 @@ class ApiRoute:
             "/api/updateServerInfo", self.update_server_info, methods=["POST"], tags=["API Server Info"])
         self.router.add_api_route(
             "/api/delServerInfo", self.del_server_info, methods=["POST"], tags=["API Server Info"])
+
+        self.router.add_api_route(
+            "/api/reload", self.reload_api, methods=["GET"], tags=["API Info Reload"])
 
         db = connect_db(config.db_info)
         api_info, _ = db.select('SELECT * FROM tb_api_info;')
@@ -172,6 +176,12 @@ class ApiRoute:
                 'SELECT * FROM tb_api_server_info;')
             result = {"result": 1, "errorMessage": ""}
 
+        return result
+
+    def reload_api(self):
+        logger.info("Reload API Info")
+        save_file_for_reload()
+        result = {"result": 1, "errorMessage": ""}
         return result
 
     def get_api_list(self) -> Dict:
