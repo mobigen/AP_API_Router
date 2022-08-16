@@ -7,7 +7,7 @@ from .forms import TableInfoForm, ColumnInfoForm
 from commonUtil.Utils import connect_db
 
 # Create your views here.
-'''
+
 db_info = {
     "host": "192.168.100.126",
     "port": 25432,
@@ -25,6 +25,7 @@ db_info = {
     "database": "dhub",
     "schema": "meta,api,sitemng"
 }
+'''
 
 
 def table_list(request):

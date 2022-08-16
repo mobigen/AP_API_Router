@@ -88,23 +88,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        # 'OPTIONS': {
-        #    'options': '-c search_path=django,meta'
-        # },
-        'NAME': 'dhub',
-        'USER': 'dhub',
-        'PASSWORD': 'dhub.12#',
-        'HOST': '192.168.101.43',
-        'PORT': '5432',
+        'NAME': 'dataportal',
+        'USER': 'dpmanager',
+        'PASSWORD': 'hello.dp12#$',
+        'HOST': '192.168.100.126',
+        'PORT': '25432',
     }
 }
-'''
-'NAME': 'dataportal',
-'USER': 'dpmanager',
-'PASSWORD': 'hello.dp12#$',
-'HOST': '192.168.100.126',
-'PORT': '25432',
-'''
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

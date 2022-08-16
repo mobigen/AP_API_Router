@@ -6,7 +6,10 @@ from django.db.models import Q
 from django.db.models.deletion import ProtectedError
 from .models import ApiInfo, ServerInfo, ApiParamInfo
 from .forms import ApiInfoForm, ServerInfoForm, ApiParamInfoForm
+import requests
 # Create your views here.
+
+RELOAD_URL = "http://127.0.0.1:18000/api/reload"
 
 
 def api_list(request):
@@ -34,6 +37,7 @@ def create_api(request):
             api = form.save(commit=False)
             api.ctgry = category
             api.save()
+            requests.get(RELOAD_URL)
             return redirect("api:api_list")
         else:
             messages.error(request, form.errors.as_text())
@@ -50,6 +54,7 @@ def update_api(request, api_nm):
         form = ApiInfoForm(request.POST, instance=api)
         if form.is_valid():
             form.save()
+            requests.get(RELOAD_URL)
             return redirect("api:update_api", api_nm=api_nm)
         else:
             messages.error(request, form.errors.as_text())
@@ -64,6 +69,8 @@ def delete_api(request, api_nm):
     api = get_object_or_404(ApiInfo, pk=api_nm)
 
     api.delete()
+    requests.get(RELOAD_URL)
+
     return redirect("api:api_list")
 
 
@@ -72,6 +79,7 @@ def create_param(request, api_nm):
         form = ApiParamInfoForm(request.POST)
         if form.is_valid():
             form.save()
+            requests.get(RELOAD_URL)
         else:
             messages.error(request, form.errors.as_text())
     return redirect("api:update_api", api_nm=api_nm)
@@ -80,6 +88,8 @@ def create_param(request, api_nm):
 def delete_param(request, api_nm, nm):
     param = ApiParamInfo.objects.filter(Q(api_nm=api_nm), Q(nm=nm))
     param.delete()
+    requests.get(RELOAD_URL)
+
     return redirect("api:update_api", api_nm=api_nm)
 
 
@@ -95,6 +105,7 @@ def create_category(request):
         form = ServerInfoForm(request.POST)
         if form.is_valid():
             form.save()
+            requests.get(RELOAD_URL)
             return redirect("api:category_list")
         else:
             messages.error(request, form.errors.as_text())
@@ -112,6 +123,7 @@ def update_category(request, nm):
         form = ServerInfoForm(request.POST, instance=category)
         if form.is_valid():
             form.save()
+            requests.get(RELOAD_URL)
             return redirect("api:category_list")
         else:
             messages.error(request, form.errors.as_text())
@@ -126,6 +138,7 @@ def delete_category(request, nm):
     category = get_object_or_404(ServerInfo, pk=nm)
     try:
         category.delete()
+        requests.get(RELOAD_URL)
     except ProtectedError as err:
         messages.error(request, f"category - {nm}을 사용중인 API가 존재합니다.")
     return redirect("api:category_list")

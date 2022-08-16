@@ -10,6 +10,10 @@ METHOD = (
     ("POST", "POST"),
 )
 
+CATEGORY = (
+    ("TEST", "TEST")
+)
+
 
 class ServerInfoForm(forms.ModelForm):
     class Meta:
@@ -22,8 +26,8 @@ class ServerInfoForm(forms.ModelForm):
 class ApiInfoForm(forms.ModelForm):
     mode = forms.ChoiceField(
         label="동작방식", choices=MODE)
-    ctgry = forms.ChoiceField(label="카테고리명", choices=[
-                              (category.nm, category.nm) for category in ServerInfo.objects.all()])
+    ctgry = forms.ChoiceField(label="카테고리명", choices=[(
+        category.nm, category.nm) for category in ServerInfo.objects.all()])
     meth = forms.ChoiceField(label="Method", choices=METHOD)
 
     class Meta:
