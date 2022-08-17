@@ -5,14 +5,14 @@ from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 
 
-class commonExcute(BaseModel):
+class commonExecute(BaseModel):
     method: str
     table_nm: str
     data: Dict
     key: Optional[List[str]] = None
 
 
-def make_query(excute: commonExcute):
+def make_query(excute: commonExecute):
     method = excute.method
     where = []
     query = None
@@ -36,7 +36,7 @@ def make_query(excute: commonExcute):
     return query
 
 
-def api(excute_list: List[commonExcute]) -> Dict:
+def api(excute_list: List[commonExecute]) -> Dict:
     query_list = []
     try:
         for excute in excute_list:
