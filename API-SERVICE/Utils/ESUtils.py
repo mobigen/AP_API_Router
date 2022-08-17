@@ -47,11 +47,11 @@ class ESSearch:
         return es
 
     def set_body(self) -> dict:
-        body = {
-            "from": self.cur_from,
-            "size": self.size,
-            "sort": self.sort_list,
-            "query": {"bool": dict()}
+        self.body = {
+            "from": 0,
+            "size": 10,
+            "sort": [],
+            "query": {"bool": [{"match_all": {}}]}
         }
         return self.body
 
@@ -60,7 +60,11 @@ class ESSearch:
         sort = [{field: order for field, order in [sort_item.split(":") for sort_item in sort]}]
         self.body["sort"] = sort
 
-    def div_keyword(self, keyword_list: list):
+    def set_pagination(self) -> None:
+        self.body["from"] = self.cur_from
+        self.body["size"] = self.size
+
+    def div_keyword(self, keyword_list: list) -> None:
         self.keyword_dict = {"match_phrase": [], "match": []}
         for keyword in keyword_list:
             k = keyword.replace(" ", "")
@@ -71,7 +75,7 @@ class ESSearch:
             else:
                 self.keyword_dict["match"].append(keyword)
 
-    def set_filter(self, filter_dict: dict):
+    def set_filter(self, filter_dict: dict) -> None:
         filter_query = []
         if len(filter_dict.values()):
             for field, value in filter_dict.items():
@@ -79,7 +83,7 @@ class ESSearch:
                 filter_query.append(filter_condition)
             self.body["query"]["bool"]["filter"] = filter_query
 
-    def set_match(self, operator: str = None):
+    def set_match(self, operator: str = None) -> None:
         must_query_list = []
         if len(self.keyword_dict.values()):
             if len(self.keyword_dict["match"]) and operator in ["or", "OR"]:
@@ -97,8 +101,5 @@ class ESSearch:
                 for phrase_key in self.keyword_dict["match_phrase"]:
                     phrase = make_query("match_phrase", "data_nm", phrase_key)
                     must_query_list.append(phrase)
-        else:
-            query = {"match_all": {}}
-            must_query_list.append(query)
 
-        self.body["query"]["bool"]["must"] = must_query_list
+            self.body["query"]["bool"]["must"] = must_query_list
