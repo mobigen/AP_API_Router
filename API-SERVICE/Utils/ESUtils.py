@@ -26,8 +26,7 @@ class ESSearch:
         port: str = "9200",
         cur_from: int = 0,
         size: int = 10,
-        index: str = "biz_meta",
-        sort_list: list = [],
+        index: str = "biz_meta"
     ):
         """
 
@@ -39,7 +38,6 @@ class ESSearch:
         self.size = size
         self.index = index
         self.cur_from = cur_from - 1
-        self.sort_list = sort_list
         self.keyword_dict = dict()
         self.conn = self.connect()
         self.body = self.set_body()
@@ -55,7 +53,12 @@ class ESSearch:
             "sort": self.sort_list,
             "query": {"bool": dict()}
         }
-        return body
+        return self.body
+
+    def set_sort(self, sort: str) -> None:
+        sort = sort.replace("score", "_score").split(",")
+        sort = [{field: order for field, order in [sort_item.split(":") for sort_item in sort]}]
+        self.body["sort"] = sort
 
     def div_keyword(self, keyword_list: list):
         self.keyword_dict = {"match_phrase": [], "match": []}

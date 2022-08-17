@@ -8,10 +8,11 @@ def api(perPage: int = 12,
         keyword1: str = "",
         keyword2: str = "",
         keyword3: str = "",
-        sort_field: str = "_score") -> Dict:
+        sort: str = "_score:desc") -> Dict:
     try:
         es = ESSearch(cur_from=curPage,size=perPage)
         es.div_keyword([keyword1,keyword2,keyword3])
+        es.set_sort(sort)
         es.set_match()
         biz_meta_elk = es.conn.search(index=es.index,body=es.body)
 
