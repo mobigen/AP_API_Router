@@ -9,7 +9,7 @@ def api() -> Dict:
                                               WHERE table_id = (SELECT id FROM tb_board_name WHERE table_nm = 'tb_board_use');"
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         use_data, _ = db.select(get_use_data_query)
     except Exception:
         except_name = get_exception_info()

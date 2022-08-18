@@ -16,7 +16,7 @@ def api(common: commonInsert) -> Dict:
     insert_query = f'INSERT INTO {common.table_nm} ({columns}) VALUES ({values});'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         db.execute(insert_query)
     except Exception:
         except_name = get_exception_info()

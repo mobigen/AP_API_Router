@@ -14,7 +14,7 @@ def api(perPage: int,
     v_meta_wrap_query = "SELECT *, row_number () OVER (ORDER BY {0}) AS rowNo FROM v_biz_meta_wrap"
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         search_word_list = [keyword1, keyword2, keyword3]
         if any(search_word_list):
             order_condition = []
@@ -45,7 +45,8 @@ def api(perPage: int,
         if len(meta_wrap[0]):
             search_list = [meta_data for meta_data in meta_wrap[0]]
 
-        body = {"totalcount": total_cnt[0][0]['cnt'], "searchList": search_list}
+        body = {"totalcount": total_cnt[0][0]
+                ['cnt'], "searchList": search_list}
         result = {"result": 1, "errorMessage": "", "data": body}
 
     return result

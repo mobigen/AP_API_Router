@@ -19,7 +19,7 @@ def api(common_list: List[commonMultiInsert]) -> Dict:
             f'INSERT INTO {common.table_nm} ({columns}) VALUES ({values});')
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         db.multiple_excute(insert_query_list)
     except Exception:
         except_name = get_exception_info()

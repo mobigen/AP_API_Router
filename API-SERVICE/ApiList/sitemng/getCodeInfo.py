@@ -9,7 +9,7 @@ def api(groupId) -> Dict:
                                 FROM tb_code_detail \
                             WHERE code_group_id = {convert_data(groupId)};'
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         code_list = db.select(get_code_info_query)
     except Exception:
         except_name = get_exception_info()

@@ -36,7 +36,7 @@ def api(insert: NmIdList) -> Dict:
                      WHERE item_id IS NOT NULL"
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
 
         nm_id_set = {_["nm_id"] for _ in db.select(nm_id_query)[0]}
         req_nm_ids = set(insert.nm_id_list)

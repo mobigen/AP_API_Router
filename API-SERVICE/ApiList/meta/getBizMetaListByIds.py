@@ -9,16 +9,17 @@ def api(datasetIdList: str) -> Dict:
     v_meta_wrap_query = 'SELECT * FROM v_biz_meta_wrap WHERE biz_dataset_id in ({0})'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         dataset_id_list = ','.join(
-            [convert_data(biz_dataset_id) for biz_dataset_id in datasetIdList.split(",")]
+            [convert_data(biz_dataset_id)
+             for biz_dataset_id in datasetIdList.split(",")]
         )
         meta_wrap = db.select(v_meta_wrap_query.format(dataset_id_list))
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
     else:
-        result = make_res_msg(1,"",meta_wrap[0],[])
+        result = make_res_msg(1, "", meta_wrap[0], [])
         result["data"].pop("header")
         result["data"]["list"] = result["data"]["body"]
         del result["data"]["body"]

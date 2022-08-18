@@ -42,7 +42,7 @@ def api(excute_list: List[commonExecute]) -> Dict:
         for excute in excute_list:
             query_list.append(make_query(excute))
 
-        db = connect_db(config.db_info)
+        db = connect_db()
         time_zone = 'Asia/Seoul'
         db.execute(f"SET TIMEZONE={convert_data(time_zone)}")
         db.multiple_excute(query_list)

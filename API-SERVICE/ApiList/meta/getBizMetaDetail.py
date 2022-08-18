@@ -9,7 +9,7 @@ def api(datasetId: str = None) -> Dict:
     v_meta_wrap_query = f'SELECT * FROM v_biz_meta_wrap WHERE biz_dataset_id = {convert_data(datasetId)}'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         meta_wrap = db.select(v_meta_wrap_query)
         meta_map = db.select(v_meta_map_query)
 

@@ -15,7 +15,7 @@ def api(common: commonDelete) -> Dict:
     delete_query = f'DELETE FROM {common.table_nm} WHERE {common.key} = {convert_data(common.data.get(common.key))};'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         db.execute(delete_query)
     except Exception:
         except_name = get_exception_info()

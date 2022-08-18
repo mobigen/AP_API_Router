@@ -17,7 +17,7 @@ def api(table_nm: str, perPage: int, curPage: int) -> Dict:
     total_cnt_query = f"SELECT count(*) AS totalCount FROM {table_nm};"
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         use_data, _ = db.select(get_query)
         total_cnt = db.select(total_cnt_query)
     except Exception:

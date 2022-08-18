@@ -2,23 +2,17 @@ import psycopg2
 from typing import List, Dict, Tuple, Any
 from fastapi.logger import logger
 from Utils.DataBaseUtil import make_insert_query, make_update_query, make_delete_query
+from ApiRoute.ApiRouteConfig import config
 
 
 class PostgresManager:
-    def __init__(self, host: str, port: str, user: str, password: str, database: str, schema: str) -> None:
-        self.host = host
-        self.port = port
-        self.user = user
-        self.password = password
-        self.database = database
-        self.schema = schema
+    def __init__(self) -> None:
         self.conn = self.connect()
         self.cursor = self.conn.cursor()
 
     def connect(self):
-        conn = psycopg2.connect(host=self.host, port=self.port, user=self.user,
-                                password=self.password, database=self.database,
-                                options=f"-c search_path={self.schema}")
+        conn = config.conn_pool.getconn()
+
         logger.info("PostgresManager Connect.")
         return conn
 

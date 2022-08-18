@@ -18,7 +18,7 @@ def api(update: UpdateCategory) -> Dict:
                     node_nm = {convert_data(update.node_nm)}\
                 WHERE node_id = {convert_data(update.node_id)};'
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         db.execute(query)
     except Exception:
         except_name = get_exception_info()

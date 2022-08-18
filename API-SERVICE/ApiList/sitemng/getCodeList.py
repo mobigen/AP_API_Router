@@ -15,7 +15,7 @@ def api(perPage: int,
     code_list_query = "SELECT *, row_number () OVER (ORDER BY {0}) AS rowNo FROM tb_code_detail"
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         common_condition = f" WHERE code_group_id = {convert_data(gropId)}"
         code_list_query = code_list_query + common_condition
         total_cnt_query = total_cnt_query + common_condition

@@ -76,7 +76,7 @@ def make_connection_pool(db_info):
     return conn_pool
 
 
-def connect_db(db_info):
+def connect_db():
     db = PostgresManager()
     return db
 

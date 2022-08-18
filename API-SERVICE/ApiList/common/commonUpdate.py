@@ -18,7 +18,7 @@ def api(common: commonUpdate) -> Dict:
                                               WHERE {common.key} = {convert_data(common.data.get(common.key))};'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         db.execute(update_query)
     except Exception:
         except_name = get_exception_info()

@@ -18,7 +18,7 @@ def api(use_board_data: updateUseBoardData) -> Dict:
                                     WHERE biz_dataset_id = {convert_data(use_board_data.biz_dataset_id)};'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         biz_dataset, _ = db.select(get_biz_meta_query)
         biz_dataset = biz_dataset[0]
 

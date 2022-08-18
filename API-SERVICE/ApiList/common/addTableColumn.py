@@ -64,7 +64,7 @@ xid : 트랜잭션 식별자 타입
 
 def api(add_table_columns: List[addTableColumn]) -> Dict:
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
 
         for add_table_column in add_table_columns:
             table_name = add_table_column.table_nm.lower()

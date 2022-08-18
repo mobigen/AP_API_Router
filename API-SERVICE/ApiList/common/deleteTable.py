@@ -19,7 +19,7 @@ def api(delete_table: deleteTable) -> Dict:
     drop_query = f'DROP TABLE {table_name};'
     delete_board_name = f'DELETE FROM tb_table_list WHERE table_nm = {convert_data(table_name)};'
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         db.execute(drop_query)
         db.execute(delete_board_name)
     except Exception:

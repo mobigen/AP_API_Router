@@ -10,7 +10,7 @@ def api(table_nm: str) -> Dict:
                                               WHERE table_id = (SELECT id FROM tb_table_list WHERE table_nm = {convert_data(table_nm)});"
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         use_data, _ = db.select(get_query)
     except Exception:
         except_name = get_exception_info()

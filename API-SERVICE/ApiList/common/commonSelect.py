@@ -109,7 +109,7 @@ def api(select_info: commonMatchSelect) -> Dict:
     logger.info(f'Get Query : {get_query}')
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         select_data, _ = db.select(get_query)
         if select_info.page_info:
             total_cnt = db.select(total_cnt_query)

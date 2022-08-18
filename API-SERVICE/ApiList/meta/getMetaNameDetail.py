@@ -11,7 +11,7 @@ def api(nameId: str = None) -> Dict:
         query = f'SELECT * FROM tb_biz_meta_name WHERE nm_id = {convert_data(nameId)}'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         meta_name = db.select(query)
     except Exception:
         except_name = get_exception_info()

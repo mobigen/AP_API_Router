@@ -70,7 +70,7 @@ def api(create_table: createTable) -> Dict:
     table_name = create_table.table_nm.lower()
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         ddl = make_ddl(category, table_name, default_info)
         db.execute(f"DROP TABLE IF EXISTS {table_name}")
         db.execute(ddl)

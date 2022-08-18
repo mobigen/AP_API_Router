@@ -20,7 +20,7 @@ def api(del_table_column: delTableColumn) -> Dict:
     del_column_query = f'ALTER TABLE {table_name} DROP {del_table_column.eng_nm};'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         db.execute(del_column_query)
 
         get_table_id_query = f'SELECT id FROM tb_table_list WHERE table_nm = {convert_data(table_name)};'

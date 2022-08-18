@@ -1,11 +1,10 @@
-from cgitb import reset
 from fastapi.logger import logger
 from typing import Dict, List
 import importlib.util
 from fastapi import APIRouter
 from ApiRoute.ApiRouteConfig import config
 from Utils.DataBaseUtil import convert_data
-from Utils.CommonUtil import connect_db, make_res_msg, get_token_info, save_file_for_reload, get_exception_info, delete_headers
+from Utils.CommonUtil import connect_db, make_res_msg, save_file_for_reload, get_exception_info, delete_headers
 from Utils.RouteUtil import bypass_msg, call_remote_func
 from pydantic import BaseModel
 from starlette.requests import Request
@@ -69,7 +68,7 @@ class ApiRoute:
         self.router.add_api_route(
             "/api/reload", self.reload_api, methods=["GET"], tags=["API Info Reload"])
 
-        db = connect_db(config.db_info)
+        db = connect_db()
         api_info, _ = db.select('SELECT * FROM tb_api_info;')
 
         config.api_server_info, _ = db.select(
@@ -97,13 +96,11 @@ class ApiRoute:
                                                 {convert_data(api_server_info["ip_adr"])}, \
                                                 {convert_data(api_server_info["domn_nm"])});'
         try:
-            db = connect_db(config.db_info)
+            db = connect_db()
             db.execute(api_server_info_query)
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             config.api_server_info, _ = db.select(
                 'SELECT * FROM tb_api_server_info;')
@@ -117,13 +114,11 @@ class ApiRoute:
                                                              domn_nm={convert_data(api_server_info["domn_nm"])} \
                                                          WHERE nm={convert_data(api_server_info["nm"])};'
         try:
-            db = connect_db(config.db_info)
+            db = connect_db()
             db.execute(api_server_info_query)
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             config.api_server_info, _ = db.select(
                 'SELECT * FROM tb_api_server_info;')
@@ -133,14 +128,12 @@ class ApiRoute:
 
     def get_server_info_list(self) -> Dict:
         try:
-            db = connect_db(config.db_info)
+            db = connect_db()
             api_server_info, _ = db.select(
                 'SELECT * FROM tb_api_server_info ORDER BY nm;')
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             result = {"api_server_info": api_server_info}
 
@@ -148,14 +141,12 @@ class ApiRoute:
 
     def get_server_info(self, nm: str) -> Dict:
         try:
-            db = connect_db(config.db_info)
+            db = connect_db()
             api_server_info, _ = db.select(
                 f'SELECT * FROM tb_api_server_info WHERE nm = {convert_data(nm)};')
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             result = {"api_server_info": api_server_info}
 
@@ -163,14 +154,12 @@ class ApiRoute:
 
     def del_server_info(self, nm: str) -> Dict:
         try:
-            db = connect_db(config.db_info)
+            db = connect_db()
             db.execute(
                 f'DELETE FROM tb_api_server_info WHERE nm = {convert_data(nm)};')
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             config.api_server_info, _ = db.select(
                 'SELECT * FROM tb_api_server_info;')
@@ -185,19 +174,16 @@ class ApiRoute:
         return result
 
     def get_api_list(self) -> Dict:
-        # logger.error("TEST")
         try:
-            db = connect_db(config.db_info)
+            db = connect_db()
 
             api_info, info_column_names = db.select(
                 f'SELECT api_nm, ctgry, route_url, url, meth, cmd, mode FROM tb_api_info ORDER BY no;')
             api_params, params_column_names = db.select(
                 f'SELECT * FROM tb_api_params ORDER BY api_nm, nm;')
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             api_info = make_res_msg("", "", api_info, info_column_names)
             api_params = make_res_msg("", "", api_params, params_column_names)
@@ -209,7 +195,7 @@ class ApiRoute:
         api_params_list = []
         params_columns = []
         try:
-            db = connect_db(config.db_info)
+            db = connect_db()
             api_info, info_column_names = db.select(
                 f'SELECT api_nm, ctgry, route_url, url, meth, cmd, mode FROM tb_api_info WHERE ctgry = {convert_data(ctgry)} ORDER BY no;')
 
@@ -221,10 +207,8 @@ class ApiRoute:
                     api_params_list.extend(api_params)
                     params_columns = params_column_names
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             api_info = make_res_msg("", "", api_info, info_column_names)
             api_params = make_res_msg(
@@ -235,16 +219,14 @@ class ApiRoute:
 
     def get_api(self, api_nm: str) -> Dict:
         try:
-            db = connect_db(config.db_info)
+            db = connect_db()
             api_info, info_column_names = db.select(
                 f'SELECT * FROM tb_api_info WHERE api_nm = {convert_data(api_nm)};')
             api_params, params_column_names = db.select(
                 f'SELECT * FROM tb_api_params WHERE api_nm = {convert_data(api_nm)} ORDER BY nm;')
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             api_info = make_res_msg("", "", api_info, info_column_names)
             api_params = make_res_msg("", "", api_params, params_column_names)
@@ -254,7 +236,7 @@ class ApiRoute:
 
     def set_api(self, api_info: ApiInfo) -> Dict:
         try:
-            db = connect_db(config.db_info)
+            db = connect_db()
 
             insert_api_info = {}
             insert_api_params = []
@@ -278,10 +260,8 @@ class ApiRoute:
                                                     {convert_data(param["data_type"])}, {convert_data(param["deflt_val"])});'
                 db.execute(api_params_query)
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             save_file_for_reload()
             result = {"result": 1, "errorMessage": ""}
@@ -290,7 +270,7 @@ class ApiRoute:
 
     def update_api(self, api_info: ApiInfo) -> Dict:
         try:
-            db = connect_db(config.db_info)
+            db = connect_db()
 
             insert_api_info = {}
             insert_api_params = []
@@ -318,10 +298,8 @@ class ApiRoute:
                 db.execute(api_params_query)
 
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             save_file_for_reload()
             result = {"result": 1, "errorMessage": ""}
@@ -330,16 +308,12 @@ class ApiRoute:
 
     def del_api(self, api_nm: str) -> Dict:
         try:
-            db = connect_db(config.db_info)
-
+            db = connect_db()
             db.execute(
                 f'DELETE FROM tb_api_info WHERE api_nm = {convert_data(api_nm)};')
-
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             save_file_for_reload()
             result = {"result": 1, "errorMessage": ""}
@@ -351,25 +325,19 @@ class ApiRoute:
         method = request.method
         content_type = request.headers.get("Content-Type")
 
-        logger.error(f"BEFORE : {dict(request.headers)}")
         headers = delete_headers(dict(request.headers), [
             "content-length", "user-agent"])
-        logger.info(f'Request Headers : {headers}')
-
-        user_info = get_token_info(request.headers)
 
         try:
-            db = connect_db(config.db_info)
+            db = connect_db()
             api_info, _ = db.select(
                 f'SELECT * FROM tb_api_info WHERE route_url = {convert_data(route_url)};')
             api_info = api_info[0]
             api_params, _ = db.select(
                 f'SELECT * FROM tb_api_params WHERE api_nm = {convert_data(api_info["api_nm"])};')
         except Exception:
-            ex_type, ex_value, trace_log = get_exception_info()
-            logger.error("Exception type : {}\nException message : {}\nTrace Log : {}"
-                         .format(ex_type, str(ex_value).strip(), trace_log))
-            result = {"result": 0, "errorMessage": ex_type}
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
         else:
             if len(api_info) == 0:
                 return {"result": 0, "errorMessage": "This is an unregistered API."}
