@@ -29,7 +29,7 @@ db_info = {
 
 
 def table_list(request):
-    table_list = TableInfo.objects.order_by("-table_nm")
+    table_list = TableInfo.objects.order_by("-schema")
 
     if request.method == "POST":
         form = TableInfoForm(request.POST)
@@ -40,7 +40,7 @@ def table_list(request):
                 table_nm = request.POST.get("table_nm")
                 schema = request.POST.get("schema")
                 db.execute(
-                    f'CREATE TABLE {schema}.{table_nm} ( idx serial4 not null );')
+                    f'CREATE TABLE {schema}.{table_nm} ( idx uuid DEFAULT uuid_generate_v4() );')
             except Exception as err:
                 messages.error(request, err)
             else:
