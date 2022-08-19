@@ -68,5 +68,7 @@ class PostgresManager:
         self.conn.commit()
 
     def __del__(self) -> None:
+        logger.info("DB CLOSE")
         self.cursor.close()
-        self.conn.close()
+        # self.conn.close()
+        config.conn_pool.putconn(self.conn)
