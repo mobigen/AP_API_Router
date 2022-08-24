@@ -1,4 +1,5 @@
 from typing import Union, Optional, List, Dict, Any
+from Utils.DataBaseUtil import convert_data
 
 
 def is_space(text: str) -> int:
@@ -50,3 +51,27 @@ def set_dict_list(option_items: Union[list, dict],
         query_list.append(query)
     return query_list
 
+
+def update_els_data(db: object, es: object, st: str, et: str) -> None:
+    """
+    CronJob update to elasticsearch index data
+    :param db: postgresql db connector object
+    :param es: elasticsearch object
+    :param st: start time, type str
+    :param et: end time, type str
+    :return: None
+    """
+    db_query = f"SELECT * FROM v_biz_meta_wrap " \
+               f"WHERE to_date(updt_date,'YY-MM-DD') " \
+               f"BETWEEN {convert_data(st)} AND {convert_data(et)}"
+
+    meta_wrap_list = db.select(db_query)[0]
+    bulk_meta_item = list()
+
+    for meta_wrap in meta_wrap_list:
+        test_dict = dict()
+        test_dict["_id"] = meta_wrap["biz_dataset_id"]
+        test_dict["_source"] = meta_wrap
+        bulk_meta_item.append(test_dict)
+
+    es.insert_bulk(bulk_meta_item)
