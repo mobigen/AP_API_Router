@@ -61,7 +61,7 @@ def update_els_data(db: object, es: object, st: str, et: str) -> None:
     :param et: end time, type str
     :return: None
     """
-    db_query = f"SELECT * FROM v_biz_meta_wrap " \
+    db_query = f"SELECT * FROM v_biz_meta_info " \
                f"WHERE to_date(updt_date,'YY-MM-DD') " \
                f"BETWEEN {convert_data(st)} AND {convert_data(et)}"
 
