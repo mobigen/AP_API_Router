@@ -1,5 +1,4 @@
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
 from Utils.DataBaseUtil import convert_data
 
@@ -8,7 +7,7 @@ def api(datasetId: str = None) -> Dict:
     v_meta_dq_query = f'SELECT * FROM tb_meta_detail_dq WHERE biz_dataset_id = {convert_data(datasetId)}'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         meta_dq = db.select(v_meta_dq_query)
     except Exception:
         except_name = get_exception_info()

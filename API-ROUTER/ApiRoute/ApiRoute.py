@@ -4,7 +4,7 @@ import importlib.util
 from fastapi import APIRouter
 from ApiRoute.ApiRouteConfig import config
 from Utils.DataBaseUtil import convert_data
-from Utils.CommonUtil import connect_db, make_res_msg, get_token_info, save_file_for_reload, get_exception_info, delete_headers
+from Utils.CommonUtil import connect_db, make_res_msg, save_file_for_reload, get_exception_info, delete_headers
 from Utils.RouteUtil import bypass_msg, call_remote_func
 from pydantic import BaseModel
 from starlette.requests import Request
@@ -64,6 +64,9 @@ class ApiRoute:
             "/api/updateServerInfo", self.update_server_info, methods=["POST"], tags=["API Server Info"])
         self.router.add_api_route(
             "/api/delServerInfo", self.del_server_info, methods=["POST"], tags=["API Server Info"])
+
+        self.router.add_api_route(
+            "/api/reload", self.reload_api, methods=["GET"], tags=["API Info Reload"])
 
         db = connect_db()
         api_info, _ = db.select('SELECT * FROM tb_api_info;')
@@ -164,8 +167,13 @@ class ApiRoute:
 
         return result
 
+    def reload_api(self):
+        logger.info("Reload API Info")
+        save_file_for_reload()
+        result = {"result": 1, "errorMessage": ""}
+        return result
+
     def get_api_list(self) -> Dict:
-        # logger.error("TEST")
         try:
             db = connect_db()
 

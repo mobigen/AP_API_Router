@@ -1,5 +1,4 @@
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
 
 
@@ -7,7 +6,7 @@ def api() -> Dict:
     get_category_list = "SELECT * FROM tb_category;"
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         category_list, _ = db.select(get_category_list)
 
         node_dict = {}

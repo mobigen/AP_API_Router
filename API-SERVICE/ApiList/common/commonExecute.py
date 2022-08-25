@@ -1,19 +1,19 @@
 from typing import Dict, List, Optional
-from ApiService.ApiServiceConfig import config
+from pydantic import BaseModel
 from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
-from pydantic import BaseModel
 
 
-class commonMultiExcute(BaseModel):
+class commonExecute(BaseModel):
     method: str
     table_nm: str
     data: Dict
-    key: Optional[str] = None
+    key: Optional[List[str]] = None
 
 
-def make_query(excute: commonMultiExcute):
+def make_query(excute: commonExecute):
     method = excute.method
+    where = []
     query = None
     if method == "INSERT":
         columns = ", ".join(excute.data.keys())
@@ -22,22 +22,28 @@ def make_query(excute: commonMultiExcute):
     elif method == "UPDATE":
         update_data = [
             f'{key} = {convert_data(value)}' for key, value in excute.data.items()]
+        for key in excute.key:
+            where.append(f'{key} = {convert_data(excute.data.get(key))}')
         query = f'UPDATE {excute.table_nm} SET {",".join(update_data)}\
-                                           WHERE {excute.key} = {convert_data(excute.data.get(excute.key))};'
+                                           WHERE {" AND ".join(where)};'
     elif method == "DELETE":
-        query = f'DELETE FROM {excute.table_nm} WHERE {excute.key} = {convert_data(excute.data.get(excute.key))};'
+        for key in excute.key:
+            where.append(f'{key} = {convert_data(excute.data.get(key))}')
+        query = f'DELETE FROM {excute.table_nm} WHERE {" AND ".join(where)};'
     else:
         raise ValueError(f"Invalid Method. ({method}))")
     return query
 
 
-def api(excute_list: List[commonMultiExcute]) -> Dict:
+def api(excute_list: List[commonExecute]) -> Dict:
     query_list = []
     try:
         for excute in excute_list:
             query_list.append(make_query(excute))
 
-        db = connect_db(config.db_info)
+        db = connect_db()
+        time_zone = 'Asia/Seoul'
+        db.execute(f"SET TIMEZONE={convert_data(time_zone)}")
         db.multiple_excute(query_list)
     except Exception:
         except_name = get_exception_info()

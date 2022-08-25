@@ -1,5 +1,4 @@
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_exception_info
 
 
@@ -14,7 +13,7 @@ def api(perPage: int,
     v_meta_wrap_query = "SELECT *, row_number () OVER (ORDER BY {0}) AS rowNo FROM v_biz_meta_wrap"
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         search_word_list = [keyword1, keyword2, keyword3]
         if any(search_word_list):
             order_condition = []

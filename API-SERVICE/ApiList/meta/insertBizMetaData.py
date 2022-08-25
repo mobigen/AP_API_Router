@@ -1,6 +1,5 @@
 import uuid
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
@@ -35,7 +34,7 @@ def api(biz_meta_data: insertBizMetaData) -> Dict:
     get_column_info = 'SELECT item_id, eng_nm FROM v_biz_meta;'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         column_info, _ = db.select(get_column_info)
 
         biz_meta_data = biz_meta_data.dict()

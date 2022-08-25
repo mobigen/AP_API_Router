@@ -1,5 +1,4 @@
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from io import StringIO
@@ -20,7 +19,7 @@ def api(datasetId: str = None) -> Dict:
     v_meta_sample_query = f'SELECT * FROM tb_meta_detail_sampledata WHERE biz_dataset_id = {convert_data(datasetId)}'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         meta_sample, _ = db.select(v_meta_sample_query)
         data_list, column_list = csv_to_dict(meta_sample[0]["sample_contents"])
     except Exception:

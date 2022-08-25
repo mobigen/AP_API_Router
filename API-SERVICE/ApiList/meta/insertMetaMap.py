@@ -1,7 +1,6 @@
 import uuid
 from typing import Dict
 from pydantic import BaseModel
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 
@@ -41,7 +40,7 @@ def api(insert: NmIdList) -> Dict:
                           FROM tb_biz_meta\
                           GROUP BY biz_dataset_id"
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
 
         nm_id_set = {_["nm_id"] for _ in db.select(nm_id_query)[0]}
         req_nm_ids = set(insert.nm_id_list)

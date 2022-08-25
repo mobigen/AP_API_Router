@@ -1,5 +1,4 @@
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel, Field
@@ -22,7 +21,7 @@ def api(update: UpdatetMetaName) -> Dict:
                 WHERE nm_id = {convert_data(update.nm_id)};'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         db.execute(query)
     except Exception:
         except_name = get_exception_info()

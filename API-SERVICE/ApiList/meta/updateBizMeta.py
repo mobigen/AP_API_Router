@@ -1,5 +1,4 @@
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
@@ -12,7 +11,7 @@ class UpdateBizMeta(BaseModel):
 
 def api(update: UpdateBizMeta) -> Dict:
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         for data in update.dataList:
             query = f'UPDATE tb_biz_meta\
                         SET item_id   = {convert_data(data["itemId"])},\

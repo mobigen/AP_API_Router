@@ -1,5 +1,4 @@
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
 from Utils.DataBaseUtil import convert_data
 
@@ -10,7 +9,7 @@ def api(apyr: str) -> Dict:
                                               WHERE table_id = (SELECT id FROM tb_board_name WHERE table_nm = 'tb_board_use');"
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         use_data, _ = db.select(get_use_data_query)
     except Exception:
         except_name = get_exception_info()

@@ -1,5 +1,4 @@
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
 
 
@@ -15,7 +14,7 @@ def api(perPage: int, curPage: int) -> Dict:
 
     total_cnt_query = "SELECT count(*) AS totalCount FROM tb_board_use;"
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         use_data, _ = db.select(get_use_data_query)
         total_cnt = db.select(total_cnt_query)
     except Exception:

@@ -1,5 +1,4 @@
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
 
 
@@ -22,7 +21,7 @@ def api() -> Dict:
                       ORDER BY tbmn.nm_id;"
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         meta_name = db.select(meta_name_query)
     except Exception:
         except_name = get_exception_info()

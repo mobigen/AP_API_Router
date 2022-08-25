@@ -1,5 +1,4 @@
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel
@@ -18,7 +17,7 @@ def api(use_board_data: updateUseBoardData) -> Dict:
                                     WHERE biz_dataset_id = {convert_data(use_board_data.biz_dataset_id)};'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         biz_dataset, _ = db.select(get_biz_meta_query)
         biz_dataset = biz_dataset[0]
 

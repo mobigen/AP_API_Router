@@ -1,6 +1,5 @@
 import uuid
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 
@@ -12,7 +11,7 @@ def api(biz_meta_list: list) -> Dict:
     biz_meta_query = 'SELECT item_id as itemId, item_val as itemVal FROM tb_biz_meta;'
 
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         for biz_meta in biz_meta_list:
             item_id, item_val = tuple(biz_meta.values())
             query = f'INSERT INTO tb_biz_meta (biz_dataset_id, item_id, item_val ) \

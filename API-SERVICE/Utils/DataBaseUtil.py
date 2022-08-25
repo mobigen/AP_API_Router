@@ -3,7 +3,13 @@ from typing import List, Dict
 
 
 def convert_data(data) -> str:
-    return f'\'{str(data)}\''
+    data = str(data)
+    if data:
+        if data == "now()" or data == "NOW()":
+            return data
+        if data[0] == "`":
+            return data[1:]
+    return f'\'{data.strip()}\''
 
 
 def make_table_info_query(db: str, table: str) -> str:

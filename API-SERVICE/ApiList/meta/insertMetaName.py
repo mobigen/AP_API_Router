@@ -1,7 +1,6 @@
 import uuid
 import string
 from typing import Dict
-from ApiService.ApiServiceConfig import config
 from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from pydantic import BaseModel, Field
@@ -24,7 +23,7 @@ def api(insert: InsertMetaName) -> Dict:
     symbol_list.remove("-")
     select_eng_nm = 'SELECT eng_nm FROM tb_biz_meta_name'
     try:
-        db = connect_db(config.db_info)
+        db = connect_db()
         eng_nm_list = db.select(select_eng_nm)[0]
 
         # 중복 체크
