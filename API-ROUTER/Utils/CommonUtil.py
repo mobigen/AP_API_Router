@@ -7,8 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 from ApiRoute.ApiRouteConfig import config
 from ConnectManager import PostgresManager
-from retry import retry
-import psycopg2
+from psycopg2 import pool
 import jwt
 import sys
 import traceback
@@ -55,22 +54,26 @@ def prepare_config() -> None:
     config.server_host=args.host
     config.server_port=args.port
     config.db_info=api_router_cfg[config.db_type]
+    config.conn_pool = make_connection_pool(config.db_info)
     config.remote_info=api_router_cfg["remote"]
     config.secret_info=api_router_cfg["secret_info"]
 
+def make_connection_pool(db_info):
+    conn_pool = pool.SimpleConnectionPool(1, 20, user=db_info["user"],
+                                          password=db_info["password"],
+                                          host=db_info["host"],
+                                          port=db_info["port"],
+                                          database=db_info["database"],
+                                          options=f'-c search_path={db_info["schema"]}', connect_timeout=10)
+    return conn_pool
 
-@ retry(psycopg2.OperationalError, delay = 1, tries = 3)
-def connect_db(db_info):
-    db=PostgresManager(host = db_info["host"], port = db_info["port"],
-                       user = db_info["user"], password = db_info["password"],
-                       database = db_info["database"], schema = db_info["schema"])
+def connect_db():
+    db = PostgresManager()
     return db
-
 
 def save_file_for_reload():
     with open(__file__, "a") as fd:
         fd.write(" ")
-
 
 def make_res_msg(result, err_msg, data = None, column_names = None):
     header_list=[]
@@ -85,7 +88,6 @@ def make_res_msg(result, err_msg, data = None, column_names = None):
                    "body": data, "header": header_list}
     return res_msg
 
-
 def get_token_info(headers: starlette.datastructures.Headers):
     user_info = None
     if config.secret_info["name"] in headers:
@@ -97,7 +99,6 @@ def get_token_info(headers: starlette.datastructures.Headers):
     logger.info(f'User Info : {user_info}')
     return user_info
 
-
 def get_exception_info():
     ex_type, ex_value, ex_traceback = sys.exc_info()
     trace_back = traceback.extract_tb(ex_traceback)
@@ -105,7 +106,6 @@ def get_exception_info():
     logger.error(
         f'\n- Exception Type : {ex_type}\n- Exception Message : {str(ex_value).strip()}\n- Exception Log : \n{trace_log}')
     return ex_type.__name__
-
 
 def delete_headers(headers: Dict, delete_header: List) -> Dict:
     for delete in delete_header:

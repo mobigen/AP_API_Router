@@ -3,6 +3,7 @@ import aiohttp
 from fastapi.logger import logger
 from urllib.parse import ParseResult
 from ApiRoute.ApiRouteConfig import config
+from Utils.CommonUtil import get_exception_info
 from typing import Dict
 
 
@@ -53,7 +54,8 @@ async def bypass_msg(api_info, params_query, body, headers):
 
 async def run_cmd(cmd: str):
     async with asyncssh.connect(host=config.remote_info["host"], port=int(config.remote_info["port"]),
-                                username=config.remote_info["id"], password=config.remote_info["password"]) as conn:
+                                username=config.remote_info["id"], password=config.remote_info["password"], known_hosts=None) as conn:
+        logger.info(f'Run Cmd : {cmd}')
         result = await conn.run(cmd, check=True)
         logger.info(f'Command Result : {result.stdout}')
     return result.stdout
@@ -61,23 +63,26 @@ async def run_cmd(cmd: str):
 
 async def call_remote_func(api_info, api_params, input_params) -> Dict:
     msg_type = api_info["msg_type"]
-
+    logger.error(f'IN PARAM : {input_params}, API PARAM : {api_params}')
     command_input = ""
     if msg_type == "JSON":
         for param in api_params:
             try:
-                data = input_params[param["param_name"]]
-                command_input += f' --{param["param_name"]} {data}'
+                data = input_params[param["nm"]]
+                if not data:
+                    data = param["deflt_val"]
+                command_input += f' --{param["nm"]} {data}'
             except KeyError:
                 logger.error(
-                    f'parameter set default value. [{param["param_name"]}]')
-                command_input += f' --{param["param_name"]} {param["default_value"]}'
+                    f'parameter set default value. [{param["nm"]}]')
+                command_input += f' --{param["nm"]} {param["deflt_val"]}'
 
     cmd = f'{api_info["cmd"]} {command_input}'
 
     try:
         result = await run_cmd(cmd)
-    except (OSError, asyncssh.Error) as exc:
-        logger.error(f'SSH connection failed: {str(exc)}')
+    except Exception:
+        except_name = get_exception_info()
+        logger.error(f'SSH connection failed: {except_name}')
 
     return eval(result)
