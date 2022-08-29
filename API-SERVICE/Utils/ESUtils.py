@@ -27,16 +27,6 @@ def div_keyword(keyword_list: list) -> Dict[Any,Any]:
     return keyword_dict
 
 
-def set_find_option(find_option: str) -> List[Dict[Any, Any]]:
-    """
-    :param find_option: type str, ex) "key1:val1,key2:val2"
-    :return: type list , ex) [{key1: val1, key2: val2}]
-    """
-    find_option = find_option.replace("score", "_score").split(",")
-    find_option = [{key: value for key, value in [option_item.split(":") for option_item in find_option]}]
-    return find_option
-
-
 def set_dict_list(option_items: Union[list, dict],
                   operator: str, field: Optional[str] = None
                   ) -> List[Dict[Any, Any]]:

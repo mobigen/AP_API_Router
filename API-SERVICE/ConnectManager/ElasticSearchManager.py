@@ -1,6 +1,6 @@
 from typing import Optional, Union, Dict, Any
 from elasticsearch import Elasticsearch, helpers
-from Utils.ESUtils import set_dict_list, make_query, set_find_option
+from Utils.ESUtils import set_dict_list, make_query
 
 
 class ESSearch:
@@ -17,8 +17,8 @@ class ESSearch:
         :param host: elasticsearch host ip addr, default = localhost
         :param port: elasticsearch ip port number, default = 9200
         :param index:
-        :param cur_from: elasticsearch default value = 0
-        :param size: elasticsearch default value = 10
+        :param cur_from: curPage, elasticsearch default value = 0
+        :param size: perPage, elasticsearch default value = 10
         """
         self.host = host
         self.port = port
@@ -34,32 +34,30 @@ class ESSearch:
 
     def set_body(self) -> Dict[Any,Any]:
         self.body = {
-            "from": 0,
-            "size": 10,
+            "from": self.cur_from,
+            "size": self.size,
             "sort": [],
             "query": {"bool": dict()}
         }
         return self.body
 
-    def set_sort(self, sort: str) -> None:
-        """
-        :param sort:  type str, ex) "field_name:asc,field_name:desc"
-        """
-        self.body["sort"] = set_find_option(sort)
+    def set_sort(self, sort: list) -> None:
+        self.body["sort"] = sort
 
     def set_pagination(self) -> None:
         self.body["from"] = self.cur_from
         self.body["size"] = self.size
 
-    def set_filter(self, filter_option: str) -> None:
-        """
-        :param filter_option:  type str, ex) "key1:val1,key2:val2"
-        """
-        filter_list = set_find_option(filter_option)
-        if len(filter_list):
-            self.body["query"]["bool"]["filter"] = set_dict_list(filter_list[0], "match")
+    def set_filter(self, filter_option: dict) -> None:
+        filter_list = []
+        if "data_srttn" in filter_option.keys() and "전체" in filter_option["data_srttn"]:
+            filter_option.pop("data_srttn")
 
-    def set_match(self, keyword_dict: dict, operator: Optional[str] = None, field: str = "data_nm") -> None:
+        for option, items in filter_option.items():
+            filter_list.extend([make_query("match",option,item) for item in items])
+        self.body["query"]["bool"]["filter"] = filter_list
+
+    def set_match(self, keyword_dict: dict, operator: Optional[str] = "AND", field: str = "data_nm") -> None:
         """
         :param keyword_dict: type dict
         :param field: search field, type str
@@ -69,7 +67,7 @@ class ESSearch:
             must_query_list = []
             option = "match"
 
-            if len(keyword_dict[option]) and operator is None:
+            if len(keyword_dict[option]) and operator.upper() == "AND":
                 must_query_list = set_dict_list(keyword_dict[option], option, field)
 
             if len(keyword_dict["match_phrase"]):
