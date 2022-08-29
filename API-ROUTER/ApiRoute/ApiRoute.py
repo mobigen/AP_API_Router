@@ -178,7 +178,7 @@ class ApiRoute:
             db = connect_db()
 
             api_info, info_column_names = db.select(
-                f'SELECT api_nm, ctgry, route_url, url, meth, cmd, mode FROM tb_api_info ORDER BY no;')
+                f'SELECT api_nm, ctgry, route_url, url, meth, cmd, mode FROM tb_api_info;')
             api_params, params_column_names = db.select(
                 f'SELECT * FROM tb_api_params ORDER BY api_nm, nm;')
         except Exception:
@@ -197,7 +197,7 @@ class ApiRoute:
         try:
             db = connect_db()
             api_info, info_column_names = db.select(
-                f'SELECT api_nm, ctgry, route_url, url, meth, cmd, mode FROM tb_api_info WHERE ctgry = {convert_data(ctgry)} ORDER BY no;')
+                f'SELECT api_nm, ctgry, route_url, url, meth, cmd, mode FROM tb_api_info WHERE ctgry = {convert_data(ctgry)};')
 
             for info in api_info:
                 logger.info(f'INFO : {info["api_nm"]}')
