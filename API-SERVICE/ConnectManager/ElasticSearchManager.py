@@ -50,8 +50,8 @@ class ESSearch:
 
     def set_filter(self, filter_option: dict) -> None:
         filter_list = []
-        if "data_srttn" in filter_option.keys() and "전체" in filter_option["data_srttn"]:
-            filter_option.pop("data_srttn")
+        # if "data_srttn" in filter_option.keys() and "전체" in filter_option["data_srttn"]:
+        #     filter_option.pop("data_srttn")
 
         for option, items in filter_option.items():
             filter_list.extend([make_query("match",option,item) for item in items])

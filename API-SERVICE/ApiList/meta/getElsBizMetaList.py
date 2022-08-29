@@ -27,17 +27,20 @@ def api(perPage: int = 12,
         es.set_sort(sortOption)
 
         if len(filterOption):
-            count_name = data_srttn[dataSrttn][0]
             es.set_filter(filterOption)
+
+        if len(dataSrttn) and dataSrttn != "전체":
+            count_name = data_srttn[dataSrttn][0]
             filter_srttn = make_query("match","data_srttn",dataSrttn)
             es.body["query"]["bool"]["filter"].append(filter_srttn)
             data_srttn.pop(dataSrttn)
         else:
             count_name = "totalCount"
 
-        data = get_srttn_count(data_srttn,es)
         es.set_match(keyword_dict,matchOption)
         biz_meta_elk = es.search()
+
+        data = get_srttn_count(data_srttn,es)
 
     except Exception:
         except_name = get_exception_info()
