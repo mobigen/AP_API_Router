@@ -65,3 +65,15 @@ def update_els_data(db: object, es: object, st: str, et: str) -> None:
         bulk_meta_item.append(test_dict)
 
     es.insert_bulk(bulk_meta_item)
+
+
+def get_srttn_count(data_srttn:dict,es: object):
+    cnt_dict = dict()
+
+    for ko_nm,cnt_nm in data_srttn.items():
+        es.body["query"]["bool"]["filter"][-1] = make_query("match","data_srttn",ko_nm)
+        search_result = es.search()
+        cnt_dict[cnt_nm[0]] = search_result["hits"]["total"]["value"]
+
+    return cnt_dict
+
