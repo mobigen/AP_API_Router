@@ -1,8 +1,12 @@
 from typing import Dict, List, Optional
-from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
-from Utils.DataBaseUtil import convert_data
+from fastapi import Depends
 from pydantic import BaseModel
 from fastapi.logger import logger
+import logging
+from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info, get_transaciton_id
+from Utils.DataBaseUtil import convert_data
+
+trace_logger = logging.getLogger("trace")
 
 
 class joinInfo(BaseModel):
@@ -101,12 +105,13 @@ def make_select_query(select_info: commonMatchSelect):
     return select_query, count_query
 
 
-def api(select_info: commonMatchSelect) -> Dict:
+def api(select_info: commonMatchSelect, transaction_id: str = Depends(get_transaciton_id)) -> Dict:
     get_column_info = f"SELECT eng_nm, kor_nm FROM tb_table_column_info \
                                               WHERE table_id = (SELECT table_id FROM tb_table_list WHERE table_nm = {convert_data(select_info.table_nm)});"
     get_query, total_cnt_query = make_select_query(select_info)
     logger.info(f'Get Query : {get_query}')
 
+    trace_logger.info(f'get_transaciton_id : {transaction_id}')
     try:
         db = connect_db()
         select_data, _ = db.select(get_query)

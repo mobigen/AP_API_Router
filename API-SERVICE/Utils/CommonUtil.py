@@ -4,6 +4,7 @@ import argparse
 import traceback
 import starlette.datastructures
 from fastapi.logger import logger
+from fastapi import Request, HTTPException, status
 from pathlib import Path
 from typing import Any
 from ApiService.ApiServiceConfig import config
@@ -129,3 +130,18 @@ def convert_error_message(exception_name: str):
         error_message = exception_name
 
     return error_message
+
+
+def get_transaciton_id(request: Request):
+    try:
+        transaction_id = request.headers.get("accept")
+
+    except Exception:
+        transaction_id = 'TEST Message'
+        '''
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Transaction information does not exist."
+        )
+        '''
+    return transaction_id

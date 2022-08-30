@@ -1,7 +1,12 @@
 from typing import Dict, List, Optional
+from fastapi import Depends
+from fastapi.logger import logger
 from pydantic import BaseModel
-from Utils.CommonUtil import connect_db, get_exception_info
+import logging
+from Utils.CommonUtil import connect_db, get_exception_info, get_transaciton_id
 from Utils.DataBaseUtil import convert_data
+
+trace_logger = logging.getLogger("trace")
 
 
 class commonExecute(BaseModel):
@@ -35,8 +40,10 @@ def make_query(excute: commonExecute):
     return query
 
 
-def api(excute_list: List[commonExecute]) -> Dict:
+def api(excute_list: List[commonExecute], transaction_id: str = Depends(get_transaciton_id)) -> Dict:
     query_list = []
+    trace_logger.info(f'get_transaciton_id : {transaction_id}')
+
     try:
         for excute in excute_list:
             query_list.append(make_query(excute))
