@@ -2,7 +2,7 @@ import uuid
 from typing import Dict
 from Utils.CommonUtil import get_exception_info
 from pydantic import BaseModel
-from Utils.ESUtils import ESSearch
+from ConnectManager.ElasticSearchManager import ESSearch
 
 
 class BizMeta(BaseModel):
@@ -36,7 +36,7 @@ def api(biz_meta_data: BizMeta) -> Dict:
         es = ESSearch()
         biz_meta_data = biz_meta_data.dict()
         biz_meta_data["biz_dataset_id"] = uid
-        es.conn.index(index=es.index,body=biz_meta_data)
+        es.insert(biz_meta_data, biz_meta_data["biz_dataset_id"])
 
     except Exception:
         except_name = get_exception_info()
