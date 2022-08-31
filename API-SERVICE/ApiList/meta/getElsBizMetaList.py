@@ -1,17 +1,22 @@
-from typing import Dict
+from typing import Dict, Optional
 from copy import deepcopy
+from pydantic import BaseModel
 from Utils.ESUtils import div_keyword, make_query
 from Utils.CommonUtil import get_exception_info
 from ConnectManager.ElasticSearchManager import ESSearch
 
 
-def api(perPage: int = 12,
-        curPage: int = 1,
-        keywordList: list = [],
-        sortOption: list = [],
-        filterOption: dict = dict(),
-        dataSrttn: str = "전체",
-        matchOption: str = "AND") -> Dict:
+class SearchOption(BaseModel):
+    perPage: int = 12
+    curPage: int = 1
+    keywordList: Optional[list] = None
+    sortOption: Optional[list] = []
+    filterOption: dict = dict()
+    dataSrttn: str = "전체"
+    matchOption: str = "AND"
+
+
+def api(search_option: SearchOption) -> Dict:
 
     data_srttn = {
         # search_keyword: (result_key, result_data)
@@ -24,14 +29,14 @@ def api(perPage: int = 12,
     data = dict()
 
     try:
-        keyword_dict = div_keyword(keywordList)
-        es = ESSearch(cur_from=curPage,size=perPage)
-        es.set_sort(sortOption)
+        keyword_dict = div_keyword(search_option.keywordList)
+        es = ESSearch(cur_from=search_option.curPage,size=search_option.perPage)
+        es.set_sort(search_option.sortOption)
 
-        if len(filterOption):
-            es.set_filter(filterOption)
+        if len(search_option.filterOption):
+            es.set_filter(search_option.filterOption)
 
-        es.set_match(keyword_dict,matchOption)
+        es.set_match(keyword_dict,search_option.matchOption)
 
         for ko_nm, eng_nm in data_srttn.items():
             cnt_body_query = {"query": deepcopy(es.body["query"])}
@@ -46,8 +51,8 @@ def api(perPage: int = 12,
             cnt = es.conn.count(index=es.index,body=cnt_body_query)["count"]
             data[eng_nm] = cnt
 
-        if dataSrttn != "전체":
-            filter_srttn = make_query("match","data_srttn",dataSrttn)
+        if search_option.dataSrttn != "전체":
+            filter_srttn = make_query("match","data_srttn",search_option.dataSrttn)
             es.body["query"]["bool"]["filter"].append(filter_srttn)
 
         biz_meta_elk = es.search()

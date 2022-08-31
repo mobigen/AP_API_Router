@@ -16,14 +16,17 @@ def make_query(op, field, value) -> Dict[Any,Any]:
 
 def div_keyword(keyword_list: list) -> Dict[Any,Any]:
     keyword_dict = {"match_phrase": [], "match": []}
-    for keyword in keyword_list:
-        k = keyword.replace(" ","")
-        if len(k) < 1:
-            continue
-        if is_space(keyword):
-            keyword_dict["match_phrase"].append(keyword)
-        else:
-            keyword_dict["match"].append(keyword)
+    if keyword_list is None:
+        return keyword_dict
+    else:
+        for keyword in keyword_list:
+            k = keyword.replace(" ","")
+            if len(k) < 1:
+                continue
+            if is_space(keyword):
+                keyword_dict["match_phrase"].append(keyword)
+            else:
+                keyword_dict["match"].append(keyword)
     return keyword_dict
 
 
