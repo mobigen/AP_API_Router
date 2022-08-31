@@ -27,7 +27,7 @@
             <th>API명</th>
             <th>Method</th>
             <th>동작방식</th>
-            <th></th>
+            <th>삭제</th>
           </tr>
         </thead>
         <tbody>
@@ -43,7 +43,7 @@
                 <td>{{ api.meth }}</td>
                 <td>{{ api.mode }}</td>
                 <td>
-                  <a href="{% url 'api:delete_api' api.api_nm %}">삭제</a>
+                  <a onclick="return confirm('정말 삭제하시겠습니까?');" href="{% url 'api:delete_api' api.api_nm %}">삭제</a>
                 </td>
               </tr>
             {% endfor %}
@@ -58,16 +58,6 @@
   </div>
   <!-- 페이징처리 시작 -->
   <ul class="pagination justify-content-center">
-    <!-- 이전페이지 -->
-    {% if api_list.has_previous %}
-      <li class="page-item">
-        <a class="page-link" data-page="{{ question_list.previous_page_number }}" href="javascript:void(0)">이전</a>
-      </li>
-    {% else %}
-      <li class="page-item disabled">
-        <a class="page-link" tabindex="-1" aria-disabled="true" href="javascript:void(0)">이전</a>
-      </li>
-    {% endif %}
     <!-- 페이지리스트 -->
     {% for page_number in api_list.paginator.page_range %}
       {% if page_number == api_list.number %}
@@ -80,16 +70,6 @@
         </li>
       {% endif %}
     {% endfor %}
-    <!-- 다음페이지 -->
-    {% if api_list.has_next %}
-      <li class="page-item">
-        <a class="page-link" data-page="{{ question_list.next_page_number }}" href="javascript:void(0)">다음</a>
-      </li>
-    {% else %}
-      <li class="page-item disabled">
-        <a class="page-link" tabindex="-1" aria-disabled="true" href="javascript:void(0)">다음</a>
-      </li>
-    {% endif %}
   </ul>
   <!-- 페이징처리 끝 -->
   <form id="searchForm" method="get" action="{% url 'api:api_list' %}">

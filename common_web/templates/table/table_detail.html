@@ -28,6 +28,7 @@
           <th>컬렴명(영어)</th>
           <th>컬럼명(한글)</th>
           <th>데이터 타입</th>
+          <th>수정</th>
           <th>삭제</th>
         </tr>
       </thead>
@@ -39,7 +40,10 @@
               <td>{{ column.kor_nm }}</td>
               <td>{{ column.data_type }}</td>
               <td>
-                <a href="{% url 'table:delete_column' table_id=table.table_id eng_nm=column.eng_nm %}">삭제</a>
+                <a href="{% url 'table:update_column' table_id=table.table_id eng_nm=column.eng_nm %}">수정</a>
+              </td>
+              <td>
+                <a onclick="return confirm('정말 삭제하시겠습니까?');" href="{% url 'table:delete_column' table_id=table.table_id eng_nm=column.eng_nm %}">삭제</a>
               </td>
             </tr>
           {% endfor %}

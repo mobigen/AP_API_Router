@@ -9,7 +9,7 @@ from .forms import ApiInfoForm, ServerInfoForm, ApiParamInfoForm
 import requests
 # Create your views here.
 
-RELOAD_URL = "http://127.0.0.1:18000/api/reload"
+RELOAD_URL = "http://192.168.100.126:9010/api/reload"
 
 
 def api_list(request):

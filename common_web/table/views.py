@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
 from django.contrib import messages
+from django.core.paginator import Paginator
+
 import uuid
 from .models import TableInfo, ColumnInfo
 from .forms import TableInfoForm, ColumnInfoForm
@@ -29,7 +31,14 @@ db_info = {
 
 
 def table_list(request):
+    page = request.GET.get('page', 1)
+    kw = request.GET.get('kw', "")
     table_list = TableInfo.objects.order_by("-schema")
+    if kw:
+        table_list = table_list.filter(Q(table_nm__icontains=kw)).distinct()
+
+    paginator = Paginator(table_list, 10)
+    page_obj = paginator.get_page(page)
 
     if request.method == "POST":
         form = TableInfoForm(request.POST)
@@ -52,7 +61,7 @@ def table_list(request):
             messages.error(request, form.errors)
     else:
         form = TableInfoForm()
-    context = {"table_list": table_list, "form": form}
+    context = {"table_list": page_obj, "form": form, "page": page, "kw": kw}
     return render(request, "table/table_list.html", context)
 
 
@@ -97,6 +106,35 @@ def delete_table(request, table_id):
     else:
         table.delete()
     return redirect("table:table_list")
+
+
+def update_column(request, table_id, eng_nm):
+    table = get_object_or_404(TableInfo, pk=table_id)
+    column = ColumnInfo.objects.filter(
+        Q(table_id=table_id), Q(eng_nm=eng_nm))[0]
+
+    print(column, table)
+    if request.method == "POST":
+        form = ColumnInfoForm(request.POST, instance=column)
+        if form.is_valid():
+            try:
+                db = connect_db(db_info)
+                table_nm = table.table_nm
+                new_nm = request.POST.get("eng_nm")
+                if eng_nm != new_nm:
+                    db.execute(
+                        f'ALTER TABLE {table_nm} RENAME COLUMN {eng_nm} TO {new_nm};')
+            except Exception as err:
+                messages.error(request, err)
+            else:
+                form.save()
+            return redirect("table:table_detail", table_id=table_id)
+        else:
+            messages.error(request, form.errors.as_text())
+    else:
+        form = ColumnInfoForm(instance=column)
+    context = {"form": form, "table_id": table_id}
+    return render(request, "table/update_column.html", context)
 
 
 def delete_column(request, table_id, eng_nm):
