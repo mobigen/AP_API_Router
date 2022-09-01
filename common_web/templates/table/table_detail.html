@@ -1,7 +1,7 @@
 {% extends 'base.html'%}
 {% block content %}
   <div class="container my-3">
-    <h2 class="border-bottom py-2">컬럼 생성 (테이블명:
+    <h2 class="border-bottom py-2">컬럼 생성 (
       {{ table.table_nm }})</h2>
 
     <form method="post">
@@ -17,12 +17,12 @@
         <label for="data_type">데이터 타입</label>
         <input type="text" class="form-control" name="data_type" id="data_type" value="{{ form.data_type.value|default_if_none:'' }}"/>
       </div>
-      <input type="submit" value="컬럼 추가" class="btn btn-primary"/>
+      <input type="submit" value="생성" class="btn btn-primary"/>
     </form>
 
-    <h2 class="border-bottom py-2">컬럼 리스트</h2>
+    <h2 class="border-bottom py-2"></h2>
 
-    <table class="table table-bordered">
+    <table class="table table-hover">
       <thead>
         <tr class="thead-dark">
           <th>컬렴명(영어)</th>
