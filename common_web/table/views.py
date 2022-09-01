@@ -66,6 +66,32 @@ def table_list(request):
     return render(request, "table/table_list.html", context)
 
 
+def create_table(request):
+    if request.method == "POST":
+        form = TableInfoForm(request.POST)
+        if form.is_valid():
+            try:
+                db = connect_db(db_info)
+
+                table_nm = request.POST.get("table_nm")
+                schema = request.POST.get("schema")
+                db.execute(
+                    f'CREATE TABLE {schema}.{table_nm} ( idx uuid DEFAULT uuid_generate_v4() );')
+            except Exception as err:
+                messages.error(request, err)
+            else:
+                table = form.save(commit=False)
+                table.table_id = uuid.uuid4()
+                table.save()
+            return redirect("table:table_list")
+        else:
+            messages.error(request, form.errors)
+    else:
+        form = TableInfoForm()
+    context = {"form": form}
+    return render(request, "table/create_table.html", context)
+
+
 def update_table(request, table_id):
     table = get_object_or_404(TableInfo, pk=table_id)
     old_nm = table.table_nm

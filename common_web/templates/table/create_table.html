@@ -1,0 +1,27 @@
+{% extends 'base.html'%}
+{% block content %}
+  <div class="container my-3">
+    <div class="col">
+      <h2 class="border-bottom py-2">테이블 생성</h2>
+      <form class="my-3" method="post">
+        <div class="form-group col-md-6">
+          <label for="table_nm">테이블명</label>
+          <input type="text" class="form-control" name="table_nm" id="table_nm" value="{{ form.table_nm.value|default_if_none:'' }}"/>
+        </div>
+        <div class="form-group col-md-6">
+          <label for="schema">카테고리명</label>
+          <select class="form-control" name="schema" id="schema">
+            {% for choice in form.schema.field.choices %}
+              {% if choice.1 == form.schema.value %}
+                <option selected="selected" value="{{ choice.0 }}">{{ choice.1 }}</option>
+              {% else %}
+                <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <input type="submit" value="테이블 생성" class="btn btn-primary"/>
+      </form>
+    </div>
+  </div>
+{% endblock %}
