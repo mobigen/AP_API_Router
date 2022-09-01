@@ -25,7 +25,7 @@
                   <a href="{% url 'api:update_category' category.nm %}">수정</a>
                 </td>
                 <td>
-                  <a onclick="return confirm('정말 삭제하시겠습니까?');" href="{% url 'api:delete_category' category.nm %}">삭제</a>
+                  <a onclick="return confirm('<{{ category.nm }}>를 정말 삭제하시겠습니까?');" href="{% url 'api:delete_category' category.nm %}">삭제</a>
                 </td>
               </tr>
             {% endfor %}

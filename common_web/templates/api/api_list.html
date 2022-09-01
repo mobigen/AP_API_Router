@@ -43,7 +43,7 @@
                 <td>{{ api.meth }}</td>
                 <td>{{ api.mode }}</td>
                 <td>
-                  <a onclick="return confirm('정말 삭제하시겠습니까?');" href="{% url 'api:delete_api' api.api_nm %}">삭제</a>
+                  <a onclick="return confirm('<{{ api.api_nm }}>를 정말 삭제하시겠습니까?');" href="{% url 'api:delete_api' api.api_nm %}">삭제</a>
                 </td>
               </tr>
             {% endfor %}

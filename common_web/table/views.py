@@ -1,3 +1,4 @@
+import re
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
 from django.contrib import messages
@@ -65,6 +66,30 @@ def table_list(request):
     return render(request, "table/table_list.html", context)
 
 
+def update_table(request, table_id):
+    table = get_object_or_404(TableInfo, pk=table_id)
+    old_nm = table.table_nm
+
+    if request.method == "POST":
+        form = TableInfoForm(request.POST, instance=table)
+        if form.is_valid():
+            try:
+                db = connect_db(db_info)
+                new_nm = request.POST.get("table_nm")
+                db.execute(f'ALTER TABLE {old_nm} RENAME TO {new_nm};')
+            except Exception as err:
+                messages.error(request, err)
+            else:
+                form.save()
+            return redirect("table:table_list")
+        else:
+            messages.error(request, form.errors.as_text())
+    else:
+        form = TableInfoForm(instance=table)
+    context = {"form": form}
+    return render(request, "table/update_table.html", context)
+
+
 def table_detail(request, table_id):
     table = get_object_or_404(TableInfo, pk=table_id)
     column_list = ColumnInfo.objects.filter(Q(table_id=table_id))
@@ -113,7 +138,6 @@ def update_column(request, table_id, eng_nm):
     column = ColumnInfo.objects.filter(
         Q(table_id=table_id), Q(eng_nm=eng_nm))[0]
 
-    print(column, table)
     if request.method == "POST":
         form = ColumnInfoForm(request.POST, instance=column)
         if form.is_valid():

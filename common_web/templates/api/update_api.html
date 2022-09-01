@@ -129,7 +129,7 @@
                   <td>{{ param.data_type }}</td>
                   <td>{{ param.deflt_val }}</td>
                   <td>
-                    <a onclick="return confirm('정말 삭제하시겠습니까?');" href="{% url 'api:delete_param' api_nm=api_nm nm=param.nm %}">삭제</a>
+                    <a onclick="return confirm('<{{ param.nm }}>를 정말 삭제하시겠습니까?');" href="{% url 'api:delete_param' api_nm=api_nm nm=param.nm %}">삭제</a>
                   </td>
 
                 </tr>
