@@ -57,7 +57,7 @@ class ESSearch:
             filter_list.extend([make_query("match",option,item) for item in items])
         self.body["query"]["bool"]["filter"] = filter_list
 
-    def set_match(self, keyword_dict: dict, operator: Optional[str] = "AND", field: str = "data_nm") -> None:
+    def set_match(self, keyword_dict: dict, operator: Optional[str] = "AND", field: str = "data_nm.korean_analyzer") -> None:
         """
         :param keyword_dict: type dict
         :param field: search field, type str
