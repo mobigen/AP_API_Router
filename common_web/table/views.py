@@ -52,7 +52,7 @@ def table_list(request):
                 table_nm = request.POST.get("table_nm")
                 schema = request.POST.get("schema")
                 db.execute(
-                    f'CREATE TABLE {schema}.{table_nm} ( idx uuid DEFAULT uuid_generate_v4() );')
+                    f'CREATE TABLE {schema}.{table_nm} ();')
             except Exception as err:
                 messages.error(request, err)
             else:
@@ -78,7 +78,7 @@ def create_table(request):
                 table_nm = request.POST.get("table_nm")
                 schema = request.POST.get("schema")
                 db.execute(
-                    f'CREATE TABLE {schema}.{table_nm} ( idx uuid DEFAULT uuid_generate_v4() );')
+                    f'CREATE TABLE {schema}.{table_nm} ();')
             except Exception as err:
                 messages.error(request, err)
             else:
@@ -207,14 +207,11 @@ def delete_column(request, table_id, eng_nm):
 def save_csv(request, table_id):
     table = get_object_or_404(TableInfo, pk=table_id)
     column_list = ColumnInfo.objects.filter(Q(table_id=table_id))
-    try:
-        response = HttpResponse(content_type='text/csv', headers={
-                                'Content-Disposition': f'attachment; filename="{table.table_nm}.csv"'})
-        response.write(u'\ufeff'.encode('utf8'))
-        writer = csv.writer(response)
-        writer.writerow(['컬럼명(영어)', '컬럼명(한글)', '데이터 타입'])
-        for column in column_list:
-            writer.writerow([column.eng_nm, column.kor_nm, column.data_type])
-    except Exception as err:
-        messages.error(request, err)
+    response = HttpResponse(content_type='text/csv', headers={
+                            'Content-Disposition': f'attachment; filename="{table.table_nm}.csv"'})
+    response.write(u'\ufeff'.encode('utf8'))
+    writer = csv.writer(response)
+    writer.writerow(['컬럼명(영어)', '컬럼명(한글)', '데이터 타입'])
+    for column in column_list:
+        writer.writerow([column.eng_nm, column.kor_nm, column.data_type])
     return response
