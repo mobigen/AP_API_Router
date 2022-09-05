@@ -24,7 +24,7 @@ class ESSearch:
         self.port = port
         self.size = size
         self.index = index
-        self.cur_from = cur_from - 1
+        self.cur_from = cur_from
         self.conn = self.connect()
         self.body = self.set_body()
 

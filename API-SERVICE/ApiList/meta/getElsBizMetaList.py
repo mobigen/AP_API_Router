@@ -27,10 +27,12 @@ def api(search_option: SearchOption) -> Dict:
         "해외데이터": "overseaCount"
     }
     data = dict()
-
+    search_option.curPage = search_option.curPage - 1
+    from_page = search_option.curPage * search_option.perPage
     try:
+        # 숫자랑 특수문자 조회
         keyword_dict = div_keyword(search_option.keywordList)
-        es = ESSearch(cur_from=search_option.curPage,size=search_option.perPage)
+        es = ESSearch(cur_from=from_page,size=search_option.perPage)
         es.set_sort(search_option.sortOption)
 
         if len(search_option.filterOption):
