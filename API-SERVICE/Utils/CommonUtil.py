@@ -64,6 +64,7 @@ def prepare_config() -> None:
     config.db_info = api_router_cfg[config.db_type]
     config.conn_pool = make_connection_pool(config.db_info)
     config.secret_info = api_router_cfg["secret_info"]
+    config.user_info = api_router_cfg["user_info"]
 
 
 def make_connection_pool(db_info):
