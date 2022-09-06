@@ -7,7 +7,7 @@ class ESSearch:
     def __init__(
             self,
             host: str = "localhost",
-            port: str = "9200",
+            port: str = "39200",
             cur_from: int = 1,
             size: int = 10,
             index: str = "biz_meta"
