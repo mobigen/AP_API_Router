@@ -1,12 +1,9 @@
 from typing import Dict
 from pydantic import BaseModel
 from fastapi.logger import logger
-from passlib.context import CryptContext
 from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from ApiService.ApiServiceConfig import config
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class commonRegister(BaseModel):
@@ -14,11 +11,14 @@ class commonRegister(BaseModel):
 
 
 def make_query(register: commonRegister):
+    password_column = config.user_info["password_column"]
+    user_info_table = config.user_info["table"]
+
     columns = ", ".join(register.data.keys())
-    register.data[config.user_info["pass_key"]] = pwd_context.hash(
-        register.data[config.user_info["pass_key"]])
+    register.data[password_column] = config.pwd_context.hash(
+        register.data[password_column])
     values = ", ".join(map(convert_data, register.data.values()))
-    query = f'INSERT INTO {config.user_info["table"]} ({columns}) VALUES ({values});'
+    query = f'INSERT INTO {user_info_table} ({columns}) VALUES ({values});'
     return query
 
 

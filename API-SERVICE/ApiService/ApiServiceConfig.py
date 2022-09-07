@@ -1,5 +1,6 @@
-from typing import Dict, List
+from typing import Dict
 from psycopg2 import pool
+from passlib.context import CryptContext
 
 
 class ApiServiceConfig:
@@ -19,6 +20,8 @@ class ApiServiceConfig:
 
     secret_info: Dict
     user_info: Dict
+    pwd_context: CryptContext
+
     conn_pool: pool.SimpleConnectionPool
 
 

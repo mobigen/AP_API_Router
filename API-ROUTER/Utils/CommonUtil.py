@@ -1,7 +1,6 @@
 import os
 import configparser
 import argparse
-import starlette.datastructures
 from fastapi.logger import logger
 from pathlib import Path
 from typing import Any, Dict, List
@@ -85,17 +84,6 @@ def make_res_msg(result, err_msg, data = None, column_names = None):
         res_msg={"result": result, "errorMessage": err_msg,
                    "body": data, "header": header_list}
     return res_msg
-
-def get_token_info(headers: starlette.datastructures.Headers):
-    user_info = None
-    if config.secret_info["name"] in headers:
-        try:
-            user_info = jwt.decode(headers[config.secret_info["name"]],
-                                   config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
-        except Exception as err:
-            logger.error(err)
-    logger.info(f'User Info : {user_info}')
-    return user_info
 
 def get_exception_info():
     ex_type, ex_value, ex_traceback = sys.exc_info()

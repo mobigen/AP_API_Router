@@ -5,14 +5,13 @@ import starlette.datastructures
 from fastapi.logger import logger
 from pathlib import Path
 from typing import Any
-from ApiService.ApiServiceConfig import config
-from ConnectManager import PostgresManager
-from retry import retry
-import psycopg2
+from passlib.context import CryptContext
 from psycopg2 import pool
 import jwt
 import sys
 import traceback
+from ApiService.ApiServiceConfig import config
+from ConnectManager import PostgresManager
 
 
 def set_log_path():
@@ -63,8 +62,11 @@ def prepare_config() -> None:
     config.db_type = f'{args.db_type}_db'
     config.db_info = api_router_cfg[config.db_type]
     config.conn_pool = make_connection_pool(config.db_info)
-    config.secret_info = api_router_cfg["secret_info"]
-    config.user_info = api_router_cfg["user_info"]
+    if config.category == "common":
+        config.secret_info = api_router_cfg["secret_info"]
+        config.user_info = api_router_cfg["user_info"]
+        config.pwd_context = CryptContext(
+            schemes=["bcrypt"], deprecated="auto")
 
 
 def make_connection_pool(db_info):
