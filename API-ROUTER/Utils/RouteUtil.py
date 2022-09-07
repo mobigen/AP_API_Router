@@ -83,7 +83,7 @@ async def call_remote_func(api_info, api_params, input_params) -> Dict:
         result = await run_cmd(cmd)
     except Exception:
         except_name = get_exception_info()
-        res_msg = {"result": result, "errorMessage": except_name}
+        res_msg = {"result": 0, "errorMessage": except_name}
         logger.error(f'SSH connection failed: {except_name}')
-    res_msg = {"result": result, "errorMessage": "", "body": eval(result)}
+    res_msg = {"result": 1, "errorMessage": "", "data": eval(result)}
     return res_msg

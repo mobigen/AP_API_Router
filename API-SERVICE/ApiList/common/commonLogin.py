@@ -66,7 +66,6 @@ def api(login: commonLogin) -> Dict:
     else:
         access_token = create_token(
             data={"sub": user[config.user_info["id_column"]]}, expires_delta=timedelta(minutes=int(config.secret_info["expire_min"])))
-        result = {"result": 1, "errorMessage": "", "data": {
-            "access_token": access_token, "token_type": "bearer"}}
+        result = {"result": 1, "errorMessage": "", "data": access_token}
 
     return result

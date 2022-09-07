@@ -6,6 +6,7 @@ from Utils.CommonUtil import connect_db, get_exception_info
 from Utils.DataBaseUtil import convert_data
 from ApiService.ApiServiceConfig import config
 from starlette.requests import Request
+from pytz import timezone
 
 
 class InvalidUserInfo(Exception):
@@ -26,9 +27,11 @@ def get_user(user_name: str):
 def create_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone('Asia/Seoul')) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.now(timezone('Asia/Seoul')) + timedelta(minutes=15)
+
+    print(f'commonToken Expire : {expire}')
     to_encode.update({"exp": expire})
 
     encoded_jwt = jwt.encode(
@@ -43,7 +46,7 @@ def api(request: Request) -> Dict:
             raise TokenDoesNotExist
         payload = jwt.decode(token=access_token,
                              key=config.secret_info["secret_key"], algorithms=config.secret_info["algorithm"])
-
+        print(f'commonToken payload : {payload}')
         username = payload["sub"]
         user = get_user(username)
         if not user[0]:
@@ -56,6 +59,6 @@ def api(request: Request) -> Dict:
         access_token = create_token(data={"sub": user[config.user_info["id_column"]]}, expires_delta=timedelta(
             minutes=int(config.secret_info["expire_min"])))
 
-        result = {"result": 1, "errorMessage": "", "data": {
-            "access_token": access_token, "token_type": "bearer"}}
+        result = {"result": 1, "errorMessage": "", "data": access_token}
+
     return result
