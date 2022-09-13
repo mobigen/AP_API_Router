@@ -1,8 +1,7 @@
 from typing import Dict
 from pydantic import BaseModel
 from fastapi.logger import logger
-from Utils.CommonUtil import connect_db, get_exception_info
-from Utils.DataBaseUtil import convert_data
+from Utils.CommonUtil import connect_db, get_exception_info, convert_data
 from ApiService.ApiServiceConfig import config
 
 
@@ -10,7 +9,7 @@ class commonRegister(BaseModel):
     data: Dict
 
 
-def make_query(register: commonRegister):
+def make_register_query(register: commonRegister):
     password_column = config.user_info["password_column"]
     user_info_table = config.user_info["table"]
 
@@ -24,7 +23,7 @@ def make_query(register: commonRegister):
 
 def api(register: commonRegister) -> Dict:
     try:
-        query = make_query(register)
+        query = make_register_query(register)
 
         db = connect_db()
         time_zone = 'Asia/Seoul'

@@ -1,10 +1,11 @@
+from datetime import datetime, timedelta
+from pytz import timezone
 import os
 import configparser
 import argparse
-import starlette.datastructures
 from fastapi.logger import logger
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Dict
 from passlib.context import CryptContext
 from psycopg2 import pool
 import jwt
@@ -12,6 +13,16 @@ import sys
 import traceback
 from ApiService.ApiServiceConfig import config
 from ConnectManager import PostgresManager
+
+
+def convert_data(data) -> str:
+    data = str(data)
+    if data:
+        if data == "now()" or data == "NOW()":
+            return data
+        if data[0] == "`":
+            return data[1:]
+    return f'\'{data.strip()}\''
 
 
 def set_log_path():
@@ -107,15 +118,6 @@ def make_res_msg(result, err_msg, data=None, column_names=None, kor_column_names
     return res_msg
 
 
-def get_token_info(headers: starlette.datastructures.Headers):
-    user_info = None
-    if config.secret_info["name"] in headers:
-        user_info = jwt.decode(headers[config.secret_info["name"]],
-                               config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
-    logger.info(f'user info : {user_info}')
-    return user_info
-
-
 def get_exception_info():
     ex_type, ex_value, ex_traceback = sys.exc_info()
     trace_back = traceback.extract_tb(ex_traceback)
@@ -133,3 +135,32 @@ def convert_error_message(exception_name: str):
         error_message = exception_name
 
     return error_message
+
+
+##### for user info #####
+def get_user(user_name: str):
+    db = connect_db()
+    user = db.select(
+        f'SELECT * FROM {config.user_info["table"]} WHERE {config.user_info["id_column"]} = {convert_data(user_name)}')
+    return user
+
+
+def create_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone('Asia/Seoul')) + expires_delta
+    else:
+        expire = datetime.now(timezone('Asia/Seoul')) + timedelta(minutes=15)
+
+    logger.info(f'commonToken Expire : {expire}')
+    to_encode.update({"exp": expire})
+
+    encoded_jwt = jwt.encode(
+        to_encode, config.secret_info["secret_key"], algorithm=config.secret_info["algorithm"])
+    return encoded_jwt
+
+
+def make_token_data(user: Dict) -> Dict:
+    token_data_column = config.secret_info["token_data_column"].split(",")
+    token_data = {column: user[column] for column in token_data_column}
+    return token_data

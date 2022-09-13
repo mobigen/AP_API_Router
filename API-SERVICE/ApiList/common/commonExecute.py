@@ -1,8 +1,7 @@
 from typing import Dict, List, Optional
 from pydantic import BaseModel
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_exception_info
-from Utils.DataBaseUtil import convert_data
+from Utils.CommonUtil import connect_db, get_exception_info, convert_data
 
 
 class commonExecute(BaseModel):
@@ -12,7 +11,7 @@ class commonExecute(BaseModel):
     key: Optional[List[str]] = None
 
 
-def make_query(excute: commonExecute):
+def make_execute_query(excute: commonExecute):
     method = excute.method
     where = []
     query = None
@@ -40,7 +39,7 @@ def api(excute_list: List[commonExecute]) -> Dict:
     query_list = []
     try:
         for excute in excute_list:
-            query_list.append(make_query(excute))
+            query_list.append(make_execute_query(excute))
 
         db = connect_db()
         time_zone = 'Asia/Seoul'

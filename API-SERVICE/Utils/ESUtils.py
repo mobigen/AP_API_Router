@@ -1,5 +1,5 @@
 from typing import Union, Optional, List, Dict, Any
-from Utils.DataBaseUtil import convert_data
+from Utils.CommonUtil import convert_data
 
 
 def is_space(text: str) -> int:
@@ -9,18 +9,18 @@ def is_space(text: str) -> int:
         return 0
 
 
-def make_query(op, field, value) -> Dict[Any,Any]:
+def make_query(op, field, value) -> Dict[Any, Any]:
     query = {op: {field: value}}
     return query
 
 
-def div_keyword(keyword_list: list) -> Dict[Any,Any]:
+def div_keyword(keyword_list: list) -> Dict[Any, Any]:
     keyword_dict = {"match_phrase": [], "match": []}
     if keyword_list is None:
         return keyword_dict
     else:
         for keyword in keyword_list:
-            k = keyword.replace(" ","")
+            k = keyword.replace(" ", "")
             if len(k) < 1:
                 continue
             if is_space(keyword):
@@ -37,10 +37,10 @@ def set_dict_list(option_items: Union[list, dict],
     for item in option_items:
         if field:
             # option_item type list
-            query = make_query(operator,field,item)
+            query = make_query(operator, field, item)
         else:
             # option item type dict
-            query = make_query(operator,item,option_items[item])
+            query = make_query(operator, item, option_items[item])
         query_list.append(query)
     return query_list
 
@@ -68,5 +68,3 @@ def update_els_data(db: object, es: object, st: str, et: str) -> None:
         bulk_meta_item.append(test_dict)
 
     es.insert_bulk(bulk_meta_item)
-
-

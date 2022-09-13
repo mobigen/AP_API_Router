@@ -1,8 +1,7 @@
 from typing import Dict
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_exception_info
+from Utils.CommonUtil import connect_db, get_exception_info, convert_data
 from fastapi.logger import logger
-from Utils.DataBaseUtil import convert_data
 
 
 def api(perPage: int,

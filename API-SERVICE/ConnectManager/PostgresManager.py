@@ -2,7 +2,6 @@ import psycopg2
 from typing import List, Dict, Tuple, Any
 from ApiService.ApiServiceConfig import config
 from fastapi.logger import logger
-from Utils.DataBaseUtil import make_insert_query, make_update_query, make_delete_query
 
 
 class PostgresManager:
@@ -45,22 +44,6 @@ class PostgresManager:
         for row in rows:
             result.append(dict(zip(column_names, row)))
         return result, column_names
-
-    def insert(self, table: str, into_info: List[Dict]) -> None:
-        sql = make_insert_query(f"{self.schema}.{table}", into_info)
-        self.execute(sql)
-        logger.info(f'PostgresManager Insert Execute. ({sql})')
-
-    def update(self, table: str, set_info: Dict, where_info: Dict) -> None:
-        sql = make_update_query(f"{self.schema}.{table}", set_info, where_info)
-        self.execute(sql)
-        logger.info(f'PostgresManager Update Execute. ({sql})')
-
-    def delete(self, table: str, where_info: Dict) -> None:
-        sql = make_delete_query(f"{self.schema}.{table}", where_info)
-        self.execute(sql)
-
-        logger.info(f'PostgresManager Delete Execute. ({sql})')
 
     def commit(self):
         self.conn.commit()

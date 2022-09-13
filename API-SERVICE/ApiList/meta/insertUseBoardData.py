@@ -1,8 +1,7 @@
 from typing import Dict
 import uuid
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, get_exception_info
-from Utils.DataBaseUtil import convert_data
+from Utils.CommonUtil import connect_db, get_exception_info, convert_data
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 

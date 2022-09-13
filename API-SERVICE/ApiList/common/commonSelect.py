@@ -1,7 +1,6 @@
 from typing import Dict, List, Optional
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info
-from Utils.DataBaseUtil import convert_data
+from Utils.CommonUtil import connect_db, make_res_msg, get_exception_info, convert_data
 from pydantic import BaseModel
 from fastapi.logger import logger
 

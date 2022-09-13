@@ -1,9 +1,7 @@
 from typing import Dict
 from fastapi.logger import logger
-from fastapi.responses import JSONResponse
-from datetime import timedelta
 from jose import jwt
-from Utils.CommonUtil import get_exception_info, get_user, create_token, make_token_data
+from Utils.CommonUtil import get_exception_info, get_user, make_res_msg
 from ApiService.ApiServiceConfig import config
 from starlette.requests import Request
 
@@ -33,9 +31,6 @@ def api(request: Request) -> Dict:
         access_token = ""
         result = {"result": 0, "errorMessage": except_name}
     else:
-        token_data = make_token_data(user)
-        access_token = create_token(data=token_data, expires_delta=timedelta(
-            minutes=int(config.secret_info["expire_min"])))
-        result = {"result": 1, "errorMessage": ""}
+        result = {"result": 0, "errorMessage": "", "data": {"body": payload}}
 
-    return JSONResponse(content=result, headers={config.secret_info["header_name"]: access_token})
+    return result
