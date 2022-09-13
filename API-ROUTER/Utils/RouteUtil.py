@@ -23,7 +23,6 @@ def make_url(server_name: str, url_path: str):
 
 async def bypass_msg(api_info, params_query, body, headers):
     method = api_info["meth"]
-    msg_type = api_info["msg_type"]
 
     url = make_url(api_info["ctgry"], api_info["url"])
     if url is None:
@@ -38,18 +37,18 @@ async def bypass_msg(api_info, params_query, body, headers):
                     params[parser_param[0]] = parser_param[1]
 
             async with session.get(url, params=params, headers=headers) as response:
+                access_token = response.headers.get(
+                    config.secret_info["header_name"])
                 result = await response.json()
         elif method == "POST":
-            if msg_type == "JSON":
-                async with session.post(url, json=body, headers=headers) as response:
-                    result = await response.json()
-            else:
-                async with session.post(url, data=body, headers=headers) as response:
-                    result = await response.json()
+            async with session.post(url, json=body, headers=headers) as response:
+                access_token = response.headers.get(
+                    config.secret_info["header_name"])
+                result = await response.json()
         else:
             logger.error(f'Method Not Allowed. {method}')
             result = {"result": 0, "errorMessage": "Method Not Allowed."}
-    return result
+    return result, access_token
 
 
 async def run_cmd(cmd: str):
@@ -62,20 +61,18 @@ async def run_cmd(cmd: str):
 
 
 async def call_remote_func(api_info, api_params, input_params) -> Dict:
-    msg_type = api_info["msg_type"]
     logger.error(f'IN PARAM : {input_params}, API PARAM : {api_params}')
     command_input = ""
-    if msg_type == "JSON":
-        for param in api_params:
-            try:
-                data = input_params[param["nm"]]
-                if not data:
-                    data = param["deflt_val"]
-                command_input += f' --{param["nm"]} {data}'
-            except KeyError:
-                logger.error(
-                    f'parameter set default value. [{param["nm"]}]')
-                command_input += f' --{param["nm"]} {param["deflt_val"]}'
+    for param in api_params:
+        try:
+            data = input_params[param["nm"]]
+            if not data:
+                data = param["deflt_val"]
+            command_input += f' --{param["nm"]} {data}'
+        except KeyError:
+            logger.error(
+                f'parameter set default value. [{param["nm"]}]')
+            command_input += f' --{param["nm"]} {param["deflt_val"]}'
 
     cmd = f'{api_info["cmd"]} {command_input}'
 

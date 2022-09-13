@@ -2,6 +2,7 @@ from fastapi.logger import logger
 from typing import Dict, List
 import importlib.util
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from ApiRoute.ApiRouteConfig import config
 from Utils.DataBaseUtil import convert_data
 from Utils.CommonUtil import connect_db, make_res_msg, save_file_for_reload, get_exception_info, delete_headers
@@ -323,7 +324,10 @@ class ApiRoute:
     async def route_api(self, request: Request) -> Dict:
         route_url = request.url.path
         method = request.method
-        content_type = request.headers.get("Content-Type")
+        req_access_token = request.headers.get(
+            config.secret_info["header_name"])
+        res_access_token = None
+        access_token = ""
 
         headers = delete_headers(dict(request.headers), [
             "content-length", "user-agent"])
@@ -342,12 +346,9 @@ class ApiRoute:
             if len(api_info) == 0:
                 return {"result": 0, "errorMessage": "This is an unregistered API."}
 
-            if content_type == "application/json":
+            body = None
+            if method == "POST":
                 body = await request.json()
-                api_info["msg_type"] = "JSON"
-            else:
-                body = await request.body()
-                api_info["msg_type"] = "BINARY"
 
             params_query = parse.unquote(str(request.query_params))
             logger.info(
@@ -357,10 +358,21 @@ class ApiRoute:
             logger.info(f'DB - api_info : {api_info}')
             logger.info(f'DB - api_params : {api_params}')
 
-            logger.info(
-                f'mode : {api_info["mode"]}, content_type : {content_type}')
+            logger.info(f'mode : {api_info["mode"]}')
             if api_info["mode"] == "MESSAGE PASSING":
-                result = await bypass_msg(api_info, params_query, body, headers)
+                result, res_access_token = await bypass_msg(api_info, params_query, body, headers)
             else:
                 result = await call_remote_func(api_info, api_params, body)
-        return result
+
+            remove_header_api_list = config.secret_info["remove_header_api"].split(
+                ",")
+
+            if api_info["api_nm"] not in remove_header_api_list:
+                if res_access_token is None:
+                    if req_access_token is not None:
+                        access_token = req_access_token
+                else:
+                    access_token = res_access_token
+
+            logger.info(f'access token : {access_token}')
+        return JSONResponse(content=result, headers={config.secret_info["header_name"]: access_token})
