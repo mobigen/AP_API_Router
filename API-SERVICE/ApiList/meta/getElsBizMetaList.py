@@ -36,7 +36,7 @@ def api(search_option: SearchOption) -> Dict:
         es = ESSearch(cur_from=from_page,size=search_option.perPage)
         es.set_sort(search_option.sortOption)
 
-        if len(search_option.filterOption):
+        if any(search_option.filterOption.values()):
             es.set_filter(search_option.filterOption,search_option.filterOperator)
 
         es.set_match(keyword_dict,search_option.matchOption)
