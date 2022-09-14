@@ -48,14 +48,17 @@ class ESSearch:
         self.body["from"] = self.cur_from
         self.body["size"] = self.size
 
-    def set_filter(self, filter_option: dict) -> None:
-        filter_list = []
-        # if "data_srttn" in filter_option.keys() and "전체" in filter_option["data_srttn"]:
-        #     filter_option.pop("data_srttn")
-
-        for option, items in filter_option.items():
-            filter_list.extend([make_query("match",option,item) for item in items])
-        self.body["query"]["bool"]["filter"] = filter_list
+    def set_filter(self, filter_option: dict, filter_oper: str = "OR") -> None:
+        if filter_oper == "OR":
+            query = " ".join([" ".join(values) for values in filter_option.values()])
+            fields = list(filter_option.keys())
+            filter_dict = {"multi_match":{"query":query,"fields":fields}}
+            self.body["query"]["bool"]["filter"] = filter_dict
+        else:
+            filter_list = []
+            for option, items in filter_option.items():
+                filter_list.extend([make_query("match",option,item) for item in items])
+            self.body["query"]["bool"]["filter"] = filter_list
 
     def set_match(self, keyword_dict: dict, operator: Optional[str] = "AND", field: str = "data_nm.korean_analyzer") -> None:
         """
@@ -84,14 +87,14 @@ class ESSearch:
         else:
             self.body["query"]["bool"]["must"] = {"match_all": {}}
 
-    def insert(self, body: dict, es_id: str) -> None:
-        return self.conn.index(index=self.index, body=body, id=es_id)
+    def insert(self, body: dict, doc_id: str) -> None:
+        return self.conn.index(index=self.index, body=body, id=doc_id)
 
     def insert_bulk(self, data: list):
         return helpers.bulk(self.conn, data, index=self.index)
 
-    def update(self, body: dict, es_id: str):
-        return self.conn.update(index=self.index, id=es_id, body=body)
+    def update(self, body: dict, doc_id: str):
+        return self.conn.update(index=self.index, id=doc_id, body=body)
 
     def delete(self, field: str, data: Union[str, list]):
         """
