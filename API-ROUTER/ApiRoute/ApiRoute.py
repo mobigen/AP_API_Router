@@ -327,7 +327,6 @@ class ApiRoute:
         access_token = ""
         headers = delete_headers(dict(request.headers), [
             "content-length", "user-agent"])
-
         try:
             db = connect_db()
             api_info, _ = db.select(
@@ -348,7 +347,7 @@ class ApiRoute:
 
             params_query = parse.unquote(str(request.query_params))
             logger.info(
-                f'Req - body : {body}, query params : {params_query}')
+                f'\nReq - body : {body}\nquery params : {params_query}')
 
             api_info["meth"] = method
             logger.info(
@@ -359,9 +358,10 @@ class ApiRoute:
                 result, access_token = await bypass_msg(api_info, params_query, body, headers)
             else:
                 result = await call_remote_func(api_info, api_params, body)
-        response = JSONResponse(content=result)
-        response.set_cookie(
-            key=config.secret_info["cookie_name"], value=access_token)
-        return response
 
-        # return result
+        response = JSONResponse(content=result)
+        add_cookie_api_list = config.secret_info["add_cookie_api"].split(",")
+        if api_info["api_nm"] in add_cookie_api_list:
+            response.set_cookie(
+                key=config.secret_info["cookie_name"], value=access_token)
+        return response
