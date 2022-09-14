@@ -13,7 +13,7 @@ class SearchOption(BaseModel):
     sortOption: Optional[list] = []
     filterOption: dict = dict()
     dataSrttn: str = "전체"
-    filterOperator: str = "AND"
+    filterOperator: str = "OR"
     matchOption: str = "AND"
 
 
