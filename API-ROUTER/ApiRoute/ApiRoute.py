@@ -2,6 +2,7 @@ from fastapi.logger import logger
 from typing import Dict, List
 import importlib.util
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from ApiRoute.ApiRouteConfig import config
 from Utils.DataBaseUtil import convert_data
 from Utils.CommonUtil import connect_db, make_res_msg, save_file_for_reload, get_exception_info, delete_headers
@@ -323,7 +324,7 @@ class ApiRoute:
     async def route_api(self, request: Request) -> Dict:
         route_url = request.url.path
         method = request.method
-
+        access_token = ""
         headers = delete_headers(dict(request.headers), [
             "content-length", "user-agent"])
 
@@ -355,7 +356,12 @@ class ApiRoute:
 
             logger.info(f'mode : {api_info["mode"]}')
             if api_info["mode"] == "MESSAGE PASSING":
-                result = await bypass_msg(api_info, params_query, body, headers)
+                result, access_token = await bypass_msg(api_info, params_query, body, headers)
             else:
                 result = await call_remote_func(api_info, api_params, body)
-        return result
+        response = JSONResponse(content=result)
+        response.set_cookie(
+            key=config.secret_info["cookie_name"], value=access_token)
+        return response
+
+        # return result
