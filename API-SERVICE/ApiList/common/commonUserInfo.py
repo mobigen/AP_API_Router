@@ -16,10 +16,11 @@ class TokenDoesNotExist(Exception):
 
 def api(request: Request) -> Dict:
     try:
-        access_token = request.headers.get(config.secret_info["header_name"])
-        if not access_token:
+        recv_access_token = request.cookies.get(
+            config.secret_info["cookie_name"])
+        if not recv_access_token:
             raise TokenDoesNotExist
-        payload = jwt.decode(token=access_token,
+        payload = jwt.decode(token=recv_access_token,
                              key=config.secret_info["secret_key"], algorithms=config.secret_info["algorithm"])
         username = payload[config.user_info["id_column"]]
         user = get_user(username)
@@ -28,7 +29,6 @@ def api(request: Request) -> Dict:
         user = user[0][0]
     except Exception:
         except_name = get_exception_info()
-        access_token = ""
         result = {"result": 0, "errorMessage": except_name}
     else:
         result = {"result": 0, "errorMessage": "", "data": {"body": payload}}

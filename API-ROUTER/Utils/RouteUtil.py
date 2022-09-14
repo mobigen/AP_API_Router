@@ -37,18 +37,14 @@ async def bypass_msg(api_info, params_query, body, headers):
                     params[parser_param[0]] = parser_param[1]
 
             async with session.get(url, params=params, headers=headers) as response:
-                access_token = response.headers.get(
-                    config.secret_info["header_name"])
                 result = await response.json()
         elif method == "POST":
             async with session.post(url, json=body, headers=headers) as response:
-                access_token = response.headers.get(
-                    config.secret_info["header_name"])
                 result = await response.json()
         else:
             logger.error(f'Method Not Allowed. {method}')
             result = {"result": 0, "errorMessage": "Method Not Allowed."}
-    return result, access_token
+    return result
 
 
 async def run_cmd(cmd: str):

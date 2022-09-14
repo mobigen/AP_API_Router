@@ -53,7 +53,7 @@ def prepare_config() -> None:
     config.db_info=api_router_cfg[config.db_type]
     config.conn_pool = make_connection_pool(config.db_info)
     config.remote_info=api_router_cfg["remote"]
-    config.secret_info=api_router_cfg["secret_info"]
+    #config.secret_info=api_router_cfg["secret_info"]
 
 def make_connection_pool(db_info):
     conn_pool = pool.SimpleConnectionPool(1, 20, user=db_info["user"],

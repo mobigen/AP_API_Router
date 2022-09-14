@@ -1,3 +1,5 @@
+from http import cookies
+from http.cookiejar import Cookie
 from typing import Dict
 from pydantic import BaseModel
 from fastapi.logger import logger
@@ -35,12 +37,12 @@ def authenticate_user(username: str, password: str):
 
 
 def api(login: commonLogin) -> Dict:
+    access_token = ""
     try:
         user = authenticate_user(
             login.data[config.user_info["id_column"]], login.data[config.user_info["password_column"]])
     except Exception:
         except_name = get_exception_info()
-        access_token = ""
         result = {"result": 0, "errorMessage": except_name}
     else:
 
@@ -49,4 +51,7 @@ def api(login: commonLogin) -> Dict:
             data=token_data, expires_delta=timedelta(minutes=int(config.secret_info["expire_min"])))
         result = {"result": 1, "errorMessage": ""}
 
-    return JSONResponse(content=result, headers={config.secret_info["header_name"]: access_token})
+    response = JSONResponse(content=result)
+    response.set_cookie(
+        key=config.secret_info["cookie_name"], value=access_token)
+    return response
