@@ -13,6 +13,7 @@ class SearchOption(BaseModel):
     sortOption: Optional[list] = []
     filterOption: dict = dict()
     dataSrttn: str = "전체"
+    filterOperator: str = "AND"
     matchOption: str = "AND"
 
 
@@ -36,7 +37,7 @@ def api(search_option: SearchOption) -> Dict:
         es.set_sort(search_option.sortOption)
 
         if len(search_option.filterOption):
-            es.set_filter(search_option.filterOption)
+            es.set_filter(search_option.filterOption,search_option.filterOperator)
 
         es.set_match(keyword_dict,search_option.matchOption)
 

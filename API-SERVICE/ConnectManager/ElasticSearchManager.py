@@ -6,7 +6,7 @@ from Utils.ESUtils import set_dict_list, make_query
 class ESSearch:
     def __init__(
             self,
-            host: str = "localhost",
+            host: str = "192.168.101.44",
             port: str = "39200",
             cur_from: int = 1,
             size: int = 10,
@@ -49,13 +49,12 @@ class ESSearch:
         self.body["size"] = self.size
 
     def set_filter(self, filter_option: dict, filter_oper: str = "OR") -> None:
+        filter_list = []
         if filter_oper == "OR":
             query = " ".join([" ".join(values) for values in filter_option.values()])
             fields = list(filter_option.keys())
-            filter_dict = {"multi_match":{"query":query,"fields":fields}}
-            self.body["query"]["bool"]["filter"] = filter_dict
+            self.body["query"]["bool"]["filter"] = [{"multi_match":{"query":query,"fields":fields}}]
         else:
-            filter_list = []
             for option, items in filter_option.items():
                 filter_list.extend([make_query("match",option,item) for item in items])
             self.body["query"]["bool"]["filter"] = filter_list
