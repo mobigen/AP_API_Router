@@ -1,6 +1,6 @@
 from typing import Dict
 from fastapi.logger import logger
-from fastapi.responses import JSONResponse
+#from fastapi.responses import JSONResponse
 from jose import jwt
 from starlette.requests import Request
 from Utils.CommonUtil import get_exception_info, get_user
@@ -16,7 +16,7 @@ class TokenDoesNotExist(Exception):
 
 
 def api(request: Request) -> Dict:
-    f_delete = True
+    #f_delete = True
     try:
         recv_access_token = request.cookies.get(
             config.secret_info["cookie_name"])
@@ -31,10 +31,11 @@ def api(request: Request) -> Dict:
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
-        f_delete = False
+        #f_delete = False
     else:
         result = {"result": 1, "errorMessage": ""}
-    response = JSONResponse(content=result)
-    if f_delete:
-        response.delete_cookie(key=config.secret_info["cookie_name"])
-    return response
+    #response = JSONResponse(content=result)
+    # if f_delete:
+    #    response.delete_cookie(key=config.secret_info["cookie_name"])
+    # return response
+    return result

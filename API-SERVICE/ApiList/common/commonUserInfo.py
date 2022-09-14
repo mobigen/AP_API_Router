@@ -31,6 +31,6 @@ def api(request: Request) -> Dict:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
     else:
-        result = {"result": 0, "errorMessage": "", "data": {"body": payload}}
+        result = {"result": 1, "errorMessage": "", "data": {"body": payload}}
 
     return result
