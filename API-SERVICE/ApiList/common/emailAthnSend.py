@@ -10,7 +10,7 @@ from Utils.CommonUtil import get_exception_info, connect_db, convert_data
 from ApiService.ApiServiceConfig import config
 
 
-class EmailAlreadyAuth(Exception):
+class EmailNotAuth(Exception):
     pass
 
 
@@ -75,12 +75,11 @@ def api(email_auth: emailAthnSend) -> Dict:
         exist_mail, _ = db.select(
             f'SELECT * FROM tb_email_athn_info WHERE email={convert_data(email_auth.email)}')
 
-        if email_auth.msg_type == "register" and len(exist_mail) != 0:
-            if exist_mail[0]["athn_yn"] == "Y":
-                raise EmailAlreadyAuth
-
-        if email_auth.msg_type == "password" and len(exist_mail) == 0:
-            raise EmailNotExist
+        if email_auth.msg_type == "password":
+            if len(exist_mail) == 0:
+                raise EmailNotExist
+            if exist_mail[0]["athn_yn"] == "N":
+                raise EmailNotAuth
 
         send_mail(auth_no, email_auth.email, email_auth.msg_type)
 
