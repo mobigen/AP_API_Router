@@ -78,6 +78,7 @@ def prepare_config() -> None:
         config.user_info = api_router_cfg["user_info"]
         config.pwd_context = CryptContext(
             schemes=["bcrypt"], deprecated="auto")
+        config.email_auth = api_router_cfg["email_auth"]
 
 
 def make_connection_pool(db_info):

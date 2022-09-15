@@ -21,6 +21,7 @@ class ApiServiceConfig:
     secret_info: Dict
     user_info: Dict
     pwd_context: CryptContext
+    email_auth: Dict
 
     conn_pool: pool.SimpleConnectionPool
 
