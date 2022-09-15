@@ -65,7 +65,7 @@ class ESSearch:
         :param field: search field, type str
         :param operator: search operator, type str ex) (AND, OR)
         """
-        if len(keyword_dict.values()):
+        if any(keyword_dict.values()):
             must_query_list = []
             option = "match"
 

@@ -56,6 +56,10 @@ def api(search_option: SearchOption) -> Dict:
 
         if search_option.dataSrttn != "전체":
             filter_srttn = make_query("match","data_srttn",search_option.dataSrttn)
+
+            if "filter" not in es.body["query"]["bool"].keys():
+                es.body["query"]["bool"]["filter"] = []
+
             es.body["query"]["bool"]["filter"].append(filter_srttn)
 
         biz_meta_elk = es.search()
