@@ -52,6 +52,7 @@ class ESSearch:
         filter_list = []
         if filter_oper == "OR":
             query = " ".join([" ".join(values) for values in filter_option.values()])
+            query = query.strip()
             fields = list(filter_option.keys())
             self.body["query"]["bool"]["filter"] = [{"multi_match":{"query":query,"fields":fields}}]
         else:
