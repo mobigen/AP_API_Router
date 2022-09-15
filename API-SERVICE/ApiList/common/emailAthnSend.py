@@ -10,8 +10,17 @@ from Utils.CommonUtil import get_exception_info, connect_db, convert_data
 from ApiService.ApiServiceConfig import config
 
 
+class EmailAlreadyAuth(Exception):
+    pass
+
+
+class EmailNotExist(Exception):
+    pass
+
+
 class emailAthnSend(BaseModel):
     email: str
+    msg_type: str  # register or password
 
 
 def make_auth_no():
@@ -32,14 +41,18 @@ def make_email_auth_query(email, auth_no, exist_mail):
     return query
 
 
-def send_mail(auth_no, receiver_addr):
+def send_mail(auth_no, receiver_addr, msg_type):
     message = MIMEMultipart("alternative")
-    message["Subject"] = config.email_auth["subject"]
+    message["Subject"] = config.email_auth[f"subject_{msg_type}"]
     message["From"] = config.email_auth["login_user"]
     message["To"] = receiver_addr
 
-    with open(f'{config.root_path}/conf/common/template/emailAthnSend.html', "r") as fd:
-        html = "\n".join(fd.readlines())
+    if msg_type == "register":
+        with open(f'{config.root_path}/conf/common/template/emailAthnSend.html', "r") as fd:
+            html = "\n".join(fd.readlines())
+    else:
+        with open(f'{config.root_path}/conf/common/template/pwdEmailAthn.html', "r") as fd:
+            html = "\n".join(fd.readlines())
 
     html = html.replace("AUTH_NO", auth_no)
     html_part = MIMEText(html, "html")
@@ -51,8 +64,7 @@ def send_mail(auth_no, receiver_addr):
     stmp.starttls()
     stmp.login(config.email_auth["login_user"],
                config.email_auth["login_pass"])
-    stmp.sendmail(config.email_auth["login_user"],
-                  receiver_addr, message.as_string())
+    stmp.send_message(message)
     stmp.quit()
 
 
@@ -63,12 +75,20 @@ def api(email_auth: emailAthnSend) -> Dict:
         exist_mail, _ = db.select(
             f'SELECT * FROM tb_email_athn_info WHERE email={convert_data(email_auth.email)}')
 
+        if email_auth.msg_type == "register" and len(exist_mail) != 0:
+            if exist_mail[0]["athn_yn"] == "Y":
+                raise EmailAlreadyAuth
+
+        if email_auth.msg_type == "password" and len(exist_mail) == 0:
+            raise EmailNotExist
+
+        send_mail(auth_no, email_auth.email, email_auth.msg_type)
+
         time_zone = 'Asia/Seoul'
         db.execute(f"SET TIMEZONE={convert_data(time_zone)}")
         query = make_email_auth_query(email_auth.email, auth_no, exist_mail)
         db.execute(query)
 
-        send_mail(auth_no, email_auth.email)
         logger.info("Successfully sent the mail.")
     except Exception:
         except_name = get_exception_info()
