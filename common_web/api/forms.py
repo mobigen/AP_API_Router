@@ -32,7 +32,8 @@ class ApiInfoForm(forms.ModelForm):
 
     class Meta:
         model = ApiInfo
-        fields = ("api_nm", "route_url", "url", "cmd", "mode", "meth", "ctgry")
+        fields = ("api_nm", "route_url", "url",
+                  "cmd", "mode", "meth")  # , "ctgry")
         labels = {"api_nm": "API명", "route_url": "Route URL",
                   "url": "Service URL", "cmd": "Remote CMD"}
 
