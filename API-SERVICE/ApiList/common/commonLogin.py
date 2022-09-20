@@ -5,35 +5,12 @@ from pydantic import BaseModel
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from datetime import timedelta
-from Utils.CommonUtil import get_exception_info, get_user, create_token, make_token_data
+from Utils.CommonUtil import get_exception_info, create_token, make_token_data, authenticate_user
 from ApiService.ApiServiceConfig import config
-
-
-class IncorrectUserName(Exception):
-    pass
-
-
-class IncorrectPassword(Exception):
-    pass
 
 
 class commonLogin(BaseModel):
     data: Dict
-
-
-def verify_password(plain_password, hashed_password):
-    return config.pwd_context.verify(plain_password, hashed_password)
-
-
-def authenticate_user(username: str, password: str):
-    user = get_user(username)
-    if not user[0]:
-        raise IncorrectUserName
-
-    user = user[0][0]
-    if not verify_password(password, user[config.user_info["password_column"]]):
-        raise IncorrectPassword
-    return user
 
 
 def api(login: commonLogin) -> Dict:

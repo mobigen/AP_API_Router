@@ -165,3 +165,26 @@ def make_token_data(user: Dict) -> Dict:
     token_data_column = config.secret_info["token_data_column"].split(",")
     token_data = {column: user[column] for column in token_data_column}
     return token_data
+
+
+class IncorrectUserName(Exception):
+    pass
+
+
+class IncorrectPassword(Exception):
+    pass
+
+
+def verify_password(plain_password, hashed_password):
+    return config.pwd_context.verify(plain_password, hashed_password)
+
+
+def authenticate_user(username: str, password: str):
+    user = get_user(username)
+    if not user[0]:
+        raise IncorrectUserName
+
+    user = user[0][0]
+    if not verify_password(password, user[config.user_info["password_column"]]):
+        raise IncorrectPassword
+    return user
