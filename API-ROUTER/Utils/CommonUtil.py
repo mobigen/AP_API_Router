@@ -7,9 +7,11 @@ from typing import Any, Dict, List
 from ApiRoute.ApiRouteConfig import config
 from ConnectManager import PostgresManager
 from psycopg2 import pool
-import jwt
 import sys
 import traceback
+
+def convert_data(data) -> str:
+    return f'\'{str(data)}\''
 
 def set_log_path():
     parser = configparser.ConfigParser()

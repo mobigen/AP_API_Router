@@ -26,7 +26,7 @@ async def bypass_msg(api_info, params_query, body, headers):
 
     url = make_url(api_info["ctgry"], api_info["url"])
     if url is None:
-        return {"result": 0, "errorMessage": "The server info does not exist."}
+        return {"result": 0, "errorMessage": "The server info does not exist."}, ""
 
     async with aiohttp.ClientSession() as session:
         if method == "GET":
@@ -61,7 +61,6 @@ async def run_cmd(cmd: str):
 
 
 async def call_remote_func(api_info, api_params, input_params) -> Dict:
-    logger.error(f'IN PARAM : {input_params}, API PARAM : {api_params}')
     command_input = ""
     for param in api_params:
         try:
@@ -81,6 +80,6 @@ async def call_remote_func(api_info, api_params, input_params) -> Dict:
     except Exception:
         except_name = get_exception_info()
         res_msg = {"result": 0, "errorMessage": except_name}
-        logger.error(f'SSH connection failed: {except_name}')
-    res_msg = {"result": 1, "errorMessage": "", "data": eval(result)}
+    else:
+        res_msg = {"result": 1, "errorMessage": "", "data": eval(result)}
     return res_msg
