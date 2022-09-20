@@ -139,6 +139,14 @@ def convert_error_message(exception_name: str):
 
 
 ##### for user info #####
+class IncorrectUserName(Exception):
+    pass
+
+
+class IncorrectPassword(Exception):
+    pass
+
+
 def get_user(user_name: str):
     db = connect_db()
     user = db.select(
@@ -165,14 +173,6 @@ def make_token_data(user: Dict) -> Dict:
     token_data_column = config.secret_info["token_data_column"].split(",")
     token_data = {column: user[column] for column in token_data_column}
     return token_data
-
-
-class IncorrectUserName(Exception):
-    pass
-
-
-class IncorrectPassword(Exception):
-    pass
 
 
 def verify_password(plain_password, hashed_password):

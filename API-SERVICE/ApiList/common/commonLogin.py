@@ -1,5 +1,3 @@
-from http import cookies
-from http.cookiejar import Cookie
 from typing import Dict
 from pydantic import BaseModel
 from fastapi.logger import logger
