@@ -76,6 +76,7 @@ def make_where_value(where):
 
 
 def make_where_info(where_info: List[whereInfo]):
+    where = ""
     for info in where_info:
         value = make_where_value(info)
         if info.sub:
