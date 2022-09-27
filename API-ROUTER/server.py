@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 import uvicorn
+from pathlib import Path
 from ApiRoute.ApiRouteConfig import config
-from Utils.CommonUtil import prepare_config, set_log_path
+from RouterUtils.CommonUtil import prepare_config, set_log_path
 from ApiRoute import ApiRoute
 import os
 
-prepare_config()
+root_path = str(Path(os.path.dirname(os.path.abspath(__file__))))
+prepare_config(root_path)
 api_router = ApiRoute()
 app = FastAPI()
 app.include_router(api_router.router)
@@ -21,3 +23,4 @@ if __name__ == '__main__':
     set_log_path()
     uvicorn.run("server:app", host=config.server_host, port=config.server_port,
                 reload=True, log_config=f'{config.root_path}/conf/logging.conf')
+  

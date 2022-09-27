@@ -3,7 +3,7 @@ import aiohttp
 from fastapi.logger import logger
 from urllib.parse import ParseResult
 from ApiRoute.ApiRouteConfig import config
-from Utils.CommonUtil import get_exception_info
+from RouterUtils.CommonUtil import get_exception_info
 from typing import Dict
 
 

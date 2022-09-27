@@ -3,14 +3,16 @@ import configparser
 import argparse
 import starlette.datastructures
 from fastapi.logger import logger
-from pathlib import Path
 from typing import Any, Dict, List
 from ApiRoute.ApiRouteConfig import config
-from ConnectManager import PostgresManager
+from RouterConnectManager import PostgresManager
 from psycopg2 import pool
 import jwt
 import sys
 import traceback
+
+def convert_data(data) -> str:
+    return f'\'{str(data)}\''
 
 def set_log_path():
     parser = configparser.ConfigParser()
@@ -45,9 +47,9 @@ def parser_params() -> Any:
     return parser.parse_args()
 
 
-def prepare_config() -> None:
-    args=parser_params()
-    config.root_path=str(Path(os.path.dirname(os.path.abspath(__file__))).parent)
+def prepare_config(root_path) -> None:
+    args = parser_params()
+    config.root_path = root_path
     api_router_cfg=get_config("config.ini")
     config.api_config=get_config("api_config.ini")
     config.db_type=f'{args.db_type}_db'
@@ -72,7 +74,8 @@ def connect_db():
     return db
 
 def save_file_for_reload():
-    with open(__file__, "a") as fd:
+    #with open(__file__, "a") as fd:
+    with open(f'{config.root_path}/server.py', "a") as fd:
         fd.write(" ")
 
 def make_res_msg(result, err_msg, data = None, column_names = None):

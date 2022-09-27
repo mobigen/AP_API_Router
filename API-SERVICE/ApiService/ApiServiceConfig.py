@@ -8,7 +8,6 @@ class ApiServiceConfig:
     category: str
 
     db_type: str
-    code_type: str
     db_info: Dict
 
     remote_info: Dict

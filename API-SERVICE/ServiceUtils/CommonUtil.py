@@ -58,7 +58,6 @@ def parser_params() -> Any:
     parser.add_argument("--port", type=int, default=19000)
     parser.add_argument("--category", default="meta")
     parser.add_argument("--db_type", default="test")
-    parser.add_argument("--code_type", default="source")
 
     return parser.parse_args()
 
@@ -73,7 +72,6 @@ def prepare_config(root_path) -> None:
     config.server_port = args.port
     config.db_type = f'{args.db_type}_db'
     config.db_info = api_router_cfg[config.db_type]
-    config.code_type = args.code_type
     config.conn_pool = make_connection_pool(config.db_info)
     config.secret_info = api_router_cfg["secret_info"]
 
