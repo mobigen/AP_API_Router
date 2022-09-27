@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 import uvicorn
+from pathlib import Path
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import prepare_config, set_log_path
+from ServiceUtils.CommonUtil import prepare_config, set_log_path
 from ApiService import ApiService
 import os
 
-prepare_config()
+root_path = str(Path(os.path.dirname(os.path.abspath(__file__))))
+prepare_config(root_path)
 api_router = ApiService()
 app = FastAPI()
 app.include_router(api_router.router)
