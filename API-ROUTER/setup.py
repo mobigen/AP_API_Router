@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='mobi_router',
-    version='1.0',
+    name='mobigen_router',
+    version='0.1',
     author='mobigen',
     author_email='cbccbs@mobigen.co.kr',
     python_requires='>=3.6',

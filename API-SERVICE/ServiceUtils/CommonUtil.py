@@ -6,12 +6,10 @@ import traceback
 import starlette.datastructures
 from fastapi.logger import logger
 from fastapi import Request, HTTPException, status
-from pathlib import Path
 from typing import Any
 from ApiService.ApiServiceConfig import config
 from ServiceConnectManager import PostgresManager
 from psycopg2 import pool
-import jwt
 import sys
 import traceback
 
@@ -112,15 +110,6 @@ def make_res_msg(result, err_msg, data=None, column_names=None, kor_column_names
         res_msg = {"result": result, "errorMessage": err_msg,
                    "data": {"body": data, "header": header_list}}
     return res_msg
-
-
-def get_token_info(headers: starlette.datastructures.Headers):
-    user_info = None
-    if config.secret_info["name"] in headers:
-        user_info = jwt.decode(headers[config.secret_info["name"]],
-                               config.secret_info["secret"], algorithms="HS256", options={"verify_exp": False})
-    logger.info(f'user info : {user_info}')
-    return user_info
 
 
 def get_exception_info():

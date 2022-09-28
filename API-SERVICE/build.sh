@@ -1,8 +1,8 @@
-rm -rf build dist mobi_service.egg-info
-pip uninstall mobi_service -y
+rm -rf build dist mobigen_service.egg-info
+pip uninstall mobigen_service -y
 
 python setup.py bdist_wheel
 
-pip install ./dist/mobi_service-1.0-py3-none-any.whl
+pip install ./dist/mobigen_service-0.1-py3-none-any.whl
 
 
