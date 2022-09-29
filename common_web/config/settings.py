@@ -88,7 +88,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dataportal',
+        'NAME': 'ktportal',
         'USER': 'dpmanager',
         'PASSWORD': 'hello.dp12#$',
         'HOST': '192.168.100.126',

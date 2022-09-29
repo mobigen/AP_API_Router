@@ -15,6 +15,8 @@ urlpatterns = [
 
     path('category/', views.category_list, name='category_list'),
     path('category/create', views.create_category, name='create_category'),
-    path('category/update/<str:nm>', views.update_category, name='update_category'),
-    path('category/delete/<str:nm>', views.delete_category, name='delete_category'),
+    path('category/update/<str:srvr_nm>',
+         views.update_category, name='update_category'),
+    path('category/delete/<str:srvr_nm>',
+         views.delete_category, name='delete_category'),
 ]

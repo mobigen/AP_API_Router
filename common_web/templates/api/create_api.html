@@ -43,9 +43,9 @@
 
       <div class="form-group col-md-6">
         <label for="meth">Method</label>
-        <select class="form-control" name="meth" id="meth">
-          {% for choice in form.meth.field.choices %}
-            {% if choice.1 == form.meth.value %}
+        <select class="form-control" name="mthd" id="mthd">
+          {% for choice in form.mthd.field.choices %}
+            {% if choice.1 == form.mthd.value %}
               <option selected="selected" value="{{ choice.0 }}">{{ choice.1 }}</option>
             {% else %}
               <option value="{{ choice.0 }}">{{ choice.1 }}</option>
@@ -55,10 +55,10 @@
       </div>
 
       <div class="form-group col-md-6">
-        <label for="ctgry">카테고리명</label>
-        <select class="form-control" name="ctgry" id="ctgry">
-          {% for choice in form.ctgry.field.choices %}
-            {% if choice.1 == form.ctgry.value %}
+        <label for="srvr_nm">카테고리명</label>
+        <select class="form-control" name="srvr_nm" id="srvr_nm">
+          {% for choice in form.srvr_nm.field.choices %}
+            {% if choice.1 == form.srvr_nm.value %}
               <option selected="selected" value="{{ choice.0 }}">{{ choice.1 }}</option>
             {% else %}
               <option value="{{ choice.0 }}">{{ choice.1 }}</option>

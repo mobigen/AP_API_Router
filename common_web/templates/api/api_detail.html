@@ -21,13 +21,13 @@
           {% if category_list %}
             {% for category in category_list %}
               <tr>
-                <td>{{ category.nm }}</td>
+                <td>{{ category.srvr_nm }}</td>
                 <td>{{ category.ip_adr }}</td>
                 <td>
-                  <a href="{% url 'api:update_category' category.nm %}">수정</a>
+                  <a href="{% url 'api:update_category' category.srvr_nm %}">수정</a>
                 </td>
                 <td>
-                  <a onclick="return confirm('<{{ category.nm }}>를 정말 삭제하시겠습니까?');" href="{% url 'api:delete_category' category.nm %}">삭제</a>
+                  <a onclick="return confirm('<{{ category.srvr_nm }}>를 정말 삭제하시겠습니까?');" href="{% url 'api:delete_category' category.srvr_nm %}">삭제</a>
                 </td>
               </tr>
             {% endfor %}

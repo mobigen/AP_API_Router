@@ -5,14 +5,18 @@
       <h2 class="border-bottom py-2">테이블 생성</h2>
       <form class="my-3" method="post">
         <div class="form-group col-md-6">
-          <label for="table_nm">테이블명</label>
-          <input type="text" class="form-control" name="table_nm" id="table_nm" value="{{ form.table_nm.value|default_if_none:'' }}"/>
+          <label for="tbl_nm">테이블명</label>
+          <input type="text" class="form-control" name="tbl_nm" id="tbl_nm" value="{{ form.tbl_nm.value|default_if_none:'' }}"/>
         </div>
         <div class="form-group col-md-6">
-          <label for="schema">카테고리명</label>
-          <select class="form-control" name="schema" id="schema">
-            {% for choice in form.schema.field.choices %}
-              {% if choice.1 == form.schema.value %}
+          <label for="tbl_kor_nm">테이블 한글명</label>
+          <input type="text" class="form-control" name="tbl_kor_nm" id="tbl_kor_nm" value="{{ form.tbl_kor_nm.value|default_if_none:'' }}"/>
+        </div>
+        <div class="form-group col-md-6">
+          <label for="db_schema">카테고리명</label>
+          <select class="form-control" name="db_schema" id="db_schema">
+            {% for choice in form.db_schema.field.choices %}
+              {% if choice.1 == form.db_schema.value %}
                 <option selected="selected" value="{{ choice.0 }}">{{ choice.1 }}</option>
               {% else %}
                 <option value="{{ choice.0 }}">{{ choice.1 }}</option>

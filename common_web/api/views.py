@@ -9,14 +9,14 @@ from .forms import ApiInfoForm, ServerInfoForm, ApiParamInfoForm
 import requests
 # Create your views here.
 
-RELOAD_URL = "http://192.168.100.126:9010/api/reload"
+RELOAD_URL = "http://192.168.100.126:8010/api/reload"
 
 
 def api_list(request):
     page = request.GET.get('page', 1)
     kw = request.GET.get('kw', "")
 
-    api_list = ApiInfo.objects.order_by("-ctgry")
+    api_list = ApiInfo.objects.order_by("-srvr_nm")
     if kw:
         api_list = api_list.filter(Q(api_nm__icontains=kw)).distinct()
 
@@ -30,12 +30,12 @@ def api_list(request):
 def create_api(request):
     if request.method == "POST":
         category = get_object_or_404(
-            ServerInfo, pk=request.POST.get("ctgry"))
+            ServerInfo, pk=request.POST.get("srvr_nm"))
 
         form = ApiInfoForm(request.POST)
         if form.is_valid():
             api = form.save(commit=False)
-            api.ctgry = category
+            api.srvr_nm = category
             api.save()
             requests.get(RELOAD_URL)
             return redirect("api:api_list")
@@ -55,7 +55,7 @@ def update_api(request, api_nm):
         if form.is_valid():
             form.save()
             requests.get(RELOAD_URL)
-            return redirect("api:update_api", api_nm=api_nm)
+            return redirect("api:api_list")
         else:
             messages.error(request, form.errors.as_text())
     else:
@@ -94,7 +94,7 @@ def delete_param(request, api_nm, nm):
 
 
 def category_list(request):
-    category_list = ServerInfo.objects.order_by("-nm")
+    category_list = ServerInfo.objects.order_by("-srvr_nm")
 
     context = {"category_list": category_list}
     return render(request, "api/category_list.html", context)
@@ -117,8 +117,8 @@ def create_category(request):
     return render(request, "api/update_category.html", context)
 
 
-def update_category(request, nm):
-    category = get_object_or_404(ServerInfo, pk=nm)
+def update_category(request, srvr_nm):
+    category = get_object_or_404(ServerInfo, pk=srvr_nm)
     if request.method == "POST":
         form = ServerInfoForm(request.POST, instance=category)
         if form.is_valid():
@@ -130,15 +130,15 @@ def update_category(request, nm):
     else:
         form = ServerInfoForm(instance=category)
 
-    context = {"form": form, "nm": nm}
+    context = {"form": form, "nm": srvr_nm}
     return render(request, "api/update_category.html", context)
 
 
-def delete_category(request, nm):
-    category = get_object_or_404(ServerInfo, pk=nm)
+def delete_category(request, srvr_nm):
+    category = get_object_or_404(ServerInfo, pk=srvr_nm)
     try:
         category.delete()
         requests.get(RELOAD_URL)
     except ProtectedError as err:
-        messages.error(request, f"category - {nm}을 사용중인 API가 존재합니다.")
+        messages.error(request, f"category - {srvr_nm}을 사용중인 API가 존재합니다.")
     return redirect("api:category_list")

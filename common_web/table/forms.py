@@ -14,13 +14,13 @@ CATEGORY = (
 
 
 class TableInfoForm(forms.ModelForm):
-    schema = forms.ChoiceField(
+    db_schema = forms.ChoiceField(
         label="카테고리명", choices=CATEGORY)
 
     class Meta:
         model = TableInfo
-        fields = ("table_nm", "schema")
-        labels = {"table_nm": "테이블명"}
+        fields = ("tbl_nm", "tbl_kor_nm", "db_schema")
+        labels = {"tbl_nm": "테이블명", "tbl_kor_nm": "테이블 한글명"}
 
 
 class ColumnInfoForm(forms.ModelForm):
@@ -29,7 +29,7 @@ class ColumnInfoForm(forms.ModelForm):
         model = ColumnInfo
         fields = ("eng_nm", "kor_nm", "data_type")
         labels = {
-            "eng_nm": "컬럼명(영어)",
-            "kor_nm": "컬럼명(한글)",
-            "data_type": "데이터 타입"
+            "eng_nm": "영문명",
+            "kor_nm": "한글명",
+            "data_type": "데이터 유형"
         }

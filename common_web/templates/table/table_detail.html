@@ -1,7 +1,7 @@
 {% extends 'base.html'%}
 {% block content %}
   <div class="container my-3">
-    <h2 class="border-bottom py-2">컬럼 생성 ({{ table.table_nm }})</h2>
+    <h2 class="border-bottom py-2">컬럼 생성 ({{ table.tbl_nm }})</h2>
 
     <form method="post">
       <div class="form-group col-md-4">
@@ -42,10 +42,10 @@
               <td>{{ column.kor_nm }}</td>
               <td>{{ column.data_type }}</td>
               <td>
-                <a href="{% url 'table:update_column' table_id=table.table_id eng_nm=column.eng_nm %}">수정</a>
+                <a href="{% url 'table:update_column' tbl_id=table.tbl_id eng_nm=column.eng_nm %}">수정</a>
               </td>
               <td>
-                <a onclick="return confirm('<{{ column.eng_nm }}>를 정말 삭제하시겠습니까?');" href="{% url 'table:delete_column' table_id=table.table_id eng_nm=column.eng_nm %}">삭제</a>
+                <a onclick="return confirm('<{{ column.eng_nm }}>를 정말 삭제하시겠습니까?');" href="{% url 'table:delete_column' tbl_id=table.tbl_id eng_nm=column.eng_nm %}">삭제</a>
               </td>
             </tr>
           {% endfor %}
@@ -56,6 +56,6 @@
         {% endif %}
       </tbody>
     </table>
-    <a href="{% url 'table:save_csv' table.table_id %}" class="btn btn-primary" style="float: right;">csv 저장</a>
+    <a href="{% url 'table:save_csv' table.tbl_id %}" class="btn btn-primary" style="float: right;">csv 저장</a>
   </div>
 {% endblock %}

@@ -25,6 +25,7 @@
           <tr class="thead-dark">
             <th>카테고리</th>
             <th>테이블명</th>
+            <th>테이블 한글명</th>
             <th>수정</th>
             <th>삭제</th>
           </tr>
@@ -33,18 +34,19 @@
           {% if table_list %}
             {% for table in table_list %}
               <tr>
-                <td>{{ table.schema }}</td>
+                <td>{{ table.db_schema }}</td>
                 <td>
-                  <a href="{% url 'table:table_detail' table.table_id %}">
-                    {{ table.table_nm }}
+                  <a href="{% url 'table:table_detail' table.tbl_id %}">
+                    {{ table.tbl_nm }}
                   </a>
                 </td>
+                <td>{{ table.tbl_kor_nm }}</td>
                 <td>
-                  <a href="{% url 'table:update_table' table.table_id %}">
+                  <a href="{% url 'table:update_table' table.tbl_id %}">
                     수정
                   </td>
                   <td>
-                    <a onclick="return confirm('<{{ table.table_nm }}>를 정말 삭제하시겠습니까?');" href="{% url 'table:delete_table' table_id=table.table_id %}">
+                    <a onclick="return confirm('<{{ table.tbl_nm }}>를 정말 삭제하시겠습니까?');" href="{% url 'table:delete_table' tbl_id=table.tbl_id %}">
                       삭제
                     </a>
                   </td>

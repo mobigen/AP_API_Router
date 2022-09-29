@@ -5,16 +5,19 @@
       <h2 class="border-bottom py-2">테이블 변경</h2>
       <form class="my-3" method="post">
         <div class="form-group col-md-6">
-          <label for="table_nm">테이블명</label>
-          <input type="text" class="form-control" name="table_nm" id="table_nm" value="{{ form.table_nm.value|default_if_none:'' }}"/>
+          <label for="tbl_nm">테이블명</label>
+          <input type="text" class="form-control" name="tbl_nm" id="tbl_nm" value="{{ form.tbl_nm.value|default_if_none:'' }}"/>
         </div>
-
+        <div class="form-group col-md-6">
+          <label for="tbl_kor_nm">테이블 한글명</label>
+          <input type="text" class="form-control" name="tbl_kor_nm" id="tbl_kor_nm" value="{{ form.tbl_kor_nm.value|default_if_none:'' }}"/>
+        </div>
         <div class="form-group  col-md-6">
-          <label for="schema">카테고리명</label>
-          {% if form.schema.value %}
-            <input type="text" class="form-control" name="schema" id="schema" value="{{ form.schema.value|default_if_none:'' }}" readonly="readonly"/>
+          <label for="db_schema">카테고리명</label>
+          {% if form.db_schema.value %}
+            <input type="text" class="form-control" name="db_schema" id="db_schema" value="{{ form.db_schema.value|default_if_none:'' }}" readonly="readonly"/>
           {% else %}
-            <input type="text" class="form-control" name="schema" id="schema" value="{{ form.schema.value|default_if_none:'' }}"/>
+            <input type="text" class="form-control" name="db_schema" id="db_schema" value="{{ form.db_schema.value|default_if_none:'' }}"/>
           {% endif %}
         </div>
 

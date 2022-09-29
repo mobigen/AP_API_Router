@@ -4,26 +4,26 @@ from django.db import models
 
 
 class ServerInfo(models.Model):
-    nm = models.CharField(max_length=64, primary_key=True)
+    srvr_nm = models.CharField(max_length=64, primary_key=True)
     ip_adr = models.CharField(max_length=128)
     domn_nm = models.CharField(max_length=256, blank=True, null=True)
 
     class Meta:
-        db_table = 'sitemng"."tb_api_server_info'
+        db_table = 'sitemng"."api_item_server_dtl'
 
 
 class ApiInfo(models.Model):
-    ctgry = models.ForeignKey(
-        ServerInfo, on_delete=models.PROTECT, db_column="ctgry")
+    srvr_nm = models.ForeignKey(
+        ServerInfo, on_delete=models.PROTECT, db_column="srvr_nm")
     api_nm = models.CharField(max_length=64, primary_key=True)
     route_url = models.CharField(max_length=256, unique=True)
     url = models.CharField(max_length=256, blank=True, null=True)
-    meth = models.CharField(max_length=64, blank=True, null=True)
+    mthd = models.CharField(max_length=64, blank=True, null=True)
     cmd = models.CharField(max_length=512, blank=True, null=True)
     mode = models.CharField(max_length=32)
 
     class Meta:
-        db_table = 'sitemng"."tb_api_info'
+        db_table = 'sitemng"."api_item_bas'
 
 
 class ApiParamInfo(models.Model):
@@ -34,5 +34,5 @@ class ApiParamInfo(models.Model):
     deflt_val = models.CharField(max_length=128)
 
     class Meta:
-        db_table = 'sitemng"."tb_api_params'
+        db_table = 'sitemng"."api_item_param_dtl'
         unique_together = (('api_nm', 'nm'),)

@@ -23,10 +23,10 @@
       <table class="table table-hover">
         <thead>
           <tr class="thead-dark">
-            <th>카테고리명</th>
+            <th>서버명</th>
             <th>API명</th>
-            <th>Method</th>
-            <th>동작방식</th>
+            <th>메소드</th>
+            <th>모드</th>
             <th>삭제</th>
           </tr>
         </thead>
@@ -35,12 +35,12 @@
             {% for api in api_list %}
               <tr>
                 <td>
-                  <a href="{% url 'api:category_list' %}">{{ api.ctgry.nm }}</a>
+                  <a href="{% url 'api:category_list' %}">{{ api.srvr_nm.srvr_nm }}</a>
                 </td>
                 <td>
                   <a href="{% url 'api:update_api' api.api_nm %}">{{ api.api_nm }}</a>
                 </td>
-                <td>{{ api.meth }}</td>
+                <td>{{ api.mthd }}</td>
                 <td>{{ api.mode }}</td>
                 <td>
                   <a onclick="return confirm('<{{ api.api_nm }}>를 정말 삭제하시겠습니까?');" href="{% url 'api:delete_api' api.api_nm %}">삭제</a>
