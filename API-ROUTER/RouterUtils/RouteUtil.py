@@ -9,7 +9,7 @@ from typing import Dict
 
 def make_url(server_name: str, url_path: str):
     for server_info in config.api_server_info:
-        if server_info["nm"] == server_name:
+        if server_info["srvr_nm"] == server_name:
             if len(server_info["ip_adr"]) != 0:
                 netloc = server_info["ip_adr"]
             else:
@@ -22,9 +22,9 @@ def make_url(server_name: str, url_path: str):
 
 
 async def bypass_msg(api_info, params_query, body, headers):
-    method = api_info["meth"]
+    method = api_info["mthd"]
 
-    url = make_url(api_info["ctgry"], api_info["url"])
+    url = make_url(api_info["srvr_nm"], api_info["url"])
     if url is None:
         return {"result": 0, "errorMessage": "The server info does not exist."}
 
