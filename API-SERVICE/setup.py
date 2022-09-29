@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='mobigen_service',
-    version='0.1',
+    version='0.2',
     author='mobigen',
     author_email='cbccbs@mobigen.co.kr',
     python_requires='>=3.6',

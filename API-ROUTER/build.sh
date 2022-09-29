@@ -3,6 +3,6 @@ pip uninstall mobigen_router -y
 
 python setup.py bdist_wheel
 
-pip install ./dist/mobigen_router-0.1-py3-none-any.whl
+pip install ./dist/mobigen_router-0.3-py3-none-any.whl
 
 
