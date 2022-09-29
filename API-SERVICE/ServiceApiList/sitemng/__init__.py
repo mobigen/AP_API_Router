@@ -1,1 +1,1 @@
-from .getCodeInfo import *
+from . import *

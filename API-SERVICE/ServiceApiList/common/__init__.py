@@ -1,2 +1,2 @@
-from .commonExecute import *
-from .commonSelect import *
+from . import *
+

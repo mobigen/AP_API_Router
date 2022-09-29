@@ -23,4 +23,4 @@ if __name__ == '__main__':
     set_log_path()
     uvicorn.run("server:app", host=config.server_host, port=config.server_port,
                 reload=True, log_config=f'{config.root_path}/conf/logging.conf')
-  
+    
