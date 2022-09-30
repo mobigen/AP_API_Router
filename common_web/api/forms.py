@@ -23,19 +23,17 @@ class ServerInfoForm(forms.ModelForm):
         widgets = {"srvr_nm": forms.TextInput()}
 
 
-class ApiInfoForm(forms.ModelForm):
+class ApiInfoForm(forms.Form):
+    api_nm = forms.CharField(label="API명", max_length=64)
+    route_url = forms.CharField(
+        label="라우트 URL", max_length=256, required=False)
+    url = forms.CharField(label="URL", max_length=256, required=False)
+    cmd = forms.CharField(label="명령어", max_length=512, required=False)
     mode = forms.ChoiceField(
         label="모드", choices=MODE)
     srvr_nm = forms.ChoiceField(label="서버명", choices=[(
         category.srvr_nm, category.srvr_nm) for category in ServerInfo.objects.all()])
     mthd = forms.ChoiceField(label="메소드", choices=METHOD)
-
-    class Meta:
-        model = ApiInfo
-        fields = ("api_nm", "route_url", "url",
-                  "cmd", "mode", "mthd")  # , "ctgry")
-        labels = {"api_nm": "API명", "route_url": "라우트 URL",
-                  "url": "URL", "cmd": "명령어"}
 
 
 class ApiParamInfoForm(forms.ModelForm):

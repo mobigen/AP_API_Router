@@ -31,11 +31,15 @@ def create_api(request):
     if request.method == "POST":
         category = get_object_or_404(
             ServerInfo, pk=request.POST.get("srvr_nm"))
-
         form = ApiInfoForm(request.POST)
         if form.is_valid():
-            api = form.save(commit=False)
-            api.srvr_nm = category
+            api = ApiInfo(srvr_nm=category,
+                          api_nm=form.cleaned_data["api_nm"],
+                          route_url=form.cleaned_data["route_url"],
+                          url=form.cleaned_data["url"],
+                          mthd=form.cleaned_data["mthd"],
+                          cmd=form.cleaned_data["cmd"],
+                          mode=form.cleaned_data["mode"])
             api.save()
             requests.get(RELOAD_URL)
             return redirect("api:api_list")
@@ -50,16 +54,28 @@ def create_api(request):
 def update_api(request, api_nm):
     api = get_object_or_404(ApiInfo, pk=api_nm)
     param_list = ApiParamInfo.objects.filter(Q(api_nm=api_nm))
+
     if request.method == "POST":
-        form = ApiInfoForm(request.POST, instance=api)
+        category = get_object_or_404(
+            ServerInfo, pk=request.POST.get("srvr_nm"))
+        form = ApiInfoForm(request.POST)
         if form.is_valid():
-            form.save()
+            api.srvr_nm = category
+            api.api_nm = request.POST.get("api_nm")
+            api.route_url = request.POST.get("route_url")
+            api.url = request.POST.get("url")
+            api.mthd = request.POST.get("mthd")
+            api.cmd = request.POST.get("cmd")
+            api.mode = request.POST.get("mode")
+            api.save()
             requests.get(RELOAD_URL)
             return redirect("api:api_list")
         else:
             messages.error(request, form.errors.as_text())
     else:
-        form = ApiInfoForm(instance=api)
+        form_data = api.__dict__
+        form_data["srvr_nm"] = form_data["srvr_nm_id"]
+        form = ApiInfoForm(form_data)
 
     context = {"form": form, "api_nm": api_nm, "param_list": param_list}
     return render(request, "api/update_api.html", context)
@@ -88,7 +104,9 @@ def create_param(request, api_nm):
 def delete_param(request, api_nm, nm):
     param = ApiParamInfo.objects.filter(Q(api_nm=api_nm), Q(nm=nm))
     param.delete()
+    print("AAA")
     requests.get(RELOAD_URL)
+    print("BBB")
 
     return redirect("api:update_api", api_nm=api_nm)
 
