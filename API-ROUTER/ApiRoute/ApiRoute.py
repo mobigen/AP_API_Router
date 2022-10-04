@@ -3,8 +3,8 @@ from typing import Dict, List
 import importlib.util
 from fastapi import APIRouter
 from ApiRoute.ApiRouteConfig import config
-from RouterUtils.CommonUtil import connect_db, make_res_msg, save_file_for_reload, get_exception_info, delete_headers, convert_data
-from RouterUtils.RouteUtil import bypass_msg, call_remote_func
+from RouterUtils.CommonUtil import connect_db, save_file_for_reload, get_exception_info, delete_headers, convert_data
+from RouterUtils.RouteUtil import bypass_msg, call_remote_func, get_api_info
 from pydantic import BaseModel
 from starlette.requests import Request
 from urllib import parse
@@ -47,12 +47,13 @@ class ApiRoute:
             "/api/reload", self.reload_api, methods=["GET"], tags=["API Info Reload"])
 
         db = connect_db()
-        api_info, _ = db.select('SELECT * FROM api_item_bas;')
+        config.api_info, _ = db.select('SELECT * FROM api_item_bas;')
+        config.api_params, _ = db.select('SELECT * FROM api_item_param_dtl;')
 
         config.api_server_info, _ = db.select(
             'SELECT * FROM api_item_server_dtl')
 
-        for api in api_info:
+        for api in config.api_info:
             method = str(api["mthd"]).split(",")
             self.router.add_api_route(
                 api["route_url"], self.route_api, methods=method, tags=[f'Route Category ({api["srvr_nm"]})'])
@@ -73,36 +74,29 @@ class ApiRoute:
         result = {"result": 1, "errorMessage": ""}
         return result
 
-
     async def route_api(self, request: Request) -> Dict:
         route_url = request.url.path
         method = request.method
+        body = None
         headers = delete_headers(dict(request.headers), [
             "content-length", "user-agent"])
         try:
-            db = connect_db()
-            api_info, _ = db.select(
-                f'SELECT * FROM api_item_bas WHERE route_url = {convert_data(route_url)};')
-            api_info = api_info[0]
-            api_params, _ = db.select(
-                f'SELECT * FROM api_item_param_dtl WHERE api_nm = {convert_data(api_info["api_nm"])};')
-            logger.info(
-                f'\nDB - api_info : {api_info}\nDB - api_params : {api_params}')
-        except Exception:
-            except_name = get_exception_info()
-            result = {"result": 0, "errorMessage": except_name}
-        else:
+            api_info, api_params = get_api_info(route_url)
             if method == "POST":
                 body = await request.json()
-            else:
-                body = None
+
             params_query = parse.unquote(str(request.query_params))
 
             logger.info(
-                f'\nReq - body : {body}\nquery params : {params_query}')
+                f'\n- api_info : {api_info}\n- api_params : {api_params} \
+                  \n- req body : {body}, params_query : {params_query}')
 
             if api_info["mode"] == "MESSAGE PASSING":
                 result = await bypass_msg(api_info, params_query, body, headers)
             else:
                 result = await call_remote_func(api_info, api_params, body)
+        except Exception:
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
+
         return result

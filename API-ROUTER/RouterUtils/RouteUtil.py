@@ -21,6 +21,20 @@ def make_url(server_name: str, url_path: str):
     return None
 
 
+def get_api_info(route_url):
+    api_info = None
+    api_params = None
+    for api in config.api_info:
+        if api["route_url"] == route_url:
+            api_info = api
+            for params in config.api_params:
+                if params["api_nm"] == api["api_nm"]:
+                    api_params = params
+                    break
+            break
+    return api_info, api_params
+
+
 async def bypass_msg(api_info, params_query, body, headers):
     method = api_info["mthd"]
 
@@ -57,20 +71,17 @@ async def run_cmd(cmd: str):
 
 
 async def call_remote_func(api_info, api_params, input_params) -> Dict:
-    msg_type = api_info["msg_type"]
-    logger.error(f'IN PARAM : {input_params}, API PARAM : {api_params}')
     command_input = ""
-    if msg_type == "JSON":
-        for param in api_params:
-            try:
-                data = input_params[param["nm"]]
-                if not data:
-                    data = param["deflt_val"]
-                command_input += f' --{param["nm"]} {data}'
-            except KeyError:
-                logger.error(
-                    f'parameter set default value. [{param["nm"]}]')
-                command_input += f' --{param["nm"]} {param["deflt_val"]}'
+    for param in api_params:
+        try:
+            data = input_params[param["nm"]]
+            if not data:
+                data = param["deflt_val"]
+            command_input += f' --{param["nm"]} {data}'
+        except KeyError:
+            logger.error(
+                f'parameter set default value. [{param["nm"]}]')
+            command_input += f' --{param["nm"]} {param["deflt_val"]}'
 
     cmd = f'{api_info["cmd"]} {command_input}'
 
@@ -78,6 +89,7 @@ async def call_remote_func(api_info, api_params, input_params) -> Dict:
         result = await run_cmd(cmd)
     except Exception:
         except_name = get_exception_info()
-        logger.error(f'SSH connection failed: {except_name}')
-
-    return eval(result)
+        res_msg = {"result": 0, "errorMessage": except_name}
+    else:
+        res_msg = {"result": 1, "errorMessage": "", "data": eval(result)}
+    return res_msg
