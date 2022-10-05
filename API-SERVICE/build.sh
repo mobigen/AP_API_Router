@@ -3,6 +3,6 @@ pip uninstall mobigen_service -y
 
 python setup.py bdist_wheel
 
-pip install ./dist/mobigen_service-0.2-py3-none-any.whl
+pip install ./dist/mobigen_service-0.5-py3-none-any.whl
 
 
