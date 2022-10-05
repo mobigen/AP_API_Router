@@ -72,16 +72,15 @@ async def run_cmd(cmd: str):
 
 async def call_remote_func(api_info, api_params, input_params) -> Dict:
     command_input = ""
-    for param in api_params:
-        try:
-            data = input_params[param["nm"]]
-            if not data:
-                data = param["deflt_val"]
-            command_input += f' --{param["nm"]} {data}'
-        except KeyError:
-            logger.error(
-                f'parameter set default value. [{param["nm"]}]')
-            command_input += f' --{param["nm"]} {param["deflt_val"]}'
+    try:
+        data = input_params[api_params["nm"]]
+        if not data:
+            data = api_params["deflt_val"]
+        command_input += f' --{api_params["nm"]} {data}'
+    except KeyError:
+        logger.error(
+            f'parameter set default value. [{api_params["nm"]}]')
+        command_input += f' --{api_params["nm"]} {api_params["deflt_val"]}'
 
     cmd = f'{api_info["cmd"]} {command_input}'
 
