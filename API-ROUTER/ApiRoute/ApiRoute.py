@@ -4,8 +4,8 @@ import importlib.util
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from ApiRoute.ApiRouteConfig import config
-from Utils.CommonUtil import connect_db, save_file_for_reload, get_exception_info, delete_headers, convert_data
-from Utils.RouteUtil import bypass_msg, call_remote_func
+from Utils.CommonUtil import connect_db, save_file_for_reload, get_exception_info, delete_headers
+from Utils.RouteUtil import bypass_msg, call_remote_func, get_api_info, make_route_response
 from pydantic import BaseModel
 from starlette.requests import Request
 from urllib import parse
@@ -45,25 +45,25 @@ class ApiRoute:
             "/api/reload", self.reload_api, methods=["GET"], tags=["API Info Reload"])
 
         db = connect_db()
-        api_info, _ = db.select('SELECT * FROM tb_api_info;')
-
+        config.api_info, _ = db.select('SELECT * FROM tb_api_info;')
+        config.api_params, _ = db.select('SELECT * FROM tb_api_params;')
         config.api_server_info, _ = db.select(
             'SELECT * FROM tb_api_server_info')
 
-        for api in api_info:
+        for api in config.api_info:
             method = str(api["meth"]).split(",")
             self.router.add_api_route(
                 api["route_url"], self.route_api, methods=method, tags=[f'Route Category ({api["ctgry"]})'])
 
-        for api_name, api_info in config.api_config.items():
-            module_path = f'{config.root_path}/ApiList/{api_info["sub_dir"]}/{api_name}.py'
+        for api_name, conf_api_info in config.api_config.items():
+            module_path = f'{config.root_path}/ApiList/{conf_api_info["sub_dir"]}/{api_name}.py'
             module_name = "api"
             spec = importlib.util.spec_from_file_location(
                 module_name, module_path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
-            self.router.add_api_route(f'{api_info["url_prefix"]}/{api_info["sub_dir"]}/{api_name}',
-                                      module.api, methods=[api_info["method"]], tags=["service"])
+            self.router.add_api_route(f'{conf_api_info["url_prefix"]}/{conf_api_info["sub_dir"]}/{api_name}',
+                                      module.api, methods=[conf_api_info["method"]], tags=["service"])
 
     def reload_api(self):
         logger.info("Reload API Info")
@@ -75,37 +75,25 @@ class ApiRoute:
         route_url = request.url.path
         method = request.method
         access_token = ""
+        body = None
         headers = delete_headers(dict(request.headers), [
             "content-length", "user-agent"])
         try:
-            db = connect_db()
-            api_info, _ = db.select(
-                f'SELECT * FROM tb_api_info WHERE route_url = {convert_data(route_url)};')
-            api_info = api_info[0]
-            api_params, _ = db.select(
-                f'SELECT * FROM tb_api_params WHERE api_nm = {convert_data(api_info["api_nm"])};')
-            logger.info(
-                f'\nDB - api_info : {api_info}\nDB - api_params : {api_params}')
-        except Exception:
-            except_name = get_exception_info()
-            result = {"result": 0, "errorMessage": except_name}
-        else:
+            api_info, api_params = get_api_info(route_url)
             if method == "POST":
                 body = await request.json()
-            else:
-                body = None
             params_query = parse.unquote(str(request.query_params))
 
             logger.info(
-                f'\nReq - body : {body}\nquery params : {params_query}')
+                f'\n- api_info : {api_info}\n- api_params : {api_params} \
+                  \n- req body : {body}, params_query : {params_query}')
 
             if api_info["mode"] == "MESSAGE PASSING":
                 result, access_token = await bypass_msg(api_info, params_query, body, headers)
             else:
                 result = await call_remote_func(api_info, api_params, body)
-        response = JSONResponse(content=result)
-        add_cookie_api_list = config.secret_info["add_cookie_api"].split(",")
-        if api_info["api_nm"] in add_cookie_api_list:
-            response.set_cookie(
-                key=config.secret_info["cookie_name"], value=access_token)
-        return response
+        except Exception:
+            except_name = get_exception_info()
+            result = {"result": 0, "errorMessage": except_name}
+
+        return make_route_response(result, api_info["api_nm"], access_token)

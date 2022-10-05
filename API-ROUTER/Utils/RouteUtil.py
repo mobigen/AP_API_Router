@@ -1,6 +1,7 @@
 import asyncssh
 import aiohttp
 from fastapi.logger import logger
+from fastapi.responses import JSONResponse
 from urllib.parse import ParseResult
 from ApiRoute.ApiRouteConfig import config
 from Utils.CommonUtil import get_exception_info
@@ -19,6 +20,29 @@ def make_url(server_name: str, url_path: str):
             logger.info(f"Message Passing Url : {url.geturl()}")
             return url.geturl()
     return None
+
+
+def make_route_response(result, api_name, access_token):
+    response = JSONResponse(content=result)
+    add_cookie_api_list = config.secret_info["add_cookie_api"].split(",")
+    if api_name in add_cookie_api_list:
+        response.set_cookie(
+            key=config.secret_info["cookie_name"], value=access_token)
+    return response
+
+
+def get_api_info(route_url):
+    api_info = None
+    api_params = None
+    for api in config.api_info:
+        if api["route_url"] == route_url:
+            api_info = api
+            for params in config.api_params:
+                if params["api_nm"] == api["api_nm"]:
+                    api_params = params
+                    break
+            break
+    return api_info, api_params
 
 
 async def bypass_msg(api_info, params_query, body, headers):
