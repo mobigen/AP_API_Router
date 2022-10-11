@@ -13,7 +13,7 @@ def api(nms) -> Dict:
         for c_id in ctgry_nm_list:
             cnt_query = make_query("query","match_phrase",{key: c_id})
             cnt = es.conn.count(index=es.index, body=cnt_query)["count"]
-            data_dict[c_id] = cnt
+            data_dict[c_id.replace("+","_")] = cnt
 
     except Exception:
         except_name = get_exception_info()
