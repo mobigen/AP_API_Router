@@ -1,10 +1,10 @@
 from Utils.CommonUtil import get_exception_info
-from ConnectManager.ElasticSearchManager import ESSearch
+from ELKSearch.Manager.manager import ElasticSearchManager
 
 
 def api(biz_dataset_id: str):
     try:
-        es = ESSearch()
+        es = ElasticSearchManager()
         es.delete("biz_dataset_id", biz_dataset_id)
 
     except Exception:

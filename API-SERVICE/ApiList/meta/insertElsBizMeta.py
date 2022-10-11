@@ -2,7 +2,7 @@ import uuid
 from typing import Dict
 from Utils.CommonUtil import get_exception_info
 from pydantic import BaseModel
-from ConnectManager.ElasticSearchManager import ESSearch
+from ELKSearch.Manager.manager import ElasticSearchManager
 
 
 class BizMeta(BaseModel):
@@ -42,7 +42,7 @@ class BizMeta(BaseModel):
 def api(biz_meta_data: BizMeta) -> Dict:
     uid = uuid.uuid4()
     try:
-        es = ESSearch()
+        es = ElasticSearchManager()
         biz_meta_data = biz_meta_data.dict()
         biz_meta_data["biz_dataset_id"] = uid
         es.insert(biz_meta_data, biz_meta_data["biz_dataset_id"])
