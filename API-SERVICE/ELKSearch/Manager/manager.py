@@ -1,0 +1,50 @@
+from typing import Dict, Any
+from elasticsearch import Elasticsearch
+
+
+class ElasticSearchManager:
+    def __init__(
+            self,
+            host: str = "192.168.101.44",
+            port: str = "39200",
+            page: int = 1,
+            size: int = 10,
+            index: str = "biz_meta",
+    ):
+        """
+        set elasticsearch connect && DSL query setting function
+        :param host: elasticsearch host ip addr, default = localhost
+        :param port: elasticsearch ip port number, default = 9200
+        :param index:
+        :param page: page, size * page , elasticsearch default value = 0
+        :param size: 아이템 개수 , elasticsearch default value = 10
+        """
+        self.host = host
+        self.port = port
+        self.size = size
+        self.index = index
+        self.cur_from = size * page
+        self.conn = self.connect()
+        self.body = self.set_default_option()
+
+    def connect(self) -> Elasticsearch:
+        es = Elasticsearch(f"http://{self.host}:{self.port}")
+        return es
+
+    def set_default_option(self) -> Dict[Any, Any]:
+        # 유지 보수를 위해 model 적용 안 함
+        self.body = {
+            "sort": [],
+        }
+        return self.body
+
+    def set_sort(self, sort: list) -> None:
+        self.body["sort"] = sort
+
+    def set_pagination(self,size: int, from_: int) -> None:
+        self.size = size
+        self.cur_from = size * from_
+
+    def search(self, source=...):
+        return self.conn.search(index=self.index, body=self.body, from_=self.cur_from,
+                                size=self.size,_source=source)
