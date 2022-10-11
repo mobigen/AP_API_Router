@@ -1,5 +1,6 @@
-from typing import Dict, Any
+from typing import Dict, Any, Union
 from elasticsearch import Elasticsearch
+from ELKSearch.Utils.elasticsearch_utils import make_query
 
 
 class ElasticSearchManager:
@@ -48,3 +49,20 @@ class ElasticSearchManager:
     def search(self, source=...):
         return self.conn.search(index=self.index, body=self.body, from_=self.cur_from,
                                 size=self.size,_source=source)
+
+    def insert(self, body: dict, doc_id: str) -> None:
+        return self.conn.index(index=self.index, body=body, id=doc_id)
+
+    def update(self, body: dict, doc_id: str):
+        return self.conn.update(index=self.index, id=doc_id, body=body)
+
+    def delete(self, field: str, data: Union[str, list]):
+        """
+        단수 : { query: { term: _id}}
+        복수 : { query : { term : []}}
+        :param field: data type str, elasticsearch index _source name
+        :param data: data type str or list
+        """
+        delete_data = {field: data}
+        delete_command = make_query("query", "term", delete_data)
+        return self.conn.delete_by_query(index=self.index,body=delete_command)
