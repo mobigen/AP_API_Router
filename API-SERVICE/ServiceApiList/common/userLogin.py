@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from datetime import timedelta
-from ServiceUtils.CommonUtil import get_exception_info, connect_db, convert_data, create_token, make_token_data, authenticate_user
+from ServiceUtils.CommonUtil import get_exception_info, connect_db, convert_data, create_token, make_token_data
 from ApiService.ApiServiceConfig import config
 
 
@@ -13,28 +13,10 @@ class userLogin(BaseModel):
     cmpno: str
     user_nm: str
     email: str
+    dept_nm: str
     aut_group_cd: Optional[str] = 'ROLE_USER'
     data_clas_cd: Optional[str] = 'GRADE3'
-    #amd_user: Optional[str] = ''
-    #amd_date: Optional[str] = None
     sttus: Optional[str] = 'SBSC'
-
-
-'''
-
-user_id => uuid 랜덤값
-emp_id => 사원 아이디(로그인아이디)
-cmpno => 사번
-user_nm => 사원 이름
-email => 사원 이메일
-aut_group_cd => ROLE_USER
-data_clas_cd => GRADE3
-reg_user => user_id와 동일한 값
-reg_date => 현재시간
-amd_user => null
-amd_date => null
-sttus => SBSC
-'''
 
 
 def make_insert_query(login: dict):
@@ -49,7 +31,7 @@ def api(login: userLogin) -> Dict:
     try:
         db = connect_db()
         user_info, _ = db.select(
-            f'SELECT * FROM user_bas WHERE user_id = {convert_data(login.user_id)};')
+            f'SELECT * FROM user_bas WHERE emp_id = {convert_data(login.emp_id)};')
         if not user_info:
             time_zone = 'Asia/Seoul'
             db.execute(f"SET TIMEZONE={convert_data(time_zone)}")
@@ -59,6 +41,12 @@ def api(login: userLogin) -> Dict:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
     else:
+        token_data = make_token_data(login.__dict__)
+        access_token = create_token(
+            data=token_data, expires_delta=timedelta(minutes=int(config.secret_info["expire_min"])))
         result = {"result": 1, "errorMessage": ""}
 
-    return result
+    response = JSONResponse(content=result)
+    response.set_cookie(
+        key=config.secret_info["cookie_name"], value=access_token)
+    return response

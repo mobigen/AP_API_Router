@@ -3,8 +3,8 @@ from typing import Dict, List
 import importlib.util
 from fastapi import APIRouter
 from ApiRoute.ApiRouteConfig import config
-from RouterUtils.CommonUtil import connect_db, save_file_for_reload, get_exception_info, delete_headers, convert_data
-from RouterUtils.RouteUtil import bypass_msg, call_remote_func, get_api_info
+from RouterUtils.CommonUtil import connect_db, save_file_for_reload, get_exception_info, delete_headers
+from RouterUtils.RouteUtil import bypass_msg, call_remote_func, get_api_info, make_route_response
 from pydantic import BaseModel
 from starlette.requests import Request
 from urllib import parse
@@ -77,6 +77,7 @@ class ApiRoute:
     async def route_api(self, request: Request) -> Dict:
         route_url = request.url.path
         method = request.method
+        access_token = ""
         body = None
         headers = delete_headers(dict(request.headers), [
             "content-length", "user-agent"])
@@ -92,11 +93,11 @@ class ApiRoute:
                   \n- req body : {body}, params_query : {params_query}')
 
             if api_info["mode"] == "MESSAGE PASSING":
-                result = await bypass_msg(api_info, params_query, body, headers)
+                result, access_token = await bypass_msg(api_info, params_query, body, headers)
             else:
                 result = await call_remote_func(api_info, api_params, body)
         except Exception:
             except_name = get_exception_info()
             result = {"result": 0, "errorMessage": except_name}
 
-        return result
+        return make_route_response(result, api_info["api_nm"], access_token)
