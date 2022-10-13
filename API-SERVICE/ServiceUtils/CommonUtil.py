@@ -1,16 +1,17 @@
-from email.policy import default
-import os
+from datetime import datetime, timedelta
+from pytz import timezone
 import configparser
 import argparse
 import traceback
 import starlette.datastructures
 from fastapi.logger import logger
 from fastapi import Request, HTTPException, status
-from typing import Any
+from typing import Any, Optional, Dict
 from ApiService.ApiServiceConfig import config
 from ServiceConnectManager import PostgresManager
 from psycopg2 import pool
 import sys
+import jwt
 import traceback
 
 
@@ -144,3 +145,55 @@ def get_transaciton_id(request: Request):
         )
         '''
     return transaction_id
+
+
+##### for user info #####
+class IncorrectUserName(Exception):
+    pass
+
+
+class IncorrectPassword(Exception):
+    pass
+
+
+def get_user(user_name: str):
+    db = connect_db()
+    user = db.select(
+        f'SELECT * FROM {config.user_info["table"]} WHERE {config.user_info["id_column"]} = {convert_data(user_name)}')
+    return user
+
+
+def create_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone('Asia/Seoul')) + expires_delta
+    else:
+        expire = datetime.now(timezone('Asia/Seoul')) + timedelta(minutes=15)
+
+    logger.info(f'commonToken Expire : {expire}')
+    to_encode.update({"exp": expire})
+
+    encoded_jwt = jwt.encode(
+        to_encode, config.secret_info["secret_key"], algorithm=config.secret_info["algorithm"])
+    return encoded_jwt
+
+
+def make_token_data(user: Dict) -> Dict:
+    token_data_column = config.secret_info["token_data_column"].split(",")
+    token_data = {column: user[column] for column in token_data_column}
+    return token_data
+
+
+def verify_password(plain_password, hashed_password):
+    return config.pwd_context.verify(plain_password, hashed_password)
+
+
+def authenticate_user(username: str, password: str):
+    user = get_user(username)
+    if not user[0]:
+        raise IncorrectUserName
+
+    user = user[0][0]
+    if not verify_password(password, user[config.user_info["password_column"]]):
+        raise IncorrectPassword
+    return user
