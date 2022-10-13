@@ -24,6 +24,9 @@ def api(input: InputModel) -> Dict:
         ############ search option ############
         action = "query"
         sub_action = "must"
+        for item in input.searchOption:
+            if item.field in ["data_nm", "data_desc"]:
+                item.field = item.field + ".korean_analyzer"
         query_dict = base_search_query(action,sub_action,input.searchOption)
 
         # ############ filter option ############
