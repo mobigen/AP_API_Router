@@ -66,3 +66,7 @@ class ElasticSearchManager:
         delete_data = {field: data}
         delete_command = make_query("query", "term", delete_data)
         return self.conn.delete_by_query(index=self.index,body=delete_command)
+
+    def prefix(self, keyword: dict, source=...):
+        prefix_query = make_query("query","prefix", keyword)
+        return self.conn.search(index=self.index, body=prefix_query, size=self.size, _source=source)
