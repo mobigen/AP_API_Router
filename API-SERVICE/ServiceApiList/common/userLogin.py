@@ -37,11 +37,14 @@ def api(login: userLogin) -> Dict:
             db.execute(f"SET TIMEZONE={convert_data(time_zone)}")
             login_query = make_insert_query(login.__dict__)
             db.execute(login_query)
+            user_info = login.__dict__
+        else:
+            user_info = user_info[0]
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
     else:
-        token_data = make_token_data(login.__dict__)
+        token_data = make_token_data(user_info)
         access_token = create_token(
             data=token_data, expires_delta=timedelta(minutes=int(config.secret_info["expire_min"])))
         result = {"result": 1, "errorMessage": ""}
