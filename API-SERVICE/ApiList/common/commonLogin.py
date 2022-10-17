@@ -20,7 +20,6 @@ def api(login: commonLogin) -> Dict:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
     else:
-
         token_data = make_token_data(user)
         access_token = create_token(
             data=token_data, expires_delta=timedelta(minutes=int(config.secret_info["expire_min"])))

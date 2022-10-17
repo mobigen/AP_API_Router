@@ -19,6 +19,7 @@ class ApiRouteConfig:
     api_info: List[Dict]
     api_params: List[Dict]
 
+    secret_info: Dict
     conn_pool: pool.SimpleConnectionPool
 
 
