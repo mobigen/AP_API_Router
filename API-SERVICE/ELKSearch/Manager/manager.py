@@ -10,7 +10,7 @@ class ElasticSearchManager:
             port: str = "39200",
             page: int = 1,
             size: int = 10,
-            index: str = "biz_meta",
+            index: str = "kt_biz_meta",
     ):
         """
         set elasticsearch connect && DSL query setting function
