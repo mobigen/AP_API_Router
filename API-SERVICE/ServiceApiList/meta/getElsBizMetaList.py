@@ -41,9 +41,16 @@ def api(input: InputModel) -> Dict:
             if "data_type" in item["match"].keys():
                 i = j
                 break
+            else:
+                i = None
 
         for key_nm, eng_nm in data_type.items():
-            item_dict["filter"][i]["match"]["data_type"]["query"] = key_nm
+            if i is None:
+                cnt_query = make_query("match","data_type",{'operator': 'OR', 'query': key_nm})
+                item_dict["filter"].append(cnt_query)
+                i = -1
+            else:
+                item_dict["filter"][i]["match"]["data_type"]["query"] = key_nm
 
             if key_nm == "T":
                 del item_dict["filter"][i]
