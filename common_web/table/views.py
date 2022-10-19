@@ -38,7 +38,7 @@ def table_list(request):
     kw = request.GET.get('kw', "")
     table_list = TableInfo.objects.order_by("-db_schema")
     if kw:
-        table_list = table_list.filter(Q(table_nm__icontains=kw)).distinct()
+        table_list = table_list.filter(Q(tbl_nm__icontains=kw)).distinct()
 
     paginator = Paginator(table_list, 10)
     page_obj = paginator.get_page(page)
