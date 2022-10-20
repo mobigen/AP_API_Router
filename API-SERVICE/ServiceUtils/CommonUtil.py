@@ -3,7 +3,8 @@ from pytz import timezone
 import configparser
 import argparse
 import traceback
-import starlette.datastructures
+
+import socket
 from fastapi.logger import logger
 from fastapi import Request, HTTPException, status
 from typing import Any, Optional, Dict
@@ -13,6 +14,9 @@ from psycopg2 import pool
 import sys
 import jwt
 import traceback
+import logging
+
+lamp = logging.getLogger("trace")
 
 
 def convert_data(data) -> str:
@@ -184,3 +188,31 @@ def make_token_data(user: Dict) -> Dict:
     token_data_column = config.secret_info["token_data_column"].split(",")
     token_data = {column: user[column] for column in token_data_column}
     return token_data
+
+
+lamp_form = {
+    "timestamp": "",
+    "service": "",
+    "operation": "",
+    "transactionId": "",
+    "logType": "",
+    "host": {"name": "", "ip": ""},
+}
+
+
+def kt_lamp(log_type: str, operation: str, dest_info: Dict, res_info: Dict, transaction_id: str = None):
+    lamp_form["service"] = ""
+    lamp_form["operation"] = operation
+    lamp_form["transactionId"] = transaction_id
+    lamp_form["logType"] = log_type
+    lamp_form["host"]["name"] = socket.gethostname()
+    lamp_form["host"]["ip"] = socket.gethostbyname(lamp_form["host"]["name"])
+
+    if log_type == "":
+        pass
+    elif log_type == "":
+        pass
+    elif log_type == "":
+        pass
+
+    lamp.info(lamp_form)

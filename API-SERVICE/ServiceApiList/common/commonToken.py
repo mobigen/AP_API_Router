@@ -41,5 +41,5 @@ def api(request: Request) -> Dict:
 
     response = JSONResponse(content=result)
     response.set_cookie(
-        key=config.secret_info["cookie_name"], value=access_token)
+        key=config.secret_info["cookie_name"], value=access_token, max_age=3600, secure=True, httponly=True)
     return response

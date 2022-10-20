@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 from ApiService.ApiServiceConfig import config
-from ServiceUtils.CommonUtil import connect_db, make_res_msg, get_exception_info, convert_data
+from ServiceUtils.CommonUtil import connect_db, make_res_msg, get_exception_info, convert_data, kt_lamp
 from pydantic import BaseModel
 from fastapi.logger import logger
 
@@ -129,4 +129,6 @@ def api(select_info: commonSelect) -> Dict:
         result = make_res_msg(1, "", select_data, eng_nm_list, kor_nm_list)
         if select_info.page_info:
             result["data"].update(total_cnt[0][0])
+
+    # kt_lamp()
     return result
