@@ -3,7 +3,7 @@ from typing import List, Union
 
 
 class ConfigOption(BaseModel):
-    field: Union[list, str]
+    field: list
     keywords: list
     operator: str
 

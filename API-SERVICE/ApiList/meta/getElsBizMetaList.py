@@ -5,6 +5,20 @@ from ELKSearch.Utils.elasticsearch_utils import make_query, base_search_query
 from Utils.CommonUtil import get_exception_info
 
 
+def extra_filter(option_list):
+    els_katech_option = ["ctgry","data_shap","data_prv_desk"]
+    for item in option_list:
+        for col in els_katech_option:
+            if col in item.field:
+                item.field.append(f"re_{col}")
+                index = item.field.index(col)
+                del item.field[index]
+                item.keywords = [v.replace(" ","") for v in item.keywords]
+        if item.field in ["data_nm", "data_desc"]:
+            item.field = item.field + ".korean_analyzer"
+    return option_list
+
+
 def api(input: InputModel) -> Dict:
     data_srttn = {
         # search_keyword: (result_key, result_data)
@@ -24,13 +38,12 @@ def api(input: InputModel) -> Dict:
         ############ search option ############
         action = "query"
         sub_action = "must"
-        for item in input.searchOption:
-            if item.field in ["data_nm", "data_desc"]:
-                item.field = item.field + ".korean_analyzer"
+        input.searchOption = extra_filter(input.searchOption)
         query_dict = base_search_query(action,sub_action,input.searchOption)
 
         # ############ filter option ############
         sub_action = "filter"
+        input.filterOption = extra_filter(input.filterOption)
         item_dict = base_search_query(action,sub_action,input.filterOption)
         query_dict.update(item_dict)
         search_query = make_query(action,"bool", query_dict)
