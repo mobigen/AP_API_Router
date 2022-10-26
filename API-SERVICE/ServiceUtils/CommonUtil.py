@@ -15,6 +15,7 @@ import sys
 import jwt
 import traceback
 import logging
+import uuid
 
 lamp = logging.getLogger("trace")
 
@@ -75,6 +76,7 @@ def prepare_config(root_path) -> None:
     config.server_port = args.port
     config.db_type = f'{args.db_type}_db'
     config.db_info = api_router_cfg[config.db_type]
+    config.lamp_info = api_router_cfg["lamp_info"]
     config.conn_pool = make_connection_pool(config.db_info)
     if config.category == "common":
         config.secret_info = api_router_cfg["secret_info"]
@@ -190,29 +192,27 @@ def make_token_data(user: Dict) -> Dict:
     return token_data
 
 
-lamp_form = {
-    "timestamp": "",
-    "service": "",
-    "operation": "",
-    "transactionId": "",
-    "logType": "",
-    "host": {"name": "", "ip": ""},
-}
-
-
-def kt_lamp(log_type: str, operation: str, dest_info: Dict, res_info: Dict, transaction_id: str = None):
-    lamp_form["service"] = ""
+def kt_lamp(log_type: str, operation: str, res_type: str = "I", res_code: str = "", res_desc: str = ""):
+    lamp_form = {}
+    now = datetime.now()
+    lamp_form["timestamp"] = now.strftime('%Y-%m-%d %H:%M:%S.%f')
+    lamp_form["service"] = config.lamp_info["service_code"]
     lamp_form["operation"] = operation
-    lamp_form["transactionId"] = transaction_id
+    lamp_form["transactionId"] = f'{lamp_form["service"]}_{uuid.uuid4()}'
     lamp_form["logType"] = log_type
-    lamp_form["host"]["name"] = socket.gethostname()
-    lamp_form["host"]["ip"] = socket.gethostbyname(lamp_form["host"]["name"])
 
-    if log_type == "":
-        pass
-    elif log_type == "":
-        pass
-    elif log_type == "":
-        pass
+    lamp_form["host"] = {}
+    lamp_form["host"]["name"] = config.lamp_info["host_name"]
+    lamp_form["host"]["ip"] = config.lamp_info["host_ip"]
+
+    if log_type == "OUT_REQ":
+        lamp_form["destination"] = {}
+        lamp_form["destination"]["name"] = config.lamp_info["dest_name"]
+        lamp_form["destination"]["ip"] = config.lamp_info["dest_ip"]
+    elif log_type == "OUT_RES" or log_type == "IN_RES":
+        lamp_form["response"] = {}
+        lamp_form["response"]["type"] = res_type
+        lamp_form["response"]["code"] = res_code
+        lamp_form["response"]["desc"] = res_desc
 
     lamp.info(lamp_form)

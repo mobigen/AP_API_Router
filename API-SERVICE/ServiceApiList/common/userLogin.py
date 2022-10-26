@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from datetime import timedelta
-from ServiceUtils.CommonUtil import get_exception_info, connect_db, convert_data, create_token, make_token_data
+from ServiceUtils.CommonUtil import get_exception_info, connect_db, convert_data, create_token, make_token_data, kt_lamp
 from ApiService.ApiServiceConfig import config
 
 
@@ -28,6 +28,7 @@ def make_insert_query(login: dict):
 
 
 def api(login: userLogin) -> Dict:
+    # kt_lamp("OUT_REQ", "userLogin")
     try:
         db = connect_db()
         user_info, _ = db.select(
@@ -43,6 +44,8 @@ def api(login: userLogin) -> Dict:
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
+        # kt_lamp("OUT_RES", "userLogin", res_type="S",
+        #        res_code = "DC_ERROR", res_desc = f'{login.emp_id}.{except_name}')
     else:
         token_data = make_token_data(user_info)
         access_token = create_token(
@@ -51,5 +54,7 @@ def api(login: userLogin) -> Dict:
 
     response = JSONResponse(content=result)
     response.set_cookie(
-        key=config.secret_info["cookie_name"], value=access_token, max_age=3600, secure=True, httponly=True)
+        key=config.secret_info["cookie_name"], value=access_token, max_age=3600, secure=False, httponly=True)
+
+    # kt_lamp("OUT_RES", "userLogin")
     return response

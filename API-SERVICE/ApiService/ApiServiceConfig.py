@@ -19,6 +19,7 @@ class ApiServiceConfig:
 
     secret_info: Dict
     user_info: Dict
+    lamp_info: Dict
     conn_pool: pool.SimpleConnectionPool
 
 

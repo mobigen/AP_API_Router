@@ -27,7 +27,7 @@ def make_route_response(result, api_name, access_token):
     add_cookie_api_list = config.secret_info["add_cookie_api"].split(",")
     if api_name in add_cookie_api_list:
         response.set_cookie(
-            key=config.secret_info["cookie_name"], value=access_token, max_age=3600, secure=True, httponly=True)
+            key=config.secret_info["cookie_name"], value=access_token, max_age=3600, secure=False, httponly=True)
     return response
 
 
