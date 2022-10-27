@@ -119,26 +119,27 @@ def delete_headers(headers: Dict, delete_header: List) -> Dict:
 
 
 def kt_lamp(log_type: str, transaction_id: str, operation: str, res_type: str = "I", res_code: str = "", res_desc: str = ""):
-    lamp_form = {}
-    now = datetime.now()
-    lamp_form["timestamp"] = now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-    lamp_form["service"] = config.lamp_info["service_code"]
-    lamp_form["operation"] = f'{config.lamp_info["prefix"]}_{operation}'
-    lamp_form["transactionId"] = transaction_id
-    lamp_form["logType"] = log_type
+    if operation in config.lamp_info["api_list"].split(","):
+        lamp_form = {}
+        now = datetime.now()
+        lamp_form["timestamp"] = now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        lamp_form["service"] = config.lamp_info["service_code"]
+        lamp_form["operation"] = f'{config.lamp_info["prefix"]}_{operation}'
+        lamp_form["transactionId"] = transaction_id
+        lamp_form["logType"] = log_type
 
-    lamp_form["host"] = {}
-    lamp_form["host"]["name"] = config.lamp_info["host_name"]
-    lamp_form["host"]["ip"] = config.lamp_info["host_ip"]
+        lamp_form["host"] = {}
+        lamp_form["host"]["name"] = config.lamp_info["host_name"]
+        lamp_form["host"]["ip"] = config.lamp_info["host_ip"]
 
-    if log_type == "OUT_REQ":
-        lamp_form["destination"] = {}
-        lamp_form["destination"]["name"] = config.lamp_info["dest_name"]
-        lamp_form["destination"]["ip"] = config.lamp_info["dest_ip"]
-    elif log_type == "OUT_RES" or log_type == "IN_RES":
-        lamp_form["response"] = {}
-        lamp_form["response"]["type"] = res_type
-        lamp_form["response"]["code"] = res_code
-        lamp_form["response"]["desc"] = res_desc
+        if log_type == "OUT_REQ":
+            lamp_form["destination"] = {}
+            lamp_form["destination"]["name"] = config.lamp_info["dest_name"]
+            lamp_form["destination"]["ip"] = config.lamp_info["dest_ip"]
+        elif log_type == "OUT_RES" or log_type == "IN_RES":
+            lamp_form["response"] = {}
+            lamp_form["response"]["type"] = res_type
+            lamp_form["response"]["code"] = res_code
+            lamp_form["response"]["desc"] = res_desc
 
-    lamp.info(lamp_form)
+        lamp.info(lamp_form)
