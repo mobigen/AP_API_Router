@@ -1,5 +1,6 @@
 from typing import Dict, Optional
 from pydantic import BaseModel
+from fastapi import Request
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from datetime import timedelta
@@ -27,8 +28,10 @@ def make_insert_query(login: dict):
     return f'INSERT INTO user_bas ({columns}) VALUES ({values});'
 
 
-def api(login: userLogin) -> Dict:
-    # kt_lamp("OUT_REQ", "userLogin")
+def api(login: userLogin, request: Request) -> Dict:
+    transaction_id = request.headers.get("transactionId")
+    kt_lamp("OUT_REQ", transaction_id, "userLogin")
+
     try:
         db = connect_db()
         user_info, _ = db.select(
@@ -56,5 +59,6 @@ def api(login: userLogin) -> Dict:
     response.set_cookie(
         key=config.secret_info["cookie_name"], value=access_token, max_age=3600, secure=False, httponly=True)
 
-    # kt_lamp("OUT_RES", "userLogin")
+    kt_lamp("OUT_RES", transaction_id, "userLogin",
+            res_desc=f'{login.emp_id}')
     return response

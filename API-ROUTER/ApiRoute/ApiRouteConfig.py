@@ -20,6 +20,7 @@ class ApiRouteConfig:
     api_params: List[Dict]
 
     secret_info: Dict
+    lamp_info: Dict
     conn_pool: pool.SimpleConnectionPool
 
 

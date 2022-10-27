@@ -3,7 +3,6 @@ from pytz import timezone
 import configparser
 import argparse
 import traceback
-
 import socket
 from fastapi.logger import logger
 from fastapi import Request, HTTPException, status
@@ -15,7 +14,6 @@ import sys
 import jwt
 import traceback
 import logging
-import uuid
 
 lamp = logging.getLogger("trace")
 
@@ -140,21 +138,6 @@ def convert_error_message(exception_name: str):
     return error_message
 
 
-def get_transaciton_id(request: Request):
-    try:
-        transaction_id = request.headers.get("accept")
-
-    except Exception:
-        transaction_id = 'TEST Message'
-        '''
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Transaction information does not exist."
-        )
-        '''
-    return transaction_id
-
-
 ##### for user info #####
 class IncorrectUserName(Exception):
     pass
@@ -192,13 +175,13 @@ def make_token_data(user: Dict) -> Dict:
     return token_data
 
 
-def kt_lamp(log_type: str, operation: str, res_type: str = "I", res_code: str = "", res_desc: str = ""):
+def kt_lamp(log_type: str, transaction_id: str, operation: str, res_type: str = "I", res_code: str = "", res_desc: str = ""):
     lamp_form = {}
     now = datetime.now()
-    lamp_form["timestamp"] = now.strftime('%Y-%m-%d %H:%M:%S.%f')
+    lamp_form["timestamp"] = now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     lamp_form["service"] = config.lamp_info["service_code"]
-    lamp_form["operation"] = operation
-    lamp_form["transactionId"] = f'{lamp_form["service"]}_{uuid.uuid4()}'
+    lamp_form["operation"] = f'{config.lamp_info["prefix"]}_{operation}'
+    lamp_form["transactionId"] = transaction_id
     lamp_form["logType"] = log_type
 
     lamp_form["host"] = {}

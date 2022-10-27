@@ -9,9 +9,15 @@ from RouterConnectManager import PostgresManager
 from psycopg2 import pool
 import sys
 import traceback
+import logging
+from datetime import datetime
+
+lamp = logging.getLogger("trace")
+
 
 def convert_data(data) -> str:
     return f'\'{str(data)}\''
+
 
 def set_log_path():
     parser = configparser.ConfigParser()
@@ -23,25 +29,26 @@ def set_log_path():
     with open(f'{config.root_path}/conf/logging.conf', 'w') as f:
         parser.write(f)
 
+
 def get_config(config_name: str):
     ano_cfg = {}
 
     conf = configparser.ConfigParser()
-    config_path =config.root_path+f'/conf/{config_name}'
-    conf.read(config_path, encoding = 'utf-8')
+    config_path = config.root_path+f'/conf/{config_name}'
+    conf.read(config_path, encoding='utf-8')
     for section in conf.sections():
-        ano_cfg[section]={}
+        ano_cfg[section] = {}
         for option in conf.options(section):
-            ano_cfg[section][option]=conf.get(section, option)
+            ano_cfg[section][option] = conf.get(section, option)
 
     return ano_cfg
 
 
 def parser_params() -> Any:
-    parser=argparse.ArgumentParser()
-    parser.add_argument("--host", type = str, default = "127.0.0.1")
-    parser.add_argument("--port", type = int, default = 18000)
-    parser.add_argument("--db_type", default = "test")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", type=str, default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=18000)
+    parser.add_argument("--db_type", default="test")
 
     return parser.parse_args()
 
@@ -49,15 +56,17 @@ def parser_params() -> Any:
 def prepare_config(root_path) -> None:
     args = parser_params()
     config.root_path = root_path
-    api_router_cfg=get_config("config.ini")
-    config.api_config=get_config("api_config.ini")
-    config.db_type=f'{args.db_type}_db'
-    config.server_host=args.host
-    config.server_port=args.port
-    config.db_info=api_router_cfg[config.db_type]
+    api_router_cfg = get_config("config.ini")
+    config.api_config = get_config("api_config.ini")
+    config.db_type = f'{args.db_type}_db'
+    config.server_host = args.host
+    config.server_port = args.port
+    config.db_info = api_router_cfg[config.db_type]
     config.conn_pool = make_connection_pool(config.db_info)
-    config.remote_info=api_router_cfg["remote"]
-    config.secret_info=api_router_cfg["secret_info"]
+    config.remote_info = api_router_cfg["remote"]
+    config.secret_info = api_router_cfg["secret_info"]
+    config.lamp_info = api_router_cfg["lamp_info"]
+
 
 def make_connection_pool(db_info):
     conn_pool = pool.SimpleConnectionPool(1, 20, user=db_info["user"],
@@ -68,27 +77,29 @@ def make_connection_pool(db_info):
                                           options=f'-c search_path={db_info["schema"]}', connect_timeout=10)
     return conn_pool
 
+
 def connect_db():
     db = PostgresManager()
     return db
+
 
 def save_file_for_reload():
     with open(f'{config.root_path}/server.py', "a") as fd:
         fd.write(" ")
 
-def make_res_msg(result, err_msg, data = None, column_names = None):
-    header_list=[]
+
+def make_res_msg(result, err_msg, data=None, column_names=None):
+    header_list = []
     for column_name in column_names:
-        header={"column_name": column_name}
+        header = {"column_name": column_name}
         header_list.append(header)
 
     if data is None or column_names is None:
-        res_msg={"result": result, "errorMessage": err_msg}
+        res_msg = {"result": result, "errorMessage": err_msg}
     else:
-        res_msg={"result": result, "errorMessage": err_msg,
+        res_msg = {"result": result, "errorMessage": err_msg,
                    "body": data, "header": header_list}
     return res_msg
-
 
 
 def get_exception_info():
@@ -99,9 +110,35 @@ def get_exception_info():
         f'\n- Exception Type : {ex_type}\n- Exception Message : {str(ex_value).strip()}\n- Exception Log : \n{trace_log}')
     return ex_type.__name__
 
+
 def delete_headers(headers: Dict, delete_header: List) -> Dict:
     for delete in delete_header:
         if headers.get(delete):
             del(headers[delete])
     return headers
-          
+
+
+def kt_lamp(log_type: str, transaction_id: str, operation: str, res_type: str = "I", res_code: str = "", res_desc: str = ""):
+    lamp_form = {}
+    now = datetime.now()
+    lamp_form["timestamp"] = now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+    lamp_form["service"] = config.lamp_info["service_code"]
+    lamp_form["operation"] = f'{config.lamp_info["prefix"]}_{operation}'
+    lamp_form["transactionId"] = transaction_id
+    lamp_form["logType"] = log_type
+
+    lamp_form["host"] = {}
+    lamp_form["host"]["name"] = config.lamp_info["host_name"]
+    lamp_form["host"]["ip"] = config.lamp_info["host_ip"]
+
+    if log_type == "OUT_REQ":
+        lamp_form["destination"] = {}
+        lamp_form["destination"]["name"] = config.lamp_info["dest_name"]
+        lamp_form["destination"]["ip"] = config.lamp_info["dest_ip"]
+    elif log_type == "OUT_RES" or log_type == "IN_RES":
+        lamp_form["response"] = {}
+        lamp_form["response"]["type"] = res_type
+        lamp_form["response"]["code"] = res_code
+        lamp_form["response"]["desc"] = res_desc
+
+    lamp.info(lamp_form)

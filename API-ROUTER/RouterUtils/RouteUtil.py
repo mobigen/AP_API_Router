@@ -4,7 +4,7 @@ from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from urllib.parse import ParseResult
 from ApiRoute.ApiRouteConfig import config
-from RouterUtils.CommonUtil import get_exception_info
+from RouterUtils.CommonUtil import get_exception_info, kt_lamp
 from typing import Dict
 
 
@@ -46,8 +46,10 @@ def get_api_info(route_url):
 
 
 async def bypass_msg(api_info, params_query, body, headers):
-    method = api_info["mthd"]
+    # lamp 2
+    kt_lamp("OUT_REQ", headers["transactionId"], api_info["api_nm"])
 
+    method = api_info["mthd"]
     url = make_url(api_info["srvr_nm"], api_info["url"])
     if url is None:
         return {"result": 0, "errorMessage": "The server info does not exist."}
@@ -72,6 +74,9 @@ async def bypass_msg(api_info, params_query, body, headers):
         else:
             logger.error(f'Method Not Allowed. {method}')
             result = {"result": 0, "errorMessage": "Method Not Allowed."}
+
+    # lamp 5
+    kt_lamp("OUT_RES", headers["transactionId"], api_info["api_nm"])
     return result, access_token
 
 

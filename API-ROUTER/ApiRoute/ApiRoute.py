@@ -3,12 +3,14 @@ from typing import Dict, List
 import importlib.util
 from fastapi import APIRouter
 from ApiRoute.ApiRouteConfig import config
-from RouterUtils.CommonUtil import connect_db, save_file_for_reload, get_exception_info, delete_headers
+from RouterUtils.CommonUtil import connect_db, save_file_for_reload, get_exception_info, delete_headers, kt_lamp
 from RouterUtils.RouteUtil import bypass_msg, call_remote_func, get_api_info, make_route_response
 from pydantic import BaseModel
 from starlette.requests import Request
 from urllib import parse
 import logging
+import uuid
+
 
 trace_logger = logging.getLogger("trace")
 
@@ -81,8 +83,15 @@ class ApiRoute:
         body = None
         headers = delete_headers(dict(request.headers), [
             "content-length", "user-agent"])
+
+        transaction_id = f'{config.lamp_info["service_code"]}_{uuid.uuid4()}'
+        headers["transactionId"] = transaction_id
+
         try:
             api_info, api_params = get_api_info(route_url)
+            # lamp 1
+            kt_lamp("IN_REQ", transaction_id, api_info["api_nm"])
+
             if method == "POST":
                 body = await request.json()
 
@@ -91,7 +100,6 @@ class ApiRoute:
             logger.info(
                 f'\n- api_info : {api_info}\n- api_params : {api_params} \
                   \n- req body : {body}, params_query : {params_query}')
-
             if api_info["mode"] == "MESSAGE PASSING":
                 result, access_token = await bypass_msg(api_info, params_query, body, headers)
             else:
@@ -99,5 +107,8 @@ class ApiRoute:
         except Exception:
             except_name = get_exception_info()
             result = {"result": 0, "errorMessage": except_name}
+
+        # lamp 6
+        kt_lamp("IN_RES", transaction_id, api_info["api_nm"])
 
         return make_route_response(result, api_info["api_nm"], access_token)
