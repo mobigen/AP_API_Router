@@ -3,6 +3,8 @@ import aiohttp
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from urllib.parse import ParseResult
+
+from regex import W
 from ApiRoute.ApiRouteConfig import config
 from Utils.CommonUtil import get_exception_info
 from typing import Dict
@@ -33,14 +35,13 @@ def make_route_response(result, api_name, access_token):
 
 def get_api_info(route_url):
     api_info = None
-    api_params = None
+    api_params = []
     for api in config.api_info:
         if api["route_url"] == route_url:
             api_info = api
             for params in config.api_params:
                 if params["api_nm"] == api["api_nm"]:
-                    api_params = params
-                    break
+                    api_params.append(params)
             break
     return api_info, api_params
 
@@ -86,15 +87,16 @@ async def run_cmd(cmd: str):
 
 async def call_remote_func(api_info, api_params, input_params) -> Dict:
     command_input = ""
-    try:
-        data = input_params[api_params["nm"]]
-        if not data:
-            data = api_params["deflt_val"]
-        command_input += f' --{api_params["nm"]} {data}'
-    except KeyError:
-        logger.error(
-            f'parameter set default value. [{api_params["nm"]}]')
-        command_input += f' --{api_params["nm"]} {api_params["deflt_val"]}'
+    for api_param in api_params:
+        try:
+            data = input_params[api_param["nm"]]
+            if not data:
+                data = api_param["deflt_val"]
+            command_input += f' --{api_param["nm"]} {data}'
+        except KeyError:
+            logger.error(
+                f'parameter set default value. [{api_param["nm"]}]')
+            command_input += f' --{api_param["nm"]} {api_param["deflt_val"]}'
 
     cmd = f'{api_info["cmd"]} {command_input}'
 

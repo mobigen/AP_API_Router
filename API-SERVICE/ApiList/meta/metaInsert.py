@@ -18,6 +18,7 @@ def api() -> Dict:
     try:
         db = connect_db()
         files = os.listdir(eda_path)
+        id_cnt = 0
         for index, rid in enumerate(files):
             print(index)
             path = os.path.join(eda_path, rid, "profile_report_merged.html")
@@ -27,9 +28,17 @@ def api() -> Dict:
                 insert_data = f'data:text/html;base64,{data_base64}'
                 print(f'LEN : {len(insert_data)}')
                 # print(insert_data)
-                query = f'UPDATE meta_temp SET file_data = {convert_data(insert_data)}\
-                            WHERE gimi9_rid = {convert_data(rid)}'
-                db.execute(query)
+                # query = f'UPDATE meta_temp SET file_data = {convert_data(insert_data)}\
+                #            WHERE gimi9_rid = {convert_data(rid)}'
+                select_query = f'select biz_dataset_id from meta_temp where gimi9_rid = {convert_data(rid)}'
+                select_res, _ = db.select(select_query)
+                if select_res:
+                    biz_dataset_id = select_res[0]["biz_dataset_id"]
+                    query = f'INSERT INTO tb_meta_html (biz_dataset_id, file_data) VALUES ({convert_data(biz_dataset_id)}, {convert_data(insert_data)});'
+                    db.execute(query)
+                else:
+                    id_cnt += 1
+            print(f'id_cnt : {id_cnt}')
 
     except Exception:
         except_name = get_exception_info()
