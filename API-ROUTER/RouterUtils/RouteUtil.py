@@ -4,7 +4,7 @@ from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from urllib.parse import ParseResult
 from ApiRoute.ApiRouteConfig import config
-from RouterUtils.CommonUtil import get_exception_info, kt_lamp
+#from RouterUtils.CommonUtil import get_exception_info, kt_lamp
 from typing import Dict
 
 
@@ -46,6 +46,8 @@ def get_api_info(route_url):
 
 
 async def bypass_msg(api_info, params_query, body, headers):
+    from RouterUtils.CommonUtil import kt_lamp
+
     # lamp 2
     kt_lamp("OUT_REQ", headers["transactionId"], api_info["api_nm"])
 
@@ -90,6 +92,8 @@ async def run_cmd(cmd: str):
 
 
 async def call_remote_func(api_info, api_params, input_params) -> Dict:
+    from RouterUtils.CommonUtil import get_exception_info
+
     command_input = ""
     try:
         data = input_params[api_params["nm"]]

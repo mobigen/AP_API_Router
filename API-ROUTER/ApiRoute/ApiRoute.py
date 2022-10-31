@@ -3,7 +3,7 @@ from typing import Dict, List
 import importlib.util
 from fastapi import APIRouter
 from ApiRoute.ApiRouteConfig import config
-from RouterUtils.CommonUtil import connect_db, save_file_for_reload, get_exception_info, delete_headers, kt_lamp
+# from RouterUtils.CommonUtil import connect_db, save_file_for_reload, get_exception_info, delete_headers, kt_lamp  # 함수 내부에 import로 수정
 from RouterUtils.RouteUtil import bypass_msg, call_remote_func, get_api_info, make_route_response
 from pydantic import BaseModel
 from starlette.requests import Request
@@ -45,6 +45,7 @@ class ApiRoute:
         self.set_route()
 
     def set_route(self) -> None:
+        from RouterUtils.CommonUtil import connect_db
         self.router.add_api_route(
             "/api/reload", self.reload_api, methods=["GET"], tags=["API Info Reload"])
 
@@ -71,12 +72,15 @@ class ApiRoute:
                                       tags=[f'service [ {conf_api_info["sub_dir"]} ]'])
 
     def reload_api(self):
+        from RouterUtils.CommonUtil import save_file_for_reload
         logger.info("Reload API Info")
         save_file_for_reload()
         result = {"result": 1, "errorMessage": ""}
         return result
 
     async def route_api(self, request: Request) -> Dict:
+        # 함수 내부에 import로 수정
+        from RouterUtils.CommonUtil import get_exception_info, delete_headers, kt_lamp
         route_url = request.url.path
         method = request.method
         access_token = ""
