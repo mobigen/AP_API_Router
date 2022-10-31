@@ -3,8 +3,6 @@ import aiohttp
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from urllib.parse import ParseResult
-
-from regex import W
 from ApiRoute.ApiRouteConfig import config
 from Utils.CommonUtil import get_exception_info
 from typing import Dict
