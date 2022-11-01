@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 from django.contrib import messages
+import os
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',
@@ -34,7 +35,7 @@ SECRET_KEY = 'fl!ggl4r^vd)ps1k8v(&w$n-afvo)(z0rco8ebk)eadffr9o9i'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.101.44']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost'] + os.getenv("ALLOWED_HOSTS").split(",")
 
 
 # Application definition
@@ -88,11 +89,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dataportal',
-        'USER': 'dpmanager',
-        'PASSWORD': 'hello.dp12#$',
-        'HOST': '192.168.100.126',
-        'PORT': '25432',
+        'NAME': os.getenv("PG_NAME", 'dataportal'),
+        'USER': os.getenv("PG_USER", 'dpmanager'),
+        'PASSWORD': os.getenv("PG_PASS"),
+        'HOST': os.getenv("PG_HOST", 'localhost'),
+        'PORT': os.getenv("PG_PORT", '5432'),
     }
 }
 

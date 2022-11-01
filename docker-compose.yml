@@ -1,0 +1,7 @@
+version: '3.9'
+services:
+  api-web:
+    image: katech-web:latest
+    container_name: api-router-web
+    ports:
+      - "30424:8000"
