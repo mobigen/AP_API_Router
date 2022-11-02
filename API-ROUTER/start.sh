@@ -17,9 +17,9 @@ input() {
 
 router_start() {
     source_path="$( cd "$( dirname "$0" )" && pwd -P )"
-    router_exec="nohup python3.8 ${source_path}/server.py --host ${router_host} --port ${router_port} --db_type ${router_db} 1> /dev/null 2>&1 &"
+    router_exec="nohup python3 ${source_path}/server.py --host ${router_host} --port ${router_port} --db_type ${router_db} 1> /dev/null 2>&1 &"
     echo "Start Command : ${router_exec}"
-    nohup python3.8 ${source_path}/server.py --host ${router_host} --port ${router_port} --db_type ${router_db} 1> /dev/null 2>&1 &
+    nohup python3 ${source_path}/server.py --host ${router_host} --port ${router_port} --db_type ${router_db} 1> /dev/null 2>&1 &
 }
 
 echo "########## Start Application (${app_name}) ##########"
