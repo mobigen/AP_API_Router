@@ -5,7 +5,7 @@ from typing import List, Dict, Tuple, Any
 from ELKSearch.Manager.manager import ElasticSearchManager
 
 
-class ApiServiceConfig:
+class ElsSearchConfig:
     root_path: str
     category: str
 
@@ -20,7 +20,7 @@ class ApiServiceConfig:
     es: ElasticSearchManager
 
 
-config = ApiServiceConfig
+config = ElsSearchConfig
 
 
 def get_config(config_name: str):
@@ -41,7 +41,7 @@ def parser_params() -> Any:
     parser = argparse.ArgumentParser()
     parser.add_argument("--category", default="local")
     parser.add_argument("--db_type", default="local")
-    parser.add_argument("--check", default=True)
+    parser.add_argument("--check", default="True")
 
     return parser.parse_args()
 

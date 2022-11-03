@@ -15,7 +15,7 @@ def main():
     db = connect_db()
 
     db_query = f"SELECT * FROM vw_biz_meta_bas "
-    if config.check:
+    if config.check == "True":
         today = datetime.today().date()
         condition = f"WHERE DATE(recnt_amd_date) > DATE('{today}')" \
                     f"OR DATE(reg_date) >= DATE('{today}')"
