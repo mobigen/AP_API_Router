@@ -13,7 +13,7 @@ def api(size: int, keyword: str) -> Dict:
     field = "data_nm"
     query = {field: keyword}
     try:
-        es = ElasticSearchManager()
+        es = ElasticSearchManager(index="biz_meta")
         es.size = size
         prefix_data = es.prefix(query,[field])
 

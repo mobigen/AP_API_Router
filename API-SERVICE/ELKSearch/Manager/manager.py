@@ -6,11 +6,11 @@ from ELKSearch.Utils.elasticsearch_utils import make_query
 class ElasticSearchManager:
     def __init__(
             self,
-            host: str = "192.168.101.44",
-            port: str = "39200",
+            host: str = "10.217.59.133",
+            port: str = "9200",
             page: int = 1,
             size: int = 10,
-            index: str = "kt_biz_meta",
+            index: str = "biz_meta",
     ):
         """
         set elasticsearch connect && DSL query setting function

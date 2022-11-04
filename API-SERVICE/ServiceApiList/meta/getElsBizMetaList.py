@@ -6,6 +6,7 @@ from ServiceUtils.CommonUtil import get_exception_info
 
 
 def api(input: InputModel) -> Dict:
+    input.index = "biz_meta"
     data_dict = dict()
     from_ = input.from_ - 1
     data_type = {
