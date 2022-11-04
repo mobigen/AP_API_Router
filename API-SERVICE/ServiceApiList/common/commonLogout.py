@@ -31,7 +31,7 @@ def api(request: Request) -> Dict:
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
-        f_delete = False
+        # f_delete = False  # 쿠기를 삭제하지 않으면 user-docean-access-token에 None 값이 들어가고 이는 Exception 발생을 야기
     else:
         result = {"result": 1, "errorMessage": ""}
     response = JSONResponse(content=result)

@@ -3,3 +3,7 @@ __pycache__/
 .DS_Store
 .idea
 *.log
+build
+mobigen_*.egg*
+dist
+.python-*
