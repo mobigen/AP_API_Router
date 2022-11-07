@@ -2,11 +2,13 @@ from typing import Dict
 from ELKSearch.Manager.manager import ElasticSearchManager
 from ELKSearch.Utils.model import InputModel
 from ELKSearch.Utils.elasticsearch_utils import make_query, base_search_query
+from ELKSearch.Utils.database_utils import get_config
 from ServiceUtils.CommonUtil import get_exception_info
+from ApiService.ApiServiceConfig import config
 
 
 def api(input: InputModel) -> Dict:
-    input.index = "biz_meta"
+    els_config = get_config(config.root_path,"config.ini")["kt"]
     data_dict = dict()
     from_ = input.from_ - 1
     data_type = {
@@ -17,7 +19,7 @@ def api(input: InputModel) -> Dict:
         "T": "totalCount"
     }
     try:
-        es = ElasticSearchManager(index=input.index, page=from_, size=input.size)
+        es = ElasticSearchManager(page=from_, size=input.size, **els_config)
         es.set_sort(input.sortOption)
 
         action = "query"

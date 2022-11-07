@@ -23,11 +23,11 @@ class ElsSearchConfig:
 config = ElsSearchConfig
 
 
-def get_config(config_name: str):
+def get_config(root_path,config_name: str):
     ano_cfg = {}
 
     conf = configparser.ConfigParser()
-    config_path = config.root_path+f"/ELKSearch/conf/{config_name}"
+    config_path = root_path+f"/ELKSearch/conf/{config_name}"
     conf.read(config_path, encoding='utf-8')
     for section in conf.sections():
         ano_cfg[section] = {}
@@ -51,8 +51,8 @@ def prepare_config(root_path) -> None:
     config.root_path = root_path
     config.category = args.category
 
-    db_config = get_config("db_config.ini")
-    els_config = get_config("config.ini")
+    db_config = get_config(root_path,"db_config.ini")
+    els_config = get_config(root_path,"config.ini")
 
     config.els_type = args.category
     config.els_info = els_config[args.category]
