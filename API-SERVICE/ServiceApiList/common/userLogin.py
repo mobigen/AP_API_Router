@@ -18,6 +18,7 @@ class userLogin(BaseModel):
     aut_group_cd: Optional[str] = 'ROLE_USER'
     data_clas_cd: Optional[str] = 'GRADE3'
     sttus: Optional[str] = 'SBSC'
+    user_type: str
 
 
 def make_insert_query(login: dict):
@@ -47,7 +48,7 @@ def api(login: userLogin, request: Request) -> Dict:
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
-        # kt_lamp("OUT_RES", "userLogin", res_type="S",
+        # kt_lamp("OUT_RES", "userLogin", res_type="S",`
         #        res_code = "DC_ERROR", res_desc = f'{login.emp_id}.{except_name}')
     else:
         token_data = make_token_data(user_info)
