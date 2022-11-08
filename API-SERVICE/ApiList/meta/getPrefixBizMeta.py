@@ -1,6 +1,8 @@
 from typing import Dict
 from ELKSearch.Manager.manager import ElasticSearchManager
 from Utils.CommonUtil import get_exception_info
+from ELKSearch.Utils.database_utils import get_config
+from ApiService.ApiServiceConfig import config
 
 
 def api(size: int, keyword: str) -> Dict:
@@ -12,8 +14,9 @@ def api(size: int, keyword: str) -> Dict:
     """
     field = "data_nm"
     query = {field: keyword}
+    els_config = get_config(config.root_path,"config.ini")["katech"]
     try:
-        es = ElasticSearchManager()
+        es = ElasticSearchManager(**els_config)
         es.size = size
         prefix_data = es.prefix(query,[field])
 

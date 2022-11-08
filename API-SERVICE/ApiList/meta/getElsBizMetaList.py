@@ -2,7 +2,9 @@ from typing import Dict
 from ELKSearch.Manager.manager import ElasticSearchManager
 from ELKSearch.Utils.model import InputModel
 from ELKSearch.Utils.elasticsearch_utils import make_query, base_search_query
-from Utils.CommonUtil import get_exception_info
+from ELKSearch.Utils.database_utils import get_config
+from ServiceUtils.CommonUtil import get_exception_info
+from ApiService.ApiServiceConfig import config
 
 
 def extra_filter(option_list):
@@ -30,9 +32,10 @@ def api(input: InputModel) -> Dict:
     }
     data_dict = dict()
     from_ = input.from_ - 1
+    els_config = get_config(config.root_path,"config.ini")["katech"]
 
     try:
-        es = ElasticSearchManager(page=from_, size=input.size)
+        es = ElasticSearchManager(page=from_, size=input.size, **els_config)
         es.set_sort(input.sortOption)
 
         ############ search option ############
