@@ -3,7 +3,7 @@ from ELKSearch.Manager.manager import ElasticSearchManager
 from ELKSearch.Utils.model import InputModel
 from ELKSearch.Utils.elasticsearch_utils import make_query, base_search_query
 from ELKSearch.Utils.database_utils import get_config
-from ServiceUtils.CommonUtil import get_exception_info
+from Utils.CommonUtil import get_exception_info
 from ApiService.ApiServiceConfig import config
 
 
