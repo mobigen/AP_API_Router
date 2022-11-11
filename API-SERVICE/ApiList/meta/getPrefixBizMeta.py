@@ -14,7 +14,7 @@ def api(size: int, keyword: str) -> Dict:
     """
     field = "data_nm"
     query = {field: keyword}
-    els_config = get_config(config.root_path,"config.ini")["katech"]
+    els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
     try:
         es = ElasticSearchManager(**els_config)
         es.size = size

@@ -32,7 +32,7 @@ def api(input: InputModel) -> Dict:
     }
     data_dict = dict()
     from_ = input.from_ - 1
-    els_config = get_config(config.root_path,"config.ini")["katech"]
+    els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
 
     try:
         es = ElasticSearchManager(page=from_, size=input.size, **els_config)
