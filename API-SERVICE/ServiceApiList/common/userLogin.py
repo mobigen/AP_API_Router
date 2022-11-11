@@ -15,8 +15,7 @@ class userLogin(BaseModel):
     user_nm: str
     email: str
     dept_nm: str
-    aut_group_cd: Optional[str] = 'ROLE_USER'
-    data_clas_cd: Optional[str] = 'GRADE3'
+    innt_aut_group_cd: Optional[str] = 'ROLE_USER'
     sttus: Optional[str] = 'SBSC'
     user_type: str
 
