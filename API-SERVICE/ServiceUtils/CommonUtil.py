@@ -171,7 +171,10 @@ def create_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 def make_token_data(user: Dict) -> Dict:
     token_data_column = config.secret_info["token_data_column"].split(",")
-    token_data = {column: user[column] for column in token_data_column}
+    # token_data = {column: user[column] for column in token_data_column}
+    token_data = {column: datetime.strftime(user[column], "%Y-%m-%d %H:%M:%S.%f") \
+        if type(user[column]) != str else user[column] for column in token_data_column}
+    logger.info(token_data)
     return token_data
 
 
