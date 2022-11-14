@@ -29,6 +29,7 @@ def main():
             els_dict["_id"] = meta_wrap["biz_dataset_id"]
             els_dict["_source"] = meta_wrap
             els_dict["_source"]["biz_dataset_id"] = meta_wrap["biz_dataset_id"]
+            # es.insert(meta_wrap,meta_wrap["biz_dataset_id"])
             bulk_meta_item.append(els_dict)
         helpers.bulk(es.conn, bulk_meta_item, index=es.index)
     except Exception as e:
