@@ -12,11 +12,12 @@ def api(size: int, keyword: str) -> Dict:
     :param keyword: type dict, ex) {"data_name" : "테"}
     :return:
     """
-    els_config = get_config(config.root_path,"config.ini")["kt"]
+    index = ["kt_biz_data", "kt_biz_asset"]
+    els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
     field = "data_nm"
     query = {field: keyword}
     try:
-        es = ElasticSearchManager(**els_config)
+        es = ElasticSearchManager(index=index,**els_config)
         es.size = size
         prefix_data = es.prefix(query,[field])
 
