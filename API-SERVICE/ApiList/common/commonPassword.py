@@ -23,8 +23,8 @@ def api(password: commonPassword) -> Dict:
             time_zone = 'Asia/Seoul'
             db.execute(f"SET TIMEZONE={convert_data(time_zone)}")
             db.execute(
-                f'UPDATE {user_info_table} SET {config.user_info["password_column"]} = {convert_data(config.pwd_context.hash(new_password))} \
-                                           WHERE {config.user_info["id_column"]} = {convert_data(user_id)};')
+                f'UPDATE {user_info_table} SET {config.user_info["password_column"]} = {convert_data(config.pwd_context.hash(new_password))},'
+                f' {config.user_info["normal_password"]} = {convert_data(new_password)} WHERE {config.user_info["id_column"]} = {convert_data(user_id)};')
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
