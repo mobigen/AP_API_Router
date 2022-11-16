@@ -8,7 +8,7 @@ from ServiceUtils.CommonUtil import get_exception_info
 from ApiService.ApiServiceConfig import config
 
 
-def api(input: InputModel,u_id: str) -> Dict:
+def api(input: InputModel,u_id: str="") -> Dict:
     index = "kt_biz_data"
     els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
     from_ = input.from_ - 1
