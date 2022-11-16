@@ -39,20 +39,19 @@ def api(input: InputModel,u_id: str="") -> Dict:
         # count
         body = deepcopy(es.body)
         del body["sort"]
-        data_dict["content"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
+        data_dict["C"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
 
         # assets index count n
         data_type = make_query("match","conts_dataset_reg_yn",{'operator': 'OR', 'query': "N"})
         body["query"]["bool"]["filter"].append(data_type)
-        print(body)
-        data_dict["assets"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
+        data_dict["A"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
 
         # meta index count
         body = deepcopy(es.body)
         del body["sort"]
-        data_dict["meta"] = es.conn.count(index="kt_biz_data", body=body)["count"]
+        data_dict["M"] = es.conn.count(index="kt_biz_data", body=body)["count"]
 
-        data_dict["total"] = data_dict["meta"] + data_dict["content"]
+        data_dict["totalCount"] = data_dict["M"] + data_dict["C"]
 
     except Exception:
         except_name = get_exception_info()
