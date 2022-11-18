@@ -27,7 +27,7 @@ class userLogin(BaseModel):
     email: str
     dept_nm: str
     tmp_aut_group_cd: Optional[str] = 'ROLE_USER'
-    tmp_aut_alc_user: str = user_id
+    tmp_aut_alc_user: str = ""
     tmp_aut_alc_date: datetime = datetime.now()
     tmp_aut_exp_date: datetime = datetime.now()
     innt_aut_group_cd: Optional[str] = 'ROLE_USER'
