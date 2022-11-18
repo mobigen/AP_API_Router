@@ -26,13 +26,15 @@ class userLogin(BaseModel):
     user_nm: str
     email: str
     dept_nm: str
-    tmp_aut_group_cd: Optional[str] = 'ROLE_USER'
-    tmp_aut_alc_user: str = ""
-    tmp_aut_alc_date: datetime = datetime.now()
-    tmp_aut_exp_date: datetime = datetime.now()
     innt_aut_group_cd: Optional[str] = 'ROLE_USER'
     sttus: Optional[str] = 'SBSC'
     user_type: str
+
+class TmpAuthUser(userLogin):
+    tmp_aut_group_cd: Optional[str] = None
+    tmp_aut_alc_user: Optional[str] = None
+    tmp_aut_alc_date: Optional[datetime] = None
+    tmp_aut_exp_date: Optional[datetime] = None
 
 
 def make_insert_query(login: dict):
@@ -65,7 +67,7 @@ def api(login: userLogin, request: Request) -> Dict:
         # kt_lamp("OUT_RES", "userLogin", res_type="S",`
         #        res_code = "DC_ERROR", res_desc = f'{login.emp_id}.{except_name}')
     else:
-        token_data = make_token_data(user_info)
+        token_data = make_token_data(TmpAuthUser(**user_info).dict())
         access_token = create_token(
             data=token_data, expires_delta=timedelta(minutes=int(config.secret_info["expire_min"])))
         result = {"result": 1, "errorMessage": ""}
