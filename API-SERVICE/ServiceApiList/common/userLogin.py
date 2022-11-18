@@ -3,18 +3,33 @@ from pydantic import BaseModel
 from fastapi import Request
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
-from datetime import timedelta
+from datetime import datetime, timedelta
 from ServiceUtils.CommonUtil import get_exception_info, connect_db, convert_data, create_token, make_token_data, kt_lamp
 from ApiService.ApiServiceConfig import config
 
 
 class userLogin(BaseModel):
+    """
+        {
+            "user_id":"e2851973-2239-4a44-8feb-00d5a3fb23ef",
+            "emp_id":"11181059",
+            "cmpno":"11181059",
+            "user_nm":"swyang",
+            "email":"swyang",
+            "dept_nm":"swyang",
+            "user_type":"SITE_USER"
+        }
+    """
     user_id: str
     emp_id: str
     cmpno: str
     user_nm: str
     email: str
     dept_nm: str
+    tmp_aut_group_cd: Optional[str] = 'ROLE_USER'
+    tmp_aut_alc_user: str = user_id
+    tmp_aut_alc_date: datetime = datetime.now()
+    tmp_aut_exp_date: datetime = datetime.now()
     innt_aut_group_cd: Optional[str] = 'ROLE_USER'
     sttus: Optional[str] = 'SBSC'
     user_type: str
