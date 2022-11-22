@@ -70,6 +70,8 @@ def make_where_value(where):
         value_list = ", ".join(
             map(convert_data, where.value.split(",")))
         value = f'( {value_list} )'
+    if where.compare_op in ["is", "is not"]:
+        value = where.value
     else:
         value = convert_data(where.value)
     return value
