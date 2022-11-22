@@ -154,7 +154,7 @@ def get_user(user_name: str):
     return user
 
 
-def create_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_token(data: dict, secret_key, algorithm, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone('Asia/Seoul')) + expires_delta
@@ -164,9 +164,7 @@ def create_token(data: dict, expires_delta: Optional[timedelta] = None):
     logger.info(f'commonToken Expire : {expire}')
     to_encode.update({"exp": expire})
 
-    encoded_jwt = jwt.encode(
-        to_encode, config.secret_info["secret_key"], algorithm=config.secret_info["algorithm"])
-    return encoded_jwt
+    return jwt.encode(to_encode, secret_key, algorithm=algorithm)
 
 
 def make_token_data(user: Dict) -> Dict:

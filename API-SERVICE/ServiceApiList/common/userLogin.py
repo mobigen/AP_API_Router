@@ -1,5 +1,7 @@
+import hashlib
+import hmac
 from typing import Dict, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
 from fastapi import Request
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
@@ -21,6 +23,7 @@ class userLogin(BaseModel):
         }
     """
     user_id: str
+    password: str = "1234"
     emp_id: str
     cmpno: str
     user_nm: str
@@ -30,11 +33,15 @@ class userLogin(BaseModel):
     sttus: Optional[str] = 'SBSC'
     user_type: str
 
+    class Config:
+        fields = {"password": {"exclude": True}}
+
 class TmpAuthUser(userLogin):
     tmp_aut_group_cd: Optional[str] = None
     tmp_aut_alc_user: Optional[str] = None
     tmp_aut_alc_date: Optional[datetime] = None
     tmp_aut_exp_date: Optional[datetime] = None
+
 
 
 def make_insert_query(login: dict):
@@ -56,9 +63,9 @@ def api(login: userLogin, request: Request) -> Dict:
         if not user_info:
             time_zone = 'Asia/Seoul'
             db.execute(f"SET TIMEZONE={convert_data(time_zone)}")
-            login_query = make_insert_query(login.__dict__)
+            login_query = make_insert_query(login.dict())
             db.execute(login_query)
-            user_info = login.__dict__
+            user_info = login.dict()
         else:
             user_info = user_info[0]
     except Exception:
@@ -69,13 +76,36 @@ def api(login: userLogin, request: Request) -> Dict:
     else:
         token_data = make_token_data(TmpAuthUser(**user_info).dict())
         access_token = create_token(
-            data=token_data, expires_delta=timedelta(minutes=int(config.secret_info["expire_min"])))
+            data=token_data,
+            expires_delta=timedelta(minutes=int(config.secret_info["expire_min"])),
+            secret_key=config.secret_info["secret_key"],
+            algorithm=config.secret_info["algorithm"]
+        )
+
+        knime_token = knime_secret({"id": login.user_id, "password": login.password})
+        print(knime_token)
+
         result = {"result": 1, "errorMessage": ""}
 
     response = JSONResponse(content=result)
     response.set_cookie(
         key=config.secret_info["cookie_name"], value=access_token, max_age=3600, secure=False, httponly=True)
+    response.set_cookie(
+        key=config.secret_info["knime_cookie_name"], value=knime_token, max_age=3600, secure=False, httponly=True)
 
     kt_lamp("OUT_RES", transaction_id, "userLogin",
             res_desc=f'{login.emp_id}')
     return response
+
+def get_hash256(str: str, key: str):
+    return hmac.new(key.encode(), str.encode(), digestmod=hashlib.sha256).hexdigest()
+
+def knime_secret(data: Dict):
+    token = create_token(
+        data=data,
+        expires_delta=timedelta(minutes=int(config.secret_info["expire_min"])),
+        secret_key=config.secret_info["secret_key"],
+        algorithm=config.secret_info["algorithm"]
+    )
+    print(token)
+    return get_hash256(token, config.secret_info["knime_secret_key"])

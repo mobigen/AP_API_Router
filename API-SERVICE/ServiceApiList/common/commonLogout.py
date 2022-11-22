@@ -37,4 +37,5 @@ def api(request: Request) -> Dict:
     response = JSONResponse(content=result)
     if f_delete:
         response.delete_cookie(key=config.secret_info["cookie_name"])
+        response.delete_cookie(key=config.secret_info["knime_cookie_name"])
     return response

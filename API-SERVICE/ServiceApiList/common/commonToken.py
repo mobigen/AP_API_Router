@@ -36,7 +36,7 @@ def api(request: Request) -> Dict:
     else:
         token_data = make_token_data(user)
         access_token = create_token(data=token_data, expires_delta=timedelta(
-            minutes=int(config.secret_info["expire_min"])))
+            minutes=int(config.secret_info["expire_min"])), secret_key=config.secret_info["secret_key"], algorithm=config.secret_info["algorithm"])
         result = {"result": 1, "errorMessage": ""}
 
     response = JSONResponse(content=result)
