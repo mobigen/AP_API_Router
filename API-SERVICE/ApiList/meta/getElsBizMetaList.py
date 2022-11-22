@@ -1,4 +1,5 @@
 from typing import Dict
+from datetime import datetime
 from ELKSearch.Manager.manager import ElasticSearchManager
 from ELKSearch.Utils.model import InputModel
 from ELKSearch.Utils.elasticsearch_utils import make_query, base_search_query
@@ -35,6 +36,11 @@ def api(input: InputModel) -> Dict:
     els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
 
     try:
+        if len(input.searchOption):
+            with open(f"{config.root_path}/log/{config.category}/{datetime.today().strftime('%Y%m%d')}_search.log","a") as fp:
+                for search in input.searchOption:
+                    fp.write(f"{str(search.keywords)}\n")
+
         es = ElasticSearchManager(page=from_, size=input.size, **els_config)
         es.set_sort(input.sortOption)
 
