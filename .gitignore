@@ -6,4 +6,7 @@ __pycache__/
 build
 mobigen_*.egg*
 dist
-.python-*
+.python-version
+.env
+.vscode
+.coverage

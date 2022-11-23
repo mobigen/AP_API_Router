@@ -11,16 +11,17 @@ from ServiceUtils.crypto import AESCipher
 
 class userLogin(BaseModel):
     """
-        {
-            "user_id":"e2851973-2239-4a44-8feb-00d5a3fb23ef",
-            "emp_id":"11181059",
-            "cmpno":"11181059",
-            "user_nm":"swyang",
-            "email":"swyang",
-            "dept_nm":"swyang",
-            "user_type":"SITE_USER"
-        }
+    {
+        "user_id":"e2851973-2239-4a44-8feb-00d5a3fb23ef",
+        "emp_id":"11181059",
+        "cmpno":"11181059",
+        "user_nm":"swyang",
+        "email":"swyang",
+        "dept_nm":"swyang",
+        "user_type":"SITE_USER"
+    }
     """
+
     user_id: str
     password: str = "1234"
     emp_id: str
@@ -28,12 +29,13 @@ class userLogin(BaseModel):
     user_nm: str
     email: str
     dept_nm: str
-    innt_aut_group_cd: Optional[str] = 'ROLE_USER'
-    sttus: Optional[str] = 'SBSC'
+    innt_aut_group_cd: Optional[str] = "ROLE_USER"
+    sttus: Optional[str] = "SBSC"
     user_type: str
 
     class Config:
         fields = {"password": {"exclude": True}}
+
 
 class TmpAuthUser(userLogin):
     tmp_aut_group_cd: Optional[str] = None
@@ -42,13 +44,12 @@ class TmpAuthUser(userLogin):
     tmp_aut_exp_date: Optional[datetime] = None
 
 
-
 def make_insert_query(login: dict):
     login["reg_user"] = login["user_id"]
     login["reg_date"] = "NOW()"
     columns = ", ".join(login.keys())
     values = ", ".join(map(convert_data, login.values()))
-    return f'INSERT INTO user_bas ({columns}) VALUES ({values});'
+    return f"INSERT INTO user_bas ({columns}) VALUES ({values});"
 
 
 def api(login: userLogin, request: Request) -> Dict:
@@ -57,10 +58,9 @@ def api(login: userLogin, request: Request) -> Dict:
 
     try:
         db = connect_db()
-        user_info, _ = db.select(
-            f'SELECT * FROM user_bas WHERE emp_id = {convert_data(login.emp_id)};')
+        user_info, _ = db.select(f"SELECT * FROM user_bas WHERE emp_id = {convert_data(login.emp_id)};")
         if not user_info:
-            time_zone = 'Asia/Seoul'
+            time_zone = "Asia/Seoul"
             db.execute(f"SET TIMEZONE={convert_data(time_zone)}")
             login_query = make_insert_query(login.dict())
             db.execute(login_query)
@@ -78,7 +78,7 @@ def api(login: userLogin, request: Request) -> Dict:
             data=token_data,
             expires_delta=timedelta(minutes=int(config.secret_info["expire_min"])),
             secret_key=config.secret_info["secret_key"],
-            algorithm=config.secret_info["algorithm"]
+            algorithm=config.secret_info["algorithm"],
         )
 
         knime_token = knime_encrypt(login.user_id + "|^|" + login.password, config.secret_info["knime_secret_key"])
@@ -87,16 +87,15 @@ def api(login: userLogin, request: Request) -> Dict:
 
     response = JSONResponse(content=result)
     response.set_cookie(
-        key=config.secret_info["cookie_name"], value=access_token, max_age=3600, secure=False, httponly=True)
+        key=config.secret_info["cookie_name"], value=access_token, max_age=3600, secure=False, httponly=True
+    )
     response.set_cookie(
-        key=config.secret_info["knime_cookie_name"], value=knime_token, max_age=3600, secure=False, httponly=True)
+        key=config.secret_info["knime_cookie_name"], value=knime_token, max_age=3600, secure=False, httponly=True
+    )
 
-    kt_lamp("OUT_RES", transaction_id, "userLogin",
-            res_desc=f'{login.emp_id}')
+    kt_lamp("OUT_RES", transaction_id, "userLogin", res_desc=f"{login.emp_id}")
     return response
 
 
 def knime_encrypt(data: str, key: str):
     return AESCipher(key).encrypt(data).decode()
-
-
