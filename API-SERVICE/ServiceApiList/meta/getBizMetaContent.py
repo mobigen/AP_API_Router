@@ -57,7 +57,7 @@ def api(input: InputModel,u_id: str="") -> Dict:
         del body["sort"]
         data_dict["M"] = es.conn.count(index="kt_biz_data", body=body)["count"]
 
-        data_dict["totalCount"] = data_dict["M"] + data_dict["C"]
+        data_dict["totalCount"] = sum(data_dict.values())
 
     except Exception:
         except_name = get_exception_info()
