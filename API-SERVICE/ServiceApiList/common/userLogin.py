@@ -1,13 +1,12 @@
-import hashlib
-import hmac
 from typing import Dict, Optional
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel
 from fastapi import Request
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from datetime import datetime, timedelta
 from ServiceUtils.CommonUtil import get_exception_info, connect_db, convert_data, create_token, make_token_data, kt_lamp
 from ApiService.ApiServiceConfig import config
+from ServiceUtils.crypto import AESCipher
 
 
 class userLogin(BaseModel):
@@ -82,8 +81,7 @@ def api(login: userLogin, request: Request) -> Dict:
             algorithm=config.secret_info["algorithm"]
         )
 
-        knime_token = knime_secret({"id": login.user_id, "password": login.password})
-        print(knime_token)
+        knime_token = knime_encrypt(login.user_id + "|^|" + login.password, config.secret_info["knime_secret_key"])
 
         result = {"result": 1, "errorMessage": ""}
 
@@ -97,15 +95,8 @@ def api(login: userLogin, request: Request) -> Dict:
             res_desc=f'{login.emp_id}')
     return response
 
-def get_hash256(str: str, key: str):
-    return hmac.new(key.encode(), str.encode(), digestmod=hashlib.sha256).hexdigest()
 
-def knime_secret(data: Dict):
-    token = create_token(
-        data=data,
-        expires_delta=timedelta(minutes=int(config.secret_info["expire_min"])),
-        secret_key=config.secret_info["secret_key"],
-        algorithm=config.secret_info["algorithm"]
-    )
-    print(token)
-    return get_hash256(token, config.secret_info["knime_secret_key"])
+def knime_encrypt(data: str, key: str):
+    return AESCipher(key).encrypt(data).decode()
+
+
