@@ -22,8 +22,14 @@ def api(input: InputModel,u_id: str="") -> Dict:
         action = "query"
         sub_action = "must"
         for item in input.searchOption:
-            if item.field in ["data_nm", "data_desc"]:
-                item.field = item.field + ".korean_analyzer"
+            tmp = []
+            for field in item.field:
+                if field in ["data_nm", "data_desc"]:
+                    col = field + ".korean_analyzer"
+                else:
+                    col = field
+                tmp.append(col)
+            item.field = tmp
         query_dict = base_search_query(action,sub_action,input.searchOption)
 
         sub_action = "filter"
