@@ -26,7 +26,8 @@ def base_search_query(action: str, sub_action: str, item_list: list) -> Dict:
                 key = "multi_match"
                 detail = {
                     "fields": item.field,
-                    "operator": item.operator
+                    "operator": item.operator,
+                    "type": "phrase_prefix"
                 }
                 query = make_query(key,action,words)
                 query[key].update(detail)
