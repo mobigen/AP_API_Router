@@ -1,17 +1,22 @@
 import os
 import smtplib
 from pathlib import Path
-from ELKSearch.Utils.database_utils import prepare_config, connect_db, select, execute
+from ELKSearch.Utils.database_utils import prepare_config, connect_db, select, execute, config
 
 root_path = str(Path(os.path.dirname(os.path.abspath(__file__))))
 prepare_config(root_path)
 
 
 def main():
-    # batch 1분에 한번씩 status를 req에서 send로 변경해준다
-    from_addr = "DataOcean@kt.com"
-    host = "14.63.245.51"
-    port = 25
+    """
+    :argument
+    category = email
+    db_type = email_db
+    """
+    # batch 1분에 한번씩 email을 전송하고 status를 req에서 send로 변경한다
+    from_addr = config.els_info["from_addr"]
+    host = config.els_info["host"]
+    port = config.els_info["port"]
     query = "SELECT * FROM email_dsp_hst WHERE sttus = 'REQ'"
     db = connect_db()
     send_list = select(db,query)[0]
