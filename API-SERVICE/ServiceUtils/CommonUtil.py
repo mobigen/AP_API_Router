@@ -162,12 +162,19 @@ class IncorrectPassword(Exception):
     pass
 
 
-def get_user(user_name: str):
+def get_user(user_name: str, user_type: str = None):
     db = connect_db()
-    user = db.select(
-        f'SELECT * FROM {config.user_info["table"]} WHERE {config.user_info["id_column"]} = {convert_data(user_name)}'
-    )
+    query = f'SELECT * FROM {config.user_info["table"]} WHERE {config.user_info["id_column"]} = {convert_data(user_name)}'
+    query += f" and user_type = '{user_type}'" if user_type else ""
+    user = db.select(query)
     return user
+
+def get_all_users():
+    db = connect_db()
+    query = f"SELECT * FROM {config.user_info['table']}"
+    users = db.select(query)
+
+    return users
 
 
 def create_token(
