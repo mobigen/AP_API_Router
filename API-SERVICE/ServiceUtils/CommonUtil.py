@@ -1,21 +1,46 @@
 from datetime import datetime, timedelta
+from ServiceUtils.exceptions import TokenDoesNotExist, InvalidUserInfo
 from pytz import timezone
 import configparser
 import argparse
 import traceback
-import socket
 from fastapi.logger import logger
-from fastapi import Request, HTTPException, status
+from fastapi.requests import Request
 from typing import Any, Optional, Dict
 from ApiService.ApiServiceConfig import config
 from ServiceConnectManager import PostgresManager
 from psycopg2 import pool
 import sys
-import jwt
+from jose import jwt
 import traceback
 import logging
 
 lamp = logging.getLogger("trace")
+
+
+def get_token_from_cookie(request: Request):
+    recv_access_token = request.cookies.get(config.secret_info["cookie_name"])
+    if not recv_access_token:
+        raise TokenDoesNotExist
+    return recv_access_token
+
+
+def jwt_decode(token):
+    return jwt.decode(
+            token=token,
+            key=config.secret_info["secret_key"],
+            algorithms=config.secret_info["algorithm"],
+        )
+
+
+def get_user_info(payload):
+    username = payload[config.user_info["id_column"]]
+    user = get_user(username)
+    if not user[0]:
+        raise InvalidUserInfo
+    user = user[0][0]
+
+    return user
 
 
 def convert_data(data) -> str:
@@ -168,13 +193,6 @@ def get_user(user_name: str, user_type: str = None):
     query += f" and user_type = '{user_type}'" if user_type else ""
     user = db.select(query)
     return user
-
-def get_all_users():
-    db = connect_db()
-    query = f"SELECT * FROM {config.user_info['table']}"
-    users = db.select(query)
-
-    return users
 
 
 def create_token(
