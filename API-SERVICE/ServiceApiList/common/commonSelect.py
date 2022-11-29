@@ -117,12 +117,13 @@ def make_select_query(select_info: commonSelect):
 
 
 def api(select_info: commonSelect, request: Request) -> Dict:
-    token = utils.get_token_from_cookie(request)
-    payload = utils.jwt_decode(token)
-    user_type = payload["user_type"]
+    if select_info.table_nm == "user_bas":
+        token = utils.get_token_from_cookie(request)
+        payload = utils.jwt_decode(token)
+        user_type = payload["user_type"]
 
-    if select_info.table_nm == "user_bas" and not user_type == "SITE_ADMIN":
-        return {"result": 0, "errorMessage": "not allowed user"}
+        if not user_type == "SITE_ADMIN":
+            return {"result": 0, "errorMessage": "not allowed user"}
 
     get_column_info = f"SELECT eng_nm, kor_nm FROM tbl_item_coln_dtl \
                                               WHERE tbl_id = (SELECT tbl_id FROM tbl_item_bas WHERE tbl_nm = {utils.convert_data(select_info.table_nm)});"
