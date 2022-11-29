@@ -19,6 +19,15 @@ class userLogin(BaseModel):
         "email":"swyang",
         "dept_nm":"swyang",
         "user_type":"SITE_USER"
+    },
+    {
+        "user_id":"0f25ac7d-abfe-41db-b6fb-6c1d929c95f8",
+        "emp_id":"11181344",
+        "cmpno":"11181344",
+        "user_nm":"테스터",
+        "email":"test@test.com",
+        "dept_nm":"테스터부서",
+        "user_type":"SITE_ADMIN"
     }
     """
 

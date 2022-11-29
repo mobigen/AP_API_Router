@@ -1,8 +1,10 @@
 from typing import Dict, List, Optional
-from ApiService.ApiServiceConfig import config
-from ServiceUtils.CommonUtil import connect_db, make_res_msg, get_exception_info, convert_data
 from pydantic import BaseModel
 from fastapi.logger import logger
+from fastapi.requests import Request
+
+from ApiService.ApiServiceConfig import config
+from ServiceUtils import CommonUtil as utils
 
 
 class joinInfo(BaseModel):
@@ -67,12 +69,12 @@ def convert_compare_op(compare_str):
 
 def make_where_value(where):
     if where.compare_op == "IN" or where.compare_op == "NOT IN":
-        value_list = ", ".join(map(convert_data, where.value.split(",")))
+        value_list = ", ".join(map(utils.convert_data, where.value.split(",")))
         value = f"( {value_list} )"
     elif where.compare_op in ["is", "is not"]:
         value = where.value
     else:
-        value = convert_data(where.value)
+        value = utils.convert_data(where.value)
     return value
 
 
@@ -114,25 +116,32 @@ def make_select_query(select_info: commonSelect):
     return select_query, count_query
 
 
-def api(select_info: commonSelect) -> Dict:
+def api(select_info: commonSelect, request: Request) -> Dict:
+    token = utils.get_token_from_cookie(request)
+    payload = utils.jwt_decode(token)
+    user_type = payload["user_type"]
+
+    if select_info.table_nm == "user_bas" and not user_type == "SITE_ADMIN":
+        return {"result": 0, "errorMessage": "not allowed user"}
+
     get_column_info = f"SELECT eng_nm, kor_nm FROM tbl_item_coln_dtl \
-                                              WHERE tbl_id = (SELECT tbl_id FROM tbl_item_bas WHERE tbl_nm = {convert_data(select_info.table_nm)});"
+                                              WHERE tbl_id = (SELECT tbl_id FROM tbl_item_bas WHERE tbl_nm = {utils.convert_data(select_info.table_nm)});"
     get_query, total_cnt_query = make_select_query(select_info)
     logger.info(f"Get Query : {get_query}")
 
     try:
-        db = connect_db()
+        db = utils.connect_db()
         select_data, _ = db.select(get_query)
         if select_info.page_info:
             total_cnt = db.select(total_cnt_query)
     except Exception:
-        except_name = get_exception_info()
+        except_name = utils.get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
     else:
         column_info, _ = db.select(get_column_info)
         kor_nm_list = [map_data["kor_nm"] for map_data in column_info]
         eng_nm_list = [map_data["eng_nm"] for map_data in column_info]
-        result = make_res_msg(1, "", select_data, eng_nm_list, kor_nm_list)
+        result = utils.make_res_msg(1, "", select_data, eng_nm_list, kor_nm_list)
         if select_info.page_info:
             result["data"].update(total_cnt[0][0])
 
