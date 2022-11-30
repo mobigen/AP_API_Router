@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime
 from elasticsearch import helpers
 from ELKSearch.Utils.database_utils import prepare_config, connect_db, select, config
+from ELKSearch.Utils.elasticsearch_utils import data_process
 
 root_path = str(Path(os.path.dirname(os.path.abspath(__file__))))
 prepare_config(root_path)
@@ -26,15 +27,7 @@ def main():
 
     try:
         for meta_wrap in meta_wrap_list:
-            els_dict = dict()
-
-            meta_wrap["re_ctgry"] = re.sub("[ ]","",str(meta_wrap["ctgry"]))
-            meta_wrap["re_data_shap"] = re.sub("[ ]","",str(meta_wrap["data_shap"]))
-            meta_wrap["re_data_prv_desk"] = re.sub("[ ]","",str(meta_wrap["data_prv_desk"]))
-
-            els_dict["_id"] = meta_wrap["biz_dataset_id"]
-            els_dict["_source"] = meta_wrap
-            els_dict["_source"]["biz_dataset_id"] = meta_wrap["biz_dataset_id"]
+            els_dict = data_process(meta_wrap)
             bulk_meta_item.append(els_dict)
         helpers.bulk(es.conn, bulk_meta_item, index=es.index)
     except Exception as e:
