@@ -19,8 +19,9 @@ def main():
     db_query = f"SELECT * FROM v_biz_meta_info "
     if config.check == "True":
         today = datetime.today().date()
-        condition = f"WHERE DATE(amd_date) >= DATE('{today}')" \
-                    f"OR DATE(reg_date) >= DATE('{today}')"
+        condition = f"WHERE (DATE(amd_date) >= DATE('{today}')" \
+                    f"OR DATE(reg_date) >= DATE('{today}'))" \
+                    "AND status = 'C'"
         db_query = db_query + condition
 
     meta_wrap_list = select(db,db_query)[0]
