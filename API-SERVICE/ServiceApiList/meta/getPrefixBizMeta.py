@@ -13,19 +13,21 @@ def api(size: int, keyword: str) -> Dict:
     :return:
     """
     index = ["kt_biz_data", "kt_biz_asset"]
-    els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
+    els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
     field = "data_nm"
     query = {field: keyword}
     try:
-        es = ElasticSearchManager(index=index,**els_config)
+        es = ElasticSearchManager(index=index, **els_config)
         es.size = size
-        prefix_data = es.prefix(query,[field])
+        prefix_data = es.prefix(query, [field])
 
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
     else:
-        prefix_data = [data["_source"]["data_nm"] for data in prefix_data["hits"]["hits"]]
+        prefix_data = [
+            data["_source"]["data_nm"] for data in prefix_data["hits"]["hits"]
+        ]
         result = {"result": 1, "errorMessage": "", "data": prefix_data}
 
     return result

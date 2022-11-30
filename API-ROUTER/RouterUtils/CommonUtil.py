@@ -16,17 +16,20 @@ lamp = logging.getLogger("trace")
 
 
 def convert_data(data) -> str:
-    return f'\'{str(data)}\''
+    return f"'{str(data)}'"
 
 
 def set_log_path():
     parser = configparser.ConfigParser()
-    parser.read(f'{config.root_path}/conf/logging.conf', encoding='utf-8')
+    parser.read(f"{config.root_path}/conf/logging.conf", encoding="utf-8")
 
-    parser.set("handler_rotatingFileHandler", "args",
-               f"('{config.root_path}/log/API-Router.log', 'a', 20000000, 10)")
+    parser.set(
+        "handler_rotatingFileHandler",
+        "args",
+        f"('{config.root_path}/log/API-Router.log', 'a', 20000000, 10)",
+    )
 
-    with open(f'{config.root_path}/conf/logging.conf', 'w') as f:
+    with open(f"{config.root_path}/conf/logging.conf", "w") as f:
         parser.write(f)
 
 
@@ -34,8 +37,8 @@ def get_config(config_name: str):
     ano_cfg = {}
 
     conf = configparser.ConfigParser()
-    config_path = config.root_path+f'/conf/{config_name}'
-    conf.read(config_path, encoding='utf-8')
+    config_path = config.root_path + f"/conf/{config_name}"
+    conf.read(config_path, encoding="utf-8")
     for section in conf.sections():
         ano_cfg[section] = {}
         for option in conf.options(section):
@@ -58,7 +61,7 @@ def prepare_config(root_path) -> None:
     config.root_path = root_path
     api_router_cfg = get_config("config.ini")
     config.api_config = get_config("api_config.ini")
-    config.db_type = f'{args.db_type}_db'
+    config.db_type = f"{args.db_type}_db"
     config.server_host = args.host
     config.server_port = args.port
     config.db_info = api_router_cfg[config.db_type]
@@ -69,12 +72,17 @@ def prepare_config(root_path) -> None:
 
 
 def make_connection_pool(db_info):
-    conn_pool = pool.SimpleConnectionPool(1, 20, user=db_info["user"],
-                                          password=db_info["password"],
-                                          host=db_info["host"],
-                                          port=db_info["port"],
-                                          database=db_info["database"],
-                                          options=f'-c search_path={db_info["schema"]}', connect_timeout=10)
+    conn_pool = pool.SimpleConnectionPool(
+        1,
+        20,
+        user=db_info["user"],
+        password=db_info["password"],
+        host=db_info["host"],
+        port=db_info["port"],
+        database=db_info["database"],
+        options=f'-c search_path={db_info["schema"]}',
+        connect_timeout=10,
+    )
     return conn_pool
 
 
@@ -84,7 +92,7 @@ def connect_db():
 
 
 def save_file_for_reload():
-    with open(f'{config.root_path}/server.py', "a") as fd:
+    with open(f"{config.root_path}/server.py", "a") as fd:
         fd.write(" ")
 
 
@@ -97,8 +105,12 @@ def make_res_msg(result, err_msg, data=None, column_names=None):
     if data is None or column_names is None:
         res_msg = {"result": result, "errorMessage": err_msg}
     else:
-        res_msg = {"result": result, "errorMessage": err_msg,
-                   "body": data, "header": header_list}
+        res_msg = {
+            "result": result,
+            "errorMessage": err_msg,
+            "body": data,
+            "header": header_list,
+        }
     return res_msg
 
 
@@ -107,22 +119,30 @@ def get_exception_info():
     trace_back = traceback.extract_tb(ex_traceback)
     trace_log = "\n".join([str(trace) for trace in trace_back])
     logger.error(
-        f'\n- Exception Type : {ex_type}\n- Exception Message : {str(ex_value).strip()}\n- Exception Log : \n{trace_log}')
+        f"\n- Exception Type : {ex_type}\n- Exception Message : {str(ex_value).strip()}\n- Exception Log : \n{trace_log}"
+    )
     return ex_type.__name__
 
 
 def delete_headers(headers: Dict, delete_header: List) -> Dict:
     for delete in delete_header:
         if headers.get(delete):
-            del(headers[delete])
+            del headers[delete]
     return headers
 
 
-def kt_lamp(log_type: str, transaction_id: str, operation: str, res_type: str = "I", res_code: str = "", res_desc: str = ""):
+def kt_lamp(
+    log_type: str,
+    transaction_id: str,
+    operation: str,
+    res_type: str = "I",
+    res_code: str = "",
+    res_desc: str = "",
+):
     if operation in config.lamp_info["api_list"].split(","):
         lamp_form = {}
         now = datetime.now()
-        lamp_form["timestamp"] = now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        lamp_form["timestamp"] = now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         lamp_form["service"] = config.lamp_info["service_code"]
         lamp_form["operation"] = f'{config.lamp_info["prefix"]}_{operation}'
         lamp_form["transactionId"] = transaction_id

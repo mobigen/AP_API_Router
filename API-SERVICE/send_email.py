@@ -1,7 +1,13 @@
 import os
 import smtplib
 from pathlib import Path
-from ELKSearch.Utils.database_utils import prepare_config, connect_db, select, execute, config
+from ELKSearch.Utils.database_utils import (
+    prepare_config,
+    connect_db,
+    select,
+    execute,
+    config,
+)
 
 root_path = str(Path(os.path.dirname(os.path.abspath(__file__))))
 prepare_config(root_path)
@@ -19,7 +25,7 @@ def main():
     port = config.els_info["port"]
     query = "SELECT * FROM email_dsp_hst WHERE sttus = 'REQ'"
     db = connect_db()
-    send_list = select(db,query)[0]
+    send_list = select(db, query)[0]
 
     for email_info in send_list:
         try:
@@ -30,14 +36,16 @@ def main():
                 f"{email_info['sbst']}\n"
             )
             with smtplib.SMTP(host, port) as smtp:
-                smtp.sendmail(from_addr,email_info['rcv_adr'],msg)
+                smtp.sendmail(from_addr, email_info["rcv_adr"], msg)
         except Exception as e:
             print(e)
         else:
             # update status
-            query = f"UPDATE email_dsp_hst SET sttus = 'SEND'"\
-                    f"WHERE email_id = '{email_info['email_id']}'"
-            execute(db,db.cursor(),query)
+            query = (
+                f"UPDATE email_dsp_hst SET sttus = 'SEND'"
+                f"WHERE email_id = '{email_info['email_id']}'"
+            )
+            execute(db, db.cursor(), query)
 
 
 if __name__ == "__main__":

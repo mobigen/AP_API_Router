@@ -5,12 +5,12 @@ from ELKSearch.Utils.elasticsearch_utils import make_query
 
 class ElasticSearchManager:
     def __init__(
-            self,
-            host: str = "10.217.59.133",
-            port: str = "9200",
-            page: int = 1,
-            size: int = 10,
-            index: str = "biz_meta",
+        self,
+        host: str = "10.217.59.133",
+        port: str = "9200",
+        page: int = 1,
+        size: int = 10,
+        index: str = "biz_meta",
     ):
         """
         set elasticsearch connect && DSL query setting function
@@ -42,13 +42,18 @@ class ElasticSearchManager:
     def set_sort(self, sort: list) -> None:
         self.body["sort"] = sort
 
-    def set_pagination(self,size: int, from_: int) -> None:
+    def set_pagination(self, size: int, from_: int) -> None:
         self.size = size
         self.cur_from = size * from_
 
     def search(self, source=...):
-        return self.conn.search(index=self.index, body=self.body, from_=self.cur_from,
-                                size=self.size,_source=source)
+        return self.conn.search(
+            index=self.index,
+            body=self.body,
+            from_=self.cur_from,
+            size=self.size,
+            _source=source,
+        )
 
     def insert(self, body: dict, doc_id: str) -> None:
         return self.conn.index(index=self.index, body=body, id=doc_id)
@@ -65,8 +70,10 @@ class ElasticSearchManager:
         """
         delete_data = {field: data}
         delete_command = make_query("query", "term", delete_data)
-        return self.conn.delete_by_query(index=self.index,body=delete_command)
+        return self.conn.delete_by_query(index=self.index, body=delete_command)
 
     def prefix(self, keyword: dict, source=...):
-        prefix_query = make_query("query","prefix", keyword)
-        return self.conn.search(index=self.index, body=prefix_query, size=self.size, _source=source)
+        prefix_query = make_query("query", "prefix", keyword)
+        return self.conn.search(
+            index=self.index, body=prefix_query, size=self.size, _source=source
+        )

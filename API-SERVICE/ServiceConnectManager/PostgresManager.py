@@ -18,13 +18,12 @@ class PostgresManager:
     def execute(self, sql: str) -> None:
         self.cursor.execute(sql)
         self.conn.commit()
-        logger.info(f'PostgresManager Execute Result. ({sql})')
+        logger.info(f"PostgresManager Execute Result. ({sql})")
 
     def multiple_excute(self, sql_list: list) -> None:
         try:
             for index, sql in enumerate(sql_list):
-                logger.info(
-                    f'PostgresManager Multiple Execute. ({index}. {sql})')
+                logger.info(f"PostgresManager Multiple Execute. ({index}. {sql})")
                 self.cursor.execute(sql)
             self.conn.commit()
         except (Exception, psycopg2.DatabaseError):
@@ -38,7 +37,7 @@ class PostgresManager:
             rows = self.cursor.fetchall()
         else:
             rows = self.cursor.fetchmany(count)
-        #logger.info(f'PostgresManager Select Execute. ({sql})')
+        # logger.info(f'PostgresManager Select Execute. ({sql})')
 
         result = []
         for row in rows:

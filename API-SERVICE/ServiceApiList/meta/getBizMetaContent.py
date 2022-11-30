@@ -8,15 +8,16 @@ from ServiceUtils.CommonUtil import get_exception_info
 from ApiService.ApiServiceConfig import config
 
 
-def api(input: InputModel,u_id: str="") -> Dict:
+def api(input: InputModel, u_id: str = "") -> Dict:
     index = "kt_biz_asset"
-    els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
+    els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
     from_ = input.from_ - 1
     data_dict = dict()
 
     try:
-        es = ElasticSearchManager(page=from_, size=input.size,
-                                  index=index, **els_config)
+        es = ElasticSearchManager(
+            page=from_, size=input.size, index=index, **els_config
+        )
         es.set_sort(input.sortOption)
 
         action = "query"
@@ -30,12 +31,12 @@ def api(input: InputModel,u_id: str="") -> Dict:
                     col = field
                 tmp.append(col)
             item.field = tmp
-        query_dict = base_search_query(action,sub_action,input.searchOption)
+        query_dict = base_search_query(action, sub_action, input.searchOption)
 
         sub_action = "filter"
-        item_dict = base_search_query(action,sub_action,input.filterOption)
+        item_dict = base_search_query(action, sub_action, input.filterOption)
         query_dict.update(item_dict)
-        search_query = make_query(action,"bool", query_dict)
+        search_query = make_query(action, "bool", query_dict)
         es.body.update(search_query)
 
         sort_list = [{item.field: item.order} for item in input.sortOption]
@@ -48,7 +49,9 @@ def api(input: InputModel,u_id: str="") -> Dict:
         data_dict["C"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
 
         # assets index count n
-        data_type = make_query("match","conts_dataset_reg_yn",{'operator': 'OR', 'query': "N"})
+        data_type = make_query(
+            "match", "conts_dataset_reg_yn", {"operator": "OR", "query": "N"}
+        )
         body["query"]["bool"]["filter"].append(data_type)
         data_dict["A"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
 
