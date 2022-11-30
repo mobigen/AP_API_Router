@@ -14,6 +14,7 @@ class SortOption(BaseModel):
 
 
 class InputModel(BaseModel):
+    chk: bool = False
     index: str = "biz_meta"
     from_: int = Field(1, alias="from")
     size: int = 10
