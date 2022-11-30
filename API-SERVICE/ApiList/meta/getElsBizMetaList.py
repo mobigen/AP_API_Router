@@ -30,7 +30,7 @@ def extra_filter(option_list):
     return option_list
 
 
-def api(input: InputModel, chk: int = 0) -> Dict:
+def api(input: InputModel) -> Dict:
     data_srttn = {
         # search_keyword: (result_key, result_data)
         "보유데이터": "hasCount",
@@ -44,7 +44,7 @@ def api(input: InputModel, chk: int = 0) -> Dict:
     els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
 
     try:
-        if chk and len(input.searchOption):
+        if input.chk and len(input.searchOption):
             with open(f"{config.root_path}/log/{config.category}/{datetime.today().strftime('%Y%m%d')}_search.log","a") as fp:
                 for search in input.searchOption:
                     fp.write(f"{str(search.keywords)}\n")
