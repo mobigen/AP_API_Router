@@ -1,5 +1,6 @@
 from copy import deepcopy
 from typing import Dict
+from datetime import datetime
 from ELKSearch.Manager.manager import ElasticSearchManager
 from ELKSearch.Utils.model import InputModel
 from ELKSearch.Utils.elasticsearch_utils import make_query, base_search_query
@@ -15,6 +16,11 @@ def api(input: InputModel) -> Dict:
     data_dict = dict()
 
     try:
+        if input.chk and len(input.searchOption):
+            with open(f"{config.root_path}/log/{config.category}/{datetime.today().strftime('%Y%m%d')}_search.log","a") as fp:
+                for search in input.searchOption:
+                    fp.write(f"{str(search.keywords)}\n")
+
         es = ElasticSearchManager(page=from_, size=input.size,
                                   index=index, **els_config)
         es.set_sort(input.sortOption)
