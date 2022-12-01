@@ -16,7 +16,7 @@ def main():
     es = config.es
     db = connect_db()
 
-    db_query = f"SELECT * FROM v_biz_meta_info  WHERE status = 'C'"
+    db_query = f"SELECT * FROM v_biz_meta_info  WHERE status = 'D'"
     if config.check == "True":
         today = datetime.today().date()
         condition = f"AND (DATE(amd_date) >= DATE('{today}')" \
