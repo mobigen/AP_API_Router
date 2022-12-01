@@ -16,12 +16,11 @@ def main():
     es = config.es
     db = connect_db()
 
-    db_query = f"SELECT * FROM v_biz_meta_info "
+    db_query = f"SELECT * FROM v_biz_meta_info  WHERE status = 'C'"
     if config.check == "True":
         today = datetime.today().date()
-        condition = f"WHERE (DATE(amd_date) >= DATE('{today}')" \
-                    f"OR DATE(reg_date) >= DATE('{today}'))" \
-                    "AND status = 'C'"
+        condition = f"AND (DATE(amd_date) >= DATE('{today}')" \
+                    f"OR DATE(reg_date) >= DATE('{today}'))"
         db_query = db_query + condition
 
     meta_wrap_list = select(db,db_query)[0]
