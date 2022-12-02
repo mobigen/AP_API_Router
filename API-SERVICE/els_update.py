@@ -35,7 +35,8 @@ def main():
         for meta_wrap in meta_wrap_list:
             els_dict = dict()
             if config.category != "data":
-                meta_wrap["upd_pam_date"] = datetime.strptime(meta_wrap["upd_pam_date"], '%Y-%m-%d').date()
+                if meta_wrap["upd_pam_date"]:
+                    meta_wrap["upd_pam_date"] = datetime.strptime(meta_wrap["upd_pam_date"], '%Y-%m-%d')
             els_dict["_id"] = meta_wrap["biz_dataset_id"]
             els_dict["_source"] = meta_wrap
             els_dict["_source"]["biz_dataset_id"] = meta_wrap["biz_dataset_id"]
