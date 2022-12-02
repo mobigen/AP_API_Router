@@ -110,9 +110,7 @@ def make_select_query(select_info: commonSelect):
     if page_info:
         page = f"LIMIT {page_info.per_page} OFFSET ({page_info.per_page} * {page_info.cur_page - 1})"
 
-    select_query = (
-        f"SELECT * FROM {select_info.table_nm} {join} {where} {order} {page};"
-    )
+    select_query = f"SELECT * FROM {select_info.table_nm} {join} {where} {order} {page};"
     count_query = f"SELECT count(*) FROM {select_info.table_nm} {join} {where};"
 
     return select_query, count_query

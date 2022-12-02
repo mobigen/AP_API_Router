@@ -14,8 +14,17 @@ import sys
 from jose import jwt
 import traceback
 import logging
+from ServiceUtils.crypto import AESCipher
 
 lamp = logging.getLogger("trace")
+
+
+def knime_encrypt(data: str):
+    return AESCipher(config.secret_info["knime_secret_key"]).encrypt(data).decode()
+
+
+def knime_decrpyt(data: str):
+    return AESCipher(config.secret_info["knime_secret_key"]).decrypt(data).decode()
 
 
 def get_token_from_cookie(request: Request):
@@ -41,6 +50,10 @@ def get_user_info(payload):
     user = user[0][0]
 
     return user
+
+
+def get_user_info(request: Request):
+    return get_user_info(jwt_decode(get_token_from_cookie(request)))
 
 
 def convert_data(data) -> str:

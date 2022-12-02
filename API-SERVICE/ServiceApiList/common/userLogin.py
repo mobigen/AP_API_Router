@@ -74,9 +74,7 @@ def api(login: userLogin, request: Request) -> Dict:
 
     try:
         db = connect_db()
-        user_info, _ = db.select(
-            f"SELECT * FROM user_bas WHERE emp_id = {convert_data(login.emp_id)};"
-        )
+        user_info, _ = db.select(f"SELECT * FROM user_bas WHERE emp_id = {convert_data(login.emp_id)};")
         if not user_info:
             time_zone = "Asia/Seoul"
             db.execute(f"SET TIMEZONE={convert_data(time_zone)}")

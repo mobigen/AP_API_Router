@@ -12,6 +12,7 @@ api_router = ApiService()
 app = FastAPI()
 app.include_router(api_router.router)
 
+
 if __name__ == "__main__":
     log_dir = f"{config.root_path}/log/{config.category}"
     if os.path.isdir(log_dir):
