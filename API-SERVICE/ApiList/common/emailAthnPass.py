@@ -22,15 +22,17 @@ def api(email_athn_pass: emailAthnPass) -> Dict:
     try:
         db = connect_db()
         email_info, _ = db.select(
-            f'SELECT * FROM tb_email_athn_info WHERE email={convert_data(email_athn_pass.email)}')
+            f"SELECT * FROM tb_email_athn_info WHERE email={convert_data(email_athn_pass.email)}"
+        )
 
         if email_info[0]["athn_no"] == email_athn_pass.athn_no:
-            time_zone = 'Asia/Seoul'
+            time_zone = "Asia/Seoul"
             db.execute(f"SET TIMEZONE={convert_data(time_zone)}")
             if email_info[0]["athn_yn"] == "Y":
                 db.execute(
                     f'UPDATE {user_info_table} SET {config.user_info["password_column"]} = {convert_data(config.pwd_context.hash(new_password))} \
-                    WHERE {config.user_info["id_column"]} = {convert_data(user_id)};')
+                    WHERE {config.user_info["id_column"]} = {convert_data(user_id)};'
+                )
             else:
                 raise EmailAuthFail
         else:

@@ -22,7 +22,9 @@ def api(request: Request) -> Dict:
         if not recv_access_token:
             raise TokenDoesNotExist
         payload = jwt.decode(
-            token=recv_access_token, key=config.secret_info["secret_key"], algorithms=config.secret_info["algorithm"]
+            token=recv_access_token,
+            key=config.secret_info["secret_key"],
+            algorithms=config.secret_info["algorithm"],
         )
         username = payload[config.user_info["id_column"]]
         user = get_user(username)

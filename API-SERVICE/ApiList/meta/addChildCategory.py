@@ -11,8 +11,8 @@ class addChildCategory(BaseModel):
 
 
 def api(insert: addChildCategory) -> Dict:
-    query = f'INSERT INTO tb_category (node_nm, prnts_id, node_id)\
-              VALUES ({convert_data(insert.node_nm)},{convert_data(insert.prnts_id)},{convert_data(uuid.uuid4())});'
+    query = f"INSERT INTO tb_category (node_nm, prnts_id, node_id)\
+              VALUES ({convert_data(insert.node_nm)},{convert_data(insert.prnts_id)},{convert_data(uuid.uuid4())});"
 
     try:
         db = connect_db()

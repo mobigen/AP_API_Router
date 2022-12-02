@@ -4,7 +4,7 @@ from Utils.CommonUtil import connect_db, get_exception_info
 
 
 def api() -> Dict:
-    category_query = 'SELECT * FROM tb_category ORDER BY prnts_id, node_id;'
+    category_query = "SELECT * FROM tb_category ORDER BY prnts_id, node_id;"
 
     try:
         db = connect_db()

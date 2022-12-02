@@ -15,7 +15,9 @@ def make_register_query(register: commonRegister):
 
     # at 221109 by seokwoo-yang, password 평문 필요 요청
     register.data["user_normal"] = register.data[password_column]
-    register.data[password_column] = config.pwd_context.hash(register.data[password_column])
+    register.data[password_column] = config.pwd_context.hash(
+        register.data[password_column]
+    )
     columns = ", ".join(register.data.keys())
     values = ", ".join(map(convert_data, register.data.values()))
     query = f"INSERT INTO {user_info_table} ({columns}) VALUES ({values});"

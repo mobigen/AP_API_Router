@@ -11,11 +11,11 @@ class UpdateCategory(BaseModel):
 
 
 def api(update: UpdateCategory) -> Dict:
-    query = f'UPDATE tb_category\
+    query = f"UPDATE tb_category\
                 SET prnts_id   = {convert_data(uuid.uuid4())},\
                     node_id   = {convert_data(update.node_id)},\
                     node_nm = {convert_data(update.node_nm)}\
-                WHERE node_id = {convert_data(update.node_id)};'
+                WHERE node_id = {convert_data(update.node_id)};"
     try:
         db = connect_db()
         db.execute(query)

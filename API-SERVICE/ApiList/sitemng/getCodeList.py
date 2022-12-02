@@ -4,14 +4,13 @@ from Utils.CommonUtil import connect_db, get_exception_info, convert_data
 from fastapi.logger import logger
 
 
-def api(perPage: int,
-        curPage: int,
-        gropId: str,
-        keyword: str = "") -> Dict:
+def api(perPage: int, curPage: int, gropId: str, keyword: str = "") -> Dict:
 
     curPage = curPage - 1
     total_cnt_query = "SELECT count(*) AS cnt FROM tb_code_detail"
-    code_list_query = "SELECT *, row_number () OVER (ORDER BY {0}) AS rowNo FROM tb_code_detail"
+    code_list_query = (
+        "SELECT *, row_number () OVER (ORDER BY {0}) AS rowNo FROM tb_code_detail"
+    )
 
     try:
         db = connect_db()
@@ -43,9 +42,11 @@ def api(perPage: int,
     else:
         code_info = []
         if len(code_list[0]):
-            code_info = [{"code_id": code_detail["code_id"], "code_nm": code_detail["code_nm"]}
-                         for code_detail in code_list[0]]
+            code_info = [
+                {"code_id": code_detail["code_id"], "code_nm": code_detail["code_nm"]}
+                for code_detail in code_list[0]
+            ]
 
-        body = {"totalcount": total_cnt[0][0]['cnt'], "list": code_info}
+        body = {"totalcount": total_cnt[0][0]["cnt"], "list": code_info}
         result = {"result": 1, "errorMessage": "", "data": body}
         return result
