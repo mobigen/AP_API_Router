@@ -6,3 +6,7 @@
  elasticsearch==7.17.6
  mobigen-router
  mobigen-service
+pydantic~=1.10.2
+starlette~=0.19.1
+setuptools~=58.1.0
+pytz~=2022.6

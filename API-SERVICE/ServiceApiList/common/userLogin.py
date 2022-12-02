@@ -4,7 +4,14 @@ from fastapi import Request
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from datetime import datetime, timedelta
-from ServiceUtils.CommonUtil import get_exception_info, connect_db, convert_data, create_token, make_token_data, kt_lamp
+from ServiceUtils.CommonUtil import (
+    get_exception_info,
+    connect_db,
+    convert_data,
+    create_token,
+    make_token_data,
+    kt_lamp,
+)
 from ApiService.ApiServiceConfig import config
 from ServiceUtils.crypto import AESCipher
 
@@ -90,16 +97,27 @@ def api(login: userLogin, request: Request) -> Dict:
             algorithm=config.secret_info["algorithm"],
         )
 
-        knime_token = knime_encrypt(login.user_id + "|^|" + login.password, config.secret_info["knime_secret_key"])
+        knime_token = knime_encrypt(
+            login.user_id + "|^|" + login.password,
+            config.secret_info["knime_secret_key"],
+        )
 
         result = {"result": 1, "errorMessage": ""}
 
     response = JSONResponse(content=result)
     response.set_cookie(
-        key=config.secret_info["cookie_name"], value=access_token, max_age=3600, secure=False, httponly=True
+        key=config.secret_info["cookie_name"],
+        value=access_token,
+        max_age=3600,
+        secure=False,
+        httponly=True,
     )
     response.set_cookie(
-        key=config.secret_info["knime_cookie_name"], value=knime_token, max_age=3600, secure=False, httponly=True
+        key=config.secret_info["knime_cookie_name"],
+        value=knime_token,
+        max_age=3600,
+        secure=False,
+        httponly=True,
     )
 
     kt_lamp("OUT_RES", transaction_id, "userLogin", res_desc=f"{login.emp_id}")

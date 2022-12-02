@@ -19,7 +19,7 @@ def api(input: Prefix) -> Dict:
     :return:
     """
     index = ["kt_biz_data", "kt_biz_asset"]
-    els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
+    els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
     field = "data_nm"
     query = {field: input.keyword}
     try:
@@ -31,7 +31,9 @@ def api(input: Prefix) -> Dict:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
     else:
-        prefix_data = [data["_source"]["data_nm"] for data in prefix_data["hits"]["hits"]]
+        prefix_data = [
+            data["_source"]["data_nm"] for data in prefix_data["hits"]["hits"]
+        ]
         result = {"result": 1, "errorMessage": "", "data": prefix_data}
 
     return result

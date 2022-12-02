@@ -18,7 +18,7 @@ def main():
     # batch 1분에 한번씩 email을 전송하고 status를 req에서 send로 변경한다
     query = "SELECT * FROM email_dsp_hst WHERE sttus = 'REQ'"
     db = connect_db()
-    send_list = select(db,query)[0]
+    send_list = select(db, query)[0]
 
     from_addr = config.els_info["from_addr"]
     host = config.els_info["host"]

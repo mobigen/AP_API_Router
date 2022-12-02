@@ -26,22 +26,23 @@ class PostgresManager:
     def multiple_excute(self, sql_list: list) -> None:
         try:
             for index, sql in enumerate(sql_list):
-                logger.info(
-                    f'PostgresManager Multiple Execute. ({index}. {sql})')
+                logger.info(f"PostgresManager Multiple Execute. ({index}. {sql})")
                 self.cursor.execute(sql)
             self.conn.commit()
         except (Exception, psycopg2.DatabaseError):
             self.conn.rollback()
             raise psycopg2.DatabaseError
 
-    def select(self, sql: str, count: int = None) -> Tuple[List[Dict[Any, Any]], List[Any]]:
+    def select(
+        self, sql: str, count: int = None
+    ) -> Tuple[List[Dict[Any, Any]], List[Any]]:
         self.execute(sql)
         column_names = [desc[0] for desc in self.cursor.description]
         if count is None:
             rows = self.cursor.fetchall()
         else:
             rows = self.cursor.fetchmany(count)
-        logger.info(f'PostgresManager Select Execute. ({sql})')
+        logger.info(f"PostgresManager Select Execute. ({sql})")
 
         result = []
         for row in rows:

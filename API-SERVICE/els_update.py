@@ -29,7 +29,7 @@ def main():
     if config.check == "True":
         db_query = db_query + condition
 
-    meta_wrap_list = select(db,db_query)[0]
+    meta_wrap_list = select(db, db_query)[0]
 
     try:
         for meta_wrap in meta_wrap_list:

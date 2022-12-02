@@ -14,8 +14,17 @@ import sys
 from jose import jwt
 import traceback
 import logging
+from ServiceUtils.crypto import AESCipher
 
 lamp = logging.getLogger("trace")
+
+
+def knime_encrypt(data: str):
+    return AESCipher(config.secret_info["knime_secret_key"]).encrypt(data).decode()
+
+
+def knime_decrpyt(data: str):
+    return AESCipher(config.secret_info["knime_secret_key"]).decrypt(data).decode()
 
 
 def get_token_from_cookie(request: Request):
@@ -27,10 +36,10 @@ def get_token_from_cookie(request: Request):
 
 def jwt_decode(token):
     return jwt.decode(
-            token=token,
-            key=config.secret_info["secret_key"],
-            algorithms=config.secret_info["algorithm"],
-        )
+        token=token,
+        key=config.secret_info["secret_key"],
+        algorithms=config.secret_info["algorithm"],
+    )
 
 
 def get_user_info(payload):
@@ -41,6 +50,10 @@ def get_user_info(payload):
     user = user[0][0]
 
     return user
+
+
+def get_user_info(request: Request):
+    return get_user_info(jwt_decode(get_token_from_cookie(request)))
 
 
 def convert_data(data) -> str:
@@ -55,9 +68,7 @@ def convert_data(data) -> str:
 
 def set_log_path():
     parser = configparser.ConfigParser()
-    parser.read(
-        f"{config.root_path}/conf/{config.category}/logging.conf", encoding="utf-8"
-    )
+    parser.read(f"{config.root_path}/conf/{config.category}/logging.conf", encoding="utf-8")
 
     parser.set(
         "handler_rotatingFileHandler",
@@ -108,6 +119,7 @@ def prepare_config(root_path) -> None:
     if config.category == "common":
         config.secret_info = api_router_cfg["secret_info"]
         config.user_info = api_router_cfg["user_info"]
+        config.ldap_info = api_router_cfg["ldap_info"]
 
 
 def make_connection_pool(db_info):
@@ -189,15 +201,15 @@ class IncorrectPassword(Exception):
 
 def get_user(user_name: str, user_type: str = None):
     db = connect_db()
-    query = f'SELECT * FROM {config.user_info["table"]} WHERE {config.user_info["id_column"]} = {convert_data(user_name)}'
+    query = (
+        f'SELECT * FROM {config.user_info["table"]} WHERE {config.user_info["id_column"]} = {convert_data(user_name)}'
+    )
     query += f" and user_type = '{user_type}'" if user_type else ""
     user = db.select(query)
     return user
 
 
-def create_token(
-    data: dict, secret_key, algorithm, expires_delta: Optional[timedelta] = None
-):
+def create_token(data: dict, secret_key, algorithm, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone("Asia/Seoul")) + expires_delta
