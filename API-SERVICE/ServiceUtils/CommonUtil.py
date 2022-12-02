@@ -52,10 +52,6 @@ def get_user_info(payload):
     return user
 
 
-def get_user_info(request: Request):
-    return get_user_info(jwt_decode(get_token_from_cookie(request)))
-
-
 def convert_data(data) -> str:
     data = str(data)
     if data:

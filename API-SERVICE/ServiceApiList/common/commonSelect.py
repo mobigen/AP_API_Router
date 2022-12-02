@@ -122,8 +122,8 @@ def api(select_info: commonSelect, request: Request) -> Dict:
         payload = utils.jwt_decode(token)
         user_type = payload["user_type"]
 
-    if not user_type == "SITE_ADMIN":
-        return {"result": 0, "errorMessage": "not allowed user"}
+        if not user_type == "SITE_ADMIN":
+            return {"result": 0, "errorMessage": "not allowed user"}
 
     get_column_info = f"SELECT eng_nm, kor_nm FROM tbl_item_coln_dtl \
                                               WHERE tbl_id = (SELECT tbl_id FROM tbl_item_bas WHERE tbl_nm = {utils.convert_data(select_info.table_nm)});"
