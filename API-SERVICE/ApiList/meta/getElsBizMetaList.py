@@ -16,9 +16,17 @@ def extra_filter(option_list):
                 item.field.append(f"re_{col}")
                 index = item.field.index(col)
                 del item.field[index]
-                item.keywords = [v.replace(" ", "") for v in item.keywords]
-        if item.field in ["data_nm", "data_desc"]:
-            item.field = item.field + ".korean_analyzer"
+                item.keywords = [v.replace(" ","") for v in item.keywords]
+
+        tmp = []
+        for field in item.field:
+            if item.field in ["data_nm", "data_desc"]:
+                col = field + ".korean_analyzer"
+            else:
+                col = field
+            tmp.append(col)
+        item.field = tmp
+
     return option_list
 
 
@@ -36,11 +44,8 @@ def api(input: InputModel) -> Dict:
     els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
 
     try:
-        if len(input.searchOption):
-            with open(
-                f"{config.root_path}/log/{config.category}/{datetime.today().strftime('%Y%m%d')}_search.log",
-                "a",
-            ) as fp:
+        if input.chk and len(input.searchOption):
+            with open(f"{config.root_path}/log/{config.category}/{datetime.today().strftime('%Y%m%d')}_search.log","a") as fp:
                 for search in input.searchOption:
                     fp.write(f"{str(search.keywords)}\n")
 
