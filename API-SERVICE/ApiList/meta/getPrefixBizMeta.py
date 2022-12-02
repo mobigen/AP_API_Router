@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 from pydantic import BaseModel
 from ELKSearch.Manager.manager import ElasticSearchManager
 from Utils.CommonUtil import get_exception_info
@@ -9,6 +9,8 @@ from ApiService.ApiServiceConfig import config
 class Prefix(BaseModel):
     size: int
     keyword: str
+    index: Optional[str] = ""
+    field: Optional[str] = ""
 
 
 def api(input:Prefix) -> Dict:
@@ -18,13 +20,17 @@ def api(input:Prefix) -> Dict:
     :param keyword: type dict, ex) {"data_name" : "테"}
     :return:
     """
-    field = "data_nm"
-    query = {field: input.keyword}
+    if input.field == "":
+        input.field = "data_nm"
+    query = {input.field: input.keyword}
     els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
     try:
+        if input.index != "":
+            els_config["index"] = input.index
         es = ElasticSearchManager(**els_config)
+
         es.size = input.size
-        prefix_data = es.prefix(query,[field])
+        prefix_data = es.prefix(query,[input.field])
 
     except Exception:
         except_name = get_exception_info()
