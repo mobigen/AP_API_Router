@@ -9,17 +9,24 @@ prepare_config(root_path)
 
 
 def main():
+    today = datetime.today().date()
     bulk_meta_item = list()
     prepare_config(root_path)
     es = config.es
     db = connect_db()
-    db_query = f"SELECT * FROM vw_{config.els_type}_biz_meta_bas "
+
+    if config.category == "data":
+        table_name = "vw_ifs_tbl_txn"
+        condition = f"WHERE DATE(tbl_first_cret_dt) > DATE('{today}')" \
+                    f"OR DATE(tbl_last_chg_dt) >= DATE('{today}')"
+    else:
+        table_name = "vw_assets_biz_meta_bas"
+        condition = f"WHERE DATE(amd_date) > DATE('{today}')" \
+                    f"OR DATE(reg_date) >= DATE('{today}')"
+
+    db_query = f"SELECT * FROM {table_name} "
+
     if config.check == "True":
-        today = datetime.today().date()
-        condition = (
-            f"WHERE DATE(amd_date) > DATE('{today}')"
-            f"OR DATE(reg_date) >= DATE('{today}')"
-        )
         db_query = db_query + condition
 
     meta_wrap_list = select(db, db_query)[0]
@@ -27,9 +34,8 @@ def main():
     try:
         for meta_wrap in meta_wrap_list:
             els_dict = dict()
-            meta_wrap["upd_pam_date"] = datetime.strptime(
-                meta_wrap["upd_pam_date"], "%Y-%m-%d"
-            ).date()
+            if config.category != "data":
+                meta_wrap["upd_pam_date"] = datetime.strptime(meta_wrap["upd_pam_date"], '%Y-%m-%d').date()
             els_dict["_id"] = meta_wrap["biz_dataset_id"]
             els_dict["_source"] = meta_wrap
             els_dict["_source"]["biz_dataset_id"] = meta_wrap["biz_dataset_id"]

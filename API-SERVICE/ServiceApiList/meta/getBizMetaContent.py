@@ -1,5 +1,6 @@
 from copy import deepcopy
 from typing import Dict
+from datetime import datetime
 from ELKSearch.Manager.manager import ElasticSearchManager
 from ELKSearch.Utils.model import InputModel
 from ELKSearch.Utils.elasticsearch_utils import make_query, base_search_query
@@ -8,16 +9,20 @@ from ServiceUtils.CommonUtil import get_exception_info
 from ApiService.ApiServiceConfig import config
 
 
-def api(input: InputModel, u_id: str = "") -> Dict:
+def api(input: InputModel) -> Dict:
     index = "kt_biz_asset"
     els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
     from_ = input.from_ - 1
     data_dict = dict()
 
     try:
-        es = ElasticSearchManager(
-            page=from_, size=input.size, index=index, **els_config
-        )
+        if input.chk and len(input.searchOption):
+            with open(f"{config.root_path}/log/{config.category}/{datetime.today().strftime('%Y%m%d')}_search.log","a") as fp:
+                for search in input.searchOption:
+                    fp.write(f"{str(search.keywords)}\n")
+
+        es = ElasticSearchManager(page=from_, size=input.size,
+                                  index=index, **els_config)
         es.set_sort(input.sortOption)
 
         action = "query"
