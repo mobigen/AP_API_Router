@@ -9,7 +9,7 @@ from ApiService.ApiServiceConfig import config
 
 
 def extra_filter(option_list):
-    els_katech_option = ["ctgry","data_shap","data_prv_desk"]
+    els_katech_option = ["ctgry", "data_shap", "data_prv_desk"]
     for item in option_list:
         for col in els_katech_option:
             if col in item.field:
@@ -37,11 +37,11 @@ def api(input: InputModel) -> Dict:
         "연동데이터": "innerCount",
         "외부데이터": "externalCount",
         "해외데이터": "overseaCount",
-        "전체": "totalCount"
+        "전체": "totalCount",
     }
     data_dict = dict()
     from_ = input.from_ - 1
-    els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
+    els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
 
     try:
         if input.chk and len(input.searchOption):
@@ -56,14 +56,14 @@ def api(input: InputModel) -> Dict:
         action = "query"
         sub_action = "must"
         input.searchOption = extra_filter(input.searchOption)
-        query_dict = base_search_query(action,sub_action,input.searchOption)
+        query_dict = base_search_query(action, sub_action, input.searchOption)
 
         # ############ filter option ############
         sub_action = "filter"
         input.filterOption = extra_filter(input.filterOption)
-        item_dict = base_search_query(action,sub_action,input.filterOption)
+        item_dict = base_search_query(action, sub_action, input.filterOption)
         query_dict.update(item_dict)
-        search_query = make_query(action,"bool", query_dict)
+        search_query = make_query(action, "bool", query_dict)
         es.body.update(search_query)
 
         # ############ sort option ############
@@ -73,7 +73,7 @@ def api(input: InputModel) -> Dict:
 
         # ############ data_srttn ############
         i = None
-        for j,item in enumerate(item_dict["filter"]):
+        for j, item in enumerate(item_dict["filter"]):
             if "data_srttn" in item["match"].keys():
                 i = j
                 break
@@ -82,7 +82,9 @@ def api(input: InputModel) -> Dict:
 
         for ko_nm, eng_nm in data_srttn.items():
             if i is None:
-                cnt_query = make_query("match","data_srttn",{'operator': 'OR', 'query': ko_nm})
+                cnt_query = make_query(
+                    "match", "data_srttn", {"operator": "OR", "query": ko_nm}
+                )
                 item_dict["filter"].append(cnt_query)
                 i = -1
             else:
@@ -92,8 +94,8 @@ def api(input: InputModel) -> Dict:
                 del item_dict["filter"][i]
 
             query_dict.update(item_dict)
-            cnt_query = make_query("query","bool",query_dict)
-            cnt = es.conn.count(index=es.index,body=cnt_query)["count"]
+            cnt_query = make_query("query", "bool", query_dict)
+            cnt = es.conn.count(index=es.index, body=cnt_query)["count"]
             data_dict[eng_nm] = cnt
 
     except Exception:

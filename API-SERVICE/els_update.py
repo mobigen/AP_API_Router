@@ -18,19 +18,23 @@ def main():
     db_query = f"SELECT * FROM v_biz_meta_info "
     if config.check == "True":
         today = datetime.today().date()
-        condition = f"WHERE DATE(amd_date) >= DATE('{today}')" \
-                    f"OR DATE(reg_date) >= DATE('{today}')"
+        condition = (
+            f"WHERE DATE(amd_date) >= DATE('{today}')"
+            f"OR DATE(reg_date) >= DATE('{today}')"
+        )
         db_query = db_query + condition
 
-    meta_wrap_list = select(db,db_query)[0]
+    meta_wrap_list = select(db, db_query)[0]
 
     try:
         for meta_wrap in meta_wrap_list:
             els_dict = dict()
 
-            meta_wrap["re_ctgry"] = re.sub("[ ]","",str(meta_wrap["ctgry"]))
-            meta_wrap["re_data_shap"] = re.sub("[ ]","",str(meta_wrap["data_shap"]))
-            meta_wrap["re_data_prv_desk"] = re.sub("[ ]","",str(meta_wrap["data_prv_desk"]))
+            meta_wrap["re_ctgry"] = re.sub("[ ]", "", str(meta_wrap["ctgry"]))
+            meta_wrap["re_data_shap"] = re.sub("[ ]", "", str(meta_wrap["data_shap"]))
+            meta_wrap["re_data_prv_desk"] = re.sub(
+                "[ ]", "", str(meta_wrap["data_prv_desk"])
+            )
 
             els_dict["_id"] = meta_wrap["biz_dataset_id"]
             els_dict["_source"] = meta_wrap

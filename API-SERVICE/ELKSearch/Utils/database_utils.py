@@ -23,12 +23,12 @@ class ElsSearchConfig:
 config = ElsSearchConfig
 
 
-def get_config(root_path,config_name: str):
+def get_config(root_path, config_name: str):
     ano_cfg = {}
 
     conf = configparser.ConfigParser()
-    config_path = root_path+f"/ELKSearch/conf/{config_name}"
-    conf.read(config_path, encoding='utf-8')
+    config_path = root_path + f"/ELKSearch/conf/{config_name}"
+    conf.read(config_path, encoding="utf-8")
     for section in conf.sections():
         ano_cfg[section] = {}
         for option in conf.options(section):
@@ -51,26 +51,31 @@ def prepare_config(root_path) -> None:
     config.root_path = root_path
     config.category = args.category
 
-    db_config = get_config(root_path,"db_config.ini")
-    els_config = get_config(root_path,"config.ini")
+    db_config = get_config(root_path, "db_config.ini")
+    els_config = get_config(root_path, "config.ini")
 
     config.els_type = args.category
     config.els_info = els_config[args.category]
     config.es = ElasticSearchManager(**config.els_info)
     config.check = args.check
 
-    config.db_type = f'{args.db_type}_db'
+    config.db_type = f"{args.db_type}_db"
     config.db_info = db_config[config.db_type]
     config.conn_pool = make_connection_pool(config.db_info)
 
 
 def make_connection_pool(db_info):
-    conn_pool = pool.SimpleConnectionPool(1, 20, user=db_info["user"],
-                                          password=db_info["password"],
-                                          host=db_info["host"],
-                                          port=db_info["port"],
-                                          database=db_info["database"],
-                                          options=f'-c search_path={db_info["schema"]}', connect_timeout=10)
+    conn_pool = pool.SimpleConnectionPool(
+        1,
+        20,
+        user=db_info["user"],
+        password=db_info["password"],
+        host=db_info["host"],
+        port=db_info["port"],
+        database=db_info["database"],
+        options=f'-c search_path={db_info["schema"]}',
+        connect_timeout=10,
+    )
     return conn_pool
 
 

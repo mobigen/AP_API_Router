@@ -15,7 +15,14 @@ def make_url(server_name: str, url_path: str):
                 netloc = server_info["ip_adr"]
             else:
                 netloc = server_info["domn_nm"]
-            url = ParseResult(scheme="http", netloc=netloc, path=url_path, params="", query="", fragment="")
+            url = ParseResult(
+                scheme="http",
+                netloc=netloc,
+                path=url_path,
+                params="",
+                query="",
+                fragment="",
+            )
             logger.info(f"Message Passing Url : {url.geturl()}")
             return url.geturl()
     return None

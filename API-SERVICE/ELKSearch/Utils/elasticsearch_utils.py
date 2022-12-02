@@ -27,16 +27,13 @@ def base_search_query(action: str, sub_action: str, item_list: list) -> Dict:
                 detail = {
                     "fields": item.field,
                     "operator": item.operator,
-                    "type": "phrase_prefix"
+                    "type": "phrase_prefix",
                 }
-                query = make_query(key,action,words)
+                query = make_query(key, action, words)
                 query[key].update(detail)
             else:
                 key = "match"
-                detail = {
-                    action: words,
-                    "operator": item.operator
-                }
+                detail = {action: words, "operator": item.operator}
                 query = make_query(key, item.field[0], detail)
             # query 추가
             item_dict[sub_action].append(query)
