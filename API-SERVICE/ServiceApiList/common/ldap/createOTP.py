@@ -1,9 +1,9 @@
-from .otp_store import OTP
-from .utils import ldap_info
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request
 from fastapi.logger import logger
 
+from .otp_store import OTP
+from .utils import ldap_info
 from ApiService.ApiServiceConfig import config
 from ServiceUtils.CommonUtil import knime_decrpyt
 from ServiceUtils.exceptions import TokenDoesNotExist, InvalidUserInfo
@@ -36,7 +36,8 @@ async def api(id: str, request: Request):
         """
 
         logger.info(f"CREATE OTP :: {otp}")
-        response = JSONResponse(content={"result": 1, "errorMessage": ""})
+        # TODO response의 otp 제거 (상용패치시)
+        response = JSONResponse(content={"result": 1, "errorMessage": "", "otp": otp})
     except Exception as e:
         logger.error(e)
         response = JSONResponse(content={"result": 0, "errorMessage": str(e)})

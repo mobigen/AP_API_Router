@@ -1,4 +1,3 @@
-from .otp_store import OTP
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from datetime import timedelta
@@ -9,6 +8,7 @@ from ServiceUtils.CommonUtil import (
     connect_db,
     convert_data,
 )
+from .otp_store import OTP
 from ServiceUtils.exceptions import InvalidUserInfo
 from ApiService.ApiServiceConfig import config
 from .schemas import TmpAuthUserBas
@@ -18,7 +18,7 @@ class OTPMissMatch(Exception):
     ...
 
 
-def api(id: str, otp: int):
+def api(id: str, otp: str):
     try:
         is_ok = OTP.check_otp(id, otp)
         if not is_ok:

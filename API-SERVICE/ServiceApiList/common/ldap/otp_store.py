@@ -14,13 +14,14 @@ class OTP:
 
     @classmethod
     def create(cls):
-        return random.randrange(1000000)
+        return "".join([str(random.randrange(10)) for i in range(6)])
 
     @classmethod
-    def add_otp(cls, id: str, otp: int):
+    def add_otp(cls, id: str, otp: str):
         def del_expired_otp(otp_db, id):
             time.sleep(180)
-            del otp_db[id]
+            if id in otp_db:
+                del otp_db[id]
             logger.info(f"expired otp :: {id}")
 
         hash = cls.get_hash(otp)
@@ -36,7 +37,7 @@ class OTP:
         ).start()
 
     @classmethod
-    def check_otp(cls, id: str, otp: int) -> bool:
+    def check_otp(cls, id: str, otp: str) -> bool:
         hash = cls.get_hash(otp)
         if id in cls.otp_db and cls.otp_db[id] == hash:
             del cls.otp_db[id]
