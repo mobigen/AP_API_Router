@@ -17,6 +17,10 @@ class commonLogin(BaseModel):
 
 
 def api(login: commonLogin) -> Dict:
+    """
+    id_column = user_id
+    password_column = user_password
+    """
     access_token = ""
     try:
         user = authenticate_user(

@@ -1,17 +1,11 @@
 from typing import Dict
 from fastapi.logger import logger
 from jose import jwt
-from Utils.CommonUtil import get_exception_info, get_user, make_res_msg
-from ApiService.ApiServiceConfig import config
 from starlette.requests import Request
 
-
-class InvalidUserInfo(Exception):
-    pass
-
-
-class TokenDoesNotExist(Exception):
-    pass
+from Utils.CommonUtil import get_exception_info, get_user, make_res_msg
+from ApiService.ApiServiceConfig import config
+from Utils.exceptions import TokenDoesNotExist, InvalidUserInfo
 
 
 def api(request: Request) -> Dict:

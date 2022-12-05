@@ -11,7 +11,7 @@ class Prefix(BaseModel):
     keyword: str
 
 
-def api(input:Prefix) -> Dict:
+def api(input: Prefix) -> Dict:
     """
     Auto Complete data_nm
     DB의 Like 검색과 유사함
@@ -20,11 +20,11 @@ def api(input:Prefix) -> Dict:
     """
     field = "data_nm"
     query = {field: input.keyword}
-    els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
+    els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
     try:
         es = ElasticSearchManager(**els_config)
         es.size = input.size
-        prefix_data = es.prefix(query,[field])
+        prefix_data = es.prefix(query, [field])
 
     except Exception:
         except_name = get_exception_info()

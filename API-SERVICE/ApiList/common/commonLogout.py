@@ -3,16 +3,10 @@ from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from jose import jwt
 from starlette.requests import Request
+
 from Utils.CommonUtil import get_exception_info, get_user
 from ApiService.ApiServiceConfig import config
-
-
-class InvalidUserInfo(Exception):
-    pass
-
-
-class TokenDoesNotExist(Exception):
-    pass
+from Utils.exceptions import TokenDoesNotExist, InvalidUserInfo
 
 
 def api(request: Request) -> Dict:

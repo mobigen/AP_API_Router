@@ -16,7 +16,7 @@ def extra_filter(option_list):
                 item.field.append(f"re_{col}")
                 index = item.field.index(col)
                 del item.field[index]
-                item.keywords = [v.replace(" ","") for v in item.keywords]
+                item.keywords = [v.replace(" ", "") for v in item.keywords]
 
         tmp = []
         for field in item.field:
@@ -45,7 +45,10 @@ def api(input: InputModel) -> Dict:
 
     try:
         if input.chk and len(input.searchOption):
-            with open(f"{config.root_path}/log/{config.category}/{datetime.today().strftime('%Y%m%d')}_search.log","a") as fp:
+            with open(
+                f"{config.root_path}/log/{config.category}/{datetime.today().strftime('%Y%m%d')}_search.log",
+                "a",
+            ) as fp:
                 for search in input.searchOption:
                     fp.write(f"{str(search.keywords)}\n")
 

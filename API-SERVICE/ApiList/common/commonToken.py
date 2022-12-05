@@ -6,14 +6,7 @@ from jose import jwt
 from Utils.CommonUtil import get_exception_info, get_user, create_token, make_token_data
 from ApiService.ApiServiceConfig import config
 from starlette.requests import Request
-
-
-class InvalidUserInfo(Exception):
-    pass
-
-
-class TokenDoesNotExist(Exception):
-    pass
+from Utils.exceptions import TokenDoesNotExist, InvalidUserInfo
 
 
 def api(request: Request) -> Dict:

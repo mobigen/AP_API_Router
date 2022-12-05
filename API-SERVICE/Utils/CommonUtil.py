@@ -27,9 +27,7 @@ def convert_data(data) -> str:
 
 def set_log_path():
     parser = configparser.ConfigParser()
-    parser.read(
-        f"{config.root_path}/conf/{config.category}/logging.conf", encoding="utf-8"
-    )
+    parser.read(f"{config.root_path}/conf/{config.category}/logging.conf", encoding="utf-8")
 
     parser.set(
         "handler_rotatingFileHandler",
