@@ -1,18 +1,53 @@
-from datetime import datetime, timedelta
 from pytz import timezone
 import os
 import configparser
 import argparse
-from fastapi.logger import logger
-from pathlib import Path
-from typing import Any, Optional, Dict
-from passlib.context import CryptContext
-from psycopg2 import pool
 import jwt
 import sys
 import traceback
-from ApiService.ApiServiceConfig import config
+from datetime import datetime, timedelta
+from fastapi.logger import logger
+from typing import Any, Optional, Dict
+from passlib.context import CryptContext
+from pathlib import Path
+from psycopg2 import pool
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 from ConnectManager import PostgresManager
+from ApiService.ApiServiceConfig import config
+
+
+def send_template_mail(replace_text, receiver_addr, msg_type):
+    message = MIMEMultipart("alternative")
+    message["Subject"] = config.email_auth[f"subject_{msg_type}"]
+    message["From"] = config.email_auth["login_user"]
+    message["To"] = receiver_addr
+
+    html_part = template_html(msg_type, replace_text)
+    message.attach(html_part)
+
+    stmp = smtplib.SMTP(host=config.email_auth["server_addr"], port=int(config.email_auth["port"]))
+    stmp.ehlo()
+    stmp.starttls()
+    stmp.login(config.email_auth["login_user"], config.email_auth["login_pass"])
+    stmp.send_message(message)
+    stmp.quit()
+
+
+def template_html(msg_type, msg):
+    template = {
+        "register": (f"{config.root_path}/conf/common/template/emailAthnSend.html", "AUTH_NO"),
+        "password": (f"{config.root_path}/conf/common/template/pwdEmailAthn.html", "AUTH_NO"),
+        "share": (f"{config.root_path}/conf/common/template/shareEmail.html", "URL"),
+    }
+
+    with open(template[msg_type][0], "r") as fd:
+        html = "\n".join(fd.readlines())
+    html = html.replace(template[msg_type][1], msg)
+
+    return MIMEText(html, "html")
 
 
 def convert_data(data) -> str:
