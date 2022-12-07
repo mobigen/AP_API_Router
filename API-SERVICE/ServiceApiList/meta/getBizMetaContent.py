@@ -43,26 +43,25 @@ def api(input: InputModel) -> Dict:
         query_dict.update(item_dict)
         search_query = make_query(action, "bool", query_dict)
         es.body.update(search_query)
+        data_type = make_query(
+            "match", "conts_dataset_reg_yn", {"operator": "OR", "query": "Y"}
+        )
+        es.body["query"]["bool"]["filter"].append(data_type)
 
         sort_list = [{item.field: item.order} for item in input.sortOption]
         es.set_sort(sort_list)
         search_data = es.search(input.resultField)
 
-        # count
+        # assets index count y
         body = deepcopy(es.body)
         del body["sort"]
         data_dict["C"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
 
-        # assets index count n
-        data_type = make_query(
-            "match", "conts_dataset_reg_yn", {"operator": "OR", "query": "N"}
-        )
-        body["query"]["bool"]["filter"].append(data_type)
+        # assets index assets n = n+y
+        body["query"]["bool"]["filter"] = body["query"]["bool"]["filter"][:-1]
         data_dict["A"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
 
         # meta index count
-        body = deepcopy(es.body)
-        del body["sort"]
         data_dict["M"] = es.conn.count(index="kt_biz_data", body=body)["count"]
 
         data_dict["totalCount"] = sum(data_dict.values())

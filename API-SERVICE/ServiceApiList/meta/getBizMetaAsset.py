@@ -9,7 +9,6 @@ from ServiceUtils.CommonUtil import get_exception_info
 from ApiService.ApiServiceConfig import config
 
 
-
 def api(input: InputModel) -> Dict:
     index = "kt_biz_asset"
     els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
@@ -44,25 +43,26 @@ def api(input: InputModel) -> Dict:
         query_dict.update(item_dict)
         search_query = make_query(action, "bool", query_dict)
         es.body.update(search_query)
-        data_type = make_query(
-            "match", "conts_dataset_reg_yn", {"operator": "OR", "query": "N"}
-        )
-        es.body["query"]["bool"]["filter"].append(data_type)
 
         sort_list = [{item.field: item.order} for item in input.sortOption]
         es.set_sort(sort_list)
         search_data = es.search(input.resultField)
 
-        # assets index count n
+        # count
         body = deepcopy(es.body)
         del body["sort"]
         data_dict["A"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
 
-        # assets index count y = n+y
-        body["query"]["bool"]["filter"] = body["query"]["bool"]["filter"][:-1]
+        # assets index count y
+        data_type = make_query(
+            "match", "conts_dataset_reg_yn", {"operator": "OR", "query": "Y"}
+        )
+        body["query"]["bool"]["filter"].append(data_type)
         data_dict["C"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
 
-        # meta index count
+        # meta index assets
+        body = deepcopy(es.body)
+        del body["sort"]
         data_dict["M"] = es.conn.count(index="kt_biz_data", body=body)["count"]
 
         data_dict["totalCount"] = sum(data_dict.values())
