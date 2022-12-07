@@ -50,14 +50,14 @@ def api(input: InputModel) -> Dict:
 
         body = deepcopy(es.body)
         del body["sort"]
-        data_dict["C"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
+        data_dict["A"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
 
         # assets index count n
         data_type = make_query(
-            "match", "conts_dataset_reg_yn", {"operator": "OR", "query": "N"}
+            "match", "conts_dataset_reg_yn", {"operator": "OR", "query": "Y"}
         )
         body["query"]["bool"]["filter"].append(data_type)
-        data_dict["A"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
+        data_dict["C"] = es.conn.count(index="kt_biz_asset", body=body)["count"]
 
         # meta index count
         body = deepcopy(es.body)
