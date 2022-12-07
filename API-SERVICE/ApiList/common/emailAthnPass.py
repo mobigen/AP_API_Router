@@ -21,9 +21,7 @@ def api(email_athn_pass: emailAthnPass) -> Dict:
     user_info_table = config.user_info["table"]
     try:
         db = connect_db()
-        email_info, _ = db.select(
-            f"SELECT * FROM tb_email_athn_info WHERE email={convert_data(email_athn_pass.email)}"
-        )
+        email_info, _ = db.select(f"SELECT * FROM tb_email_athn_info WHERE email={convert_data(email_athn_pass.email)}")
 
         if email_info[0]["athn_no"] == email_athn_pass.athn_no:
             time_zone = "Asia/Seoul"
