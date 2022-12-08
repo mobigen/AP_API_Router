@@ -20,11 +20,10 @@ def extra_filter(option_list):
 
         tmp = []
         for field in item.field:
-            if item.field in ["data_nm", "data_desc"]:
+            tmp.append(field)
+            if field in ["data_nm", "data_desc"]:
                 col = field + ".korean_analyzer"
-            else:
-                col = field
-            tmp.append(col)
+                tmp.append(col)
         item.field = tmp
 
     return option_list
