@@ -1,11 +1,12 @@
+import random
+import string
 from typing import Dict
+
 from fastapi.logger import logger
 from pydantic import BaseModel
-import string
-import random
 
-from Utils.CommonUtil import get_exception_info, connect_db, convert_data, send_template_mail
 from ApiService.ApiServiceConfig import config
+from Utils.CommonUtil import get_exception_info, connect_db, convert_data, send_template_mail
 
 
 class EmailNotAuth(Exception):

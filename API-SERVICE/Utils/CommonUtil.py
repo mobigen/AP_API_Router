@@ -192,6 +192,9 @@ class IncorrectUserName(Exception):
 class IncorrectPassword(Exception):
     pass
 
+class LeavedUser(Exception):
+    pass
+
 
 def get_user(user_name: str):
     db = connect_db()
@@ -235,6 +238,9 @@ def authenticate_user(username: str, password: str):
         raise IncorrectUserName
 
     user = user[0][0]
+    if user["user_sttus"] == "SCSN":
+        raise LeavedUser("user_sttus :: SCSN}")
+
     if not verify_password(password, user[config.user_info["password_column"]]):
         raise IncorrectPassword
     return user
