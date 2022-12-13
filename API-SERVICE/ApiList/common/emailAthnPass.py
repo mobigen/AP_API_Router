@@ -9,19 +9,21 @@ class EmailAuthFail(Exception):
     pass
 
 
-class emailAthnPass(BaseModel):
+class EmailAthnPass(BaseModel):
     email: str
     athn_no: str
     new_password: str
 
 
-def api(email_athn_pass: emailAthnPass) -> Dict:
+def api(email_athn_pass: EmailAthnPass) -> Dict:
     user_id = email_athn_pass.email
     new_password = email_athn_pass.new_password
     user_info_table = config.user_info["table"]
     try:
         db = connect_db()
-        email_info, _ = db.select(f"SELECT * FROM tb_email_athn_info WHERE email={convert_data(email_athn_pass.email)}")
+        email_info, _ = db.select(
+            f"SELECT * FROM tb_email_athn_info WHERE email={convert_data(email_athn_pass.email)}"
+        )
 
         if email_info[0]["athn_no"] == email_athn_pass.athn_no:
             time_zone = "Asia/Seoul"

@@ -6,7 +6,13 @@ from fastapi.logger import logger
 from pydantic import BaseModel
 
 from ApiService.ApiServiceConfig import config
-from Utils.CommonUtil import get_exception_info, connect_db, convert_data, send_template_mail
+from Utils import insert_mail_history
+from Utils.CommonUtil import (
+    get_exception_info,
+    connect_db,
+    convert_data,
+    send_template_mail,
+)
 
 
 class EmailNotAuth(Exception):
@@ -17,7 +23,7 @@ class EmailNotExist(Exception):
     pass
 
 
-class emailAthnSend(BaseModel):
+class EmailAthnSend(BaseModel):
     email: str
     msg_type: str  # register or password
 
@@ -40,7 +46,7 @@ def make_email_auth_query(email, auth_no, exist_mail):
     return query
 
 
-def api(email_auth: emailAthnSend) -> Dict:
+def api(email_auth: EmailAthnSend) -> Dict:
     try:
         auth_no = make_auth_no()
         db = connect_db()
@@ -53,6 +59,12 @@ def api(email_auth: emailAthnSend) -> Dict:
                 raise EmailNotAuth
 
         send_template_mail(auth_no, email_auth.email, email_auth.msg_type)
+        insert_mail_history(
+            rcv_adr=email_auth.email,
+            title=config.email_auth[f"subject_{email_auth.msg_type}"],
+            contents=auth_no,
+            tmplt_cd=email_auth.msg_type,
+        )
 
         time_zone = "Asia/Seoul"
         db.execute(f"SET TIMEZONE={convert_data(time_zone)}")

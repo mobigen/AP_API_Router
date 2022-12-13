@@ -1,3 +1,5 @@
+import uuid
+
 from pytz import timezone
 import os
 import configparser
@@ -17,6 +19,16 @@ from email.mime.multipart import MIMEMultipart
 
 from ConnectManager import PostgresManager
 from ApiService.ApiServiceConfig import config
+
+
+def insert_mail_history(rcv_adr: str, title: str, contents: str, tmplt_cd: str):
+    db = connect_db()
+    sql = f"""
+        INSERT INTO
+            sitemng.tb_email_send_info (email_id, rcv_adr, title, contents, tmplt_cd, sttus, reg_date)
+        VALUES
+            ('{uuid.uuid4()}', '{rcv_adr}', '{title}', '{contents}', '{tmplt_cd}', 'SEND', '{datetime.now()}');"""
+    db.execute(sql)
 
 
 def send_template_mail(replace_text, receiver_addr, msg_type):
@@ -191,6 +203,7 @@ class IncorrectUserName(Exception):
 
 class IncorrectPassword(Exception):
     pass
+
 
 class LeavedUser(Exception):
     pass
