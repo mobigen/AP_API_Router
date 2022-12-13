@@ -21,8 +21,8 @@ def main():
     db = connect_db()
     send_list = select(db, query)[0]
 
-    from_addr = config.els_info["from_addr"]
-    host = config.els_info["server_addr"]
+    from_addr = "admin@bigdata-car.kr"
+    host = config.els_info["host"]
     port = config.els_info["port"]
 
     for email_info in send_list:
@@ -55,7 +55,7 @@ def main():
 
             # with smtplib.SMTP(host, port) as smtp:
             with smtplib.SMTP(host,port) as smtp:
-                smtp.login(config.els_info["login_user"],config.els_info["login_pass"])
+                smtp.login(from_addr,config.els_info["index"])
                 smtp.send_message(message)
         except Exception as e:
             print(e)
