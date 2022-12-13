@@ -19,8 +19,8 @@ def api(input: UpdateData) -> Dict:
         es = ElasticSearchManager(**els_config)
         biz_data = db.select(query)[0][0]
 
-        els_dict = data_process(biz_data)
-        es.insert(els_dict,input.biz_dataset_id)
+        els_dict = data_process(biz_data)["_source"]
+        es.conn.index(index=es.index,body=els_dict,id=input.biz_dataset_id)
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
