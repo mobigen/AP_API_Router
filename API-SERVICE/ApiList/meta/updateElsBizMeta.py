@@ -8,7 +8,6 @@ from ApiService.ApiServiceConfig import config
 
 
 def api(biz_dataset_id: str) -> Dict:
-    els_dict = dict()
     els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
     query = f"SELECT * FROM v_biz_meta_info WHERE biz_dataset_id = {convert_data(biz_dataset_id)}"
     try:
