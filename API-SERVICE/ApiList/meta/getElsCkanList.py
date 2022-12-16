@@ -32,13 +32,13 @@ def extra_filter(option_list):
 
 def api(input: InputModel) -> Dict:
     from_ = input.from_ - 1
-    index = "biz_meta"
     els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
+    index = "ckan_data"
     try:
         if input.chk and len(input.searchOption):
             with open(
-                f"{config.root_path}/log/{config.category}/{datetime.today().strftime('%Y%m%d')}_search.log",
-                "a",
+                    f"{config.root_path}/log/{config.category}/{datetime.today().strftime('%Y%m%d')}_search.log",
+                    "a",
             ) as fp:
                 for search in input.searchOption:
                     fp.write(f"{str(search.keywords)}\n")
@@ -49,7 +49,6 @@ def api(input: InputModel) -> Dict:
         ############ search option ############
         action = "query"
         sub_action = "must"
-        input.searchOption = extra_filter(input.searchOption)
         query_dict = base_search_query(action, sub_action, input.searchOption)
 
         # ############ filter option ############
