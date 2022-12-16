@@ -43,15 +43,19 @@ def base_search_query(action: str, sub_action: str, item_list: list) -> Dict:
     return item_dict
 
 
+def default_process(els_dict, data):
+    els_dict["_id"] = data["biz_dataset_id"]
+    els_dict["_source"] = data
+    els_dict["_source"]["biz_dataset_id"] = data["biz_dataset_id"]
+    return els_dict
+
 
 def data_process(data):
     # D-Ocean Project Function
     els_dict = dict()
-    data["re_ctgry"] = re.sub("[ ]","",str(data["ctgry"]))
-    data["re_data_shap"] = re.sub("[ ]","",str(data["data_shap"]))
-    data["re_data_prv_desk"] = re.sub("[ ]","",str(data["data_prv_desk"]))
+    data["re_ctgry"] = re.sub("[ ]", "", str(data["ctgry"]))
+    data["re_data_shap"] = re.sub("[ ]", "", str(data["data_shap"]))
+    data["re_data_prv_desk"] = re.sub("[ ]", "", str(data["data_prv_desk"]))
 
-    els_dict["_id"] = data["biz_dataset_id"]
-    els_dict["_source"] = data
-    els_dict["_source"]["biz_dataset_id"] = data["biz_dataset_id"]
+    els_dict = default_process(els_dict, data)
     return els_dict
