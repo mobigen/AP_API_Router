@@ -9,27 +9,6 @@ from Utils.SearchUtil import search_count
 from ApiService.ApiServiceConfig import config
 
 
-def extra_filter(option_list):
-    els_katech_option = ["ctgry", "data_shap", "data_prv_desk"]
-    for item in option_list:
-        for col in els_katech_option:
-            if col in item.field:
-                item.field.append(f"re_{col}")
-                index = item.field.index(col)
-                del item.field[index]
-                item.keywords = [v.replace(" ", "") for v in item.keywords]
-
-        tmp = []
-        for field in item.field:
-            tmp.append(field)
-            if field in ["data_nm", "data_desc"]:
-                col = field + ".korean_analyzer"
-                tmp.append(col)
-        item.field = tmp
-
-    return option_list
-
-
 def api(input: InputModel) -> Dict:
     from_ = input.from_ - 1
     els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
@@ -53,7 +32,6 @@ def api(input: InputModel) -> Dict:
 
         # ############ filter option ############
         sub_action = "filter"
-        input.filterOption = extra_filter(input.filterOption)
         item_dict = base_search_query(action, sub_action, input.filterOption)
         query_dict.update(item_dict)
         search_query = make_query(action, "bool", query_dict)
