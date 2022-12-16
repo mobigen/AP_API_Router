@@ -1,4 +1,4 @@
-from ELKSearch.Utils.elasticsearch_utils import  make_query
+from ELKSearch.Utils.elasticsearch_utils import make_query
 
 
 def search_count(es, item_dict, query_dict):
@@ -34,9 +34,16 @@ def search_count(es, item_dict, query_dict):
         if ko_nm == "전체":
             del item_dict["filter"][i]
 
+        if ko_nm == "해외데이터":
+            index = "ckan_data"
+            del item_dict["filter"][i]
+            i = None
+        else:
+            index = "biz_meta"
+
         query_dict.update(item_dict)
         cnt_query = make_query("query", "bool", query_dict)
-        cnt = es.conn.count(index=es.index, body=cnt_query)["count"]
+        cnt = es.conn.count(index=index, body=cnt_query)["count"]
         data_dict[eng_nm] = cnt
 
     return data_dict
