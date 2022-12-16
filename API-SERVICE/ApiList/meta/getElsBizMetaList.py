@@ -5,7 +5,7 @@ from ELKSearch.Utils.model import InputModel
 from ELKSearch.Utils.elasticsearch_utils import make_query, base_search_query
 from ELKSearch.Utils.database_utils import get_config
 from Utils.CommonUtil import get_exception_info
-from Utils.SearchUtils import search_count
+from Utils.SearchUtil import search_count
 from ApiService.ApiServiceConfig import config
 
 
