@@ -53,6 +53,9 @@ class ApiRoute:
         self.router.add_api_route(
             "/api/reload", self.reload_api, methods=["GET"], tags=["API Info Reload"]
         )
+        self.router.add_api_route(
+            "/route/common/me", self.get_client_ip, methods=["GET"]
+        )
 
         db = connect_db()
         config.api_info, _ = db.select("SELECT * FROM tb_api_info;")
@@ -82,6 +85,9 @@ class ApiRoute:
                 methods=[conf_api_info["method"]],
                 tags=["service"],
             )
+
+    def get_client_ip(self, request: Request):
+        return {"result": 1, "errorMessage": "", "data": request.scope["client"][0]}
 
     def reload_api(self):
         logger.info("Reload API Info")
