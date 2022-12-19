@@ -8,12 +8,12 @@ class EmailAuthFail(Exception):
     pass
 
 
-class emailAthnCnfm(BaseModel):
+class EmailAthnCnfm(BaseModel):
     email: str
     athn_no: str
 
 
-def api(email_confirm: emailAthnCnfm) -> Dict:
+def api(email_confirm: EmailAthnCnfm) -> Dict:
     try:
         db = connect_db()
         email_info, _ = db.select(
