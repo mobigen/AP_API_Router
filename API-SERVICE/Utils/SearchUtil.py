@@ -8,8 +8,8 @@ def search_count(es, item_dict, query_dict):
         "보유데이터": "hasCount",
         "연동데이터": "innerCount",
         "외부데이터": "externalCount",
-        "해외데이터": "overseaCount",
         "전체": "totalCount",
+        "해외데이터": "overseaCount"
     }
 
     # ############ data_srttn ############
@@ -22,24 +22,23 @@ def search_count(es, item_dict, query_dict):
             i = None
 
     for ko_nm, eng_nm in data_srttn.items():
-        if i is None:
-            cnt_query = make_query(
-                "match", "data_srttn", {"operator": "OR", "query": ko_nm}
-            )
-            item_dict["filter"].append(cnt_query)
-            i = -1
-        else:
-            item_dict["filter"][i]["match"]["data_srttn"]["query"] = ko_nm
-
-        if ko_nm == "전체":
-            del item_dict["filter"][i]
-
         if ko_nm == "해외데이터":
             index = "ckan_data"
-            del item_dict["filter"][i]
+            item_dict["filter"] = []
             i = None
         else:
             index = "biz_meta"
+            if i is None:
+                cnt_query = make_query(
+                    "match", "data_srttn", {"operator": "OR", "query": ko_nm}
+                )
+                item_dict["filter"].append(cnt_query)
+                i = -1
+            else:
+                item_dict["filter"][i]["match"]["data_srttn"]["query"] = ko_nm
+
+        if ko_nm == "전체":
+            del item_dict["filter"][i]
 
         query_dict.update(item_dict)
         cnt_query = make_query("query", "bool", query_dict)
