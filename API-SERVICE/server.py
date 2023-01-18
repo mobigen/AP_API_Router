@@ -1,3 +1,4 @@
+from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 import uvicorn
 from ApiService.ApiServiceConfig import config
@@ -9,6 +10,12 @@ prepare_config()
 api_router = ApiService()
 app = FastAPI()
 app.include_router(api_router.router)
+
+
+from Utils.batch_email import email_handler
+scheduler = BackgroundScheduler()
+scheduler.add_job(email_handler, "interval", seconds=10)
+scheduler.start()
 
 if __name__ == "__main__":
     log_dir = f"{config.root_path}/log/{config.category}"
