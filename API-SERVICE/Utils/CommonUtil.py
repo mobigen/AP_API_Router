@@ -1,4 +1,6 @@
 import uuid
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 from pytz import timezone
 import os
@@ -14,8 +16,6 @@ from passlib.context import CryptContext
 from pathlib import Path
 from psycopg2 import pool
 import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 from ConnectManager import PostgresManager
 from ApiService.ApiServiceConfig import config
@@ -43,11 +43,10 @@ def send_template_mail(replace_text, receiver_addr, msg_type):
 
 def send_mail(msg, **kwargs):
     try:
-        els_config = kwargs["config"] if "config" in kwargs else {}
-        host = kwargs.pop("email_server_host", "mail.w.bigdata-car.kr")
-        port = kwargs.pop("email_server_port", 587)
-        from_ = kwargs.pop("from_", )
-        password = els_config.pop("index", "")
+        host = kwargs.pop("email_server_host", config.email_auth.get("server_addr"))
+        port = kwargs.pop("email_server_port", config.email_auth.get("port"))
+        from_ = kwargs.pop("from_", config.email_auth.get("login_user"))
+        password = kwargs.pop("password", config.email_auth.get("login_pass"))
 
         message = MIMEMultipart("alternative")
         message["Subject"] = kwargs.pop("subject", "")
