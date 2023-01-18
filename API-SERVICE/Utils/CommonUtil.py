@@ -32,20 +32,37 @@ def insert_mail_history(rcv_adr: str, title: str, contents: str, tmplt_cd: str):
 
 
 def send_template_mail(replace_text, receiver_addr, msg_type):
-    message = MIMEMultipart("alternative")
-    message["Subject"] = config.email_auth[f"subject_{msg_type}"]
-    message["From"] = config.email_auth["login_user"]
-    message["To"] = receiver_addr
-
     html_part = template_html(msg_type, replace_text)
-    message.attach(html_part)
+    send_mail(
+        html_part,
+        subject=config.email_auth[f"subject_{msg_type}"],
+        from_=config.email_auth["login_user"],
+        to_=receiver_addr,
+    )
 
-    stmp = smtplib.SMTP(host=config.email_auth["server_addr"], port=int(config.email_auth["port"]))
-    stmp.ehlo()
-    stmp.starttls()
-    stmp.login(config.email_auth["login_user"], config.email_auth["login_pass"])
-    stmp.send_message(message)
-    stmp.quit()
+
+def send_mail(msg, **kwargs):
+    try:
+        els_config = kwargs["config"] if "config" in kwargs else {}
+        host = kwargs.pop("email_server_host", "mail.w.bigdata-car.kr")
+        port = kwargs.pop("email_server_port", 587)
+        from_ = kwargs.pop("from_", )
+        password = els_config.pop("index", "")
+
+        message = MIMEMultipart("alternative")
+        message["Subject"] = kwargs.pop("subject", "")
+        message["From"] = from_
+        message["To"] = kwargs.pop("to_", "")
+        message.attach(msg)
+
+        stmp = smtplib.SMTP(host=host, port=port)
+        stmp.ehlo()
+        stmp.starttls()
+        stmp.login(from_, password)
+        stmp.send_message(message)
+        stmp.quit()
+    except Exception as e:
+        raise e
 
 
 def template_html(msg_type, msg):
@@ -74,7 +91,9 @@ def convert_data(data) -> str:
 
 def set_log_path():
     parser = configparser.ConfigParser()
-    parser.read(f"{config.root_path}/conf/{config.category}/logging.conf", encoding="utf-8")
+    parser.read(
+        f"{config.root_path}/conf/{config.category}/logging.conf", encoding="utf-8"
+    )
 
     parser.set(
         "handler_rotatingFileHandler",

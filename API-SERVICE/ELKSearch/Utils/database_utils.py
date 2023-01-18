@@ -56,7 +56,8 @@ def prepare_config(root_path) -> None:
 
     config.els_type = args.category
     config.els_info = els_config[args.category]
-    config.es = ElasticSearchManager(**config.els_info)
+    if config.category != "email":
+        config.es = ElasticSearchManager(**config.els_info)
     config.check = args.check
 
     config.db_type = f"{args.db_type}_db"
