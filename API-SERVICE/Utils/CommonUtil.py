@@ -1,24 +1,24 @@
-import uuid
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-
-from pytz import timezone
-import os
-import configparser
 import argparse
-import jwt
+import configparser
+import os
+import smtplib
 import sys
 import traceback
+import uuid
 from datetime import datetime, timedelta
-from fastapi.logger import logger
-from typing import Any, Optional, Dict
-from passlib.context import CryptContext
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from pathlib import Path
-from psycopg2 import pool
-import smtplib
+from typing import Any, Optional, Dict
 
-from ConnectManager import PostgresManager
+import jwt
+from fastapi.logger import logger
+from passlib.context import CryptContext
+from psycopg2 import pool
+from pytz import timezone
+
 from ApiService.ApiServiceConfig import config
+from ConnectManager import PostgresManager
 
 
 def insert_mail_history(rcv_adr: str, title: str, contents: str, tmplt_cd: str):
