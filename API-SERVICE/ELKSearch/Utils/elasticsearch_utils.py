@@ -1,5 +1,6 @@
 import re
 from typing import Dict, Any
+from datetime import datetime
 
 
 def is_space(text: str) -> int:
@@ -56,6 +57,8 @@ def data_process(data):
     data["re_ctgry"] = re.sub("[ ]", "", str(data["ctgry"]))
     data["re_data_shap"] = re.sub("[ ]", "", str(data["data_shap"]))
     data["re_data_prv_desk"] = re.sub("[ ]", "", str(data["data_prv_desk"]))
+    if len(data["updt_dt"]) > 26:
+        data["updt_dt"] = datetime.strptime(data["updt_dt"][:-3], "%Y-%m-%d %H:%M:%S.%f")
 
     els_dict = default_process(els_dict, data)
     return els_dict
