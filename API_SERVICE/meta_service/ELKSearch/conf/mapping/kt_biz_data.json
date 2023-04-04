@@ -1,0 +1,186 @@
+{
+  "settings": {
+    "queries.cache.enabled": "true",
+    "refresh_interval":"10s",
+    "max_shingle_diff": 10,
+    "analysis": {
+      "tokenizer": {
+        "nori_user_dic": {
+          "type": "nori_tokenizer",
+          "decompound_mode": "discard",
+          "user_dictionary": "user_dic.txt"
+        }
+      },
+      "filter": {
+        "nori_pos": {
+          "type": "nori_part_of_speech",
+          "stoptags": [
+            "E", "J", "SC", "SE", "SF", "SP", "SSC", "SSO", "SY", "VCN", "VCP", "VSV", "VX", "XPN", "XSA", "XSN", "XSV"
+          ]
+        },
+        "synonym": {
+          "type": "synonym_graph",
+          "synonyms_path": "synonyms.txt"
+        },
+        "stopwords": {
+          "type": "stop",
+          "stopwords_path": "stopwords.txt"
+        },
+        "shingle_ten": {
+          "type": "shingle",
+          "token_separator": "",
+          "max_shingle_size": 10
+        }
+      },
+      "analyzer": {
+        "korean_analyzer": {
+          "tokenizer": "nori_user_dic",
+          "filter": [
+            "nori_pos", "nori_readingform", "lowercase", "synonym", "stopwords", "remove_duplicates", "shingle_ten"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "biz_dataset_id": {
+        "type": "keyword"
+      },
+      "sum_date": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        },
+        "fielddata": true
+      },
+      "unit_svc_cd": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        },
+        "fielddata": true
+      },
+      "host_nm": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        },
+        "fielddata": true
+      },
+      "schma_nm": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        },
+        "fielddata": true
+      },
+      "tbl_nm": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        },
+        "fielddata": true
+      },
+      "tbl_kor_nm": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        },
+        "fielddata": true
+      },
+      "tbl_def_sbst": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        },
+        "fielddata": true
+      },
+      "tbl_size": {
+        "type": "integer"
+      },
+      "ba_tkcgr_id": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        },
+        "fielddata": true
+      },
+      "dbms_type_nm": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        },
+        "fielddata": true
+      },
+      "tbl_first_cret_dt": {
+        "type": "date",
+        "format": "yyyy-MM-dd||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||date_hour_minute_second"
+      },
+      "tbl_last_chg_dt": {
+        "type": "date",
+        "format": "yyyy-MM-dd||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||date_hour_minute_second"
+      },
+      "send_dt": {
+        "type": "date",
+        "format": "yyyy-MM-dd||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||date_hour_minute_second"
+      },
+      "trt_sttus_cd": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "tbl_sttus_div_cd": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      }
+    }
+  }
+}

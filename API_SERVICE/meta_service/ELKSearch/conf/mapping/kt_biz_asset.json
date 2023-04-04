@@ -1,0 +1,250 @@
+{
+  "settings": {
+    "queries.cache.enabled": "true",
+    "refresh_interval":"10s",
+    "max_shingle_diff": 10,
+    "analysis": {
+      "tokenizer": {
+        "nori_user_dic": {
+          "type": "nori_tokenizer",
+          "decompound_mode": "discard",
+          "user_dictionary": "user_dic.txt"
+        }
+      },
+      "filter": {
+        "nori_pos": {
+          "type": "nori_part_of_speech",
+          "stoptags": [
+            "E", "J", "SC", "SE", "SF", "SP", "SSC", "SSO", "SY", "VCN", "VCP", "VSV", "VX", "XPN", "XSA", "XSN", "XSV"
+          ]
+        },
+        "synonym": {
+          "type": "synonym_graph",
+          "synonyms_path": "synonyms.txt"
+        },
+        "stopwords": {
+          "type": "stop",
+          "stopwords_path": "stopwords.txt"
+        },
+        "shingle_ten": {
+          "type": "shingle",
+          "token_separator": "",
+          "max_shingle_size": 10
+        }
+      },
+      "analyzer": {
+        "korean_analyzer": {
+          "tokenizer": "nori_user_dic",
+          "filter": [
+            "nori_pos", "nori_readingform", "lowercase", "synonym", "stopwords", "remove_duplicates", "shingle_ten"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "biz_dataset_id": {
+        "type": "keyword"
+      },
+      "data_nm": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        },
+        "fielddata": true
+      },
+      "data_desc": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "ctgry": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "ctgry_id": {
+        "type": "keyword"
+      },
+      "src_url": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "kywrd": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "reg_date": {
+        "type": "date"
+      },
+      "amd_date": {
+        "type": "date"
+      },
+      "lnk_date": {
+        "type": "integer"
+      },
+      "upd_pam_date": {
+        "type": "date"
+      },
+      "prv_forml": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "data_eng_nm": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "data_clas": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "ottp_scope": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "law_review_ncst_yn": {
+        "type": "keyword"
+      },
+      "qat_idex_reg_yn": {
+        "type": "keyword"
+      },
+      "conts_dataset_reg_yn": {
+        "type": "keyword"
+      },
+      "samp_file_atc_yn": {
+        "type": "keyword"
+      },
+      "data_upd_cycl": {
+        "type": "keyword"
+      },
+      "tkcgr": {
+        "type": "keyword"
+      },
+      "tkcg_dept": {
+        "type": "keyword"
+      },
+      "rqtr": {
+        "type": "keyword"
+      },
+      "rqt_dept": {
+        "type": "keyword"
+      },
+      "lnk_date_chg_yn": {
+        "type": "keyword"
+      },
+      "retv_num": {
+        "type": "integer"
+      },
+      "intrst_data_num": {
+        "type": "integer"
+      },
+      "downl_num": {
+        "type": "integer"
+      },
+      "data_clasdownl_num": {
+        "type": "integer"
+      },
+      "src_sys": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "src_data_phys_nm": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "wflow_nm": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "tbl_schma": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "file_upload_query": {
+        "type": "text",
+        "fields": {
+          "korean_analyzer": {
+            "type": "text",
+            "analyzer": "korean_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      }
+    }
+  }
+}
