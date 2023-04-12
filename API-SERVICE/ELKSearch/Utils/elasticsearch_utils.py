@@ -57,7 +57,9 @@ def data_process(data):
     data["re_ctgry"] = re.sub("[ ]", "", str(data["ctgry"]))
     data["re_data_shap"] = re.sub("[ ]", "", str(data["data_shap"]))
     data["re_data_prv_desk"] = re.sub("[ ]", "", str(data["data_prv_desk"]))
-    if len(data["updt_dt"]) > 26:
+
+    # test 환경에서 updt_dt가 None값인 경우가 있음
+    if "updt_dt" in data.keys() and data["updt_dt"] and len(data["updt_dt"]) > 26:
         data["updt_dt"] = datetime.strptime(data["updt_dt"][:-3], "%Y-%m-%d %H:%M:%S.%f")
 
     els_dict = default_process(els_dict, data)
