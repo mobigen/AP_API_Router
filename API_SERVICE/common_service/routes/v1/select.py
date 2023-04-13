@@ -157,15 +157,15 @@ def str_to_filter(key: Column, value: Union[str, int], compare: str):
     compare = compare.lower()
     if compare in ["equal", "="]:
         return key == value
-    elif compare == ["not equal", "!="]:
+    elif compare in ["not equal", "!="]:
         return key != value
-    elif compare == ["greater than", ">"]:
+    elif compare in ["greater than", ">"]:
         return key > value
-    elif compare == "greater than or equal":
+    elif compare in ["greater than or equal", ">="]:
         return key >= value
-    elif compare == "less than":
+    elif compare in ["less than", "<"]:
         return key < value
-    elif compare == "less than or equal":
+    elif compare in ["less than or equal", "<="]:
         return key <= value
     elif compare == "like":
         return key.like(value)
