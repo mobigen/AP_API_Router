@@ -1,4 +1,4 @@
-from common_service.routes.v1 import select
+from common_service.routes.v1 import select, execute
 import uvicorn
 from fastapi import FastAPI
 
@@ -12,6 +12,7 @@ def create_app():
     db.init_app(app_, **settings.dict())
 
     app_.include_router(select.router, prefix="/portal/api/common")
+    app_.include_router(execute.router, prefix="/portal/api/common")
 
     return app_
 

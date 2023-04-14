@@ -47,7 +47,7 @@ router = APIRouter()
 
 
 @router.post("/common-select", response_model=dict)
-async def read_data(common_select: CommonSelect, session: Session = Depends(db.get_db)):
+async def comon_select(params: CommonSelect, session: Session = Depends(db.get_db)):
     """
     {
         "table_nm":"banr_adm_bas",
@@ -68,23 +68,13 @@ async def read_data(common_select: CommonSelect, session: Session = Depends(db.g
         ]
     }
     {"table_nm":"vw_srhwd_find_tmscnt_sum","order_info":{"key":"find_tmscnt","value":"DESC","table_nm":"vw_srhwd_find_tmscnt_sum","order":"DESC"},"page_info":{"per_page":10,"cur_page":1}}
-    Args:
-        common_select (CommonSelect): _description_
-        session (Session, optional): _description_. Defaults to Depends(db.get_db).
-        table_dict (dict, optional): _description_. Defaults to Depends(db.get_meta_tables).
-
-    Raises:
-        e: _description_
-
-    Returns:
-        _type_: _description_
     """
     query = None
-    base_table = db.get_table(common_select.table_nm)
-    key = common_select.key
+    base_table = db.get_table(params.table_nm)
+    key = params.key
     try:
         # Join
-        if join_info := common_select.join_info:
+        if join_info := params.join_info:
             join_table = db.get_table(join_info.table_nm)
             query = session.query(base_table, join_table).join(
                 join_table,
@@ -94,7 +84,7 @@ async def read_data(common_select: CommonSelect, session: Session = Depends(db.g
             query = session.query(base_table)
 
         # Where
-        if where_info := common_select.where_info:
+        if where_info := params.where_info:
             filter_val = None
             for where_condition in where_info:
                 filter_condition = str_to_filter(
@@ -127,12 +117,12 @@ async def read_data(common_select: CommonSelect, session: Session = Depends(db.g
         count = query.count()
 
         # Order
-        if order_info := common_select.order_info:
+        if order_info := params.order_info:
             order_key = getattr(base_table.columns, order_info.key)
             query = query.order_by(getattr(sqlalchemy, order_info.order.lower())(order_key))
 
         # Paging
-        if page_info := common_select.page_info:
+        if page_info := params.page_info:
             per_page = page_info.per_page
             cur_page = page_info.cur_page
             query = query.limit(per_page).offset((cur_page - 1) * per_page)

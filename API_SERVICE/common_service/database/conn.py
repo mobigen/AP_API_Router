@@ -11,6 +11,8 @@ class SQLAlchemy:
     def __init__(self, app: FastAPI = None, **kwargs):
         self._engine = None
         self._session = None
+        self._Base = None
+        self._table_dict = None
         if app is not None:
             self.init_app(app=app, **kwargs)
 
@@ -18,8 +20,6 @@ class SQLAlchemy:
         database_url = kwargs.get("DB_URL")
         pool_recycle = kwargs.get("DB_POOL_RECYCLE", 900)
         db_echo = kwargs.get("DB_ECHO", True)
-
-        print(f"database_url :: {database_url}")
 
         self._engine = create_engine(
             database_url,
@@ -36,10 +36,12 @@ class SQLAlchemy:
         self._Base.prepare()
 
         self._table_dict = dict(metadata.tables)
-        print(self._table_dict.keys())
-        print(len(self._table_dict.keys()))
         print(dir(metadata))
+        print(dir(self._Base))
+        print(self._Base.classes)
         print(dir(self._Base.classes))
+
+        print(len(self._table_dict))
 
         self._session = sessionmaker(autocommit=False, autoflush=False, bind=self._engine)
 
