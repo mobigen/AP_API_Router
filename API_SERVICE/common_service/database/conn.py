@@ -36,6 +36,12 @@ class SQLAlchemy:
         self._Base.prepare()
 
         self._table_dict = dict(metadata.tables)
+        print(dir(metadata))
+        print(dir(self._Base))
+        print(self._Base.classes)
+        print(dir(self._Base.classes))
+
+        print(len(self._table_dict))
 
         self._session = sessionmaker(autocommit=False, autoflush=False, bind=self._engine)
 
