@@ -47,7 +47,7 @@ router = APIRouter()
 
 
 @router.post("/common-select", response_model=dict)
-async def read_data(common_select: CommonSelect, session: Session = Depends(db.get_db)):
+async def comon_select(common_select: CommonSelect, session: Session = Depends(db.get_db)):
     """
     {
         "table_nm":"banr_adm_bas",
@@ -68,16 +68,6 @@ async def read_data(common_select: CommonSelect, session: Session = Depends(db.g
         ]
     }
     {"table_nm":"vw_srhwd_find_tmscnt_sum","order_info":{"key":"find_tmscnt","value":"DESC","table_nm":"vw_srhwd_find_tmscnt_sum","order":"DESC"},"page_info":{"per_page":10,"cur_page":1}}
-    Args:
-        common_select (CommonSelect): _description_
-        session (Session, optional): _description_. Defaults to Depends(db.get_db).
-        table_dict (dict, optional): _description_. Defaults to Depends(db.get_meta_tables).
-
-    Raises:
-        e: _description_
-
-    Returns:
-        _type_: _description_
     """
     query = None
     base_table = db.get_table(common_select.table_nm)
