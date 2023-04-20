@@ -1,0 +1,9 @@
+services:
+  api_router:
+    image: api-router:1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api-router
+    ports:
+      - "9010:8000"
