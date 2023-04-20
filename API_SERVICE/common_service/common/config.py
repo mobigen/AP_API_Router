@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     PG_DBNAME: str
     PG_SCHEMA: str
 
-    DB_URL: Union[str, PostgresDsn] = None
+    DB_URL: PostgresDsn = None
 
     @validator("DB_URL", pre=True, always=True)
     def assemble_db_url(cls, v, values):
