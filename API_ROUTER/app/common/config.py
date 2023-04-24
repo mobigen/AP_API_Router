@@ -2,9 +2,9 @@ import logging.config
 import os
 from functools import lru_cache
 
-from pydantic import BaseSettings, SecretStr
+from pydantic import BaseSettings, SecretStr, PostgresDsn, validator
 
-from .logging import log_config
+from libs.logging import log_config
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -22,6 +22,25 @@ class Settings(BaseSettings):
     PG_PASS: SecretStr
     PG_BASE: str
     PG_SCHEMA: str
+
+    DB_URL: PostgresDsn = None
+
+    @validator("DB_URL", pre=True, always=True)
+    def assemble_db_url(cls, v, values):
+        print(f"v :: {v}")
+        print(f"values :: {values}")
+        if all(value is not None for value in values.values()):
+            return str(
+                PostgresDsn.build(
+                    scheme="postgresql",
+                    host=values.get("PG_HOST"),
+                    port=str(values.get("PG_PORT")),
+                    user=values.get("PG_USER"),
+                    password=values.get("PG_PASS").get_secret_value(),
+                    path=f"/{values.get('PG_BASE')}",
+                )
+            )
+        raise ValueError("Not all PostgreSQL database connection values were provided.")
 
 
 class ProdSettings(Settings):

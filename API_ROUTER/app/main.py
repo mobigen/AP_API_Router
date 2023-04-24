@@ -1,7 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
 
-from app.database.conn import db
+from libs.database.conn import db
+from app.common.config import settings
 from app.routes import index
 
 
@@ -13,7 +14,8 @@ def create_app():
 
     app_ = FastAPI()
     # db init
-    db.init_app(app_)
+    print(settings.dict())
+    db.init_app(app_, **settings.dict())
     # middleware init
     # router init
     app_.include_router(index.router, tags=["index"])

@@ -4,7 +4,7 @@ import json
 import aiohttp
 from app.common import const
 from app.common.config import logger
-from app.database.conn import db
+from libs.database.conn import db
 from app.database.models import TbApiInfo
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
