@@ -1,12 +1,49 @@
 import logging.config
 import os
 from functools import lru_cache
+from typing import Union
 
 from pydantic import BaseSettings, SecretStr, PostgresDsn, validator
 
 from libs.logging import log_config
 
+
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+class DBInfo(BaseSettings):
+    HOST: str = ""
+    PORT: str = ""
+    USER: str = ""
+    PASS: SecretStr = ""
+    BASE: str = ""
+
+    def get_dsn(self):
+        return ""
+
+
+class PGInfo(DBInfo):
+    type: str = "postgres"
+    SCHEMA: str = ""
+
+    def get_dsn(self):
+        return str(
+            PostgresDsn.build(
+                scheme="postgresql",
+                host=self.HOST,
+                port=self.PORT,
+                user=self.USER,
+                password=self.PASS.get_secret_value(),
+                path=f"/{self.BASE}",
+            )
+        )
+
+
+class TiberoInfo(DBInfo):
+    type: str = "tibero"
+
+    def get_dsn(self):
+        return f"DSN={self.BASE};UID={self.USER};PWD={self.PASS}"
 
 
 class Settings(BaseSettings):
@@ -16,30 +53,14 @@ class Settings(BaseSettings):
     RELOAD: bool
     TESTING: bool
 
-    PG_HOST: str
-    PG_PORT: int
-    PG_USER: str
-    PG_PASS: SecretStr
-    PG_BASE: str
-    PG_SCHEMA: str
+    DB_INFO: PGInfo = PGInfo()
 
-    DB_URL: PostgresDsn = None
+    DB_URL: Union[str, PostgresDsn] = None
 
     @validator("DB_URL", pre=True, always=True)
     def assemble_db_url(cls, v, values):
-        print(f"v :: {v}")
-        print(f"values :: {values}")
         if all(value is not None for value in values.values()):
-            return str(
-                PostgresDsn.build(
-                    scheme="postgresql",
-                    host=values.get("PG_HOST"),
-                    port=str(values.get("PG_PORT")),
-                    user=values.get("PG_USER"),
-                    password=values.get("PG_PASS").get_secret_value(),
-                    path=f"/{values.get('PG_BASE')}",
-                )
-            )
+            return values.get("DB_INFO").get_dsn()
         raise ValueError("Not all PostgreSQL database connection values were provided.")
 
 
@@ -60,12 +81,11 @@ class LocalSettings(Settings):
     DB_ECHO: bool = True
     RELOAD: bool = False
 
-    PG_HOST: str = "192.168.100.126"
-    PG_PORT: int = 25432
-    PG_USER: str = "dpsi"
-    PG_PASS: SecretStr = "hello.sitemng12#$"
-    PG_BASE: str = "ktportal"
-    PG_SCHEMA: str = "sitemng"
+    DB_INFO = PGInfo(
+        HOST="192.168.100.126", PORT="25432", USER="dpsi", PASS="hello.sitemng12#$", BASE="ktportal", SCHEMA="sitemng"
+    )
+
+    # DB_INFO: TiberoInfo = TiberoInfo(HOST="192.168.101.164", PORT="8629", USER="dhub", PASS="dhub1234", BASE="tibero")
 
 
 class TestSettings(LocalSettings):

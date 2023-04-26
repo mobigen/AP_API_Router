@@ -15,11 +15,7 @@ class BaseMixin:
         self.id = 0
 
     def all_columns(self):
-        return [
-            c
-            for c in self.__table__.columns
-            if c.primary_key is False and c.name != "created_at"
-        ]
+        return [c for c in self.__table__.columns if c.primary_key is False and c.name != "created_at"]
 
     def __hash__(self):
         return hash(self.id)
@@ -59,9 +55,7 @@ class BaseMixin:
             query = query.filter(col == val)
 
         if query.count() > 1:
-            raise Exception(
-                "Only one row is supposed to be returned, but got more than one."
-            )
+            raise Exception("Only one row is supposed to be returned, but got more than one.")
         result = query.first()
         if not session:
             sess.close()
@@ -122,9 +116,7 @@ class BaseMixin:
                 col_name = a
                 is_asc = True
             col = self.cls_attr(col_name)
-            self._q = (
-                self._q.order_by(col.asc()) if is_asc else self._q.order_by(col.desc())
-            )
+            self._q = self._q.order_by(col.asc()) if is_asc else self._q.order_by(col.desc())
         return self
 
     def update(self, auto_commit: bool = False, **kwargs):
