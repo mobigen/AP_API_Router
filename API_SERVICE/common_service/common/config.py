@@ -57,7 +57,6 @@ class LocalSettings(Settings):
     PG_USER = "dpmanager"
     PG_PASSWORD = "hello.dp12#$"
     PG_DBNAME = "ktportal"
-    # PG_SCHEMA = "sitemng"
     PG_SCHEMA = "users,meta,sitemng,board,analysis,sysconfig"
 
 
@@ -73,3 +72,4 @@ def get_settings():
 
 
 settings = get_settings()
+print(settings)

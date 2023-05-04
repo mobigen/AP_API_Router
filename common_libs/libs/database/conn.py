@@ -1,12 +1,14 @@
 import abc
+import sys
+from typing import Dict, List, Union
 
-from fastapi import FastAPI
-from sqlalchemy import MetaData, create_engine, inspect
-from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-
+import pyodbc
 from app.common.config import settings
+from fastapi import FastAPI
+from sqlalchemy import Column, MetaData, and_, create_engine, not_, or_
+import sqlalchemy
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session, sessionmaker
 
 
 class Connector(metaclass=abc.ABCMeta):
@@ -67,7 +69,7 @@ class SQLAlchemy(Connector):
             self._session.close_all()
             self._engine.dispose()
 
-    def get_db(self):
+    def get_db(self) -> Session:
         if self.session is None:
             raise Exception("must be called 'init_db'")
         try:
@@ -76,31 +78,66 @@ class SQLAlchemy(Connector):
         finally:
             self._session_instance.close()
 
-    def select(self, **kwargs):
-        cond = []
-        table_ = None
-        for key, val in kwargs.items():
-            key = key.split("__")
-            print(f"key :: {key}, v :: {val}")
-            if len(key) > 2:
-                raise Exception("No 2 more dunders")
-            col = getattr(table_.columns, key[0])
-            if len(key) == 1:
-                cond.append((col == val))
-            elif len(key) == 2 and key[1] == "gt":
-                cond.append((col > val))
-            elif len(key) == 2 and key[1] == "gte":
-                cond.append((col >= val))
-            elif len(key) == 2 and key[1] == "lt":
-                cond.append((col < val))
-            elif len(key) == 2 and key[1] == "lte":
-                cond.append((col <= val))
-            elif len(key) == 2 and key[1] == "in":
-                cond.append((col.in_(val)))
+    def select(self, **kwargs) -> List[dict]:
+        base_table = self.get_table(kwargs["table_nm"])
+        key = kwargs["key"]
+        # Join
+        if join_info := kwargs["join_info"]:
+            join_table = db.get_table(join_info.table_nm)
+            query = self._session_instance.query(base_table, join_table).join(
+                join_table,
+                getattr(base_table.columns, key) == getattr(join_table.columns, join_info.key),
+            )
+        else:
+            query = self._session_instance.query(base_table)
 
-        self._q = self._session_instance.query(table_).filter(*cond)
+        # Where
+        if where_info := kwargs["where_info"]:
+            filter_val = None
+            for where_condition in where_info:
+                filter_condition = self._parse_operand(
+                    getattr(base_table.columns, where_condition.key),
+                    where_condition.value,
+                    where_condition.compare_op,
+                )
+                if sub_conditions := where_condition.sub_conditions:
+                    for sub_condition in sub_conditions:
+                        sub_filter_condition = self._parse_operand(
+                            getattr(base_table.columns, sub_condition.key),
+                            sub_condition.value,
+                            sub_condition.compare_op,
+                        )
+                        # or_ , | 사용무관
+                        if sub_condition.op.lower() == "or":
+                            filter_condition = or_(filter_condition, sub_filter_condition)
+                        elif sub_condition.op.lower() == "and":
+                            filter_condition = and_(filter_condition, sub_filter_condition)
 
-        return self
+                if filter_val is not None:
+                    if where_condition.op.lower() == "or":
+                        filter_val = filter_val | filter_condition
+                    elif where_condition.op.lower() == "and":
+                        filter_val = filter_val & filter_condition
+                else:
+                    filter_val = filter_condition
+            query = query.filter(filter_val)
+
+        count = query.count()
+
+        # Order
+        if order_info := kwargs["order_info"]:
+            order_key = getattr(base_table.columns, order_info.key)
+            query = query.order_by(getattr(sqlalchemy, order_info.order.lower())(order_key))
+
+        # Paging
+        if page_info := kwargs["page_info"]:
+            per_page = page_info.per_page
+            cur_page = page_info.cur_page
+            query = query.limit(per_page).offset((cur_page - 1) * per_page)
+
+        data = [dict(zip([column.name for column in base_table.columns], data)) for data in query.all()]
+
+        return data, count
 
     def first(self):
         data = self._q.first()
@@ -109,9 +146,42 @@ class SQLAlchemy(Connector):
     def execute(self, **kwargs):
         ...
 
+    def get_table(self, table_nm):
+        for nm, t in self._table_dict.items():
+            if table_nm in nm:
+                return t
+
+    def _parse_operand(key: Column, value: Union[str, int], compare: str):
+        compare = compare.lower()
+        if compare in ["equal", "="]:
+            return key == value
+        elif compare in ["not equal", "!="]:
+            return key != value
+        elif compare in ["greater than", ">"]:
+            return key > value
+        elif compare in ["greater than or equal", ">="]:
+            return key >= value
+        elif compare in ["less than", "<"]:
+            return key < value
+        elif compare in ["less than or equal", "<="]:
+            return key <= value
+        elif compare == "like":
+            return key.like(value)
+        elif compare == "not like":
+            return not_(key.like(value))
+        elif compare == "in":
+            return key.in_(value.split(","))
+        elif compare == "not in":
+            return not_(key.in_(value.split(",")))
+        elif compare == "ilike":
+            return key.ilike(value)
+        else:
+            return
+
     @property
     def session(self):
-        return self.get_db
+        if self._session_instance:
+            return self._session_instance
 
     @property
     def engine(self):
@@ -130,15 +200,13 @@ class TiberoConnector(Connector):
             self.init_app(app, kwargs)
 
     def init_app(self, app: FastAPI, **kwargs):
-        import pyodbc
-
         self.conn = pyodbc.connect(kwargs.get("DB_URL"))
         self.conn.setdecoding(pyodbc.SQL_CHAR, encoding="utf-8")
         self.conn.setdecoding(pyodbc.SQL_WCHAR, encoding="utf-32le")
         self.conn.setdecoding(pyodbc.SQL_WMETADATA, encoding="utf-32le")
         self.conn.setencoding(encoding="utf-8")
 
-    def select(self, **kwargs):
+    def select(self, **kwargs) -> List[dict]:
         table_nm = kwargs.get("table_nm")
         join_key = kwargs.get("key")
 
@@ -170,20 +238,21 @@ class TiberoConnector(Connector):
             query += f"limit {p} offset {c}"
 
         try:
-            print(query)
             self.cur.execute(query)
-            headers = [desc[0] for desc in self.cur.description]
-            return [dict(zip(headers, row)) for row in self.cur.fetchall()]
+            rows = [dict(zip([desc[0] for desc in self.cur.description], row)) for row in self.cur.fetchall()]
+            query.replace("*", "count(*)")
+            count = self.cur.execute(query).fetchone()[0]
+            return rows, count
         except Exception as e:
             raise e
 
-    def first(self, **kwargs):
-        return self.select(**kwargs)[0]
+    def first(self, **kwargs) -> Dict:
+        return self.select(**kwargs)[0][0]
 
     def execute(self, **kwargs):
         ...
 
-    def get_db(self):
+    def get_db(self) -> pyodbc.Cursor:
         self.cur = self.conn.cursor()
         try:
             yield self

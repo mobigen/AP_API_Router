@@ -1,4 +1,4 @@
-from typing import Optional, List, Union
+from typing import Any, Optional, List, Union
 
 import sqlalchemy
 from fastapi import Depends, APIRouter
@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy import Column, or_, and_, not_
 from sqlalchemy.orm import Session
 
-from common_service.database.conn import db
+from libs.database.conn import db
 
 
 class JoinInfo(BaseModel):
@@ -47,7 +47,7 @@ router = APIRouter()
 
 
 @router.post("/common-select", response_model=dict)
-async def comon_select(params: CommonSelect, session: Session = Depends(db.get_db)):
+async def comon_select(params: CommonSelect, session: Union[Any, Session] = Depends(db.get_db)):
     """
     {
         "table_nm":"banr_adm_bas",
@@ -69,70 +69,13 @@ async def comon_select(params: CommonSelect, session: Session = Depends(db.get_d
     }
     {"table_nm":"vw_srhwd_find_tmscnt_sum","order_info":{"key":"find_tmscnt","value":"DESC","table_nm":"vw_srhwd_find_tmscnt_sum","order":"DESC"},"page_info":{"per_page":10,"cur_page":1}}
     """
-    query = None
-    base_table = db.get_table(params.table_nm)
-    key = params.key
     try:
-        # Join
-        if join_info := params.join_info:
-            join_table = db.get_table(join_info.table_nm)
-            query = session.query(base_table, join_table).join(
-                join_table,
-                getattr(base_table.columns, key) == getattr(join_table.columns, join_info.key),
-            )
-        else:
-            query = session.query(base_table)
-
-        # Where
-        if where_info := params.where_info:
-            filter_val = None
-            for where_condition in where_info:
-                filter_condition = str_to_filter(
-                    getattr(base_table.columns, where_condition.key),
-                    where_condition.value,
-                    where_condition.compare_op,
-                )
-                if sub_conditions := where_condition.sub_conditions:
-                    for sub_condition in sub_conditions:
-                        sub_filter_condition = str_to_filter(
-                            getattr(base_table.columns, sub_condition.key),
-                            sub_condition.value,
-                            sub_condition.compare_op,
-                        )
-                        # or_ , | 사용무관
-                        if sub_condition.op.lower() == "or":
-                            filter_condition = or_(filter_condition, sub_filter_condition)
-                        elif sub_condition.op.lower() == "and":
-                            filter_condition = and_(filter_condition, sub_filter_condition)
-
-                if filter_val is not None:
-                    if where_condition.op.lower() == "or":
-                        filter_val = filter_val | filter_condition
-                    elif where_condition.op.lower() == "and":
-                        filter_val = filter_val & filter_condition
-                else:
-                    filter_val = filter_condition
-            query = query.filter(filter_val)
-
-        count = query.count()
-
-        # Order
-        if order_info := params.order_info:
-            order_key = getattr(base_table.columns, order_info.key)
-            query = query.order_by(getattr(sqlalchemy, order_info.order.lower())(order_key))
-
-        # Paging
-        if page_info := params.page_info:
-            per_page = page_info.per_page
-            cur_page = page_info.cur_page
-            query = query.limit(per_page).offset((cur_page - 1) * per_page)
-
-        data = [dict(zip([column.name for column in base_table.columns], data)) for data in query.all()]
+        rows, count = session.select(**params.dict())
         result = {
             "result": 1,
             "errorMessage": "",
-            "data": data if data else [],
-            "header": get_column_info(session, base_table.name),
+            "data": rows if rows else [],
+            "header": get_column_info(session, params.table_nm),
             "count": count if count else 0,
         }
 
@@ -141,34 +84,6 @@ async def comon_select(params: CommonSelect, session: Session = Depends(db.get_d
         raise e
 
     return result
-
-
-def str_to_filter(key: Column, value: Union[str, int], compare: str):
-    compare = compare.lower()
-    if compare in ["equal", "="]:
-        return key == value
-    elif compare in ["not equal", "!="]:
-        return key != value
-    elif compare in ["greater than", ">"]:
-        return key > value
-    elif compare in ["greater than or equal", ">="]:
-        return key >= value
-    elif compare in ["less than", "<"]:
-        return key < value
-    elif compare in ["less than or equal", "<="]:
-        return key <= value
-    elif compare == "like":
-        return key.like(value)
-    elif compare == "not like":
-        return not_(key.like(value))
-    elif compare == "in":
-        return key.in_(value.split(","))
-    elif compare == "not in":
-        return not_(key.in_(value.split(",")))
-    elif compare == "ilike":
-        return key.ilike(value)
-    else:
-        return
 
 
 def get_column_info(session, table_nm):
