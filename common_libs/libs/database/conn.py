@@ -123,26 +123,52 @@ class SQLAlchemy(Connector):
 
 
 class TiberoConnector(Connector):
-    def __init__(self, **kwargs):
+    def __init__(self, app: FastAPI = None, **kwargs):
         self.conn = None
         self.cur = None
-        self.init_app(kwargs)
+        if app is not None:
+            self.init_app(app, kwargs)
 
     def init_app(self, app: FastAPI, **kwargs):
         import pyodbc
 
-        self.conn = pyodbc.connect(f"DSN={kwargs.get('BASE')};UID={kwargs.get('USER')};PWD={kwargs.get('PASS')}")
+        self.conn = pyodbc.connect(kwargs.get("DB_URL"))
         self.conn.setdecoding(pyodbc.SQL_CHAR, encoding="utf-8")
         self.conn.setdecoding(pyodbc.SQL_WCHAR, encoding="utf-8")
         self.conn.setencoding(encoding="utf-8")
 
-    def select(self, **kwargs):
-        tablename = kwargs.get("tablename")
-        route_url = kwargs.get("route_url")
-        method = kwargs.get("method")
-        query = f"select * from {tablename} where route_url = '{route_url}' and method = '{method}'"
+    def select(self, tablename, **kwargs):
+        table_nm = kwargs.get("table_nm")
+        join_key = kwargs.get("key")
+
+        query = f"select * from {table_nm} "
+        if join_info := kwargs.get("join_info"):
+            t = join_info["table_nm"]
+            k = join_info["key"]
+            query += f"join {t} on {join_key} = {k} "
+
+        if where_info := kwargs.get("where_info"):
+            query += f"where "
+            for info in where_info:
+                t = where_info["table_nm"]
+                k = where_info["key"]
+                val = where_info["value"]
+                compare_op = self._parse_operand(where_info["compare_op"])
+                query += f"{t}.{k} {compare_op} {val} "
+
+        if order_info := kwargs.get("order_info"):
+            t = order_info["table_nm"]
+            k = order_info["key"]
+            o = order_info["order"]
+            query += f"order by {t}.{k} {str(o).upper()} "
+
+        if page_info := kwargs.get("page_info"):
+            p = page_info["per_page"]
+            c = page_info["cur_page"]
+            query += f"limit {p} offset {c}"
 
         try:
+            print(query)
             self.cur.execute(query)
             return ([desc[0] for desc in self.cur.description], self.cur.fetchall())
         except Exception as e:
@@ -158,6 +184,9 @@ class TiberoConnector(Connector):
         finally:
             if self.cur:
                 self.cur.close()
+
+    def _parse_operand(self, operand):
+        ...
 
 
 Base = declarative_base()

@@ -43,7 +43,7 @@ class TiberoInfo(DBInfo):
     type: str = "tibero"
 
     def get_dsn(self):
-        return f"DSN={self.BASE};UID={self.USER};PWD={self.PASS}"
+        return f"DSN={self.BASE};UID={self.USER};PWD={self.PASS.get_secret_value()}"
 
 
 class Settings(BaseSettings):
