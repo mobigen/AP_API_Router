@@ -1,13 +1,10 @@
 import abc
-import sys
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Tuple
 
 import pyodbc
-from app.common.config import settings
+import sqlalchemy
 from fastapi import FastAPI
 from sqlalchemy import Column, MetaData, and_, create_engine, not_, or_
-import sqlalchemy
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
 
 
@@ -78,12 +75,12 @@ class SQLAlchemy(Connector):
         finally:
             self._session_instance.close()
 
-    def select(self, **kwargs) -> List[dict]:
+    def select(self, **kwargs) -> Tuple[List[dict], int]:
         base_table = self.get_table(kwargs["table_nm"])
         key = kwargs["key"]
         # Join
         if join_info := kwargs["join_info"]:
-            join_table = db.get_table(join_info.table_nm)
+            join_table = self.get_table(join_info.table_nm)
             query = self._session_instance.query(base_table, join_table).join(
                 join_table,
                 getattr(base_table.columns, key) == getattr(join_table.columns, join_info.key),
@@ -147,7 +144,7 @@ class SQLAlchemy(Connector):
         ...
 
     def get_table(self, table_nm):
-        for nm, t in self._table_dict.items():
+        for nm, t in self._metadata.tables.items():
             if table_nm in nm:
                 return t
 
@@ -206,7 +203,7 @@ class TiberoConnector(Connector):
         self.conn.setdecoding(pyodbc.SQL_WMETADATA, encoding="utf-32le")
         self.conn.setencoding(encoding="utf-8")
 
-    def select(self, **kwargs) -> List[dict]:
+    def select(self, **kwargs) -> Tuple[List[dict], int]:
         table_nm = kwargs.get("table_nm")
         join_key = kwargs.get("key")
 
@@ -276,6 +273,3 @@ class TiberoConnector(Connector):
         else:
             return operand
 
-
-Base = declarative_base()
-db = SQLAlchemy(Base) if settings.DB_INFO.type != "tibero" else TiberoConnector()

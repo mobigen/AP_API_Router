@@ -3,14 +3,14 @@ import json
 from typing import Any, Union
 
 import aiohttp
-from app.common import const
-from app.common.config import logger
-from app.database.models import TbApiInfo
-from libs.database.conn import db
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+
+from app.common import const
+from app.common.config import logger
+from app.database.conn import db
 
 router = APIRouter()
 
@@ -26,6 +26,7 @@ async def index(request: Request, route_path: str, session: Union[Any, Session] 
     headers = get_headers(request.headers)
     query_params = request.query_params
     data = None
+    status = 200
     if method == "POST":
         try:
             data = await request.json()

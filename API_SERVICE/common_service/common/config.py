@@ -1,6 +1,5 @@
 import os
 from functools import lru_cache
-from typing import Union
 
 from pydantic import BaseSettings, PostgresDsn, validator
 

@@ -1,10 +1,11 @@
-from libs import logging
-from libs.database.conn import SQLAlchemy
-
 from fastapi import FastAPI
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import MetaData
 from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base
+
+from common_service.common.config import settings
+from libs.database.conn import TiberoConnector
+from libs.database.conn import SQLAlchemy
 
 
 class SQLAlchemyForCommon(SQLAlchemy):
@@ -23,4 +24,5 @@ class SQLAlchemyForCommon(SQLAlchemy):
         self._table_dict = dict(metadata.tables)
 
 
-db = SQLAlchemyForCommon()
+Base = declarative_base()
+db = SQLAlchemy(Base) if settings.DB_INFO.type != "tibero" else TiberoConnector()

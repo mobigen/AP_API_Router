@@ -1,12 +1,10 @@
 from typing import Any, Optional, List, Union
 
-import sqlalchemy
 from fastapi import Depends, APIRouter
 from pydantic import BaseModel
-from sqlalchemy import Column, or_, and_, not_
 from sqlalchemy.orm import Session
 
-from libs.database.conn import db
+from app.database.conn import db
 
 
 class JoinInfo(BaseModel):
