@@ -6,7 +6,7 @@ import aiohttp
 from app.common import const
 from app.common.config import logger
 from app.database.models import TbApiInfo
-from app.database.conn import db
+from libs.database.conn import db
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from starlette.requests import Request
@@ -32,15 +32,25 @@ async def index(request: Request, route_path: str, session: Union[Any, Session] 
         except json.JSONDecodeError:
             data = (await request.body()).decode()
 
-    # select * from api_item_bas join api_item_server_dtl on api_item_server_dtl.srvr_nm = api_item_bas.srvr_nm where api_item_bas.route_url = '/route/common/portal/api/login' and api_item_bas.mthd = 'POST';
-    _, rows = session.select(
-        {
+    """
+    select * from api_item_bas
+    join api_item_server_dtl on api_item_server_dtl.srvr_nm = api_item_bas.srvr_nm
+    where api_item_bas.route_url = '/route/common/portal/api/login' and api_item_bas.mthd = 'POST';
+    """
+    rows = session.first(
+        **{
             "table_nm": "api_item_bas",
             "key": "srvr_nm",
             "join_info": {"table_nm": "api_item_server_dtl", "key": "srvr_nm"},
             "where_info": [
-                {"table_nm": "api_item_bas", "key": "route_url", "value": f"/{route_path}", "op": ""},
-                {"table_nm": "api_item_bas", "key": "mthd", "value": f"{method}"},
+                {
+                    "table_nm": "api_item_bas",
+                    "key": "route_url",
+                    "value": f"/{route_path}",
+                    "compare_op": "=",
+                    "op": "",
+                },
+                {"table_nm": "api_item_bas", "key": "mthd", "value": f"{method}", "compare_op": "=", "op": "and"},
             ],
         }
     )
@@ -49,16 +59,16 @@ async def index(request: Request, route_path: str, session: Union[Any, Session] 
         logger.error(f"API INFO NOT FOUND, url :: {route_path}, method :: {method}")
         return JSONResponse(content={"result": 0, "errorMessage": "API INFO NOT FOUND."}, status_code=404)
 
-    remote_url = "http://" + rows[1] + rows[0]
+    remote_url = "http://" + rows["IP_ADR"] + rows["URL"]
 
     cookies = {}
     try:
-        cookies, result = await request_to_service(remote_url, method, query_params, data, headers)
+        cookies, result, status = await request_to_service(remote_url, method, query_params, data, headers)
     except Exception as e:
         logger.error(e, exc_info=True)
         result = {"result": 0, "errorMessage": type(e).__name__}
 
-    response = JSONResponse(content=result)
+    response = JSONResponse(content=result, status_code=status)
     for k, v in cookies.items():
         response.set_cookie(key=k, value=v, max_age=3600, secure=False, httponly=True)
 
@@ -80,4 +90,4 @@ def get_headers(h) -> dict:
 async def request_to_service(url, method, params, data, headers):
     async with aiohttp.ClientSession() as session:
         async with session.request(url=url, method=method, params=params, json=data, headers=headers) as response:
-            return dict(response.cookies), await response.json()
+            return dict(response.cookies), await response.json(), response.status

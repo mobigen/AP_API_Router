@@ -76,7 +76,7 @@ class SQLAlchemy(Connector):
         finally:
             self._session_instance.close()
 
-    def select(self, tablename, **kwargs):
+    def select(self, **kwargs):
         cond = []
         table_ = None
         for key, val in kwargs.items():
@@ -134,10 +134,11 @@ class TiberoConnector(Connector):
 
         self.conn = pyodbc.connect(kwargs.get("DB_URL"))
         self.conn.setdecoding(pyodbc.SQL_CHAR, encoding="utf-8")
-        self.conn.setdecoding(pyodbc.SQL_WCHAR, encoding="utf-8")
+        self.conn.setdecoding(pyodbc.SQL_WCHAR, encoding="utf-32le")
+        self.conn.setdecoding(pyodbc.SQL_WMETADATA, encoding="utf-32le")
         self.conn.setencoding(encoding="utf-8")
 
-    def select(self, tablename, **kwargs):
+    def select(self, **kwargs):
         table_nm = kwargs.get("table_nm")
         join_key = kwargs.get("key")
 
@@ -145,16 +146,17 @@ class TiberoConnector(Connector):
         if join_info := kwargs.get("join_info"):
             t = join_info["table_nm"]
             k = join_info["key"]
-            query += f"join {t} on {join_key} = {k} "
+            query += f"join {t} on {table_nm}.{join_key} = {t}.{k} "
 
         if where_info := kwargs.get("where_info"):
             query += f"where "
             for info in where_info:
-                t = where_info["table_nm"]
-                k = where_info["key"]
-                val = where_info["value"]
-                compare_op = self._parse_operand(where_info["compare_op"])
-                query += f"{t}.{k} {compare_op} {val} "
+                t = info["table_nm"]
+                k = info["key"]
+                val = info["value"]
+                compare_op = self._parse_operand(info["compare_op"])
+                op = info["op"]
+                query += f"{op} {t}.{k} {compare_op} '{val}' "
 
         if order_info := kwargs.get("order_info"):
             t = order_info["table_nm"]
@@ -170,9 +172,13 @@ class TiberoConnector(Connector):
         try:
             print(query)
             self.cur.execute(query)
-            return ([desc[0] for desc in self.cur.description], self.cur.fetchall())
+            headers = [desc[0] for desc in self.cur.description]
+            return [dict(zip(headers, row)) for row in self.cur.fetchall()]
         except Exception as e:
             raise e
+
+    def first(self, **kwargs):
+        return self.select(**kwargs)[0]
 
     def execute(self, **kwargs):
         ...
@@ -186,7 +192,20 @@ class TiberoConnector(Connector):
                 self.cur.close()
 
     def _parse_operand(self, operand):
-        ...
+        if operand == "Equal":
+            return "="
+        elif operand == "Not Equal":
+            return "!="
+        elif operand == "Greater Than":
+            return ">"
+        elif operand == "Greater Than or Equal":
+            return ">="
+        elif operand == "Less Than":
+            return "<"
+        elif operand == "Less Than or Equal":
+            return "<="
+        else:
+            return operand
 
 
 Base = declarative_base()
