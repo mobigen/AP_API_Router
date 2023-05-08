@@ -273,3 +273,8 @@ class TiberoConnector(Connector):
         else:
             return operand
 
+    def get_column_info(self, table_nm):
+        # OWNER, TABLE_NAME, COLUMN_NAME, COMMENT
+        self.cur.execute(f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm}';")
+        return [{"column_name": row[2], "kor_column_name": row[3]} for row in self.cur.fetchall()]
+
