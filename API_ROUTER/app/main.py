@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 
-from libs.database.conn import db
+from app.database.conn import db
 from app.common.config import settings
 from app.routes import index
 

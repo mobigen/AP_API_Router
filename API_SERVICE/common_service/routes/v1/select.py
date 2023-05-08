@@ -4,7 +4,7 @@ from fastapi import Depends, APIRouter
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.database.conn import db
+from common_service.database.conn import db
 
 
 class JoinInfo(BaseModel):

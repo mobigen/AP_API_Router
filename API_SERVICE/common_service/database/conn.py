@@ -21,8 +21,8 @@ class SQLAlchemyForCommon(SQLAlchemy):
         self._Base = automap_base(metadata=metadata)
         self._Base.prepare()
 
-        self._table_dict = dict(metadata.tables)
+        # self._table_dict = dict(metadata.tables)
 
 
 Base = declarative_base()
-db = SQLAlchemy(Base) if settings.DB_INFO.type != "tibero" else TiberoConnector()
+db = SQLAlchemyForCommon(Base) if settings.DB_INFO.type != "tibero" else TiberoConnector()
