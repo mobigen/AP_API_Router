@@ -73,7 +73,7 @@ async def comon_select(params: CommonSelect, session: Union[Any, Session] = Depe
             "result": 1,
             "errorMessage": "",
             "data": rows if rows else [],
-            "header": get_column_info(session, params.table_nm),
+            "header": session.get_column_info(params.table_nm),
             "count": count if count else 0,
         }
 
@@ -82,15 +82,3 @@ async def comon_select(params: CommonSelect, session: Union[Any, Session] = Depe
         raise e
 
     return result
-
-
-def get_column_info(session, table_nm):
-    tbl_item_coln_dtl = db.get_table("tbl_item_coln_dtl")
-    tbl_item_bas = db.get_table("tbl_item_bas")
-    data = (
-        session.query(getattr(tbl_item_coln_dtl.columns, "eng_nm"), getattr(tbl_item_coln_dtl.columns, "kor_nm"))
-        .join(tbl_item_bas, getattr(tbl_item_bas.columns, "tbl_id") == getattr(tbl_item_coln_dtl.columns, "tbl_id"))
-        .filter(getattr(tbl_item_bas.columns, "tbl_nm") == table_nm)
-        .all()
-    )
-    return [dict(zip(["column_name", "kor_column_name"], row)) for row in data]
