@@ -27,7 +27,9 @@ router_stop() {
 }
 
 router_start() {
+    echo "APP_ENV :: $APP_ENV"
     source_path="$( cd "$( dirname "$0" )" && pwd -P )"
+    export PYTHONPATH=$PYTHONPATH:$source_path
     router_exec="nohup uvicorn app.main:app --host ${router_host} --port ${router_port} --log-config app/logging.json &>/dev/null &"
     echo "Start Command : ${router_exec}"
     eval ${router_exec}
