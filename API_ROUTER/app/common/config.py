@@ -1,3 +1,5 @@
+import json
+
 import logging.config
 import os
 from functools import lru_cache
@@ -5,10 +7,9 @@ from typing import Union
 
 from pydantic import BaseSettings, SecretStr, PostgresDsn, validator
 
-from libs.logging import log_config
-
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+print(f"base_dir :: {base_dir}")
 
 
 class DBInfo(BaseSettings):
@@ -81,11 +82,11 @@ class LocalSettings(Settings):
     DB_ECHO: bool = True
     RELOAD: bool = False
 
-    DB_INFO = PGInfo(
-        HOST="192.168.100.126", PORT="25432", USER="dpsi", PASS="hello.sitemng12#$", BASE="ktportal", SCHEMA="sitemng"
-    )
+    # DB_INFO = PGInfo(
+    #     HOST="192.168.100.126", PORT="25432", USER="dpsi", PASS="hello.sitemng12#$", BASE="ktportal", SCHEMA="sitemng"
+    # )
 
-    # DB_INFO: TiberoInfo = TiberoInfo(HOST="192.168.101.164", PORT="8629", USER="dhub", PASS="dhub1234", BASE="tibero")
+    DB_INFO: TiberoInfo = TiberoInfo(HOST="192.168.101.164", PORT="8629", USER="dhub", PASS="dhub1234", BASE="tibero")
 
 
 class TestSettings(LocalSettings):
@@ -101,5 +102,8 @@ def get_settings():
 
 settings = get_settings()
 
-logging.config.dictConfig(log_config)
-logger = logging.getLogger(os.getenv("APP_ENV", "prod"))
+
+with open(os.path.join(base_dir, "logging.json")) as f:
+    log_config = json.load(f)
+    logging.config.dictConfig(log_config)
+logger = logging.getLogger()

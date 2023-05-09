@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from app.database.conn import db
 from app.common.config import settings
 from app.routes import index
+from app.common.config import logger
 
 
 def create_app():
@@ -14,7 +15,7 @@ def create_app():
 
     app_ = FastAPI()
     # db init
-    print(settings.dict())
+    logger.info(settings.dict())
     db.init_app(app_, **settings.dict())
     # middleware init
     # router init

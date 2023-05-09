@@ -1,4 +1,5 @@
 import abc
+import logging
 from typing import Dict, List, Union, Tuple
 
 import pyodbc
@@ -6,6 +7,8 @@ import sqlalchemy
 from fastapi import FastAPI
 from sqlalchemy import Column, MetaData, and_, create_engine, not_, or_
 from sqlalchemy.orm import Session, sessionmaker
+
+logger = logging.getLogger()
 
 
 class Connector(metaclass=abc.ABCMeta):
@@ -27,7 +30,7 @@ class Connector(metaclass=abc.ABCMeta):
 
 
 class SQLAlchemy(Connector):
-    def __init__(self, base, app: FastAPI = None, **kwargs):
+    def __init__(self, base=None, app: FastAPI = None, **kwargs):
         self._engine = None
         self._Base = base
         self._session = None
@@ -235,6 +238,7 @@ class TiberoConnector(Connector):
             query += f"limit {p} offset {c}"
 
         try:
+            logger.info(query)
             self.cur.execute(query)
             rows = [dict(zip([desc[0] for desc in self.cur.description], row)) for row in self.cur.fetchall()]
             query = query.replace("*", "count(*)")
@@ -275,6 +279,8 @@ class TiberoConnector(Connector):
 
     def get_column_info(self, table_nm):
         # OWNER, TABLE_NAME, COLUMN_NAME, COMMENT
-        self.cur.execute(f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm}';")
+        query = f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm}';"
+        logger.info(query)
+        self.cur.execute(query)
         return [{"column_name": row[2], "kor_column_name": row[3]} for row in self.cur.fetchall()]
 
