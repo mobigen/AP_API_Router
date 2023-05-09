@@ -237,9 +237,9 @@ class TiberoConnector(Connector):
         try:
             self.cur.execute(query)
             rows = [dict(zip([desc[0] for desc in self.cur.description], row)) for row in self.cur.fetchall()]
-            query.replace("*", "count(*)")
+            query = query.replace("*", "count(*)")
             count = self.cur.execute(query).fetchone()[0]
-            return rows, count
+            return rows, int(count)
         except Exception as e:
             raise e
 
