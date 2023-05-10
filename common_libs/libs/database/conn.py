@@ -252,23 +252,20 @@ class TiberoConnector(Connector):
 
     def all(self) -> Tuple[List[dict], int]:
         try:
-            if self._q:
-                self.cur.execute(self._q)
-                rows = [dict(zip([desc[0] for desc in self.cur.description], row)) for row in self.cur.fetchall()]
-                return (
-                    (rows, int(self.cur.execute(self._q.replace("*", "count(*)")).fetchone()[0])) if rows else ([], 0)
-                )
+            data = self.cur.execute(self._q).fetchall()
+            if data:
+                rows = [dict(zip([desc[0] for desc in self.cur.description], row)) for row in data]
+                return (rows, int(self.cur.execute(self._q.replace("*", "count(*)")).fetchone()[0]))
         except Exception as e:
             raise e
 
     def first(self) -> Dict:
         try:
-            self.cur.execute(self._q)
-            return dict(zip([d[0] for d in self.cur.description], self.cur.fetchone()))
+            data = self.cur.execute(self._q).fetchone()
+            if data:
+                return dict(zip([d[0] for d in self.cur.description], data))
         except Exception as e:
             raise e
-
-        # return dict(zip([desc[0] for desc in self.cur.description], self.cur.execute(self._q).fetchone()))
 
     def execute(self, **kwargs):
         ...
