@@ -45,7 +45,7 @@ router = APIRouter()
 
 
 @router.post("/common-select", response_model=dict)
-async def comon_select(params: CommonSelect, session: Union[Any, Session] = Depends(db.get_db)):
+async def common_select(params: CommonSelect, session: Union[Any, Session] = Depends(db.get_db)):
     """
     {
         "table_nm":"banr_adm_bas",

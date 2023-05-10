@@ -8,6 +8,7 @@ from libs.database.conn import TiberoConnector
 from libs.database.conn import SQLAlchemy
 
 
+# TODO: SQLAlchemy version 수정필요
 class SQLAlchemyForCommon(SQLAlchemy):
     def __init__(self, app: FastAPI = None, **kwargs):
         self._table_dict = None
