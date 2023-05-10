@@ -21,7 +21,15 @@ class Connector(metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def select(self, tablename, **kwargs):
+    def query(self, **kwargs):
+        ...
+
+    @abc.abstractmethod
+    def all(self):
+        ...
+
+    @abc.abstractmethod
+    def first(self):
         ...
 
     @abc.abstractmethod
@@ -196,6 +204,7 @@ class TiberoConnector(Connector):
     def __init__(self, app: FastAPI = None, **kwargs):
         self.conn = None
         self.cur = None
+        self._q = None
         if app is not None:
             self.init_app(app, kwargs)
 
@@ -206,7 +215,7 @@ class TiberoConnector(Connector):
         self.conn.setdecoding(pyodbc.SQL_WMETADATA, encoding="utf-32le")
         self.conn.setencoding(encoding="utf-8")
 
-    def select(self, **kwargs) -> Tuple[List[dict], int]:
+    def query(self, **kwargs):
         table_nm = kwargs.get("table_nm")
         join_key = kwargs.get("key")
 
@@ -237,18 +246,29 @@ class TiberoConnector(Connector):
             c = page_info["cur_page"]
             query += f"limit {p} offset {c}"
 
+        self._q = query
+        logger.info(query)
+        return self
+
+    def all(self) -> Tuple[List[dict], int]:
         try:
-            logger.info(query)
-            self.cur.execute(query)
-            rows = [dict(zip([desc[0] for desc in self.cur.description], row)) for row in self.cur.fetchall()]
-            query = query.replace("*", "count(*)")
-            count = self.cur.execute(query).fetchone()[0]
-            return rows, int(count)
+            if self._q:
+                self.cur.execute(self._q)
+                rows = [dict(zip([desc[0] for desc in self.cur.description], row)) for row in self.cur.fetchall()]
+                return (
+                    (rows, int(self.cur.execute(self._q.replace("*", "count(*)")).fetchone()[0])) if rows else ([], 0)
+                )
         except Exception as e:
             raise e
 
-    def first(self, **kwargs) -> Dict:
-        return self.select(**kwargs)[0][0]
+    def first(self) -> Dict:
+        try:
+            self.cur.execute(self._q)
+            return dict(zip([d[0] for d in self.cur.description], self.cur.fetchone()))
+        except Exception as e:
+            raise e
+
+        # return dict(zip([desc[0] for desc in self.cur.description], self.cur.execute(self._q).fetchone()))
 
     def execute(self, **kwargs):
         ...
@@ -279,8 +299,7 @@ class TiberoConnector(Connector):
 
     def get_column_info(self, table_nm):
         # OWNER, TABLE_NAME, COLUMN_NAME, COMMENT
-        query = f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm}';"
+        query = f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm.upper()}';"
         logger.info(query)
         self.cur.execute(query)
         return [{"column_name": row[2], "kor_column_name": row[3]} for row in self.cur.fetchall()]
-

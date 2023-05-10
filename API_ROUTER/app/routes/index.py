@@ -38,7 +38,7 @@ async def index(request: Request, route_path: str, session: Union[Any, Session] 
     join api_item_server_dtl on api_item_server_dtl.srvr_nm = api_item_bas.srvr_nm
     where api_item_bas.route_url = '/route/common/portal/api/login' and api_item_bas.mthd = 'POST';
     """
-    rows = session.first(
+    rows = session.query(
         **{
             "table_nm": "api_item_bas",
             "key": "srvr_nm",
@@ -54,7 +54,7 @@ async def index(request: Request, route_path: str, session: Union[Any, Session] 
                 {"table_nm": "api_item_bas", "key": "mthd", "value": f"{method}", "compare_op": "=", "op": "and"},
             ],
         }
-    )
+    ).first()
 
     if not rows:
         logger.error(f"API INFO NOT FOUND, url :: {route_path}, method :: {method}")

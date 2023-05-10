@@ -68,7 +68,7 @@ async def comon_select(params: CommonSelect, session: Union[Any, Session] = Depe
     {"table_nm":"vw_srhwd_find_tmscnt_sum","order_info":{"key":"find_tmscnt","value":"DESC","table_nm":"vw_srhwd_find_tmscnt_sum","order":"DESC"},"page_info":{"per_page":10,"cur_page":1}}
     """
     try:
-        rows, count = session.select(**params.dict())
+        rows, count = session.query(**params.dict()).all()
         result = {
             "result": 1,
             "errorMessage": "",
