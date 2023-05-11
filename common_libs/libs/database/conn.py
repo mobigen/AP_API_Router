@@ -254,7 +254,7 @@ class TiberoConnector(Connector):
         try:
             data = self.cur.execute(self._q).fetchall()
             if data:
-                rows = [dict(zip([desc[0].lower() for desc in self.cur.description], row)) for row in data]
+                rows = [dict(zip(self._get_headers(), row)) for row in data]
                 return (rows, int(self.cur.execute(self._q.replace("*", "count(*)")).fetchone()[0]))
         except Exception as e:
             raise e
@@ -263,12 +263,15 @@ class TiberoConnector(Connector):
         try:
             data = self.cur.execute(self._q).fetchone()
             if data:
-                return dict(zip([d[0] for d in self.cur.description], data))
+                return dict(zip(self._get_headers(), data))
         except Exception as e:
             raise e
 
     def execute(self, **kwargs):
         ...
+
+    def _get_headers(self) -> list[str]:
+        return [d[0].lower() for d in self.cur.description]
 
     def get_db(self) -> pyodbc.Cursor:
         self.cur = self.conn.cursor()
