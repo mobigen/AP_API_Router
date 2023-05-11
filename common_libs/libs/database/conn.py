@@ -254,7 +254,7 @@ class TiberoConnector(Connector):
         try:
             data = self.cur.execute(self._q).fetchall()
             if data:
-                rows = [dict(zip([desc[0] for desc in self.cur.description], row)) for row in data]
+                rows = [dict(zip([desc[0].lower() for desc in self.cur.description], row)) for row in data]
                 return (rows, int(self.cur.execute(self._q.replace("*", "count(*)")).fetchone()[0]))
         except Exception as e:
             raise e

@@ -37,6 +37,7 @@ async def login(params: LoginInfo, request: Request, session: Union[Session, Any
             return JSONResponse(content={"result": 0, "errorMessage": "user not found"})
 
         if row["password"] != params.password:
+            # TODO: 암호화 복호화 필요?
             return JSONResponse(content={"result": 0, "errorMessage": "password not valid"})
 
         access_token = create_access_token(data=row)
