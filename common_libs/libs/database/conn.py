@@ -342,12 +342,21 @@ class TiberoConnector(Connector):
             params = None
             if method.lower() == "insert":
                 data = kwargs.get("data")
-                params = data.values()
+                params = tuple(data.values())
                 query += f"insert into {kwargs.get('table_nm')} "
                 query += f"({','.join(data.keys())}) "
                 query += f"values ({','.join(['?']*len(data))})"
+            elif method.lower() == "update":
+                data = kwargs.get("data")
+                params = tuple(data.values())
+                query += f"update {kwargs.get('table_nm')} "
+                query += f"set {'column'} = ? "
+                query += f"where {kwargs.get('key')} = ?"
+            elif method.lower() == "delete":
+                ...
+            else:
+                raise Exception(f"{method} :: Mehtod not allowed")
 
-            self.cur.execute("BEGIN TRANSACTION")
             self.cur.execute(query, params)
             self.conn.commit()
         except Exception as e:
