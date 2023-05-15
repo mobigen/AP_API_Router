@@ -337,15 +337,16 @@ class TiberoConnector(Connector):
 
     def execute(self, **kwargs):
         try:
-            method = str(kwargs.get("method"))
+            method = str(kwargs.get("method")).lower()
             data = kwargs.get("data")
             params = tuple(data.values())
+
             query = ""
-            if method.lower() == "insert":
+            if method == "insert":
                 query += f"insert into {kwargs.get('table_nm')} "
                 query += f"({','.join(data.keys())}) "
                 query += f"values ({','.join(['?']*len(data))})"
-            elif method.lower() == "update":
+            elif method == "update":
                 query += f"update {kwargs.get('table_nm')} "
                 query += f"set {','.join([f'{k} = ?' for k in data.keys()])} "
 
@@ -354,8 +355,10 @@ class TiberoConnector(Connector):
                 if ks:
                     for k in ks:
                         query += f"and {k} = '{data[k]}' "
-            elif method.lower() == "delete":
-                ...
+            elif method == "delete":
+                query += f"delete from {kwargs.get('table_nm')} "
+                query += f"where {' and '.join([f'{k} = ?' for k in kwargs.get('key')])}"
+
             else:
                 raise Exception(f"{method} :: Mehtod not allowed")
 
