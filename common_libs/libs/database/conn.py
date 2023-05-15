@@ -152,7 +152,75 @@ class SQLAlchemy(Connector):
         return data
 
     def execute(self, **kwargs):
-        ...
+        """
+        [
+            {
+                "method":"INSERT",
+                "table_nm":"inqr_bas",
+                "data":{
+                    "id":"9bb29b2b-159e-4cee-89af-a80cfe6f0651",
+                    "title":"test문의",
+                    "sbst":"문으으으의",
+                    "ctg_id":"INQR001",
+                    "reg_user_nm":"테스터",
+                    "cmpno":"dev-12346578",
+                    "del_yn":"N",
+                    "reg_user":"f142cdc2-207b-4eda-9e7d-2605e4e65571",
+                    "reg_date":"NOW()",
+                    "amd_user":"f142cdc2-207b-4eda-9e7d-2605e4e65571",
+                    "amd_date":"NOW()"
+                }
+            }
+        ]
+        [
+            {
+                "method":"UPDATE",
+                "table_nm":"inqr_bas",
+                "key": ["id"],
+                "data":{
+                    "id":"9bb29b2b-159e-4cee-89af-a80cfe6f0651",
+                    "title":"test문의111111",
+                    "sbst":"문으으으의"
+                }
+            }
+        ]
+        [
+            {
+                "method":"DELETE",
+                "table_nm":"inqr_bas",
+                "key": ["id"],
+                "data":{
+                    "id":"9bb29b2b-159e-4cee-89af-a80cfe6f0651"
+                }
+            }
+        ]
+
+        {"result":1,"errorMessage":""}
+        """
+        # try:
+        #     session.begin()
+
+        #     for row in params:
+        #         method = row.method.lower()
+        #         table = db.get_table(row.table_nm)
+        #         cond = [getattr(table.columns, k) == row.data[k] for k in row.key] if row.key else []
+
+        #         if method == "insert":
+        #             ins = table.insert().values(**row.data)
+        #             session.execute(ins)
+        #         elif method == "update":
+        #             stmt = table.update().where(*cond).values(**row.data)
+        #             session.execute(stmt)
+        #         elif method == "delete":
+        #             stmt = table.delete().where(*cond)
+        #             session.execute(stmt)
+        #         else:
+        #             raise NotImplementedError
+
+        #     session.commit()
+        # except Exception as e:
+        #     session.rollback()
+        #         raise e
 
     def get_table(self, table_nm):
         for nm, t in self._metadata.tables.items():
@@ -209,7 +277,7 @@ class TiberoConnector(Connector):
             self.init_app(app, kwargs)
 
     def init_app(self, app: FastAPI, **kwargs):
-        self.conn = pyodbc.connect(kwargs.get("DB_URL"))
+        self.conn = pyodbc.connect(kwargs.get("DB_URL"), autocommit=False)
         self.conn.setdecoding(pyodbc.SQL_CHAR, encoding="utf-8")
         self.conn.setdecoding(pyodbc.SQL_WCHAR, encoding="utf-32le")
         self.conn.setdecoding(pyodbc.SQL_WMETADATA, encoding="utf-32le")
@@ -268,6 +336,25 @@ class TiberoConnector(Connector):
             raise e
 
     def execute(self, **kwargs):
+        try:
+            method = str(kwargs.get("method"))
+            query = ""
+            params = None
+            if method.lower() == "insert":
+                data = kwargs.get("data")
+                params = data.values()
+                query += f"insert into {kwargs.get('table_nm')} "
+                query += f"({','.join(data.keys())}) "
+                query += f"values ({','.join(['?']*len(data))})"
+
+            self.cur.execute("BEGIN TRANSACTION")
+            self.cur.execute(query, params)
+            self.conn.commit()
+        except Exception as e:
+            self.conn.rollback()
+            raise e
+
+    def execute_many(self, **kwargs):
         ...
 
     def _get_headers(self) -> list[str]:
@@ -278,6 +365,8 @@ class TiberoConnector(Connector):
         try:
             yield self
         finally:
+            if self._q:
+                self._q = None
             if self.cur:
                 self.cur.close()
 
