@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Optional, List, Union
 
 from fastapi import Depends, APIRouter
@@ -43,6 +44,8 @@ class CommonSelect(BaseModel):
 
 router = APIRouter()
 
+logger = logging.getLogger()
+
 
 @router.post("/common-select", response_model=dict)
 async def common_select(params: CommonSelect, session: Union[Any, Session] = Depends(db.get_db)):
@@ -68,6 +71,7 @@ async def common_select(params: CommonSelect, session: Union[Any, Session] = Dep
     {"table_nm":"vw_srhwd_find_tmscnt_sum","order_info":{"key":"find_tmscnt","value":"DESC","table_nm":"vw_srhwd_find_tmscnt_sum","order":"DESC"},"page_info":{"per_page":10,"cur_page":1}}
     """
     try:
+        logger.info(params.dict())
         rows, count = session.query(**params.dict()).all()
         result = {
             "result": 1,

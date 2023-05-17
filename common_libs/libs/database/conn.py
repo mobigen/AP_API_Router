@@ -273,6 +273,7 @@ class TiberoConnector(Connector):
         self.conn = None
         self.cur = None
         self._q = None
+        self._cntq = None
         if app is not None:
             self.init_app(app, kwargs)
 
@@ -284,35 +285,57 @@ class TiberoConnector(Connector):
         self.conn.setencoding(encoding="utf-8")
 
     def query(self, **kwargs):
+        """
+        SELECT *
+            FROM (
+            SELECT ROWNUM AS rn, subquery.*
+            FROM (
+                SELECT *
+                FROM ACT_SRVY
+                JOIN ACT_SRV_FILE_DETLS ON ACT_SRVY.IDX = ACT_SRV_FILE_DETLS.IDX
+                WHERE ACT_SRVY.OFANSTP = 'CMPLT'
+            ) AS subquery
+            ) AS main_query
+            WHERE main_query.rn > 0;
+        """
         table_nm = kwargs.get("table_nm")
         join_key = kwargs.get("key")
 
-        query = f"select * from {table_nm} "
+        join_clause = ""
         if join_info := kwargs.get("join_info"):
             t = join_info["table_nm"]
             k = join_info["key"]
-            query += f"join {t} on {table_nm}.{join_key} = {t}.{k} "
+            join_clause += f"join {t} on {table_nm}.{join_key} = {t}.{k} "
 
+        where_clause = ""
         if where_info := kwargs.get("where_info"):
-            query += f"where "
+            where_clause += f"where "
             for info in where_info:
                 t = info["table_nm"]
                 k = info["key"]
                 val = info["value"]
-                compare_op = self._parse_operand(info["compare_op"])
                 op = info["op"]
-                query += f"{op} {t}.{k} {compare_op} '{val}' "
+                where_clause += f"{op} {self._calc_operand(f'{t}.{k}', val, info['compare_op'])} "
+            # TODO: sub where conditions
 
+        order_clause = ""
         if order_info := kwargs.get("order_info"):
             t = order_info["table_nm"]
             k = order_info["key"]
             o = order_info["order"]
-            query += f"order by {t}.{k} {str(o).upper()} "
+            order_clause += f"order by {t}.{k} {str(o).upper()} "
 
+        query = f"select * from {table_nm} " + join_clause + where_clause + order_clause
+        self._cntq = f"select count(*) from {table_nm} " + join_clause + where_clause + order_clause
+
+        page_clause = ""
         if page_info := kwargs.get("page_info"):
-            p = page_info["per_page"]
-            c = page_info["cur_page"]
-            query += f"limit {p} offset {c}"
+            per_page = page_info["per_page"]
+            offset = (page_info["cur_page"] - 1) * per_page
+            limit = offset + per_page
+            page_clause += f"select * from (select ROWNUM as SEQ, sq.* "
+            page_clause += f"from ({query}) as sq) as mq where mq.SEQ > {offset} and mq.SEQ <= {limit}"
+            query = page_clause
 
         self._q = query
         logger.info(query)
@@ -323,7 +346,7 @@ class TiberoConnector(Connector):
             data = self.cur.execute(self._q).fetchall()
             if data:
                 rows = [dict(zip(self._get_headers(), row)) for row in data]
-                return (rows, int(self.cur.execute(self._q.replace("*", "count(*)")).fetchone()[0]))
+                return (rows, int(self.cur.execute(self._cntq).fetchone()[0]))
         except Exception as e:
             raise e
 
@@ -382,24 +405,27 @@ class TiberoConnector(Connector):
         finally:
             if self._q:
                 self._q = None
+                self._cntq = None
             if self.cur:
                 self.cur.close()
 
-    def _parse_operand(self, operand):
-        if operand == "Equal":
-            return "="
-        elif operand == "Not Equal":
-            return "!="
-        elif operand == "Greater Than":
-            return ">"
-        elif operand == "Greater Than or Equal":
-            return ">="
-        elif operand == "Less Than":
-            return "<"
-        elif operand == "Less Than or Equal":
-            return "<="
+    def _calc_operand(self, k, v, operand):
+        if operand in ["Equal", "="]:
+            return f"{k} = '{v}'"
+        elif operand in ["Not Equal", "!="]:
+            return f"{k} != '{v}'"
+        elif operand in ["Greater Than", ">"]:
+            return f"{k} > '{v}'"
+        elif operand in ["Greater Than or Equal", ">="]:
+            return f"{k} >= '{v}'"
+        elif operand in ["Less Than", "<"]:
+            return f"{k} < '{v}'"
+        elif operand in ["Less Than or Equal", "<="]:
+            return f"{k} <='{v}'"
+        elif operand.lower() in ["ilike"]:
+            return f"upper({k}) like '{v}'"
         else:
-            return operand
+            return f"{k} {operand} '{v}'"
 
     def get_column_info(self, table_nm):
         # OWNER, TABLE_NAME, COLUMN_NAME, COMMENT
