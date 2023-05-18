@@ -285,6 +285,7 @@ class SQLAlchemyConnector(Connector):
     def get_column_info(self, table_nm) -> List[Dict[str, str]]:
         ...
 
+
 class TiberoConnector(Connector):
     def __init__(self, app: FastAPI = None, **kwargs):
         self.conn = None
@@ -429,7 +430,7 @@ class TiberoConnector(Connector):
     def _get_headers(self) -> list[str]:
         return [d[0].lower() for d in self.cur.description]
 
-    def _calc_operand(self, k, v, operand):
+    def _calc_operand(self, k, v, operand) -> str:
         if operand in ["Equal", "="]:
             return f"{k} = '{v}'"
         elif operand in ["Not Equal", "!="]:

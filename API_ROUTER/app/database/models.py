@@ -1,7 +1,7 @@
 from sqlalchemy import String, Column, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.orm import relationship
 
-from libs.database.conn import Base
+from app.database.conn import Base
 from libs.database.models import BaseMixin
 
 

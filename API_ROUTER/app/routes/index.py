@@ -1,16 +1,15 @@
 import copy
 import json
-from typing import Any, Union
 
 import aiohttp
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from app.common import const
 from app.common.config import logger
 from app.database.conn import db
+from libs.database.conn import Connector
 
 router = APIRouter()
 
@@ -21,7 +20,7 @@ async def me(request: Request):
 
 
 @router.api_route("/{route_path:path}", methods=["GET", "POST"])
-async def index(request: Request, route_path: str, session: Union[Any, Session] = Depends(db.get_db)):
+async def index(request: Request, route_path: str, session: Connector = Depends(db.get_db)):
     method = request.method
     headers = get_headers(request.headers)
     query_params = request.query_params
@@ -33,11 +32,6 @@ async def index(request: Request, route_path: str, session: Union[Any, Session] 
         except json.JSONDecodeError:
             data = (await request.body()).decode()
 
-    """
-    select * from api_item_bas
-    join api_item_server_dtl on api_item_server_dtl.srvr_nm = api_item_bas.srvr_nm
-    where api_item_bas.route_url = '/route/common/portal/api/login' and api_item_bas.mthd = 'POST';
-    """
     row = session.query(
         **{
             "table_nm": "api_item_bas",

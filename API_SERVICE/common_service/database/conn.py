@@ -5,11 +5,11 @@ from sqlalchemy.orm import declarative_base
 
 from common_service.common.config import settings
 from libs.database.conn import TiberoConnector
-from libs.database.conn import SQLAlchemy
+from libs.database.conn import SQLAlchemyConnector
 
 
 # TODO: SQLAlchemy version 수정필요
-class SQLAlchemyForCommon(SQLAlchemy):
+class SQLAlchemyForCommon(SQLAlchemyConnector):
     def __init__(self, app: FastAPI = None, **kwargs):
         self._table_dict = None
         if app is not None:
