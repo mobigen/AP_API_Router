@@ -72,11 +72,11 @@ async def common_select(params: CommonSelect, session: Union[Any, Session] = Dep
     """
     try:
         logger.info(params.dict())
-        rows, count = session.query(**params.dict()).all()
+        rows = session.query(**params.dict()).all()
         result = {
             "data": {
-                "count": count if count else 0,
-                "body": rows if rows else [],
+                "count": rows[1] if rows else 0,
+                "body": rows[0] if rows else [],
                 "header": session.get_column_info(params.table_nm),
             },
             "result": 1,
