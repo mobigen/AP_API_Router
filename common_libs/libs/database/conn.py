@@ -333,7 +333,7 @@ class TiberoConnector(Connector):
             per_page = page_info["per_page"]
             offset = (page_info["cur_page"] - 1) * per_page
             limit = offset + per_page
-            page_clause += f"select * from (select ROWNUM as SEQ, sq.* "
+            page_clause += "select * from (select ROWNUM as SEQ, sq.* "
             page_clause += f"from ({query}) as sq) as mq where mq.SEQ > {offset} and mq.SEQ <= {limit}"
             query = page_clause
 
@@ -347,6 +347,9 @@ class TiberoConnector(Connector):
             if data:
                 rows = [dict(zip(self._get_headers(), row)) for row in data]
                 return (rows, int(self.cur.execute(self._cntq).fetchone()[0]))
+        except TypeError as te:
+            logger.warning(te)
+            return
         except Exception as e:
             raise e
 
@@ -355,6 +358,9 @@ class TiberoConnector(Connector):
             data = self.cur.execute(self._q).fetchone()
             if data:
                 return dict(zip(self._get_headers(), data))
+        except TypeError as te:
+            logger.warning(te)
+            return
         except Exception as e:
             raise e
 
@@ -432,4 +438,4 @@ class TiberoConnector(Connector):
         query = f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm.upper()}';"
         logger.info(query)
         self.cur.execute(query)
-        return [{"column_name": row[2], "kor_column_name": row[3]} for row in self.cur.fetchall()]
+        return [{"column_name": str(row[2]).lower(), "kor_column_name": row[3]} for row in self.cur.fetchall()]
