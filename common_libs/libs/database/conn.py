@@ -1,14 +1,17 @@
 import abc
 import logging
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Union, Tuple, TypeVar
 
 import pyodbc
 import sqlalchemy
 from fastapi import FastAPI
 from sqlalchemy import Column, MetaData, and_, create_engine, not_, or_
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 logger = logging.getLogger()
+
+
+T = TypeVar('T', bound="Connector")
 
 
 class Connector(metaclass=abc.ABCMeta):
@@ -17,27 +20,32 @@ class Connector(metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def get_db(self):
+    def get_db(self) -> T:
         ...
 
     @abc.abstractmethod
-    def query(self, **kwargs):
+    def query(self, **kwargs) -> T:
         ...
 
     @abc.abstractmethod
-    def all(self):
+    def all(self) -> Tuple[List[dict], int]:
         ...
 
     @abc.abstractmethod
-    def first(self):
+    def first(self) -> dict:
         ...
 
     @abc.abstractmethod
     def execute(self, tablename, **kwargs):
         ...
 
+    @abc.abstractmethod
+    def get_column_info(self, table_nm) -> List[Dict[str, str]]:
+        ...
 
-class SQLAlchemy(Connector):
+
+class SQLAlchemyConnector(Connector):
+    # TODO: 임시작성 추후에 실 사용시 수정필요
     def __init__(self, base=None, app: FastAPI = None, **kwargs):
         self._engine = None
         self._Base = base
@@ -45,6 +53,8 @@ class SQLAlchemy(Connector):
         self._session_instance = None
         self._metadata = None
         self._q = None
+        self._cnt = 0
+        self._column_names = []
         if app is not None:
             self.init_app(app=app, **kwargs)
 
@@ -77,7 +87,7 @@ class SQLAlchemy(Connector):
             self._session.close_all()
             self._engine.dispose()
 
-    def get_db(self) -> Session:
+    def get_db(self) -> "SQLAlchemyConnector":
         if self.session is None:
             raise Exception("must be called 'init_db'")
         try:
@@ -86,7 +96,7 @@ class SQLAlchemy(Connector):
         finally:
             self._session_instance.close()
 
-    def select(self, **kwargs) -> Tuple[List[dict], int]:
+    def query(self, **kwargs) -> "SQLAlchemyConnector":
         base_table = self.get_table(kwargs["table_nm"])
         key = kwargs["key"]
         # Join
@@ -95,7 +105,7 @@ class SQLAlchemy(Connector):
             query = self._session_instance.query(base_table, join_table).join(
                 join_table,
                 getattr(base_table.columns, key) == getattr(join_table.columns, join_info.key),
-            )
+                )
         else:
             query = self._session_instance.query(base_table)
 
@@ -130,7 +140,7 @@ class SQLAlchemy(Connector):
                     filter_val = filter_condition
             query = query.filter(filter_val)
 
-        count = query.count()
+        self._cnt = query.count()
 
         # Order
         if order_info := kwargs["order_info"]:
@@ -143,9 +153,14 @@ class SQLAlchemy(Connector):
             cur_page = page_info.cur_page
             query = query.limit(per_page).offset((cur_page - 1) * per_page)
 
-        data = [dict(zip([column.name for column in base_table.columns], data)) for data in query.all()]
+        self._q = query
+        self._column_names = [column.name for column in base_table.columns]
+        return self
 
-        return data, count
+    def all(self) -> Tuple[List[dict], int]:
+        data = [dict(zip(self._column_names, data)) for data in self._q.all()]
+
+        return data, self._cnt
 
     def first(self):
         data = self._q.first()
@@ -267,6 +282,8 @@ class SQLAlchemy(Connector):
     def Base(self):
         return self._Base
 
+    def get_column_info(self, table_nm) -> List[Dict[str, str]]:
+        ...
 
 class TiberoConnector(Connector):
     def __init__(self, app: FastAPI = None, **kwargs):
@@ -284,7 +301,18 @@ class TiberoConnector(Connector):
         self.conn.setdecoding(pyodbc.SQL_WMETADATA, encoding="utf-32le")
         self.conn.setencoding(encoding="utf-8")
 
-    def query(self, **kwargs):
+    def get_db(self) -> "TiberoConnector":
+        self.cur = self.conn.cursor()
+        try:
+            yield self
+        finally:
+            if self._q:
+                self._q = None
+                self._cntq = None
+            if self.cur:
+                self.cur.close()
+
+    def query(self, **kwargs) -> "TiberoConnector":
         """
         SELECT *
             FROM (
@@ -346,7 +374,7 @@ class TiberoConnector(Connector):
             data = self.cur.execute(self._q).fetchall()
             if data:
                 rows = [dict(zip(self._get_headers(), row)) for row in data]
-                return (rows, int(self.cur.execute(self._cntq).fetchone()[0]))
+                return rows, int(self.cur.execute(self._cntq).fetchone()[0])
         except TypeError as te:
             logger.warning(te)
             return
@@ -398,22 +426,8 @@ class TiberoConnector(Connector):
             self.conn.rollback()
             raise e
 
-    def execute_many(self, **kwargs):
-        ...
-
     def _get_headers(self) -> list[str]:
         return [d[0].lower() for d in self.cur.description]
-
-    def get_db(self) -> pyodbc.Cursor:
-        self.cur = self.conn.cursor()
-        try:
-            yield self
-        finally:
-            if self._q:
-                self._q = None
-                self._cntq = None
-            if self.cur:
-                self.cur.close()
 
     def _calc_operand(self, k, v, operand):
         if operand in ["Equal", "="]:
@@ -430,10 +444,13 @@ class TiberoConnector(Connector):
             return f"{k} <='{v}'"
         elif operand.lower() in ["ilike"]:
             return f"upper({k}) like '{v}'"
+        elif operand.lower() in ["in"]:
+            v = ",".join([f"'{x}'" for x in v.split(",")])
+            return f"{k} in ({v})"
         else:
             return f"{k} {operand} '{v}'"
 
-    def get_column_info(self, table_nm):
+    def get_column_info(self, table_nm) -> List[Dict[str, str]]:
         # OWNER, TABLE_NAME, COLUMN_NAME, COMMENT
         query = f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm.upper()}';"
         logger.info(query)

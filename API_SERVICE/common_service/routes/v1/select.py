@@ -1,11 +1,11 @@
 import logging
-from typing import Any, Optional, List, Union
+from typing import Optional, List
 
 from fastapi import Depends, APIRouter
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 
 from common_service.database.conn import db
+from libs.database.conn import Connector
 
 
 class JoinInfo(BaseModel):
@@ -48,7 +48,7 @@ logger = logging.getLogger()
 
 
 @router.post("/common-select", response_model=dict)
-async def common_select(params: CommonSelect, session: Union[Any, Session] = Depends(db.get_db)):
+async def common_select(params: CommonSelect, session: Connector = Depends(db.get_db)):
     """
     {
         "table_nm":"banr_adm_bas",
@@ -85,6 +85,5 @@ async def common_select(params: CommonSelect, session: Union[Any, Session] = Dep
 
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
-        raise e
-
+        logger.error(e, exc_info=True)
     return result
