@@ -38,7 +38,7 @@ async def index(request: Request, route_path: str, session: Union[Any, Session] 
     join api_item_server_dtl on api_item_server_dtl.srvr_nm = api_item_bas.srvr_nm
     where api_item_bas.route_url = '/route/common/portal/api/login' and api_item_bas.mthd = 'POST';
     """
-    rows = session.query(
+    row = session.query(
         **{
             "table_nm": "api_item_bas",
             "key": "srvr_nm",
@@ -56,11 +56,13 @@ async def index(request: Request, route_path: str, session: Union[Any, Session] 
         }
     ).first()
 
-    if not rows:
+    if not row:
         logger.error(f"API INFO NOT FOUND, url :: {route_path}, method :: {method}")
         return JSONResponse(content={"result": 0, "errorMessage": "API INFO NOT FOUND."}, status_code=404)
 
-    remote_url = "http://" + rows["IP_ADR"] + rows["URL"]
+    logger.info(f"API :: {row}")
+
+    remote_url = "http://" + row["ip_adr"] + row["url"]
 
     cookies = {}
     try:
