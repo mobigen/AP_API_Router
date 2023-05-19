@@ -1,4 +1,6 @@
+import datetime
 import logging
+from datetime import datetime
 from typing import Dict, List, Tuple
 
 import pyodbc
@@ -19,10 +21,15 @@ class TiberoConnector(Connector):
             self.init_app(app, kwargs)
 
     def init_app(self, app: FastAPI, **kwargs):
+        def __convert_timestamp(value):
+            value = datetime.strptime(value.decode(), '%Y/%m/%d %H:%M:%S.%f')
+            return value.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
         self.conn = pyodbc.connect(kwargs.get("DB_URL"), autocommit=False)
         self.conn.setdecoding(pyodbc.SQL_CHAR, encoding="utf-8")
         self.conn.setdecoding(pyodbc.SQL_WCHAR, encoding="utf-32le")
         self.conn.setdecoding(pyodbc.SQL_WMETADATA, encoding="utf-32le")
+        self.conn.add_output_converter(pyodbc.SQL_TYPE_TIMESTAMP, __convert_timestamp)
         self.conn.setencoding(encoding="utf-8")
 
     def get_db(self) -> "TiberoConnector":
