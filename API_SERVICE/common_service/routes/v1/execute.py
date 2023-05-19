@@ -1,10 +1,14 @@
+import logging
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from starlette.responses import JSONResponse
 
 from common_service.database.conn import db
 from libs.database.connector import Connector
+
+logger = logging.getLogger()
 
 
 class CommonExecute(BaseModel):
@@ -19,6 +23,10 @@ router = APIRouter()
 
 @router.post("/common-execute")
 async def common_execute(params: List[CommonExecute], session: Connector = Depends(db.get_db)):
-    for param in params:
-        session.execute(**param.dict())
-    return {"result": 1, "errorMessage": ""}
+    try:
+        logger.info([param.dict() for param in params])
+        for param in params:
+            session.execute(**param.dict())
+        return JSONResponse(content={"result": 1, "errorMessage": ""}, status_code=200)
+    except Exception as e:
+        return JSONResponse(content={"result": 0, "errorMessage": str(e)}, status_code=400)

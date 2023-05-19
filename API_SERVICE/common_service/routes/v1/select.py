@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from fastapi import Depends, APIRouter
 from pydantic import BaseModel
+from starlette.responses import JSONResponse
 
 from common_service.database.conn import db
 from libs.database.connector import Connector
@@ -47,7 +48,7 @@ router = APIRouter()
 logger = logging.getLogger()
 
 
-@router.post("/common-select", response_model=dict)
+@router.post("/common-select")
 async def common_select(params: CommonSelect, session: Connector = Depends(db.get_db)):
     """
     {
@@ -73,7 +74,7 @@ async def common_select(params: CommonSelect, session: Connector = Depends(db.ge
     try:
         logger.info(params.dict())
         rows = session.query(**params.dict()).all()
-        result = {
+        return JSONResponse(content={
             "data": {
                 "count": rows[1] if rows else 0,
                 "body": rows[0] if rows else [],
@@ -81,9 +82,8 @@ async def common_select(params: CommonSelect, session: Connector = Depends(db.ge
             },
             "result": 1,
             "errorMessage": "",
-        }
+        }, status_code=200)
 
     except Exception as e:
-        result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
-    return result
+        return JSONResponse(content={"result": 0, "errorMessage": str(e)}, status_code=400)
