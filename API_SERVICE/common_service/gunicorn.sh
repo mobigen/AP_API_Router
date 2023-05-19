@@ -1,13 +1,13 @@
 #!/bin/bash
 
 root_path="$( cd "$( dirname "$0" )" && pwd -P )"
-pid_path="$root_path/common-gunicorn.pid"
+pid_path="$root_path/gunicorn-common.pid"
 
 echo $pid_path
 
 # gunicorn 실행 명령어
 start_gunicorn() {
-    gunicorn main:app --bind 0.0.0.0:20000 -c gunicorn.conf.py
+    gunicorn main:app --bind 0.0.0.0:20000 -c gunicorn.conf.py -D --pid $pid_path
     sleep 2
     pid=$(cat $pid_path)
     echo "Gunicorn started. PID: $pid"

@@ -126,7 +126,7 @@ spew = False
 #       None to signal that Python should choose one on its own.
 #
 
-daemon = True
+daemon = False
 pidfile = "./gunicorn-router.pid"
 umask = 0
 user = None
