@@ -16,7 +16,7 @@
       "class": "logging.handlers.RotatingFileHandler",
       "level": "DEBUG",
       "formatter": "default",
-      "filename": "./log/API-Router.log",
+      "filename": "./log/router.log",
       "mode": "a",
       "maxBytes": 20000000,
       "backupCount": 10
