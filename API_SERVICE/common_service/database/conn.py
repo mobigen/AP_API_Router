@@ -4,8 +4,8 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import declarative_base
 
 from common_service.common.config import settings
-from libs.database.conn import TiberoConnector
-from libs.database.conn import SQLAlchemyConnector
+from libs.database.tibero import TiberoConnector
+from libs.database.orm import SQLAlchemyConnector
 
 
 # TODO: SQLAlchemy version 수정필요

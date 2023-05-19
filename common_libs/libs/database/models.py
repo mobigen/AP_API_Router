@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from .conn import db
+from .orm import db
 
 
 class BaseMixin:

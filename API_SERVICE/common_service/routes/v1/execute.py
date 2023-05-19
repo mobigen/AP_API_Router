@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from common_service.database.conn import db
-from libs.database.conn import Connector
+from libs.database.connector import Connector
 
 
 class CommonExecute(BaseModel):

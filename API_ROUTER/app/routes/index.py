@@ -9,7 +9,7 @@ from starlette.responses import JSONResponse
 from app.common import const
 from app.common.config import logger
 from app.database.conn import db
-from libs.database.conn import Connector
+from libs.database.connector import Connector
 
 router = APIRouter()
 
