@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple
 import pyodbc
 from fastapi import FastAPI
 
-from connector import Connector
+from .connector import Connector
 
 logger = logging.getLogger()
 
@@ -28,7 +28,7 @@ class TiberoConnector(Connector):
     def get_db(self) -> "TiberoConnector":
         self.cur = self.conn.cursor()
         try:
-            return self
+            yield self
         finally:
             if self._q:
                 self._q = None

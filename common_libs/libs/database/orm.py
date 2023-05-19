@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from sqlalchemy import Column, MetaData, and_, create_engine, not_, or_
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-from connector import Connector
+from .connector import Connector
 
 db = declarative_base()
 
