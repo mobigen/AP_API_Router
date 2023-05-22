@@ -6,44 +6,19 @@ from typing import Dict, List, Tuple
 import pyodbc
 from fastapi import FastAPI
 
-from .connector import Connector
+from .connector import Connector, Executor
 
 logger = logging.getLogger()
 
 
-class TiberoConnector(Connector):
-    def __init__(self, app: FastAPI = None, **kwargs):
-        self.conn = None
-        self.cur = None
+class QueryExecutor(Executor):
+    def __init__(self, conn):
+        self.conn = conn
         self._q = None
         self._cntq = None
-        if app is not None:
-            self.init_app(app, kwargs)
+        self.cur = conn.cursor()
 
-    def init_app(self, app: FastAPI, **kwargs):
-        def __convert_timestamp(value):
-            value = datetime.strptime(value.decode(), '%Y/%m/%d %H:%M:%S.%f')
-            return value.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-
-        self.conn = pyodbc.connect(kwargs.get("DB_URL"), autocommit=False)
-        self.conn.setdecoding(pyodbc.SQL_CHAR, encoding="utf-8")
-        self.conn.setdecoding(pyodbc.SQL_WCHAR, encoding="utf-32le")
-        self.conn.setdecoding(pyodbc.SQL_WMETADATA, encoding="utf-32le")
-        self.conn.add_output_converter(pyodbc.SQL_TYPE_TIMESTAMP, __convert_timestamp)
-        self.conn.setencoding(encoding="utf-8")
-
-    def get_db(self) -> "TiberoConnector":
-        self.cur = self.conn.cursor()
-        try:
-            yield self
-        finally:
-            if self._q:
-                self._q = None
-                self._cntq = None
-            if self.cur:
-                self.cur.close()
-
-    def query(self, **kwargs) -> "TiberoConnector":
+    def query(self, **kwargs) -> "QueryExecutor":
         """
         SELECT *
             FROM (
@@ -104,7 +79,7 @@ class TiberoConnector(Connector):
         try:
             data = self.cur.execute(self._q).fetchall()
             if data:
-                rows = [dict(zip(self._get_headers(), row)) for row in data]
+                rows = [dict(zip(self._get_headers(self.cur), row)) for row in data]
                 return rows, int(self.cur.execute(self._cntq).fetchone()[0])
         except TypeError as te:
             logger.warning(te)
@@ -116,7 +91,7 @@ class TiberoConnector(Connector):
         try:
             data = self.cur.execute(self._q).fetchone()
             if data:
-                return dict(zip(self._get_headers(), data))
+                return dict(zip(self._get_headers(self.cur), data))
         except TypeError as te:
             logger.warning(te)
             return
@@ -124,41 +99,41 @@ class TiberoConnector(Connector):
             raise e
 
     def execute(self, **kwargs):
+        method = str(kwargs.get("method")).lower()
+        data = kwargs.get("data")
+        params = tuple(data.values())
+
+        query = ""
+        if method == "insert":
+            query += f"insert into {kwargs.get('table_nm')} "
+            query += f"({','.join(data.keys())}) "
+            query += f"values ({','.join(['?']*len(data))})"
+        elif method == "update":
+            query += f"update {kwargs.get('table_nm')} "
+            query += f"set {','.join([f'{k} = ?' for k in data.keys()])} "
+
+            k0, *ks = kwargs.get("key")
+            query += f"where {k0} = '{data[k0]}' "
+            if ks:
+                for k in ks:
+                    query += f"and {k} = '{data[k]}' "
+        elif method == "delete":
+            query += f"delete from {kwargs.get('table_nm')} "
+            query += f"where {' and '.join([f'{k} = ?' for k in kwargs.get('key')])}"
+
+        else:
+            raise Exception(f"{method} :: Mehtod not allowed")
+
+        logger.info(f"query :: {query}")
         try:
-            method = str(kwargs.get("method")).lower()
-            data = kwargs.get("data")
-            params = tuple(data.values())
-
-            query = ""
-            if method == "insert":
-                query += f"insert into {kwargs.get('table_nm')} "
-                query += f"({','.join(data.keys())}) "
-                query += f"values ({','.join(['?']*len(data))})"
-            elif method == "update":
-                query += f"update {kwargs.get('table_nm')} "
-                query += f"set {','.join([f'{k} = ?' for k in data.keys()])} "
-
-                k0, *ks = kwargs.get("key")
-                query += f"where {k0} = '{data[k0]}' "
-                if ks:
-                    for k in ks:
-                        query += f"and {k} = '{data[k]}' "
-            elif method == "delete":
-                query += f"delete from {kwargs.get('table_nm')} "
-                query += f"where {' and '.join([f'{k} = ?' for k in kwargs.get('key')])}"
-
-            else:
-                raise Exception(f"{method} :: Mehtod not allowed")
-
-            logger.info(f"query :: {query}")
             self.cur.execute(query, params)
             self.conn.commit()
         except Exception as e:
             self.conn.rollback()
             raise e
 
-    def _get_headers(self) -> list[str]:
-        return [d[0].lower() for d in self.cur.description]
+    def _get_headers(self, cursor) -> list[str]:
+        return [d[0].lower() for d in cursor.description]
 
     def _calc_operand(self, k, v, operand) -> str:
         if operand in ["Equal", "="]:
@@ -185,5 +160,46 @@ class TiberoConnector(Connector):
         # OWNER, TABLE_NAME, COLUMN_NAME, COMMENT
         query = f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm.upper()}';"
         logger.info(query)
-        self.cur.execute(query)
+        with self.conn.cursor() as cursor:
+            cursor.execute(query)
         return [{"column_name": str(row[2]).lower(), "kor_column_name": row[3]} for row in self.cur.fetchall()]
+
+    def close(self):
+        if self.cur:
+            self.cur.close()
+
+
+class TiberoConnector(Connector):
+    def __init__(self, app: FastAPI = None, **kwargs):
+        self.conn = None
+        self.cur = None
+        self._q = None
+        self._cntq = None
+        if app is not None:
+            self.init_app(app, kwargs)
+
+    def init_app(self, app: FastAPI, **kwargs):
+        def __convert_timestamp(value):
+            value = datetime.strptime(value.decode(), "%Y/%m/%d %H:%M:%S.%f")
+            return value.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
+        @app.on_event("startup")
+        async def startup():
+            self.conn = pyodbc.connect(kwargs.get("DB_URL"), autocommit=False)
+            self.conn.setdecoding(pyodbc.SQL_CHAR, encoding="utf-8")
+            self.conn.setdecoding(pyodbc.SQL_WCHAR, encoding="utf-32le")
+            self.conn.setdecoding(pyodbc.SQL_WMETADATA, encoding="utf-32le")
+            self.conn.add_output_converter(pyodbc.SQL_TYPE_TIMESTAMP, __convert_timestamp)
+            self.conn.setencoding(encoding="utf-8")
+
+        @app.on_event("shutdown")
+        async def shutdown():
+            if self.conn:
+                self.conn.close()
+
+    def get_db(self) -> "TiberoConnector":
+        executor = QueryExecutor(self.conn)
+        try:
+            yield executor
+        finally:
+            executor.close()

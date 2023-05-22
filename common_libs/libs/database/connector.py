@@ -15,6 +15,8 @@ class Connector(metaclass=abc.ABCMeta):
     def get_db(self) -> T:
         ...
 
+
+class Executor(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def query(self, **kwargs) -> T:
         ...
@@ -33,4 +35,8 @@ class Connector(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_column_info(self, table_nm) -> List[Dict[str, str]]:
+        ...
+
+    @abc.abstractmethod
+    def close(self):
         ...
