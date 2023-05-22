@@ -1,6 +1,7 @@
 import datetime
 import logging
 from datetime import datetime
+from decimal import Decimal
 from typing import Dict, List, Tuple
 
 import pyodbc
@@ -79,7 +80,10 @@ class QueryExecutor(Executor):
         try:
             data = self.cur.execute(self._q).fetchall()
             if data:
-                rows = [dict(zip(self._get_headers(self.cur), row)) for row in data]
+                rows = [
+                    dict(zip(self._get_headers(self.cur), map(lambda x: int(x) if isinstance(x, Decimal) else x, row)))
+                    for row in data
+                ]
                 return rows, int(self.cur.execute(self._cntq).fetchone()[0])
         except TypeError as te:
             logger.warning(te)
@@ -160,8 +164,7 @@ class QueryExecutor(Executor):
         # OWNER, TABLE_NAME, COLUMN_NAME, COMMENT
         query = f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm.upper()}';"
         logger.info(query)
-        with self.conn.cursor() as cursor:
-            cursor.execute(query)
+        self.cur.execute(query)
         return [{"column_name": str(row[2]).lower(), "kor_column_name": row[3]} for row in self.cur.fetchall()]
 
     def close(self):

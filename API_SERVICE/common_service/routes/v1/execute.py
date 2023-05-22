@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
 from common_service.database.conn import db
-from libs.database.connector import Connector
+from libs.database.connector import Executor
 
 logger = logging.getLogger()
 
@@ -22,7 +22,7 @@ router = APIRouter()
 
 
 @router.post("/common-execute")
-async def common_execute(params: List[CommonExecute], session: Connector = Depends(db.get_db)):
+async def common_execute(params: List[CommonExecute], session: Executor = Depends(db.get_db)):
     try:
         logger.info([param.dict() for param in params])
         for param in params:

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
 from common_service.database.conn import db
-from libs.database.connector import Connector
+from libs.database.connector import Executor
 
 
 class JoinInfo(BaseModel):
@@ -49,7 +49,7 @@ logger = logging.getLogger()
 
 
 @router.post("/common-select")
-async def common_select(params: CommonSelect, session: Connector = Depends(db.get_db)):
+async def common_select(params: CommonSelect, session: Executor = Depends(db.get_db)):
     """
     {
         "table_nm":"banr_adm_bas",

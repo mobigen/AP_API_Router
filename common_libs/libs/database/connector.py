@@ -3,7 +3,7 @@ from typing import TypeVar, Tuple, List, Dict
 
 from fastapi import FastAPI
 
-T = TypeVar('T', bound="Connector")
+T = TypeVar("T", bound="Connector")
 
 
 class Connector(metaclass=abc.ABCMeta):
