@@ -105,7 +105,9 @@ class QueryExecutor(Executor):
     def execute(self, **kwargs):
         method = str(kwargs.get("method")).lower()
         data = kwargs.get("data")
-        params = tuple(data.values())
+        params = tuple(
+            map(lambda x: datetime.now() if isinstance(x, str) and x.upper().startswith("NOW") else x, data.values())
+        )
 
         query = ""
         if method == "insert":
