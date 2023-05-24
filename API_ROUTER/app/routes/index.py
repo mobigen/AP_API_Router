@@ -9,7 +9,7 @@ from starlette.responses import JSONResponse
 from app.common import const
 from app.common.config import logger
 from app.database.conn import db
-from libs.database.connector import Connector
+from libs.database.connector import Executor
 
 router = APIRouter()
 
@@ -20,7 +20,7 @@ async def me(request: Request):
 
 
 @router.api_route("/{route_path:path}", methods=["GET", "POST"])
-async def index(request: Request, route_path: str, session: Connector = Depends(db.get_db)):
+async def index(request: Request, route_path: str, session: Executor = Depends(db.get_db)):
     method = request.method
     headers = get_headers(request.headers)
     query_params = request.query_params

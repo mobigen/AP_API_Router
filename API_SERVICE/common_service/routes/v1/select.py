@@ -20,7 +20,7 @@ class WhereInfo(BaseModel):
     value: str
     compare_op: str
     op: Optional[str] = ""
-    sub_conditions: Optional[List["WhereInfo"]] = None
+    sub: Optional[List["WhereInfo"]] = None
 
 
 class OrderInfo(BaseModel):

@@ -46,11 +46,18 @@ class QueryExecutor(Executor):
         if where_info := kwargs.get("where_info"):
             where_clause += f"where "
             for info in where_info:
-                t = info["table_nm"]
-                k = info["key"]
-                val = info["value"]
-                op = info["op"]
-                where_clause += f"{op} {self._calc_operand(f'{t}.{k}', val, info['compare_op'])} "
+                clause = self._calc_operand(f"{info['table_nm']}.{info['key']}", info["value"], info["compare_op"])
+                if "sub" in info and info["sub"]:
+                    where_clause += f"{info['op']} ({clause} "
+                    for sub in info["sub"]:
+                        sub_clause = self._calc_operand(
+                            f"{sub['table_nm']}.{sub['key']}", sub["value"], sub["compare_op"]
+                        )
+                        where_clause += f"{sub['op']} {sub_clause}"
+                    where_clause += ") "
+                else:
+                    where_clause += f"{info['op']} {clause} "
+
             # TODO: sub where conditions
 
         order_clause = ""

@@ -3,7 +3,7 @@ from typing import TypeVar, Tuple, List, Dict
 
 from fastapi import FastAPI
 
-T = TypeVar("T", bound="Connector")
+T = TypeVar("T", bound="Executor")
 
 
 class Connector(metaclass=abc.ABCMeta):
@@ -30,7 +30,7 @@ class Executor(metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def execute(self, tablename, **kwargs):
+    def execute(self, **kwargs):
         ...
 
     @abc.abstractmethod
