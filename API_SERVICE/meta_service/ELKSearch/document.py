@@ -54,13 +54,27 @@ class DocumentManager:
         :param pk_value: 삭제할 데이터를 특정하기 위한 변수
         :return:
         """
-        del_query = {"query": make_format("match",pk_name,pk_value)}
+        del_query = {"query": make_format("match", pk_name, pk_value)}
         self.connect.delete_by_query(index=self.index, body=del_query)
 
-    def set_pagination(self, size: int, from_: int) -> None:
+    def set_pagination(self, size: int = 0, from_: int = 0) -> None:
         """
         검색 결과를 어디서 부터 얼만큼 출력할지 설정하는 모듈
         find 모듈을 사용하기 전에 선행 되어야함
         """
         self.size = size
         self.page = size * from_
+
+    def prefix(self, body: dict, source: list = ...) -> dict:
+        """
+        :param body:
+        :param source:
+        :return:
+        """
+        prefix_query = make_format("query","prefix", body)
+        return self.connect.search(
+            index=self.index,
+            body=prefix_query,
+            size=self.size,
+            _source=source
+        )
