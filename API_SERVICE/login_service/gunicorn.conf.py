@@ -17,7 +17,7 @@
 #       range.
 #
 
-bind = "0.0.0.0:8010"
+bind = "0.0.0.0:21000"
 backlog = 2048
 
 #
@@ -127,7 +127,7 @@ spew = False
 #
 
 daemon = False
-pidfile = "./gunicorn-router.pid"
+pidfile = "./gunicorn-login.pid"
 umask = 0
 user = None
 group = None
@@ -144,10 +144,10 @@ tmp_upload_dir = None
 #
 #       A string of "debug", "info", "warning", "error", "critical"
 #
-logfile = "./router.log"
-errorlog = "./router-error.log"
+logfile = "./log/login.log"
+errorlog = "./log/login-error.log"
 loglevel = "info"
-accesslog = "./router.log"
+accesslog = "./log/login.log"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
 #
@@ -163,7 +163,7 @@ access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"
 #       A string or None to choose a default of something like 'gunicorn'.
 #
 
-proc_name = "API-Router"
+proc_name = "API-Service-login"
 
 
 #

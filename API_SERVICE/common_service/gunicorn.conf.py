@@ -73,7 +73,7 @@ worker_class = "uvicorn.workers.UvicornWorker"
 worker_connections = 1000
 timeout = 60
 keepalive = 2
-reload = True
+reload = False
 
 #
 #   spew - Install a trace function that spews every line of Python
