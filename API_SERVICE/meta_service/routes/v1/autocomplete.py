@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 
 class Prefix(BaseModel):
+    size: int
     col_nm: str
     keyword: str
 
@@ -21,11 +22,11 @@ logger = logging.getLogger()
 
 
 @router.post("autocomplete", response_model=dict)
-def autocomplete(input: Prefix, size: int):
+def autocomplete(input: Prefix):
     index = ""
 
     try:
-        result = common_prefix(local_server, index, size, input)
+        result = common_prefix(local_server, index, input)
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
