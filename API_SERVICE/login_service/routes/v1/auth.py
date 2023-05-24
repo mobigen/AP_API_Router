@@ -1,13 +1,15 @@
 from datetime import datetime, timedelta
-from typing import Any, Union
+
+import bcrypt
 import jwt
-from login_service.common.const import ALGORITHM, COOKIE_NAME, EXPIRE_DELTA, SECRET_KEY
-from login_service.database.conn import db
-from login_service.common.config import logger
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
+
+from libs.database.connector import Executor
+from login_service.common.config import logger
+from login_service.common.const import ALGORITHM, EXPIRE_DELTA, SECRET_KEY
+from login_service.database.conn import db
 
 
 class LoginInfo(BaseModel):
@@ -18,13 +20,30 @@ class LoginInfo(BaseModel):
         fields = {"password": {"exclude": True}}
 
 
+class UserToken(BaseModel):
+    user_id: str
+    id: str
+    name: str
+    auth_cd: str
+    mobile_phone: str
+    phone: str
+    email: str
+    reg_date: str
+    amd_date: str
+
+
 router = APIRouter()
 
 
+@router.post("/register")
+async def register():
+    hash_pw = bcrypt.hashpw("password".encode("utf-8"), bcrypt.gensalt())
+
+
 @router.post("/login")
-async def login(params: LoginInfo, request: Request, session: Union[Session, Any] = Depends(db.get_db)) -> JSONResponse:
+async def login(params: LoginInfo, request: Request, session: Executor = Depends(db.get_db)) -> JSONResponse:
     try:
-        row = db.query(
+        row = session.query(
             **{
                 "table_nm": "user_bas",
                 "where_info": [
@@ -36,22 +55,15 @@ async def login(params: LoginInfo, request: Request, session: Union[Session, Any
         if not row:
             return JSONResponse(content={"result": 0, "errorMessage": "user not found"})
 
-        if row["password"] != params.password:
-            # TODO: 암호화 복호화 필요?
-            return JSONResponse(content={"result": 0, "errorMessage": "password not valid"})
+        is_verified = bcrypt.checkpw(params.password.encode("utf-8"), row["password"].encode("utf-8"))
+        if not is_verified:
+            return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "password not valid"})
 
         access_token = create_access_token(data=row)
-
-        response = JSONResponse(content={"result": 1, "errorMessage": ""})
-        response.set_cookie(
-            key=COOKIE_NAME,
-            value=access_token,
-            max_age=3600,
-            secure=False,
-            httponly=True,
+        return JSONResponse(
+            status_code=200,
+            content={"result": 1, "errorMessage": "", "data": {"body": [{"Authorization": f"Bearer {access_token}"}]}},
         )
-
-        return response
     except Exception as e:
         logger.error(e, exc_info=True)
         return JSONResponse(content={"result": 0, "errorMessage": ""})

@@ -1,6 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
-from login_service.routes.v1 import login
+from login_service.routes.v1 import auth
 from login_service.common.config import settings
 from login_service.database.conn import db
 
@@ -10,7 +10,7 @@ def create_app():
     print(settings.dict())
     db.init_app(app_, **settings.dict())
 
-    app_.include_router(login.router, prefix="/portal/api/common")
+    app_.include_router(auth.router, prefix="/portal/api/common")
 
     return app_
 
