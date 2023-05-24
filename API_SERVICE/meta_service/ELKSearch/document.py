@@ -1,4 +1,4 @@
-from meta_service.ELKSearch.Utils.base import set_body
+from meta_service.ELKSearch.Utils.base import set_body, make_format
 
 
 class DocumentManager:
@@ -15,16 +15,27 @@ class DocumentManager:
         self.size = size
         self.page = size * from_
 
-    def create(self):
-        pass
+    def insert(self):
+        """
+        document 데이터 추가
+        """
+        return self.connect.index(index=self.index, body=self.body)
 
-    def update(self):
-        pass
+    def update(self, doc_id):
+        """
+        document update
+        id 값을 이용해 document를 특정하고 body의 내용을 덮어쓰기 하는 기능
+        :param doc_id: els에서 설정된 document id 값
+        :return:
+        """
+        return self.connect.update(index=self.index, id=doc_id, body=self.body)
 
     def find(self, source: list = ...) -> dict:
         """
         els 검색 기능
         특정 index에서 조건에 맞는 document를 출력
+        :param source: 출력할 결과 컬럼명
+        :return:
         """
         return self.connect.search(
             index=self.index,
@@ -34,8 +45,17 @@ class DocumentManager:
             _source=source
         )
 
-    def delete(self):
-        pass
+    def delete(self, pk_name: str, pk_value):
+        """
+        els document 삭제 기능
+        특정 document를 검색해서 검색 결과에 해당하는 항목을 삭제함
+        pk_name,pk_value가 유니크한 값이 아니면 여러개의 항목이 삭제될 수 있음
+        :param pk_name: 삭제할 데이터를 특정하기 위한 컬럼명
+        :param pk_value: 삭제할 데이터를 특정하기 위한 변수
+        :return:
+        """
+        del_query = {"query": make_format("match",pk_name,pk_value)}
+        self.connect.delete_by_query(index=self.index, body=del_query)
 
     def set_pagination(self, size: int, from_: int) -> None:
         """
