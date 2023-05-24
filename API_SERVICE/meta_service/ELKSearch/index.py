@@ -1,7 +1,7 @@
 import os
 import json
 # ELKSearch 경로
-ELSSearch_PATH = os.path.dirname(os.path.abspath(__file__))
+ELKSearch_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
 class Index:
@@ -21,7 +21,7 @@ class Index:
         :return: els에 요청한 결과 성공/실패는 bool 타입으로 반환 된다
         """
         if path is None:
-            path = f"{ELSSearch_PATH}/mapping/{index}.json"
+            path = f"{ELKSearch_PATH}/mapping/{index}.json"
 
         with open(path, "r") as fp:
             mapping = json.load(fp)

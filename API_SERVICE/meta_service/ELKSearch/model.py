@@ -2,13 +2,13 @@ from typing import List, Union
 from pydantic import BaseModel, Field, dataclasses
 
 
-class ElsServerConfig(BaseModel):
+class ElkServerConfig(BaseModel):
     host: str
     port: str
 
 
 @dataclasses.dataclass
-class ElsIndexConfig(BaseModel):
+class ElkIndexConfig(BaseModel):
     host: str
     port: str
     index: str
