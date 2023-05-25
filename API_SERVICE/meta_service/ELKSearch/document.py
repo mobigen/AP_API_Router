@@ -1,4 +1,5 @@
-from meta_service.ELKSearch.Utils.base import set_body, make_format
+from meta_service.ELKSearch.Utils.base import make_format
+from meta_service.ELKSearch.Utils.document_utils import set_source
 
 
 class DocumentManager:
@@ -11,9 +12,12 @@ class DocumentManager:
         """
         self.connect = connect
         self.index = index
-        self.body = set_body()
+        self.body = dict()
         self.size = size
         self.page = size * from_
+
+    def set_body(self,body: dict):
+        self.body = body
 
     def insert(self):
         """
@@ -30,13 +34,14 @@ class DocumentManager:
         """
         return self.connect.update(index=self.index, id=doc_id, body=self.body)
 
-    def find(self, source: list = ...) -> dict:
+    def find(self, source: list = None) -> dict:
         """
         els 검색 기능
         특정 index에서 조건에 맞는 document를 출력
         :param source: 출력할 결과 컬럼명
         :return:
         """
+        source = set_source(source)
         return self.connect.search(
             index=self.index,
             body=self.body,
@@ -65,12 +70,14 @@ class DocumentManager:
         self.size = size
         self.page = size * from_
 
-    def prefix(self, body: dict, source: list = ...) -> dict:
+    def prefix(self, body: dict, source: list = None) -> dict:
         """
         :param body:
         :param source:
         :return:
         """
+        source = set_source(source)
+        print(source)
         prefix_query = make_format("query","prefix", body)
         return self.connect.search(
             index=self.index,
