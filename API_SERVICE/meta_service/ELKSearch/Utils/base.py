@@ -16,7 +16,3 @@ def symbol_filter(keywords: str):
     words = " ".join(keywords).strip()
     words = re.sub(f"[{string.punctuation}]"," ",words)
     return words
-
-
-def set_body():
-    return {"sort": []}
