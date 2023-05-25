@@ -18,32 +18,32 @@ logger = logging.getLogger()
 
 class LoginInfo(BaseModel):
     user_id: str
-    password: str = "1234"
+    password: str
 
 
 class RegisterInfo(BaseModel):
     usridx: str
     id: str
     pwd: str
-    nm: str
-    mbphne: str
-    phne: str
-    email: str
-    deptidx: str
-    roleidx: str
-    aprvusr: str
-    aprvyn: str
-    useyn: str
-    rgstusridx: str
-    mdfcusridx: str
-    rgstdt: str
-    mdfcdt: str
+    nm: Optional[str]
+    mbphne: Optional[str]
+    phne: Optional[str]
+    email: Optional[str]
+    deptidx: Optional[str]
+    roleidx: Optional[str]
+    aprvusr: Optional[str]
+    aprvyn: Optional[str]
+    useyn: Optional[str]
+    rgstusridx: Optional[str]
+    mdfcusridx: Optional[str]
+    rgstdt: Optional[str]
+    mdfcdt: Optional[str]
 
 
 class UserToken(BaseModel):
-    usridx: Optional[str]
-    id: Optional[str]
-    pwd: Optional[str]
+    usridx: str
+    id: str
+    pwd: str
     nm: Optional[str]
     mbphne: Optional[str]
     phne: Optional[str]
@@ -66,20 +66,22 @@ router = APIRouter()
 
 
 @router.post("/user/register")
-async def register():
-    hash_pw = bcrypt.hashpw("password".encode("utf-8"), bcrypt.gensalt()).decode(encoding="utf-8")
+async def register(params: RegisterInfo, session: Executor = Depends(db.get_db)):
+    hash_pw = bcrypt.hashpw(params.pwd.encode("utf-8"), bcrypt.gensalt()).decode(encoding="utf-8")
+    params.pwd = hash_pw
+    try:
+        session.execute(method="INSERT", table_nm="usr_mgmt", data=params.dict())
+        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
 @router.post("/user/login")
 async def login(params: LoginInfo, session: Executor = Depends(db.get_db)) -> JSONResponse:
     try:
         row = session.query(
-            **{
-                "table_nm": "USR_MGMT",
-                "where_info": [
-                    {"table_nm": "USR_MGMT", "key": "id", "value": params.user_id, "compare_op": "=", "op": ""}
-                ],
-            }
+            table_nm="USR_MGMT",
+            where_info=[{"table_nm": "USR_MGMT", "key": "id", "value": params.user_id, "compare_op": "=", "op": ""}],
         ).first()
 
         if not row:
@@ -102,7 +104,10 @@ async def login(params: LoginInfo, session: Executor = Depends(db.get_db)) -> JS
 @router.get("/user/info")
 async def info(request: Request):
     token = request.headers.get("Authorization")
-    return jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+    try:
+        return jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+    except jwt.DecodeError as e:
+        logger.error(f"{e}, token :: {token}", exc_info=True)
 
 
 def create_access_token(data: dict = None, expires_delta: int = EXPIRE_DELTA):
