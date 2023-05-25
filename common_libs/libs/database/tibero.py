@@ -110,11 +110,20 @@ class QueryExecutor(Executor):
             raise e
 
     def execute(self, **kwargs):
+        def parse_update_data(datas):
+            ret = []
+            for data in datas:
+                if isinstance(data, str) and data.upper().startswith("NOW"):
+                    ret.append(datetime.now())
+                elif isinstance(data, str) and data.lower().startswith("`"):
+                    pass
+                else:
+                    ret.append(data)
+            return tuple(ret)
+
         method = str(kwargs.get("method")).lower()
         data = kwargs.get("data")
-        params = tuple(
-            map(lambda x: datetime.now() if isinstance(x, str) and x.upper().startswith("NOW") else x, data.values())
-        )
+        params = parse_update_data(data.values())
 
         query = ""
         if method == "insert":
@@ -123,7 +132,8 @@ class QueryExecutor(Executor):
             query += f"values ({','.join(['?']*len(data))})"
         elif method == "update":
             query += f"update {kwargs.get('table_nm')} "
-            query += f"set {','.join([f'{k} = ?' for k in data.keys()])} "
+            place_hold = [f"{k} = ?" if not data[k].startswith("`") else f"{k} = {data[k][1:]}" for k in data.keys()]
+            query += f"set {','.join(place_hold)} "
 
             k0, *ks = kwargs.get("key")
             query += f"where {k0} = '{data[k0]}' "
@@ -143,6 +153,7 @@ class QueryExecutor(Executor):
             self.conn.commit()
         except Exception as e:
             self.conn.rollback()
+            logger.error(f"error at params :: {params}")
             raise e
 
     def _get_headers(self, cursor) -> list[str]:

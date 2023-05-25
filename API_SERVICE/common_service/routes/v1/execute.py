@@ -24,9 +24,9 @@ router = APIRouter()
 @router.post("/common-execute")
 async def common_execute(params: List[CommonExecute], session: Executor = Depends(db.get_db)):
     try:
-        logger.info([param.dict() for param in params])
         for param in params:
             session.execute(**param.dict())
         return JSONResponse(content={"result": 1, "errorMessage": ""}, status_code=200)
     except Exception as e:
+        logger.error(f"{params}, {str(e)}", exc_info=True)
         return JSONResponse(content={"result": 0, "errorMessage": str(e)}, status_code=400)
