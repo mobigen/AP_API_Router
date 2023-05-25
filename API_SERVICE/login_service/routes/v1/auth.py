@@ -65,13 +65,13 @@ class UserToken(BaseModel):
 router = APIRouter()
 
 
-@router.post("/register")
+@router.post("/user/register")
 async def register():
     hash_pw = bcrypt.hashpw("password".encode("utf-8"), bcrypt.gensalt()).decode(encoding="utf-8")
 
 
-@router.post("/login")
-async def login(params: LoginInfo, request: Request, session: Executor = Depends(db.get_db)) -> JSONResponse:
+@router.post("/user/login")
+async def login(params: LoginInfo, session: Executor = Depends(db.get_db)) -> JSONResponse:
     try:
         row = session.query(
             **{
@@ -97,6 +97,12 @@ async def login(params: LoginInfo, request: Request, session: Executor = Depends
     except Exception as e:
         logger.error(e, exc_info=True)
         return JSONResponse(content={"result": 0, "errorMessage": ""})
+
+
+@router.get("/user/info")
+async def info(request: Request):
+    token = request.headers.get("Authorization")
+    return jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
 
 
 def create_access_token(data: dict = None, expires_delta: int = EXPIRE_DELTA):
