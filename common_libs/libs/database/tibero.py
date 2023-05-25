@@ -132,7 +132,10 @@ class QueryExecutor(Executor):
             query += f"values ({','.join(['?']*len(data))})"
         elif method == "update":
             query += f"update {kwargs.get('table_nm')} "
-            place_hold = [f"{k} = ?" if not data[k].startswith("`") else f"{k} = {data[k][1:]}" for k in data.keys()]
+            place_hold = [
+                f"{k} = {data[k][1:]}" if isinstance(data[k], str) and data[k].startswith("`") else f"{k} = ?"
+                for k in data.keys()
+            ]
             query += f"set {','.join(place_hold)} "
 
             k0, *ks = kwargs.get("key")
