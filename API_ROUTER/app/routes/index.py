@@ -33,21 +33,19 @@ async def index(request: Request, route_path: str, session: Executor = Depends(d
             data = (await request.body()).decode()
 
     row = session.query(
-        **{
-            "table_nm": "api_item_bas",
-            "key": "srvr_nm",
-            "join_info": {"table_nm": "api_item_server_dtl", "key": "srvr_nm"},
-            "where_info": [
-                {
-                    "table_nm": "api_item_bas",
-                    "key": "route_url",
-                    "value": f"/{route_path}",
-                    "compare_op": "=",
-                    "op": "",
-                },
-                {"table_nm": "api_item_bas", "key": "mthd", "value": f"{method}", "compare_op": "=", "op": "and"},
-            ],
-        }
+        table_nm="api_item_bas",
+        key="srvr_nm",
+        join_info={"table_nm": "api_item_server_dtl", "key": "srvr_nm"},
+        where_info=[
+            {
+                "table_nm": "api_item_bas",
+                "key": "route_url",
+                "value": f"/{route_path}",
+                "compare_op": "=",
+                "op": "",
+            },
+            {"table_nm": "api_item_bas", "key": "mthd", "value": f"{method}", "compare_op": "=", "op": "and"},
+        ],
     ).first()
 
     if not row:
