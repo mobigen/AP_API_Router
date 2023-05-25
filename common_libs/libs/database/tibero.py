@@ -1,4 +1,3 @@
-import datetime
 import logging
 from datetime import datetime
 from decimal import Decimal
@@ -44,7 +43,7 @@ class QueryExecutor(Executor):
 
         where_clause = ""
         if where_info := kwargs.get("where_info"):
-            where_clause += f"where "
+            where_clause += "where "
             for info in where_info:
                 clause = self._calc_operand(f"{info['table_nm']}.{info['key']}", info["value"], info["compare_op"])
                 if "sub" in info and info["sub"]:
