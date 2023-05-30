@@ -1,6 +1,6 @@
 from sqlalchemy.orm import declarative_base
 
-from app.common.config import settings
+from login_service.common.config import settings
 from libs.database.tibero import TiberoConnector
 from libs.database.orm import SQLAlchemyConnector
 

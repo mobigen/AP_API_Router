@@ -1,14 +1,15 @@
-from common_service.routes.v1 import select, execute
 import uvicorn
 from fastapi import FastAPI
 
+from common_service.common.config import logger
 from common_service.common.config import settings
 from common_service.database.conn import db
+from common_service.routes.v1 import select, execute
 
 
 def create_app():
     app_ = FastAPI()
-    print(settings.dict())
+    logger.info(settings.dict())
     db.init_app(app_, **settings.dict())
 
     app_.include_router(select.router, prefix="/portal/api/common")
