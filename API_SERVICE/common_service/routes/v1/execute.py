@@ -28,5 +28,7 @@ async def common_execute(params: List[CommonExecute], session: Executor = Depend
             session.execute(**param.dict())
         return JSONResponse(content={"result": 1, "errorMessage": ""}, status_code=200)
     except Exception as e:
-        logger.error(f"{params}, {str(e)}", exc_info=True)
+        logger.error(f"{str(e)}", exc_info=True)
+        for param in params:
+            logger.info(param.dict())
         return JSONResponse(content={"result": 0, "errorMessage": str(e)}, status_code=400)
