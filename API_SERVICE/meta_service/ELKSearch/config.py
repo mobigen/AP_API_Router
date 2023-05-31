@@ -14,3 +14,8 @@ local_server = ElkServerConfig(
     host="0.0.0.0",
     port="9200"
 )
+
+경dev_server = ElkServerConfig(
+    host="192.168.101.164",
+    port="9200"
+)
