@@ -70,6 +70,16 @@ async def register(params: RegisterInfo, session: Executor = Depends(db.get_db))
     hash_pw = bcrypt.hashpw(params.pwd.encode("utf-8"), bcrypt.gensalt()).decode(encoding="utf-8")
     params.pwd = hash_pw
     try:
+        logger.info(params)
+        row = session.query(
+            table_nm="usr_mgmt",
+            where_info=[
+                {"table_nm": "usr_mgmt", "key": "usridx", "value": params.usridx, "compare_op": "=", "op": ""},
+                {"table_nm": "usr_mgmt", "key": "id", "value": params.id, "compare_op": "=", "op": "AND"},
+            ],
+        ).first()
+        if row:
+            return JSONResponse(status_code=200, content={"result": 1, "errorMessage": "Already registered"})
         session.execute(method="INSERT", table_nm="usr_mgmt", data=params.dict())
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     except Exception as e:
