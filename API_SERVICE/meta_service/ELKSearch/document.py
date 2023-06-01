@@ -73,7 +73,7 @@ class DocumentManager:
     def prefix(self, body: dict, source: list = None) -> dict:
         """
         :param body:
-        :param source:
+        :param source: 반환 받을 index의 필드 빈 list 값 이면 전체 출력
         :return:
         """
         source = set_source(source)
@@ -85,3 +85,9 @@ class DocumentManager:
             size=self.size,
             _source=source
         )
+
+    def count(self, body: dict) -> int:
+        """
+        :param body: elasticsearch에 전송할 query
+        :return: query 결과로 나온 item 갯 수        """
+        return self.connect.count(index=self.index, body=body)["count"]
