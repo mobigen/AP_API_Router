@@ -16,11 +16,11 @@ logger = logging.getLogger()
 
 
 @router.post("/els-update", response_model=dict)
-def els_update(session: Connector = Depends(db.get_db)):
-    index = "vw_co_if"
+def els_update(table_name: str, session: Connector = Depends(db.get_db)):
+    index = table_name.lower()
 
-    data_query = "SELECT {0} FROM VW_CO_IF;"
-    col_query = "SELECT column_name FROM all_tab_columns WHERE table_name = 'VW_CO_IF';"
+    data_query = "SELECT {0} FROM {1};"
+    col_query = f"SELECT column_name FROM all_tab_columns WHERE table_name = '{table_name}';"
     try:
         cur = session.conn.cursor()
         cur.execute(col_query)
@@ -29,7 +29,7 @@ def els_update(session: Connector = Depends(db.get_db)):
         # 'MDFCDT', 'IFOFFRYN', 'SALPRC', 'SYSTDVL', 'CORETC', 'NRTOFFR', 'COCT', 'DFNMTRA']
         columns = [col_nm[0] for col_nm in cur.fetchall()]
 
-        data_query = data_query.format(",".join(columns))
+        data_query = data_query.format(",".join(columns), table_name)
         cur.execute(data_query)
 
         docmanager = default_search_set(dev_server, index)
