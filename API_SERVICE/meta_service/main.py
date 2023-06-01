@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from meta_service.common.config import logger
 from meta_service.common.config import settings
 from meta_service.database.conn import db
-from meta_service.routes.v1 import autocomplete, els_data_search
+from meta_service.routes.v1 import autocomplete, els_data_search, els_update
 
 
 def create_app():
@@ -14,6 +14,7 @@ def create_app():
 
     app_.include_router(autocomplete.router, prefix="/portal/api/meta")
     app_.include_router(els_data_search.router, prefix="/portal/api/meta")
+    app_.include_router(els_update.router, prefix="/portal/api/meta")
 
     return app_
 
