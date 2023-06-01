@@ -19,11 +19,11 @@ class DocumentManager:
     def set_body(self,body: dict):
         self.body = body
 
-    def insert(self):
+    def insert(self, doc_id: str):
         """
         document 데이터 추가
         """
-        return self.connect.index(index=self.index, body=self.body)
+        return self.connect.index(index=self.index, body=self.body, id=doc_id)
 
     def update(self, doc_id):
         """
