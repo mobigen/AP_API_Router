@@ -77,7 +77,6 @@ class DocumentManager:
         :return:
         """
         source = set_source(source)
-        print(source)
         prefix_query = make_format("query","prefix", body)
         return self.connect.search(
             index=self.index,
