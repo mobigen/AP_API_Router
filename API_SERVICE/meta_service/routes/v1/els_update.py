@@ -1,4 +1,5 @@
 import logging
+import decimal
 
 from fastapi import Depends, APIRouter
 
@@ -23,7 +24,6 @@ def els_update(session: Connector = Depends(db.get_db)):
     try:
         cur = session.conn.cursor()
         cur.execute(col_query)
-        # column 소문자 처리
         # columns ['IDX', 'CONM', 'DFNMTRAIDX', 'BZRGSTCD', 'PRCCTCD',
         # 'COCTIDX', 'PSNIDX', 'PSNNM', 'PHONN', 'OFFRDT', 'ENDDT',
         # 'MDFCDT', 'IFOFFRYN', 'SALPRC', 'SYSTDVL', 'CORETC', 'NRTOFFR', 'COCT', 'DFNMTRA']
@@ -34,17 +34,21 @@ def els_update(session: Connector = Depends(db.get_db)):
 
         docmanager = default_search_set(dev_server, index)
 
-        insert_dataset = []
+        # insert_dataset = []
         for row in cur.fetchall():
             insert_body = dict()
             for i in range(0,len(columns)):
-                insert_body[columns[i]] = row[i]
+                col = columns[i].lower()
+                if type(row[i]) == decimal.Decimal:
+                    insert_body[col] = int(row[i])
+                else:
+                    insert_body[col] = row[i]
+
             docmanager.set_body(insert_body)
-            docmanager.insert(insert_body["IDX"])
-            # insert_dataset.append(insert_body)
-
-
-        result = {"result":0,"data": "test"}
+            logger.info(docmanager.insert(insert_body["idx"]))
+        #     insert_dataset.append(insert_body)
+        # logger.info(len(insert_dataset))
+        result = {"result":1,"data": "test"}
 
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
