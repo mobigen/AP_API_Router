@@ -127,7 +127,6 @@ spew = False
 #
 
 daemon = False
-pidfile = "./gunicorn-common.pid"
 umask = 0
 user = None
 group = None
