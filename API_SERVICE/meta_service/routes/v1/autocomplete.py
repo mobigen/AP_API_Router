@@ -31,7 +31,9 @@ def autocomplete(input: Prefix):
     try:
         query = {input.col_nm: input.keyword}
         docmanager = default_search_set(dev_server, input.index, input.size)
-        result = {"result": 1,"data": search_filter(docmanager.prefix(body=query))}
+        prefix_data = search_filter(docmanager.prefix(body=query, source=[input.col_nm]))
+        prefix_data = [data[input.col_nm] for data in prefix_data]
+        result = {"result": 1,"dataList": prefix_data}
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
