@@ -16,7 +16,7 @@ class ElkIndexConfig(BaseModel):
 
 class CoreOption(BaseModel):
     field: Union[list, str]
-    keywords: list
+    keywords: Union[list, str]
     operator: str
 
 
