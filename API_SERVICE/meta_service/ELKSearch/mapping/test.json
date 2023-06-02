@@ -1,0 +1,9 @@
+{
+  "mappings": {
+    "properties": {
+      "test_id": {"type": "keyword"},
+      "name": {"type": "text"},
+      "num": {"type": "integer"}
+    }
+  }
+}
