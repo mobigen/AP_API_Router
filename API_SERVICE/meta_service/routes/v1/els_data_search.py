@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from meta_service.database.conn import db
 from libs.database.connector import Connector
@@ -18,7 +18,7 @@ router = APIRouter()
 logger = logging.getLogger()
 
 @router.post("/search")
-def search(input: InputModel):
+def search(input: InputModel, session: Connector = Depends(db.get_db)):
     """
 
     :param input:
@@ -27,8 +27,11 @@ def search(input: InputModel):
     try:
         len_search = len(input.searchOption)
         len_filter = len(input.filterOption)
-        docmanager = default_search_set(dev_server, input.index, input.size, input.from_)
 
+        # from_ 0 부터 시작해야함, web에서는 1부터 넘어오기 때문에 1을 빼준다
+        docmanager = default_search_set(dev_server, input.index, input.size, input.from_ - 1)
+
+        # query에 조건이 없으면 match all 실행 
         if not any([len_filter,len_search]):
             body = make_format("query","match_all",dict())
         else:
@@ -37,8 +40,11 @@ def search(input: InputModel):
             body = make_format("query","bool", {"must": search_query,"filter": filter_query})
 
         docmanager.set_body(body)
-        logger.info(body)
-        data = {"header": "", "count": docmanager.count(body), "body": search_filter(docmanager.find(input.resultField))}
+        data = {
+            "header": session.get_column_info(input.index.upper()),
+            "count": docmanager.count(body),
+            "body": search_filter(docmanager.find(input.resultField))
+        }
         result = {"result": 1, "data": data}
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}

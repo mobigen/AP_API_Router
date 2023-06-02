@@ -23,11 +23,14 @@ def base_query(len_query:int, queryOption: list) -> list:
     if len_query:
         query_func = "multi_match"
         query_type = "phrase_prefix"
-        return [ {query_func:{
-            "query": " ".join(query.keywords),
-            "fields": query.field,
-            "type": query_type
-        }} for query in queryOption]
+
+        return [
+            {query_func: {"query": str(query.keywords[0]), "fields": query.field, "type": query_type}}
+            if len(query.keywords) == 1 else 
+            {query_func: {"query": " ".join(query.keywords), "fields": query.field, "operator": query.operator}}
+            for query in queryOption
+        ]
+
     else:
         return queryOption
     
