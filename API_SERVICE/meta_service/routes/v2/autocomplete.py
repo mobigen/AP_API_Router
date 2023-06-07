@@ -30,6 +30,22 @@ logger = logging.getLogger()
 
 @router.post("/autocomplete", response_model=dict)
 def autocomplete(input: Prefix):
+    """
+    :param input:
+    {
+        "index": "index_name",
+        "size": 5,
+        "fields": [
+            "col1", "col2"
+        ],
+        "query": "search keyword"
+    }
+    :return:
+    {
+        "result": 1,
+        "data": ["data1","data2"..."data5"]
+    }
+    """
     try:
         keyword = input.query
         docmanager = default_search_set(dev_server, input.index, input.size)

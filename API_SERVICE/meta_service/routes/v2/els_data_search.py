@@ -42,7 +42,7 @@ def search(input: InputModel, session: Connector = Depends(db.get_db)):
         "data": {
             "header": {"column_name": "col1", "kor_column_name": "컬럼명1"},
             "count": "10",  # total count
-            "body": [{data set 1}, {data set 2} ...]
+            "body": [{data set 1}, {data set 2} ... {data set 10}]
         }
     }
     """
