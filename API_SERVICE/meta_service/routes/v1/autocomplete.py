@@ -32,11 +32,16 @@ logger = logging.getLogger()
 def autocomplete(input: CoreOption, index: str, size: int):
     #input.field는 list 형식으로 받아야함, keywords는 string으로 받아야함
     try:
+        
         docmanager = default_search_set(dev_server, index, size)
         if len(input.field) > 1:
             # multi field 일 때
             logger.info("multi_match")
             prefix_query = base_query(1, [input])
+            
+            for query_dict in prefix_query:
+                query_dict["multi_match"].pop("operator",None)
+            
             body = make_format("query","bool",{"must": prefix_query})
             docmanager.set_body(body)
             prefix_dict = search_filter(docmanager.find(input.field))
