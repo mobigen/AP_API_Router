@@ -38,7 +38,6 @@ def autocomplete(input: Prefix):
         del input.size
         
         body = make_format("query","query_string",input.dict())
-        
         docmanager.set_body(body)
         prefix_dict = search_filter(docmanager.find(input.fields))
 
@@ -46,7 +45,8 @@ def autocomplete(input: Prefix):
             return {"result": 1,"data": []}
 
         prefix_data = [ word for data in prefix_dict for word in data.values() if keyword in word]
-        result = {"result": 1,"data": prefix_data}
+        # 데이터셋에서 해당 되는 데이터가 여러개 있을 수 있어 prefix_data에 size를 줌
+        result = {"result": 1,"data": prefix_data[:docmanager.size]}
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
