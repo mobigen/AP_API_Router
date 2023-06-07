@@ -29,7 +29,7 @@ class RegisterInfo(BaseModel):
     mbphne: Optional[str]
     phne: Optional[str]
     email: Optional[str]
-    deptidx: Optional[str]
+    dept: Optional[str]
     roleidx: Optional[str]
     aprvusr: Optional[str]
     aprvyn: Optional[str]
@@ -37,7 +37,15 @@ class RegisterInfo(BaseModel):
     rgstusridx: Optional[str]
     mdfcusridx: Optional[str]
     rgstdt: Optional[str]
-    mdfcdt: Optional[str]
+    bdt: Optional[str]
+    gn: Optional[str]
+    usrtpidx: Optional[str]
+    usrtp: Optional[str]
+    usrclsp: Optional[str]
+    work: Optional[str]
+    instidx: Optional[str]
+    inst: Optional[str]
+    cmpno: Optional[str]
 
 
 class UserToken(BaseModel):
