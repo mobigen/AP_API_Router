@@ -96,6 +96,11 @@ async def register(params: RegisterInfo, session: Executor = Depends(db.get_db))
 
 @router.post("/user/login")
 async def login(params: LoginInfo, session: Executor = Depends(db.get_db)) -> JSONResponse:
+    """
+    F01: id, pwd 불일치
+    F02: 관리자 승인 필요
+    F03: 삭제된 계정
+    """
     try:
         row = session.query(
             table_nm="USR_MGMT",
@@ -103,11 +108,16 @@ async def login(params: LoginInfo, session: Executor = Depends(db.get_db)) -> JS
         ).first()
 
         if not row:
-            return JSONResponse(content={"result": 0, "errorMessage": "user not found"})
+            return JSONResponse(content={"result": 0, "errorMessage": "F01"})
+        elif row["useyn"] != "Y":
+            return JSONResponse(content={"result": 0, "errorMessage": "F03"})
 
         is_verified = bcrypt.checkpw(params.password.encode("utf-8"), row["pwd"].encode("utf-8"))
         if not is_verified:
-            return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "password not valid"})
+            return JSONResponse(content={"result": 0, "errorMessage": "F01"})
+
+        if row["aprvyn"] != "Y":
+            return JSONResponse(content={"result": 0, "errorMessage": "F02"})
 
         access_token = create_access_token(data=UserToken(**row).dict())
         return JSONResponse(
@@ -116,7 +126,7 @@ async def login(params: LoginInfo, session: Executor = Depends(db.get_db)) -> JS
         )
     except Exception as e:
         logger.error(e, exc_info=True)
-        return JSONResponse(content={"result": 0, "errorMessage": ""})
+        return JSONResponse(statuscode=500, content={"result": 0, "errorMessage": str(e)})
 
 
 @router.get("/user/info")
