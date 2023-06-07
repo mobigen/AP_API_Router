@@ -20,9 +20,31 @@ logger = logging.getLogger()
 @router.post("/search")
 def search(input: InputModel, session: Connector = Depends(db.get_db)):
     """
-
     :param input:
+    {
+        "index": "index_name",
+        "from": 0,    # page
+        "size": 10,   # result size
+        "resultField": ["col1", "col2"],
+        "sortOption": [{"col": "desc"}],
+        "searchOption": [
+            {
+                "field": ["conm"],
+                "operator": "OR",
+                "keywords": ["기업명"]
+            }
+        ],
+        "filterOption": []
+    }
     :return:
+    {
+        "result": 1,
+        "data": {
+            "header": {"column_name": "col1", "kor_column_name": "컬럼명1"},
+            "count": "10",  # total count
+            "body": [{data set 1}, {data set 2} ...]
+        }
+    }
     """
     try:
         len_search = len(input.searchOption)
