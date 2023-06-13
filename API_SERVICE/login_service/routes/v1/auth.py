@@ -4,7 +4,7 @@ from typing import Optional
 
 import bcrypt
 import jwt
-from fastapi import APIRouter, Body, Depends, Request
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
@@ -52,7 +52,7 @@ router = APIRouter()
 
 
 @router.post("/user/register")
-async def register(params: RegisterInfo = Body(embed=True), session: Executor = Depends(db.get_db)):
+async def register(params: RegisterInfo, session: Executor = Depends(db.get_db)):
     hash_pw = bcrypt.hashpw(params.pwd.encode("utf-8"), bcrypt.gensalt()).decode(encoding="utf-8")
     params.pwd = hash_pw
     try:
