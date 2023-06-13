@@ -84,13 +84,10 @@ class QueryExecutor(Executor):
 
     def all(self) -> Tuple[List[dict], int]:
         try:
-            data = self.cur.execute(self._q).fetchall()
-            if data:
-                rows = [
-                    dict(zip(self._get_headers(self.cur), map(lambda x: int(x) if isinstance(x, Decimal) else x, row)))
-                    for row in data
-                ]
-                return rows, int(self.cur.execute(self._cntq).fetchone()[0])
+            rows = self.cur.execute(self._q).fetchall()
+            if rows:
+                datas = [dict(zip(self._get_headers(self.cur), self._parse_select_data(row))) for row in rows]
+                return datas, int(self.cur.execute(self._cntq).fetchone()[0])
         except TypeError as te:
             logger.warning(te)
             return
@@ -99,9 +96,9 @@ class QueryExecutor(Executor):
 
     def first(self) -> Dict:
         try:
-            data = self.cur.execute(self._q).fetchone()
-            if data:
-                return dict(zip(self._get_headers(self.cur), data))
+            row = self.cur.execute(self._q).fetchone()
+            if row:
+                return dict(zip(self._get_headers(self.cur), self._parse_select_data(row)))
         except TypeError as te:
             logger.warning(te)
             return
@@ -157,6 +154,9 @@ class QueryExecutor(Executor):
             self.conn.rollback()
             logger.error(f"error at params :: {params}")
             raise e
+
+    def _parse_select_data(self, row):
+        return map(lambda x: int(x) if isinstance(x, Decimal) else x, row)
 
     def _get_headers(self, cursor) -> list[str]:
         return [d[0].lower() for d in cursor.description]
