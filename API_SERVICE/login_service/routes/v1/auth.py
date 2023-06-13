@@ -4,7 +4,7 @@ from typing import Optional
 
 import bcrypt
 import jwt
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Body, Depends, Request
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
@@ -48,33 +48,11 @@ class RegisterInfo(BaseModel):
     cmpno: Optional[str]
 
 
-class UserToken(BaseModel):
-    usridx: str
-    id: str
-    pwd: str
-    nm: Optional[str]
-    mbphne: Optional[str]
-    phne: Optional[str]
-    email: Optional[str]
-    deptidx: Optional[str]
-    roleidx: Optional[str]
-    aprvusr: Optional[str]
-    aprvyn: Optional[str]
-    useyn: Optional[str]
-    rgstusridx: Optional[str]
-    mdfcusridx: Optional[str]
-    rgstdt: Optional[str]
-    mdfcdt: Optional[str]
-
-    class Config:
-        fields = {"pwd": {"exclude": True}}
-
-
 router = APIRouter()
 
 
 @router.post("/user/register")
-async def register(params: RegisterInfo, session: Executor = Depends(db.get_db)):
+async def register(params: RegisterInfo = Body(embed=True), session: Executor = Depends(db.get_db)):
     hash_pw = bcrypt.hashpw(params.pwd.encode("utf-8"), bcrypt.gensalt()).decode(encoding="utf-8")
     params.pwd = hash_pw
     try:
@@ -119,19 +97,22 @@ async def login(params: LoginInfo, session: Executor = Depends(db.get_db)) -> JS
         if row["aprvyn"] != "Y":
             return JSONResponse(content={"result": 0, "errorMessage": "F02"})
 
-        access_token = create_access_token(data=UserToken(**row).dict())
+        access_token = create_access_token(data=row)
         return JSONResponse(
             status_code=200,
             content={"result": 1, "errorMessage": "", "data": {"body": [{"Authorization": f"{access_token}"}]}},
         )
     except Exception as e:
         logger.error(e, exc_info=True)
-        return JSONResponse(statuscode=500, content={"result": 0, "errorMessage": str(e)})
+        logger.error(f"data :: {params}")
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
 @router.get("/user/info")
 async def info(request: Request):
     token = request.headers.get("Authorization")
+    if token.startswith("bearer "):
+        token = token[7:]
     try:
         return jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
     except jwt.DecodeError as e:
@@ -140,6 +121,7 @@ async def info(request: Request):
 
 def create_access_token(data: dict = None, expires_delta: int = EXPIRE_DELTA):
     to_encode = data.copy()
+    to_encode.pop("pwd")
     if expires_delta:
         to_encode.update({"exp": datetime.utcnow() + timedelta(hours=expires_delta)})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
