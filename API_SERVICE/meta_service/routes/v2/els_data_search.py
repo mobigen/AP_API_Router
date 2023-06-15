@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 
 from meta_service.database.conn import db
 from libs.database.connector import Connector
+from meta_service.common.config import settings
 
 from meta_service.ELKSearch.config import dev_server
 from meta_service.ELKSearch.model import InputModel
@@ -74,7 +75,7 @@ def search(input: InputModel, session: Connector = Depends(db.get_db)):
 
         docmanager.set_body(body)
         data = {
-            "header": session.get_column_info(input.index.upper()),
+            "header": session.get_column_info(input.index, settings.DB_INFO.SCHEMA),
             "count": docmanager.count(body),
             "body": search_filter(docmanager.find(input.resultField))
         }
