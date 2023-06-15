@@ -12,7 +12,7 @@ logger = logging.getLogger()
 
 
 class QueryExecutor(Executor):
-    def __init__(self, conn):
+    def __init__(self, conn: pyodbc.Connection):
         self.conn = conn
         self._q = None
         self._cntq = None
@@ -56,8 +56,6 @@ class QueryExecutor(Executor):
                     where_clause += ") "
                 else:
                     where_clause += f"{info['op']} {clause} "
-
-            # TODO: sub where conditions
 
         order_clause = ""
         if order_info := kwargs.get("order_info"):
@@ -182,9 +180,11 @@ class QueryExecutor(Executor):
         else:
             return f"{k} {operand} '{v}'"
 
-    def get_column_info(self, table_nm) -> List[Dict[str, str]]:
+    def get_column_info(self, table_nm, schema) -> List[Dict[str, str]]:
         # OWNER, TABLE_NAME, COLUMN_NAME, COMMENT
-        query = f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm.upper()}';"
+        query = (
+            f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm.upper()}' AND OWNER = '{schema.upper()}';"
+        )
         logger.info(query)
         self.cur.execute(query)
         return [{"column_name": str(row[2]).lower(), "kor_column_name": row[3]} for row in self.cur.fetchall()]
