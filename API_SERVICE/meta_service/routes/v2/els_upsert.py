@@ -5,9 +5,10 @@ from fastapi import Depends, APIRouter
 
 from meta_service.database.conn import db
 from libs.database.connector import Connector
+from meta_service.common.config import settings
 
 from meta_service.ELKSearch.config import dev_server
-from meta_service.common.search import default_search_set
+from meta_service.common.search import default_search_set, Upsert, exception_col
 
 
 router = APIRouter()
@@ -15,20 +16,27 @@ router = APIRouter()
 logger = logging.getLogger()
 
 
-@router.post("/els-update", response_model=dict)
-def els_update(index: str, session: Connector = Depends(db.get_db)):
+@router.post("/els-upsert", response_model=dict)
+def els_update(input: Upsert, session: Connector = Depends(db.get_db)):
 
-    # data_query = "SELECT {0} FROM {1};"
-    data_query = {"table_nm": index}
-    
+    data_query = {
+        "table_nm": input.index,
+        "where_info": [{
+            "table_nm": input.index,
+            "key": input.key,
+            "value": input.ids,
+            "compare_op": "in",
+            "op": ""
+        }]
+    }
+    logger.info(data_query)
     try:
         cur = session.conn.cursor()
-        column_dict = session.get_column_info(index)
+        column_dict = session.get_column_info(input.index, settings.DB_INFO.SCHEMA)
         columns = [col["column_name"] for col in column_dict]
-        logger.info(columns)
+        
         rows = session.query(**data_query).all()[0]
-
-        docmanager = default_search_set(dev_server, index)
+        docmanager = default_search_set(dev_server, input.index)
 
         insert_dataset = []
         for row in rows:
@@ -38,8 +46,11 @@ def els_update(index: str, session: Connector = Depends(db.get_db)):
                     insert_body[columns[i]] = int(row[columns[i]])
                 else:
                     insert_body[columns[i]] = row[columns[i]]
+
+            insert_body = exception_col(input.index,insert_body)
             docmanager.set_body(insert_body)
-            logger.info(docmanager.insert(insert_body["idx"]))
+            doc_id = insert_body[input.key]
+            logger.info(docmanager.update(doc_id))
         result = {"result":1,"data": "test"}
 
     except Exception as e:
