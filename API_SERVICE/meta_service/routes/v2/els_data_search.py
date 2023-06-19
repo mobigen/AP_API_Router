@@ -61,12 +61,13 @@ def search(input: InputModel, session: Connector = Depends(db.get_db)):
             search_format = "(*{0}*)"
             search_query = []
             for query in input.searchOption:
-                keywords = [search_format.format(keyword) for keyword in query.keywords]
+                keywords = [search_format.format(word) for keyword in query.keywords for word in keyword.split(" ")]
                 if len(keywords) > 1:
-                    keywords = f" {query.operator} ".join(keywords)    
+                    keywords = f" {query.operator.upper()} ".join(keywords)    
                 else:
                     keywords = keywords[0]
                 search_query.append({"query_string": {"query": keywords ,"fields": query.field}})
+                logger.info(search_query)
 
             # search_query = base_query(len_search, input.searchOption)
             filter_query = base_query(len_filter, input.filterOption)
