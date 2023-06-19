@@ -8,7 +8,7 @@ from libs.database.connector import Connector
 from meta_service.common.config import settings
 
 from meta_service.ELKSearch.config import dev_server
-from meta_service.common.search import default_search_set
+from meta_service.common.search import default_search_set, exception_col
 
 
 router = APIRouter()
@@ -48,13 +48,4 @@ def els_update(index: str, session: Connector = Depends(db.get_db)):
         result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
     return result
-
-
-def exception_col(table_nm, insert_body):
-    
-    if table_nm == "vw_co_if":
-        insert_body.pop("mjrdfnprdc", None)
-        insert_body.pop("mjrcvlprdc", None)
-        insert_body.pop("skl", None)
-    return insert_body
 
