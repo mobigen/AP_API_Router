@@ -1,0 +1,40 @@
+{
+    "settings": {
+          "queries.cache.enabled": "true",
+          "refresh_interval":"10s",
+          "max_shingle_diff": 10
+    },
+    "mappings": {
+          "properties": {
+                "idx": {
+                      "type": "text"
+                },
+                "bsnsnm": {
+                      "type": "text"
+                },
+                "spvsntskno": {
+                      "type": "integer"
+                },
+                "rschorgannm": {
+                      "type": "text"
+                },
+                "ctrprc": {
+                      "type": "integer"
+                },
+                "ctrdt": {
+                      "type": "date",
+                      "format":"strict_date_optional_time_nanos||yyyy-MM-dd'T'HH:mm:ss.SSSSSS||yyyy-MM-dd||yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||date_hour_minute_second"
+                },
+                "enddt": {
+                      "type": "date",
+                      "format":"strict_date_optional_time_nanos||yyyy-MM-dd'T'HH:mm:ss.SSSSSS||yyyy-MM-dd||yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||date_hour_minute_second"
+                },
+                "crtcbsnsctidx": {
+                      "type": "text"
+                },
+                "crtcbsnsct": {
+                      "type": "text"
+                }
+          }
+    }
+}

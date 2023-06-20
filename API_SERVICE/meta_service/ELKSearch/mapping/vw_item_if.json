@@ -1,0 +1,47 @@
+{
+    "settings": {
+          "queries.cache.enabled": "true",
+          "refresh_interval":"10s",
+          "max_shingle_diff": 10
+    },
+    "mappings": {
+          "properties": {
+                "idx": {
+                      "type": "text"
+                },
+                "itemnm": {
+                      "type": "text"
+                },
+                "partmtnm": {
+                      "type": "text"
+                },
+                "idtn": {
+                      "type": "text"
+                },
+                "cbsn": {
+                      "type": "text"
+                },
+                "unt": {
+                      "type": "text"
+                },
+                "qty": {
+                      "type": "integer"
+                },
+                "cst": {
+                      "type": "integer"
+                },
+                "ctrprc": {
+                      "type": "integer"
+                },
+                "ctryr": {
+                      "type": "integer"
+                },
+                "wpnsystctidx": {
+                      "type": "text"
+                },
+                "wpnsystct": {
+                      "type": "text"
+                }
+          }
+    }
+}
