@@ -5,9 +5,10 @@ from fastapi import Depends, APIRouter
 
 from meta_service.database.conn import db
 from libs.database.connector import Connector
+from meta_service.common.config import settings
 
 from meta_service.ELKSearch.config import dev_server
-from meta_service.common.search import default_search_set
+from meta_service.common.search import default_search_set, exception_col
 
 
 router = APIRouter()
@@ -15,7 +16,7 @@ router = APIRouter()
 logger = logging.getLogger()
 
 
-@router.post("/els-update", response_model=dict)
+@router.post("/bulk_update", response_model=dict)
 def els_update(index: str, session: Connector = Depends(db.get_db)):
 
     # data_query = "SELECT {0} FROM {1};"
@@ -23,9 +24,8 @@ def els_update(index: str, session: Connector = Depends(db.get_db)):
     
     try:
         cur = session.conn.cursor()
-        column_dict = session.get_column_info(index)
+        column_dict = session.get_column_info(index, settings.DB_INFO.SCHEMA)
         columns = [col["column_name"] for col in column_dict]
-        logger.info(columns)
         rows = session.query(**data_query).all()[0]
 
         docmanager = default_search_set(dev_server, index)
@@ -38,6 +38,8 @@ def els_update(index: str, session: Connector = Depends(db.get_db)):
                     insert_body[columns[i]] = int(row[columns[i]])
                 else:
                     insert_body[columns[i]] = row[columns[i]]
+                
+            insert_body = exception_col(index,insert_body)
             docmanager.set_body(insert_body)
             logger.info(docmanager.insert(insert_body["idx"]))
         result = {"result":1,"data": "test"}
@@ -46,3 +48,4 @@ def els_update(index: str, session: Connector = Depends(db.get_db)):
         result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
     return result
+

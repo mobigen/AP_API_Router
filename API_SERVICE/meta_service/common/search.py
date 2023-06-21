@@ -1,8 +1,32 @@
+from pydantic import BaseModel
 from meta_service.ELKSearch.Utils.base import set_els, make_format
 from meta_service.ELKSearch.document import DocumentManager
 
 
+class Upsert(BaseModel):
+    index: str
+    key: str
+    ids: str
+
+
+def exception_col(table_nm: str, insert_body: dict) -> dict:
+    """
+    db데이터를 els에 넣기전 실행해야 하는 예외 처리
+    입력하지 못하는 column들을 insert 구문에서 삭제 해주는 기능
+    """
+    
+    if table_nm == "vw_co_if":
+        insert_body.pop("mjrdfnprdc", None)
+        insert_body.pop("mjrcvlprdc", None)
+        insert_body.pop("skl", None)
+    return insert_body
+
+
 def default_search_set(server_config, index, size=10, from_=0):
+    """
+    검색에 필요한 default 세팅 
+    자동완성과 검색에 사용
+    """
     es = set_els(server_config)
     docmanger = DocumentManager(es, index)
     docmanger.set_pagination(size, from_)
@@ -11,6 +35,7 @@ def default_search_set(server_config, index, size=10, from_=0):
 
 def base_query(len_query:int, queryOption: list) -> list:
     """
+    검색에 사용되는 base_query, match must 방식으로 query를 만들어 준다
     :param queryOption: ELKSearch model SearchOption or FilterOption
     :return:
     ["multi_match": {

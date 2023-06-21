@@ -32,7 +32,7 @@ class DocumentManager:
         :param doc_id: els에서 설정된 document id 값
         :return:
         """
-        return self.connect.update(index=self.index, id=doc_id, body=self.body)
+        return self.connect.index(index=self.index, id=doc_id, body=self.body)
 
     def find(self, source: list = None) -> dict:
         """

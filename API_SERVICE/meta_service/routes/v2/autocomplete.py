@@ -53,7 +53,22 @@ def autocomplete(input: Prefix):
         del input.index
         del input.size
         
-        body = make_format("query","query_string",input.dict())
+        # body = make_format("query","query_string",input.dict())
+        search_query = {"query_string": input.dict()}
+        
+        body = {
+            "query": {
+                "bool": {
+                    "must": [search_query]
+                }
+            }
+        }
+        if docmanager.index == "vw_co_if":
+            filter_query = make_format("term","showyn","y")
+            body["query"]["bool"]["filter"] = [filter_query]
+
+
+        logger.info(body)
         docmanager.set_body(body)
         prefix_dict = search_filter(docmanager.find(input.fields))
 

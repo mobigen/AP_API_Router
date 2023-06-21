@@ -1,0 +1,83 @@
+{
+    "settings": {
+          "queries.cache.enabled": "true",
+          "refresh_interval":"10s",
+          "max_shingle_diff": 10
+    },
+    "mappings": {
+          "properties": {
+                "idx": {
+                      "type": "text"
+                },
+                "conm": {
+                      "type": "text"
+                },
+                "dfnmtraidx": {
+                      "type": "text"
+                },
+                "bzrgtcd": {
+                      "type": "text"
+                },
+                "prcctcd": {
+                      "type": "text"
+                },
+                "coctidx": {
+                      "type": "text"
+                },
+                "psnidx": {
+                      "type": "text"
+                },
+                "psnnm": {
+                      "type": "text"
+                },
+                "phonm": {
+                      "type": "text"
+                },
+                "phonn": {
+                      "type": "text"
+                },
+                "offrdt": {
+                      "type": "date",
+                      "format":"strict_date_optional_time_nanos||yyyy-MM-dd'T'HH:mm:ss.SSSSSS||yyyy-MM-dd||yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||date_hour_minute_second"
+                },
+                "enddtENDDT": {
+                      "type": "date",
+                      "format":"strict_date_optional_time_nanos||yyyy-MM-dd'T'HH:mm:ss.SSSSSS||yyyy-MM-dd||yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||date_hour_minute_second"
+                },
+                "mdfcdt": {
+                      "type": "date",
+                      "format":"strict_date_optional_time_nanos||yyyy-MM-dd'T'HH:mm:ss.SSSSSS||yyyy-MM-dd||yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||date_hour_minute_second"
+                },
+                "ifoffryn": {
+                      "type": "text"
+                },
+                "salprc": {
+                      "type": "integer"
+                },
+                "sysdvl": {
+                      "type": "integer"
+                },
+                "coretc": {
+                      "type": "integer"
+                },
+                "nrtoffr": {
+                      "type": "integer"
+                },
+                "coct": {
+                      "type": "text"
+                },
+                "dfnmtra": {
+                      "type": "text"
+                },
+                "showyn": {
+                      "type": "text"
+                },
+                "wpnsystctidx": {
+                      "type": "text"
+                },
+                "wpnsystct": {
+                      "type": "text"
+                }
+          }
+    }
+}
