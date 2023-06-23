@@ -71,6 +71,12 @@ def search(input: InputModel, session: Connector = Depends(db.get_db)):
 
             # search_query = base_query(len_search, input.searchOption)
             filter_query = base_query(len_filter, input.filterOption)
+
+            # range option
+            for query in input.rangeOption:
+                filter_query.append(make_format("range",query.field,query.compare_dict))
+                logger.info(filter_query)
+
             body = make_format("query","bool", {"must": search_query,"filter": filter_query})
             logger.info(body)
 

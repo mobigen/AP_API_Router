@@ -25,6 +25,11 @@ class SortOption(BaseModel):
     order: str
 
 
+class RangeOption(BaseModel):
+    field: str
+    compare_dict: dict
+
+
 class InputModel(BaseModel):
     index: str = ""
     from_: int = Field(1, alias="from")
@@ -33,3 +38,4 @@ class InputModel(BaseModel):
     sortOption: List[SortOption] = []
     searchOption: List[CoreOption] = []
     filterOption: List[CoreOption] = []
+    rangeOption: List[RangeOption] = []
