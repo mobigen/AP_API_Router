@@ -10,6 +10,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Any, Optional, Dict
+from Utils.keycloak import KeycloakManager
 
 import jwt
 from fastapi.logger import logger
@@ -90,9 +91,7 @@ def convert_data(data) -> str:
 
 def set_log_path():
     parser = configparser.ConfigParser()
-    parser.read(
-        f"{config.root_path}/conf/{config.category}/logging.conf", encoding="utf-8"
-    )
+    parser.read(f"{config.root_path}/conf/{config.category}/logging.conf", encoding="utf-8")
 
     parser.set(
         "handler_rotatingFileHandler",
@@ -144,6 +143,11 @@ def prepare_config() -> None:
         config.user_info = api_router_cfg["user_info"]
         config.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         config.email_auth = api_router_cfg["email_auth"]
+        config.keycloak_info = api_router_cfg["keycloak_info"]
+
+
+def get_keycloak_manager():
+    return KeycloakManager(config.keycloak_info["keycloak_url"])
 
 
 def make_connection_pool(db_info):

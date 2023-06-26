@@ -25,5 +25,7 @@ class ApiServiceConfig:
 
     conn_pool: pool.SimpleConnectionPool
 
+    keycloak_info: Dict
+
 
 config = ApiServiceConfig
