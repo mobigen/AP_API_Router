@@ -1,7 +1,7 @@
 from typing import Dict
 from pydantic import BaseModel
 from fastapi.logger import logger
-from Utils.CommonUtil import connect_db, get_exception_info, convert_data, get_keycloak_manager
+from Utils.CommonUtil import connect_db, get_admin_token, get_exception_info, convert_data, get_keycloak_manager
 from ApiService.ApiServiceConfig import config
 
 
@@ -24,12 +24,7 @@ def make_register_query(register: commonRegister):
 
 async def api(register: commonRegister) -> Dict:
     try:
-        res = await get_keycloak_manager().generate_admin_token(
-            username=config.keycloak_info["admin_username"],
-            password=config.keycloak_info["admin_password"],
-            grant_type="password",
-        )
-        admin_token = res.get("data").get("access_token")
+        admin_token = await get_admin_token()
 
         reg_data = {
             "username": register.data["user_id"],

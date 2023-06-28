@@ -15,7 +15,6 @@ class KeycloakManager:
         return cls._instance
 
     def __init__(self, base_url: str) -> None:
-        print("test")
         self.base_url = base_url
 
     async def _request_to_keycloak(self, api_url, method, headers, **kwargs):
@@ -33,7 +32,6 @@ class KeycloakManager:
         print(data)
         async with aiohttp.ClientSession() as session:
             async with session.request(url=api_url, method=method, headers=headers, data=data) as response:
-                print("response")
                 try:
                     ret = await response.json()
                 except Exception:
@@ -67,9 +65,10 @@ class KeycloakManager:
 
         Args:
             realm (_type_): keycloak 인증 그룹
+            grant_type (str): 인증방법('password', 'refresh_token')
             username (str): 계정명
             password (str): 패스워드
-            grant_type (str): 인증방법('password', 'refresh_token')
+            refresh_token (str): 리프레시 토큰
             client_id (str): keycloak client_id
             client_secret (str): keycloak_client_id에 대응하는 secret key
 

@@ -150,6 +150,16 @@ def get_keycloak_manager():
     return KeycloakManager(config.keycloak_info["keycloak_url"])
 
 
+async def get_admin_token():
+    res = await get_keycloak_manager().generate_admin_token(
+        username=config.keycloak_info["admin_username"],
+        password=config.keycloak_info["admin_password"],
+        grant_type="password",
+    )
+
+    return res.get("data").get("access_token")
+
+
 def make_connection_pool(db_info):
     conn_pool = pool.SimpleConnectionPool(
         1,
