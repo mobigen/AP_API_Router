@@ -1,3 +1,4 @@
+from ast import literal_eval
 import copy
 import json
 
@@ -10,6 +11,7 @@ from app.common import const
 from app.common.config import logger
 from app.database.conn import db
 from libs.database.connector import Executor
+
 
 router = APIRouter()
 
@@ -32,21 +34,7 @@ async def index(request: Request, route_path: str, session: Executor = Depends(d
         except json.JSONDecodeError:
             data = (await request.body()).decode()
 
-    row = session.query(
-        table_nm="api_item_bas",
-        key="srvr_nm",
-        join_info={"table_nm": "api_item_server_dtl", "key": "srvr_nm"},
-        where_info=[
-            {
-                "table_nm": "api_item_bas",
-                "key": "route_url",
-                "value": f"/{route_path}",
-                "compare_op": "=",
-                "op": "",
-            },
-            {"table_nm": "api_item_bas", "key": "mthd", "value": f"{method}", "compare_op": "=", "op": "and"},
-        ],
-    ).first()
+    row = session.query(**literal_eval(const.ROUTE_DATA)).first()
 
     if not row:
         logger.error(f"API INFO NOT FOUND, url :: {route_path}, method :: {method}")
@@ -54,7 +42,7 @@ async def index(request: Request, route_path: str, session: Executor = Depends(d
 
     logger.info(f"API :: {row}")
 
-    remote_url = "http://" + row["ip_adr"] + row["url"]
+    remote_url = "http://" + row[const.ROUTE_IP_FIELD] + row[const.ROUTE_API_URL_FIELD]
 
     cookies = {}
     try:

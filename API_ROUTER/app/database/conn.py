@@ -5,4 +5,4 @@ from libs.database.tibero import TiberoConnector
 from libs.database.orm import SQLAlchemyConnector
 
 Base = declarative_base()
-db = SQLAlchemyConnector(Base) if settings.DB_INFO.type != "tibero" else TiberoConnector()
+db = {"orm": SQLAlchemyConnector(Base), "tibero": TiberoConnector()}[settings.DB_INFO.type]

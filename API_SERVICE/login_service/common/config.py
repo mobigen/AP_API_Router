@@ -53,7 +53,6 @@ class Settings(BaseSettings):
     TESTING: bool = True
 
     DB_INFO: DBInfo = DBInfo()
-
     DB_URL: Union[str, PostgresDsn] = None
 
     @validator("DB_URL", pre=True, always=True)
