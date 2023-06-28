@@ -1,18 +1,38 @@
 EXCLUDE_HEADERS = ["content-length", "user-agent"]
-ROUTE_DATA = """{
-    "table_nm": "tb_api_info",
-    "key": "ctgry",
-    "join_info": {"table_nm": "tb_api_server_info", "key": "ctgry"},
-    "where_info": [
-        {
-            "table_nm": "tb_api_info",
-            "key": "route_url",
-            "value": "{route_path}",
-            "compare_op": "=",
-            "op": "",
-        },
-        {"table_nm": "tb_api_info", "key": "meth", "value": "{method}", "compare_op": "=", "op": "and"},
-    ]
-}"""
+
 ROUTE_IP_FIELD = "ip_adr"
 ROUTE_API_URL_FIELD = "url"
+API_ROUTE_TABLE = "api_item_bas"
+API_SERVER_INFO_TABLE = "api_item_server_dtl"
+
+
+class RouteTable:
+    api_list_table = "api_item_bas"
+    api_server_info_table = "api_item_server_dtl"
+    join_key = "srvr_nm"
+    url_key = "route_url"
+    method_key = "mthd"
+
+    @staticmethod
+    def get_query_data(route_path, method) -> dict:
+        return {
+            "table_nm": RouteTable.api_list_table,
+            "key": RouteTable.join_key,
+            "join_info": {"table_nm": RouteTable.api_server_info_table, "key": RouteTable.join_key},
+            "where_info": [
+                {
+                    "table_nm": RouteTable.api_list_table,
+                    "key": RouteTable.url_key,
+                    "value": route_path,
+                    "compare_op": "=",
+                    "op": "",
+                },
+                {
+                    "table_nm": RouteTable.api_list_table,
+                    "key": RouteTable.method_key,
+                    "value": method,
+                    "compare_op": "=",
+                    "op": "and",
+                },
+            ],
+        }

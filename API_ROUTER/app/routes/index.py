@@ -1,6 +1,6 @@
-from ast import literal_eval
 import copy
 import json
+import logging
 
 import aiohttp
 from fastapi import APIRouter, Depends
@@ -8,10 +8,10 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from app.common import const
-from app.common.config import logger
 from app.database.conn import db
 from libs.database.connector import Executor
 
+logger = logging.getLogger()
 
 router = APIRouter()
 
@@ -34,7 +34,7 @@ async def index(request: Request, route_path: str, session: Executor = Depends(d
         except json.JSONDecodeError:
             data = (await request.body()).decode()
 
-    row = session.query(**literal_eval(const.ROUTE_DATA)).first()
+    row = session.query(**const.RouteTable.get_query_data("/"+route_path, method)).first()
 
     if not row:
         logger.error(f"API INFO NOT FOUND, url :: {route_path}, method :: {method}")

@@ -106,4 +106,3 @@ settings = get_settings()
 with open(os.path.join(base_dir, "logging.json")) as f:
     log_config = json.load(f)
     logging.config.dictConfig(log_config)
-logger = logging.getLogger()
