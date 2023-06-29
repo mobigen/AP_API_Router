@@ -5,7 +5,7 @@ from ELKSearch.Utils.model import InputModel
 from ELKSearch.Utils.elasticsearch_utils import make_query, base_search_query
 from ELKSearch.Utils.database_utils import get_config
 from Utils.CommonUtil import get_exception_info
-from Utils.SearchUtil import search_count
+from Utils.SearchUtil import search_count, ckan_query
 from ApiService.ApiServiceConfig import config
 
 
@@ -26,18 +26,7 @@ def api(input: InputModel) -> Dict:
         es.set_sort(input.sortOption)
 
         ############ search option ############
-        search_format = "(*{0}*)"
-        query_dict = []
-
-        for query in input.searchOption:
-            keywords = [search_format.format(word) for keyword in query.keywords for word in keyword.split(" ")]
-            if len(keywords) > 1:
-                keywords = f" {query.operator.upper()} ".join(keywords)
-            else:
-                keywords = keywords[0]
-            query_dict.append({"query_string": {"query": keywords,"fields": query.field}})
-
-        query_dict = {"must": query_dict}
+        query_dict = ckan_query(input.searchOption)
         search_query = make_query("query","bool", query_dict)
         es.body.update(search_query)
 

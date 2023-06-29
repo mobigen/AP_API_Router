@@ -46,3 +46,18 @@ def search_count(es, item_dict, query_dict):
         data_dict[eng_nm] = cnt
 
     return data_dict
+
+
+def ckan_query(search_option) -> dict:
+    search_format = "(*{0}*)"
+    query_dict = []
+
+    for query in search_option:
+        keywords = [search_format.format(word) for keyword in query.keywords for word in keyword.split(" ")]
+        if len(keywords) > 1:
+            keywords = f" {query.operator.upper()} ".join(keywords)
+        else:
+            keywords = keywords[0]
+        query_dict.append({"query_string": {"query": keywords,"fields": query.field}})
+
+    return {"must": query_dict}
