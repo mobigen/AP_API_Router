@@ -67,7 +67,9 @@ def api(input: InputModel) -> Dict:
 
         data_dict = search_count(es, item_dict, query_dict)
         ckan_dict = ckan_query(input.searchOption)
+
         data_dict["overseaCount"] = search_count(es, {'filter': []}, ckan_dict)["overseaCount"]
+        data_dict["totalCount"] = data_dict["totalCount"] + data_dict["overseaCount"]
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
