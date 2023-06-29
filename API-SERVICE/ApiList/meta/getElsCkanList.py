@@ -7,7 +7,6 @@ from ELKSearch.Utils.database_utils import get_config
 from Utils.CommonUtil import get_exception_info
 from Utils.SearchUtil import search_count
 from ApiService.ApiServiceConfig import config
-from fastapi.logger import logger
 
 
 def api(input: InputModel) -> Dict:
@@ -27,9 +26,20 @@ def api(input: InputModel) -> Dict:
         es.set_sort(input.sortOption)
 
         ############ search option ############
-        action = "query"
-        sub_action = "must"
-        query_dict = base_search_query(action, sub_action, input.searchOption)
+        search_format = "(*{0}*)"
+        query_dict = []
+
+        for query in input.searchOption:
+            keywords = [search_format.format(word) for keyword in query.keywords for word in keyword.split(" ")]
+            if len(keywords) > 1:
+                keywords = f" {query.operator.upper()} ".join(keywords)
+            else:
+                keywords = keywords[0]
+            query_dict.append({"query_string": {"query": keywords,"fields": query.field}})
+
+        query_dict = {"must": query_dict}
+        search_query = make_query("query","bool", query_dict)
+        es.body.update(search_query)
 
         # ############ sort option ############
         sort_list = [{item.field: item.order} for item in input.sortOption]
