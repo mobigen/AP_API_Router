@@ -5,9 +5,8 @@ from ELKSearch.Utils.model import InputModel
 from ELKSearch.Utils.elasticsearch_utils import make_query, base_search_query
 from ELKSearch.Utils.database_utils import get_config
 from Utils.CommonUtil import get_exception_info
-from Utils.SearchUtil import search_count
+from Utils.SearchUtil import search_count, ckan_query
 from ApiService.ApiServiceConfig import config
-from fastapi.logger import logger
 
 
 def api(input: InputModel) -> Dict:
@@ -27,9 +26,9 @@ def api(input: InputModel) -> Dict:
         es.set_sort(input.sortOption)
 
         ############ search option ############
-        action = "query"
-        sub_action = "must"
-        query_dict = base_search_query(action, sub_action, input.searchOption)
+        query_dict = ckan_query(input.searchOption)
+        search_query = make_query("query","bool", query_dict)
+        es.body.update(search_query)
 
         # ############ sort option ############
         sort_list = [{item.field: item.order} for item in input.sortOption]

@@ -29,7 +29,7 @@ class ElasticSearchManager:
         self.body = self.set_default_option()
 
     def connect(self) -> Elasticsearch:
-        es = Elasticsearch(f"http://{self.host}:{self.port}")
+        es = Elasticsearch(f"http://{self.host}:{self.port}", timeout=30, max_retries=10, retry_on_timeout=True)
         return es
 
     def set_default_option(self) -> Dict[Any, Any]:

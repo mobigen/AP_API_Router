@@ -8,8 +8,11 @@ from ApiService.ApiServiceConfig import config
 
 
 def api() -> Dict:
+    """
+    bulk로 업데이트 할 때 timeout이 발생하는 이슈가 있음
+    """
     els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
-    bulk_meta_item = list()
+    # bulk_meta_item = list()
     db_query = f"SELECT * FROM v_biz_meta_info  WHERE status = 'D'"
 
     try:
@@ -19,8 +22,9 @@ def api() -> Dict:
         meta_wrap_list = db.select(db_query)[0]
         for meta_wrap in meta_wrap_list:
             els_dict = data_process(meta_wrap)
-            bulk_meta_item.append(els_dict)
-        helpers.bulk(es.conn, bulk_meta_item, index=es.index)
+            es.insert(meta_wrap,meta_wrap["biz_dataset_id"])
+            # bulk_meta_item.append(els_dict)
+        # helpers.bulk(es.conn, bulk_meta_item, index=es.index)
 
     except Exception:
         except_name = get_exception_info()
