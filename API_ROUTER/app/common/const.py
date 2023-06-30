@@ -2,22 +2,21 @@ EXCLUDE_HEADERS = ["content-length", "user-agent"]
 
 ROUTE_IP_FIELD = "ip_adr"
 ROUTE_API_URL_FIELD = "url"
-API_ROUTE_TABLE = "api_item_bas"
-API_SERVER_INFO_TABLE = "api_item_server_dtl"
 
 
 class RouteTable:
-    api_list_table = "api_item_bas"
-    api_server_info_table = "api_item_server_dtl"
-    join_key = "srvr_nm"
+    api_list_table = "tb_api_info"
+    api_server_info_table = "tb_api_server_info"
+    main_key = "ctgry"
+    join_key = "nm"
     url_key = "route_url"
-    method_key = "mthd"
+    method_key = "meth"
 
     @staticmethod
     def get_query_data(route_path, method) -> dict:
         return {
             "table_nm": RouteTable.api_list_table,
-            "key": RouteTable.join_key,
+            "key": RouteTable.main_key,
             "join_info": {"table_nm": RouteTable.api_server_info_table, "key": RouteTable.join_key},
             "where_info": [
                 {

@@ -1,6 +1,3 @@
-import json
-
-import logging.config
 import os
 from functools import lru_cache
 from typing import Union
@@ -24,7 +21,7 @@ class DBInfo(BaseSettings):
 
 
 class PGInfo(DBInfo):
-    type: str = "postgres"
+    type: str = "orm"
     SCHEMA: str = ""
 
     def get_dsn(self):
@@ -54,7 +51,7 @@ class Settings(BaseSettings):
     RELOAD: bool
     TESTING: bool
 
-    DB_INFO: PGInfo = PGInfo()
+    DB_INFO: DBInfo = DBInfo()
 
     DB_URL: Union[str, PostgresDsn] = None
 
@@ -82,11 +79,11 @@ class LocalSettings(Settings):
     DB_ECHO: bool = True
     RELOAD: bool = False
 
-    # DB_INFO = PGInfo(
-    #     HOST="192.168.100.126", PORT="25432", USER="dpsi", PASS="hello.sitemng12#$", BASE="ktportal", SCHEMA="sitemng"
-    # )
+    DB_INFO = PGInfo(
+        HOST="192.168.100.126", PORT="25432", USER="dpmanager", PASS="hello.dp12#$", BASE="dataportal", SCHEMA="sitemng"
+    )
 
-    DB_INFO: TiberoInfo = TiberoInfo(HOST="192.168.101.164", PORT="8629", USER="dhub", PASS="dhub1234", BASE="tibero")
+    # DB_INFO: TiberoInfo = TiberoInfo(HOST="192.168.101.164", PORT="8629", USER="dhub", PASS="dhub1234", BASE="tibero")
 
 
 class TestSettings(LocalSettings):
@@ -97,12 +94,13 @@ class TestSettings(LocalSettings):
 @lru_cache
 def get_settings():
     env = os.getenv("APP_ENV", "prod")
+    print(f"env :: {env}")
     return {"local": LocalSettings(), "test": TestSettings(), "prod": ProdSettings()}[env]
 
 
 settings = get_settings()
 
 
-with open(os.path.join(base_dir, "logging.json")) as f:
-    log_config = json.load(f)
-    logging.config.dictConfig(log_config)
+# with open(os.path.join(base_dir, "logging.json")) as f:
+#     log_config = json.load(f)
+#     logging.config.dictConfig(log_config)
