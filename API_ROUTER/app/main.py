@@ -1,10 +1,13 @@
+import logging
+
 import uvicorn
 from fastapi import FastAPI
 
-from app.database.conn import db
 from app.common.config import settings
+from app.database.conn import db
 from app.routes import index
-from app.common.config import logger
+
+logger = logging.getLogger()
 
 
 def create_app():

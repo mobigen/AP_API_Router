@@ -34,7 +34,7 @@ class Executor(metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def get_column_info(self, table_nm) -> List[Dict[str, str]]:
+    def get_column_info(self, table_nm, schema=None) -> List[Dict[str, str]]:
         ...
 
     @abc.abstractmethod

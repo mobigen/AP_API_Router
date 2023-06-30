@@ -1,8 +1,14 @@
 from sqlalchemy.orm import declarative_base
 
 from app.common.config import settings
-from libs.database.tibero import TiberoConnector
-from libs.database.orm import SQLAlchemyConnector
 
 Base = declarative_base()
-db = SQLAlchemyConnector(Base) if settings.DB_INFO.type != "tibero" else TiberoConnector()
+db = None
+if settings.DB_INFO.type == "tibero":
+    from libs.database.tibero import TiberoConnector
+
+    db = TiberoConnector()
+elif settings.DB_INFO.type == "orm":
+    from libs.database.orm import SQLAlchemyConnector
+
+    db = SQLAlchemyConnector(Base)

@@ -4,6 +4,7 @@ from typing import Optional, List
 from fastapi import Depends, APIRouter
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
+from common_service.common.config import settings
 
 from common_service.database.conn import db
 from libs.database.connector import Executor
@@ -73,16 +74,19 @@ async def common_select(params: CommonSelect, session: Executor = Depends(db.get
     """
     try:
         rows = session.query(**params.dict()).all()
-        return JSONResponse(content={
-            "data": {
-                "count": rows[1] if rows else 0,
-                "body": rows[0] if rows else [],
-                "header": session.get_column_info(params.table_nm),
+        return JSONResponse(
+            content={
+                "data": {
+                    "count": rows[1] if rows else 0,
+                    "body": rows[0] if rows else [],
+                    "header": session.get_column_info(params.table_nm, settings.DB_INFO.SCHEMA),
+                },
+                "result": 1,
+                "errorMessage": "",
             },
-            "result": 1,
-            "errorMessage": "",
-        }, status_code=200)
+            status_code=200,
+        )
 
     except Exception as e:
-        logger.error(f"{params}, {str(e)}", exc_info=True)
+        logger.error(f"{params.dict()}, {str(e)}", exc_info=True)
         return JSONResponse(content={"result": 0, "errorMessage": str(e)}, status_code=400)

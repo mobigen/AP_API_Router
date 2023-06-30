@@ -16,6 +16,7 @@ class DBInfo(BaseSettings):
     USER: str = ""
     PASS: SecretStr = ""
     BASE: str = ""
+    SCHEMA: str = ""
 
     def get_dsn(self):
         return ""
@@ -53,7 +54,6 @@ class Settings(BaseSettings):
     TESTING: bool = True
 
     DB_INFO: DBInfo = DBInfo()
-
     DB_URL: Union[str, PostgresDsn] = None
 
     @validator("DB_URL", pre=True, always=True)
@@ -82,7 +82,9 @@ class LocalSettings(Settings):
     #     HOST="192.168.100.126", PORT="25432", USER="dpsi", PASS="hello.sitemng12#$", BASE="ktportal", SCHEMA="sitemng"
     # )
 
-    DB_INFO: TiberoInfo = TiberoInfo(HOST="192.168.101.164", PORT="8629", USER="dhub", PASS="dhub1234", BASE="tibero")
+    DB_INFO: TiberoInfo = TiberoInfo(
+        HOST="192.168.101.164", PORT="8629", USER="dhub", PASS="dhub1234", BASE="tibero", SCHEMA="DHUB"
+    )
 
 
 class TestSettings(LocalSettings):
@@ -90,7 +92,7 @@ class TestSettings(LocalSettings):
 
 
 @lru_cache
-def get_settings():
+def get_settings() -> Settings:
     env = os.getenv("APP_ENV", "prod")
     print(env)
     return {"local": LocalSettings(), "test": TestSettings(), "prod": ProdSettings()}[env]

@@ -12,7 +12,7 @@ logger = logging.getLogger()
 
 
 class QueryExecutor(Executor):
-    def __init__(self, conn):
+    def __init__(self, conn: pyodbc.Connection):
         self.conn = conn
         self._q = None
         self._cntq = None
@@ -57,8 +57,6 @@ class QueryExecutor(Executor):
                 else:
                     where_clause += f"{info['op']} {clause} "
 
-            # TODO: sub where conditions
-
         order_clause = ""
         if order_info := kwargs.get("order_info"):
             t = order_info["table_nm"]
@@ -84,13 +82,10 @@ class QueryExecutor(Executor):
 
     def all(self) -> Tuple[List[dict], int]:
         try:
-            data = self.cur.execute(self._q).fetchall()
-            if data:
-                rows = [
-                    dict(zip(self._get_headers(self.cur), map(lambda x: int(x) if isinstance(x, Decimal) else x, row)))
-                    for row in data
-                ]
-                return rows, int(self.cur.execute(self._cntq).fetchone()[0])
+            rows = self.cur.execute(self._q).fetchall()
+            if rows:
+                datas = [dict(zip(self._get_headers(self.cur), self._parse_select_data(row))) for row in rows]
+                return datas, int(self.cur.execute(self._cntq).fetchone()[0])
         except TypeError as te:
             logger.warning(te)
             return
@@ -99,9 +94,9 @@ class QueryExecutor(Executor):
 
     def first(self) -> Dict:
         try:
-            data = self.cur.execute(self._q).fetchone()
-            if data:
-                return dict(zip(self._get_headers(self.cur), data))
+            row = self.cur.execute(self._q).fetchone()
+            if row:
+                return dict(zip(self._get_headers(self.cur), self._parse_select_data(row)))
         except TypeError as te:
             logger.warning(te)
             return
@@ -158,6 +153,9 @@ class QueryExecutor(Executor):
             logger.error(f"error at params :: {params}")
             raise e
 
+    def _parse_select_data(self, row):
+        return map(lambda x: int(x) if isinstance(x, Decimal) else x, row)
+
     def _get_headers(self, cursor) -> list[str]:
         return [d[0].lower() for d in cursor.description]
 
@@ -182,9 +180,11 @@ class QueryExecutor(Executor):
         else:
             return f"{k} {operand} '{v}'"
 
-    def get_column_info(self, table_nm) -> List[Dict[str, str]]:
+    def get_column_info(self, table_nm, schema) -> List[Dict[str, str]]:
         # OWNER, TABLE_NAME, COLUMN_NAME, COMMENT
-        query = f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm.upper()}';"
+        query = (
+            f"SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = '{table_nm.upper()}' AND OWNER = '{schema.upper()}';"
+        )
         logger.info(query)
         self.cur.execute(query)
         return [{"column_name": str(row[2]).lower(), "kor_column_name": row[3]} for row in self.cur.fetchall()]
