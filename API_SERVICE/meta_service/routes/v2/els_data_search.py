@@ -50,12 +50,13 @@ def search(input: InputModel, session: Connector = Depends(db.get_db)):
     try:
         len_search = len(input.searchOption)
         len_filter = len(input.filterOption)
+        len_range = len(input.rangeOption)
 
         # from_ 0 부터 시작해야함, web에서는 1부터 넘어오기 때문에 1을 빼준다
         docmanager = default_search_set(dev_server, input.index, input.size, input.from_ - 1)
 
         # query에 조건이 없으면 match all 실행 
-        if not any([len_filter,len_search]):
+        if not any([len_filter, len_search, len_range]):
             body = make_format("query","match_all",dict())
         else:
             search_format = "(*{0}*)"
