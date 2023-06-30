@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from meta_service.ELKSearch.Utils.base import set_els, make_format
 from meta_service.ELKSearch.document import DocumentManager
+from fastapi.logger import logger
 
 
 class Upsert(BaseModel):
@@ -19,6 +20,11 @@ def exception_col(table_nm: str, insert_body: dict) -> dict:
         insert_body.pop("mjrdfnprdc", None)
         insert_body.pop("mjrcvlprdc", None)
         insert_body.pop("skl", None)
+    if  table_nm == "vw_expr_item_db":
+        logger.info(insert_body.keys())
+        for key in list(insert_body.keys()):
+            if not key in ["idx", "korconm"]:
+                insert_body.pop(key, None)
     return insert_body
 
 
