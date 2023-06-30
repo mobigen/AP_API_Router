@@ -21,7 +21,7 @@ async def me(request: Request):
     return {"result": 1, "errorMesage": "", "data": request.scope["client"][0]}
 
 
-@router.api_route("/{route_path:path}", methods=["GET", "POST"])
+@router.api_route("{route_path:path}", methods=["GET", "POST"])
 async def index(request: Request, route_path: str, session: Executor = Depends(db.get_db)):
     method = request.method
     headers = get_headers(request.headers)
@@ -34,7 +34,7 @@ async def index(request: Request, route_path: str, session: Executor = Depends(d
         except json.JSONDecodeError:
             data = (await request.body()).decode()
 
-    row = session.query(**const.RouteTable.get_query_data("/"+route_path, method)).first()
+    row = session.query(**const.RouteTable.get_query_data(route_path, method)).first()
 
     if not row:
         logger.error(f"API INFO NOT FOUND, url :: {route_path}, method :: {method}")
