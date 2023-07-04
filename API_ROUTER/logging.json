@@ -11,12 +11,31 @@
       "class": "logging.StreamHandler",
       "level": "DEBUG",
       "formatter": "default"
+    },
+    "file": {
+      "class": "logging.handlers.RotatingFileHandler",
+      "level": "DEBUG",
+      "formatter": "default",
+      "filename": "./router.log",
+      "mode": "a",
+      "maxBytes": 20000000,
+      "backupCount": 10
     }
   },
   "loggers": {
     "root": {
       "level": "DEBUG",
-      "handlers": ["console"],
+      "handlers": ["console", "file"],
+      "propagate": false
+    },
+    "uvicorn.access": {
+      "level": "INFO",
+      "handlers": ["console", "file"],
+      "propagate": false
+    },
+    "sqlalchemy.engine": {
+      "level": "INFO",
+      "handlers": ["console", "file"],
       "propagate": false
     }
   }

@@ -1,3 +1,5 @@
+import json
+import logging.config
 import os
 from functools import lru_cache
 from typing import Union
@@ -101,6 +103,6 @@ def get_settings():
 settings = get_settings()
 
 
-# with open(os.path.join(base_dir, "logging.json")) as f:
-#     log_config = json.load(f)
-#     logging.config.dictConfig(log_config)
+with open(os.path.join(base_dir, "logging.json")) as f:
+    log_config = json.load(f)
+    logging.config.dictConfig(log_config)
