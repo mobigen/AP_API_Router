@@ -22,7 +22,7 @@ def api() -> Dict:
         meta_wrap_list = db.select(db_query)[0]
         for meta_wrap in meta_wrap_list:
             els_dict = data_process(meta_wrap)
-            es.insert(meta_wrap,meta_wrap["biz_dataset_id"])
+            es.insert(els_dict["_source"],meta_wrap["biz_dataset_id"])
             # bulk_meta_item.append(els_dict)
         # helpers.bulk(es.conn, bulk_meta_item, index=es.index)
 
