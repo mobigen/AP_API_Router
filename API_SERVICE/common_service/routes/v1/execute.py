@@ -1,15 +1,14 @@
 import logging
 from typing import Dict, List, Optional
 
+import jwt
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
+
 from common_service.common.const import ALGORITHM, NOT_ALLOWED_TABLES, SECRET_KEY
-
 from common_service.database.conn import db
-import jwt
 from libs.database.connector import Executor
-
 
 logger = logging.getLogger()
 
@@ -28,11 +27,13 @@ router = APIRouter()
 async def common_execute(request: Request, params: List[CommonExecute], session: Executor = Depends(db.get_db)):
     try:
         for param in params:
-            if param.table_nm in NOT_ALLOWED_TABLES:
+            table_nm = param.table_nm
+            method = param.method
+            if table_nm in NOT_ALLOWED_TABLES:
                 roleidx = get_roleidx_from_token(request)
                 if roleidx != "0":
                     return JSONResponse(content={"result": 0, "errorMessage": "NotAllowedTable"})
-                elif param.table_nm == "USR_MGMT" and param.method == "INSERT":
+                elif table_nm == "USR_MGMT" and method == "INSERT":
                     return JSONResponse(content={"result": 0, "errorMessage": "use register api"})
             session.execute(**param.dict())
         return JSONResponse(content={"result": 1, "errorMessage": ""}, status_code=200)
