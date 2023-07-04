@@ -36,7 +36,6 @@ def api(input: InputModel) -> Dict:
         search_data = es.search(input.resultField)
 
         data_dict = search_count(es, {'filter': []}, query_dict)
-        data_dict["totalCount"] = data_dict["totalCount"] + data_dict["overseaCount"]
 
     except Exception:
         except_name = get_exception_info()
