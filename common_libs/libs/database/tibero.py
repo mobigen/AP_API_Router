@@ -222,7 +222,7 @@ class TiberoConnector(Connector):
             if self.conn:
                 self.conn.close()
 
-    def get_db(self) -> "TiberoConnector":
+    def get_db(self) -> Executor:
         executor = QueryExecutor(self.conn)
         try:
             yield executor

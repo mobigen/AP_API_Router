@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, List, Union, Tuple, Optional
 
 import sqlalchemy
@@ -8,6 +9,8 @@ from sqlalchemy.orm import sessionmaker, declarative_base, Session, Query
 from .connector import Connector, Executor
 
 db = declarative_base()
+
+logger = logging.getLogger()
 
 
 class SQLAlchemyConnector(Connector):
@@ -48,7 +51,7 @@ class SQLAlchemyConnector(Connector):
             self._session.close_all()
             self._engine.dispose()
 
-    def get_db(self) -> "SQLAlchemyConnector":
+    def get_db(self) -> Executor:
         if self._session is None:
             raise Exception("must be called 'init_db'")
         executor = OrmExecutor(self._session(), self._metadata)
@@ -67,6 +70,7 @@ class OrmExecutor(Executor):
 
     def query(self, **kwargs) -> "OrmExecutor":
         base_table = self.get_table(kwargs["table_nm"])
+        logger.info(base_table)
         key = kwargs.get("key")
         # Join
         if join_info := kwargs.get("join_info"):
@@ -139,23 +143,21 @@ class OrmExecutor(Executor):
         try:
             self._session.begin()
 
-            method = kwargs.get("method").lower()
-            table = self.get_table(kwargs.get("table_nm"))
-            data = kwargs.get("data")
-            cond = [getattr(table.columns, k) == data[k] for k in data.keys()]
-
+            method = kwargs.pop("method").lower()
+            table = self.get_table(kwargs.pop("table_nm"))
+            data = kwargs.pop("data")
+            keys = kwargs.pop("key")
+            cond = [getattr(table.columns, k) == data[k] for k in keys]
             if method == "insert":
                 stmt = table.insert().values(**data)
-                self._session.execute(stmt)
             elif method == "update":
                 stmt = table.update().where(*cond).values(**data)
-                self._.execute(stmt)
             elif method == "delete":
                 stmt = table.delete().where(*cond)
-                self._.execute(stmt)
             else:
                 raise NotImplementedError
 
+            self._session.execute(stmt)
             self._session.commit()
         except Exception as e:
             self._session.rollback()
