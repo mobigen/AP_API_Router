@@ -1,8 +1,8 @@
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.ext.automap import automap_base
 
 from app.common.config import settings
 
-Base = declarative_base()
+Base = automap_base()
 db = None
 if settings.DB_INFO.type == "tibero":
     from libs.database.tibero import TiberoConnector
