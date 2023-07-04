@@ -1,7 +1,7 @@
 from typing import Dict
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
-import jwt
+from jose import jwt
 from starlette.requests import Request
 
 from Utils.CommonUtil import get_exception_info, get_user

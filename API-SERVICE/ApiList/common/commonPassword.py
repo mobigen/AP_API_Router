@@ -2,7 +2,7 @@ from typing import Dict, Optional
 from pydantic import BaseModel
 from fastapi.logger import logger
 from fastapi.requests import Request
-import jwt
+from jose import jwt
 from Utils.CommonUtil import (
     connect_db,
     get_exception_info,

@@ -2,7 +2,7 @@ from typing import Dict
 from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from datetime import timedelta
-import jwt
+from jose import jwt
 from Utils.CommonUtil import get_exception_info, get_user, create_token, make_token_data
 from ApiService.ApiServiceConfig import config
 from starlette.requests import Request
