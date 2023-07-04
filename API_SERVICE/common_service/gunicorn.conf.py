@@ -144,10 +144,10 @@ tmp_upload_dir = None
 #
 #       A string of "debug", "info", "warning", "error", "critical"
 #
-logfile = "./log/common.log"
+logfile = "./log/commom.log"
 errorlog = "./log/common-error.log"
 loglevel = "info"
-accesslog = "./log/common.log"
+accesslog = "./log/commom.log"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
 #
