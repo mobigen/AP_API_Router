@@ -5,12 +5,12 @@ ROUTE_API_URL_FIELD = "url"
 
 
 class RouteTable:
-    api_list_table = "tb_api_info"
-    api_server_info_table = "tb_api_server_info"
-    main_key = "ctgry"
-    join_key = "nm"
+    api_list_table = "api_item_bas"
+    api_server_info_table = "api_item_server_dtl"
+    main_key = "srvr_nm"
+    join_key = "srvr_nm"
     url_key = "route_url"
-    method_key = "meth"
+    method_key = "mthd"
 
     @staticmethod
     def get_query_data(route_path, method) -> dict:

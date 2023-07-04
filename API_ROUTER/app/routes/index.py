@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.get("/route/common/me")
 async def me(request: Request):
-    return {"result": 1, "errorMesage": "", "data": request.scope["client"][0]}
+    return {"result": 1, "errorMessage": "", "data": request.scope["client"][0]}
 
 
 @router.api_route("{route_path:path}", methods=["GET", "POST"])
