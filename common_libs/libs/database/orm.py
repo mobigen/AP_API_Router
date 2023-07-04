@@ -2,7 +2,7 @@ from typing import Dict, List, Union, Tuple, Optional
 
 import sqlalchemy
 from fastapi import FastAPI
-from sqlalchemy import Column, MetaData, and_, create_engine, not_, or_
+from sqlalchemy import Column, MetaData, and_, create_engine, not_, or_, Table
 from sqlalchemy.orm import sessionmaker, declarative_base, Session, Query
 
 from .connector import Connector, Executor
@@ -74,7 +74,7 @@ class OrmExecutor(Executor):
             query = self._session.query(base_table, join_table).join(
                 join_table,
                 getattr(base_table.columns, key) == getattr(join_table.columns, join_info["key"]),
-                )
+            )
         else:
             query = self._session.query(base_table)
 
@@ -136,35 +136,32 @@ class OrmExecutor(Executor):
         return dict(zip(columns, self._q.first()))
 
     def execute(self, **kwargs):
-        """
-        {"result":1,"errorMessage":""}
-        """
-        # try:
-        #     session.begin()
+        try:
+            self._session.begin()
 
-        #     for row in params:
-        #         method = row.method.lower()
-        #         table = db.get_table(row.table_nm)
-        #         cond = [getattr(table.columns, k) == row.data[k] for k in row.key] if row.key else []
+            method = kwargs.get("method").lower()
+            table = self.get_table(kwargs.get("table_nm"))
+            data = kwargs.get("data")
+            cond = [getattr(table.columns, k) == data[k] for k in data.keys()]
 
-        #         if method == "insert":
-        #             ins = table.insert().values(**row.data)
-        #             session.execute(ins)
-        #         elif method == "update":
-        #             stmt = table.update().where(*cond).values(**row.data)
-        #             session.execute(stmt)
-        #         elif method == "delete":
-        #             stmt = table.delete().where(*cond)
-        #             session.execute(stmt)
-        #         else:
-        #             raise NotImplementedError
+            if method == "insert":
+                stmt = table.insert().values(**data)
+                self._session.execute(stmt)
+            elif method == "update":
+                stmt = table.update().where(*cond).values(**data)
+                self._.execute(stmt)
+            elif method == "delete":
+                stmt = table.delete().where(*cond)
+                self._.execute(stmt)
+            else:
+                raise NotImplementedError
 
-        #     session.commit()
-        # except Exception as e:
-        #     session.rollback()
-        #         raise e
+            self._session.commit()
+        except Exception as e:
+            self._session.rollback()
+            raise e
 
-    def get_table(self, table_nm):
+    def get_table(self, table_nm) -> Table:
         for nm, t in self._metadata.tables.items():
             if table_nm in nm:
                 return t
@@ -204,4 +201,3 @@ class OrmExecutor(Executor):
 
     def close(self):
         self._session.close()
-

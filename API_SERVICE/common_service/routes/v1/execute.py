@@ -24,16 +24,10 @@ class CommonExecute(BaseModel):
 router = APIRouter()
 
 
-@router.post("/common-execute")
+@router.post("/commonExecute")
 async def common_execute(request: Request, params: List[CommonExecute], session: Executor = Depends(db.get_db)):
     try:
         for param in params:
-            if param.table_nm in NOT_ALLOWED_TABLES:
-                roleidx = get_roleidx_from_token(request)
-                if roleidx != "0":
-                    return JSONResponse(content={"result": 0, "errorMessage": "NotAllowedTable"})
-                elif param.table_nm == "USR_MGMT" and param.method == "INSERT":
-                    return JSONResponse(content={"result": 0, "errorMessage": "use register api"})
             session.execute(**param.dict())
         return JSONResponse(content={"result": 1, "errorMessage": ""}, status_code=200)
     except Exception as e:
@@ -41,6 +35,15 @@ async def common_execute(request: Request, params: List[CommonExecute], session:
         for param in params:
             logger.info(param.dict())
         return JSONResponse(content={"result": 0, "errorMessage": str(e)}, status_code=400)
+
+
+# def check():
+#     if param.table_nm in NOT_ALLOWED_TABLES:
+#         roleidx = get_roleidx_from_token(request)
+#         if roleidx != "0":
+#             return JSONResponse(content={"result": 0, "errorMessage": "NotAllowedTable"})
+#         elif param.table_nm == "USR_MGMT" and param.method == "INSERT":
+#             return JSONResponse(content={"result": 0, "errorMessage": "use register api"})
 
 
 def get_roleidx_from_token(request: Request) -> dict:

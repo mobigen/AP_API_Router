@@ -16,7 +16,7 @@
       "class": "logging.handlers.RotatingFileHandler",
       "level": "DEBUG",
       "formatter": "default",
-      "filename": "./log/common.log",
+      "filename": "./common.log",
       "mode": "a",
       "maxBytes": 20000000,
       "backupCount": 10

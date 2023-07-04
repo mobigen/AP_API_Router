@@ -23,7 +23,7 @@ class DBInfo(BaseSettings):
 
 
 class PGInfo(DBInfo):
-    type: str = "postgres"
+    type: str = "orm"
     SCHEMA: str = ""
 
     def get_dsn(self):
@@ -78,13 +78,18 @@ class LocalSettings(Settings):
     DB_ECHO: bool = True
     RELOAD: bool = False
 
-    # DB_INFO = PGInfo(
-    #     HOST="192.168.100.126", PORT="25432", USER="dpsi", PASS="hello.sitemng12#$", BASE="ktportal", SCHEMA="sitemng"
-    # )
-
-    DB_INFO: TiberoInfo = TiberoInfo(
-        HOST="192.168.101.164", PORT="8629", USER="dhub", PASS="dhub1234", BASE="tibero", SCHEMA="DHUB"
+    DB_INFO = PGInfo(
+        HOST="192.168.100.126",
+        PORT="25432",
+        USER="dpmanager",
+        PASS="hello.dp12#$",
+        BASE="dataportal",
+        SCHEMA="sitemng,users,meta,iag,ckan,board,analysis",
     )
+
+    # DB_INFO: TiberoInfo = TiberoInfo(
+    #     HOST="192.168.101.164", PORT="8629", USER="dhub", PASS="dhub1234", BASE="tibero", SCHEMA="DHUB"
+    # )
 
 
 class TestSettings(LocalSettings):

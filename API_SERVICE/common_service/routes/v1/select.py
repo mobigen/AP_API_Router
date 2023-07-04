@@ -49,7 +49,7 @@ router = APIRouter()
 logger = logging.getLogger()
 
 
-@router.post("/common-select")
+@router.post("/commonSelect")
 async def common_select(params: CommonSelect, session: Executor = Depends(db.get_db)):
     """
     {
@@ -73,6 +73,7 @@ async def common_select(params: CommonSelect, session: Executor = Depends(db.get
     {"table_nm":"vw_srhwd_find_tmscnt_sum","order_info":{"key":"find_tmscnt","value":"DESC","table_nm":"vw_srhwd_find_tmscnt_sum","order":"DESC"},"page_info":{"per_page":10,"cur_page":1}}
     """
     try:
+        logger.info(f"params :: {params}")
         rows = session.query(**params.dict()).all()
         return JSONResponse(
             content={
