@@ -8,7 +8,7 @@ from pydantic import BaseSettings, SecretStr, PostgresDsn, validator
 
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-print(f"base_dir :: {base_dir}")
+print(f"router base_dir :: {base_dir}")
 
 
 class DBInfo(BaseSettings):
@@ -17,6 +17,10 @@ class DBInfo(BaseSettings):
     USER: str = ""
     PASS: SecretStr = ""
     BASE: str = ""
+
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
 
     def get_dsn(self):
         return ""
@@ -70,9 +74,7 @@ class ProdSettings(Settings):
     RELOAD = False
     TESTING = False
 
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
+    DB_INFO: PGInfo = PGInfo()
 
 
 class LocalSettings(Settings):
@@ -84,8 +86,6 @@ class LocalSettings(Settings):
     DB_INFO = PGInfo(
         HOST="192.168.100.126", PORT="25432", USER="dpmanager", PASS="hello.dp12#$", BASE="dataportal", SCHEMA="sitemng"
     )
-
-    # DB_INFO: TiberoInfo = TiberoInfo(HOST="192.168.101.164", PORT="8629", USER="dhub", PASS="dhub1234", BASE="tibero")
 
 
 class TestSettings(LocalSettings):
@@ -101,6 +101,7 @@ def get_settings():
 
 
 settings = get_settings()
+print(settings)
 
 
 with open(os.path.join(base_dir, "logging.json")) as f:
