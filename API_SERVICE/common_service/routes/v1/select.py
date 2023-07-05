@@ -51,27 +51,6 @@ logger = logging.getLogger()
 
 @router.post("/commonSelect")
 async def common_select(params: CommonSelect, session: Executor = Depends(db.get_db)):
-    """
-    {
-        "table_nm":"banr_adm_bas",
-        "where_info":[
-            {
-                "key":"banr_div",
-                "value":"T",
-                "table_nm":"banr_adm_bas",
-                "compare_op":"Equal","op":""
-            },
-            {
-                "key":"pstng_fns_date",
-                "compare_op":">=",
-                "value":"2023-04-12 00:00:00",
-                "table_nm":"banr_adm_bas",
-                "op":"AND"
-            }
-        ]
-    }
-    {"table_nm":"vw_srhwd_find_tmscnt_sum","order_info":{"key":"find_tmscnt","value":"DESC","table_nm":"vw_srhwd_find_tmscnt_sum","order":"DESC"},"page_info":{"per_page":10,"cur_page":1}}
-    """
     try:
         logger.info(f"params :: {params}")
         rows = session.query(**params.dict()).all()

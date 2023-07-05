@@ -28,6 +28,7 @@ router = APIRouter()
 async def common_execute(request: Request, params: List[CommonExecute], session: Executor = Depends(db.get_db)):
     try:
         for param in params:
+            # TODO: 테이블 접근 제한에 대한 권한 확인등의 작업 필요
             session.execute(**param.dict())
         return JSONResponse(content={"result": 1, "errorMessage": ""}, status_code=200)
     except Exception as e:
@@ -44,10 +45,3 @@ async def common_execute(request: Request, params: List[CommonExecute], session:
 #             return JSONResponse(content={"result": 0, "errorMessage": "NotAllowedTable"})
 #         elif param.table_nm == "USR_MGMT" and param.method == "INSERT":
 #             return JSONResponse(content={"result": 0, "errorMessage": "use register api"})
-
-
-def get_roleidx_from_token(request: Request) -> dict:
-    token = request.headers.get("Authorization")
-    if token.startswith("Bearer "):
-        token = token[7:]
-    return dict(jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)).get("roleidx")
