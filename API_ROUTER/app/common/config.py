@@ -1,12 +1,13 @@
+import json
+import logging.config
 import os
 from functools import lru_cache
 from typing import Union
 
 from pydantic import BaseSettings, SecretStr, PostgresDsn, validator
 
-
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-print(f"base_dir :: {base_dir}")
+print(f"router base_dir :: {base_dir}")
 
 
 class DBInfo(BaseSettings):
@@ -15,6 +16,11 @@ class DBInfo(BaseSettings):
     USER: str = ""
     PASS: SecretStr = ""
     BASE: str = ""
+    SCHEMA: str = ""
+
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
 
     def get_dsn(self):
         return ""
@@ -68,9 +74,7 @@ class ProdSettings(Settings):
     RELOAD = False
     TESTING = False
 
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
+    DB_INFO: PGInfo = PGInfo()
 
 
 class LocalSettings(Settings):
@@ -101,6 +105,6 @@ def get_settings():
 settings = get_settings()
 
 
-# with open(os.path.join(base_dir, "logging.json")) as f:
-#     log_config = json.load(f)
-#     logging.config.dictConfig(log_config)
+with open(os.path.join(base_dir, "logging.json")) as f:
+    log_config = json.load(f)
+    logging.config.dictConfig(log_config)

@@ -5,6 +5,9 @@ ROUTE_API_URL_FIELD = "url"
 
 
 class RouteTable:
+    """
+        각 프로젝트 별 api router 테이블에 맞게 변경 필요
+    """
     api_list_table = "tb_api_info"
     api_server_info_table = "tb_api_server_info"
     main_key = "ctgry"
