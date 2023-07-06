@@ -8,7 +8,7 @@ from libs.database.connector import Connector
 from meta_service.common.config import settings
 
 from meta_service.ELKSearch.config import dev_server
-from meta_service.common.search import default_search_set, Upsert, exception_col
+from meta_service.common.search import default_search_set, Record, exception_col
 
 
 router = APIRouter()
@@ -17,7 +17,7 @@ logger = logging.getLogger()
 
 
 @router.post("/els-upsert", response_model=dict)
-def els_update(input: Upsert, session: Connector = Depends(db.get_db)):
+def els_update(input: Record, session: Connector = Depends(db.get_db)):
 
     data_query = {
         "table_nm": input.index,

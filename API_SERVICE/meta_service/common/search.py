@@ -4,7 +4,7 @@ from meta_service.ELKSearch.document import DocumentManager
 from fastapi.logger import logger
 
 
-class Upsert(BaseModel):
+class Record(BaseModel):
     index: str
     key: str
     ids: str
