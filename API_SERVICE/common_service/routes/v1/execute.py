@@ -4,12 +4,10 @@ from typing import Dict, List, Optional
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
-from common_service.common.const import ALGORITHM, NOT_ALLOWED_TABLES, SECRET_KEY
 
+from common_service.common.const import NOT_ALLOWED_TABLES
 from common_service.database.conn import db
-import jwt
 from libs.database.connector import Executor
-
 
 logger = logging.getLogger()
 
@@ -29,11 +27,9 @@ async def common_execute(request: Request, params: List[CommonExecute], session:
     try:
         for param in params:
             if param.table_nm in NOT_ALLOWED_TABLES:
-                roleidx = get_roleidx_from_token(request)
-                if roleidx != "0":
-                    return JSONResponse(content={"result": 0, "errorMessage": "NotAllowedTable"})
-                elif param.table_nm == "USR_MGMT" and param.method == "INSERT":
-                    return JSONResponse(content={"result": 0, "errorMessage": "use register api"})
+                ...
+                # TODO: 유저 테이블등 수정,삭제 제한이 있는 테이블에 관한 필터링 필요
+
             session.execute(**param.dict())
         return JSONResponse(content={"result": 1, "errorMessage": ""}, status_code=200)
     except Exception as e:
@@ -41,10 +37,3 @@ async def common_execute(request: Request, params: List[CommonExecute], session:
         for param in params:
             logger.info(param.dict())
         return JSONResponse(content={"result": 0, "errorMessage": str(e)}, status_code=400)
-
-
-def get_roleidx_from_token(request: Request) -> dict:
-    token = request.headers.get("Authorization")
-    if token.startswith("Bearer "):
-        token = token[7:]
-    return dict(jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)).get("roleidx")
