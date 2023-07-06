@@ -16,6 +16,11 @@ class DBInfo(BaseSettings):
     USER: str = ""
     PASS: SecretStr = ""
     BASE: str = ""
+    SCHEMA: str = ""
+
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
 
     def get_dsn(self):
         return ""
@@ -63,12 +68,10 @@ class Settings(BaseSettings):
 
 
 class ProdSettings(Settings):
-    RELOAD = False
-    TESTING = False
-
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
+    TESTING: bool = False
+    DB_POOL_RECYCLE: int = 900
+    DB_ECHO: bool = True
+    RELOAD: bool = False
 
 
 class LocalSettings(Settings):
@@ -77,11 +80,11 @@ class LocalSettings(Settings):
     DB_ECHO: bool = True
     RELOAD: bool = False
 
-    # DB_INFO = PGInfo(
-    #     HOST="192.168.100.126", PORT="25432", USER="dpsi", PASS="hello.sitemng12#$", BASE="ktportal", SCHEMA="sitemng"
-    # )
+    DB_INFO = PGInfo(
+        HOST="192.168.100.126", PORT="25432", USER="dpsi", PASS="hello.sitemng12#$", BASE="ktportal", SCHEMA="sitemng"
+    )
 
-    DB_INFO: TiberoInfo = TiberoInfo(HOST="192.168.101.164", PORT="8629", USER="dhub", PASS="dhub1234", BASE="tibero")
+    # DB_INFO: TiberoInfo = TiberoInfo(HOST="192.168.101.164", PORT="8629", USER="dhub", PASS="dhub1234", BASE="tibero")
 
 
 class TestSettings(LocalSettings):
@@ -101,4 +104,3 @@ print(settings)
 with open(os.path.join(base_dir, "logging.json")) as f:
     log_config = json.load(f)
     logging.config.dictConfig(log_config)
-logger = logging.getLogger()
