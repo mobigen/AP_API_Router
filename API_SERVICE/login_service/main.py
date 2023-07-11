@@ -5,6 +5,10 @@ from login_service.routes.v1 import auth
 from login_service.common.config import settings
 from login_service.database.conn import db
 
+import logging
+
+logger = logging.getLogger()
+
 
 def create_app():
     app_ = FastAPI()
