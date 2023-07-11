@@ -1,128 +1,254 @@
+from ast import literal_eval
+import json
 import logging
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Dict, Optional
 
 import bcrypt
 import jwt
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
+from libs.auth.keycloak import keycloak
 
 from libs.database.connector import Executor
-from login_service.common.const import ALGORITHM, EXPIRE_DELTA, SECRET_KEY
+from login_service.common.config import settings
+from login_service.common.const import ALGORITHM, COOKIE_NAME, EXPIRE_DELTA, SECRET_KEY, LoginTable, RegisterTable
 from login_service.database.conn import db
 
 
 logger = logging.getLogger()
 
 
-class LoginInfo(BaseModel):
-    user_id: str
-    password: str
+class LoginInfoWrap(BaseModel):
+    """
+    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
+    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
+    """
+
+    class LoginInfo(BaseModel):
+        user_id: str
+        user_password: str
+
+    data: LoginInfo
 
 
-class RegisterInfo(BaseModel):
-    usridx: str
-    id: str
-    pwd: str
-    nm: Optional[str]
-    mbphne: Optional[str]
-    phne: Optional[str]
-    email: Optional[str]
-    dept: Optional[str]
-    roleidx: Optional[str]
-    aprvusr: Optional[str]
-    aprvyn: Optional[str]
-    useyn: Optional[str]
-    rgstusridx: Optional[str]
-    mdfcusridx: Optional[str]
-    rgstdt: Optional[str]
-    bdt: Optional[str]
-    gn: Optional[str]
-    usrtpidx: Optional[str]
-    usrtp: Optional[str]
-    usrclsp: Optional[str]
-    work: Optional[str]
-    instidx: Optional[str]
-    inst: Optional[str]
-    cmpno: Optional[str]
+class RegisterInfoWrap(BaseModel):
+    """
+    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
+    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 RegisterInfo 객체를 생성
+    """
+
+    class RegisterInfo(BaseModel):
+        user_id: str
+        user_password: str
+        login_type: Optional[str]
+        user_type: Optional[str]
+        user_sttus: Optional[str]
+        user_nm: Optional[str]
+        email: Optional[str]
+        moblphon: Optional[str]
+        blng_org_cd: Optional[str]
+        blng_org_nm: Optional[str]
+        blng_org_desc: Optional[str]
+        service_terms_yn: Optional[str]
+        pwd_fail_tms: Optional[int]
+        login_fail_date: Optional[datetime]
+        last_login_date: Optional[datetime]
+        reg_date: Optional[datetime]
+        amd_date: Optional[datetime]
+        user_uuid: Optional[str]
+        reg_user: Optional[str]
+        amd_user: Optional[str]
+        user_role: Optional[str]
+        user_normal: Optional[str]
+        adm_yn: Optional[str]
+
+    data: RegisterInfo
 
 
 router = APIRouter()
 
 
-@router.post("/user/register")
-async def register(params: RegisterInfo, session: Executor = Depends(db.get_db)):
-    hash_pw = bcrypt.hashpw(params.pwd.encode("utf-8"), bcrypt.gensalt()).decode(encoding="utf-8")
-    params.pwd = hash_pw
+@router.post("/user/commonRegister")
+async def register(params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
+    param = params.data
+    param.user_normal = param.user_password
+    param.user_password = bcrypt.hashpw(param.user_password.encode("utf-8"), bcrypt.gensalt()).decode(encoding="utf-8")
     try:
         logger.info(params)
-        row = session.query(
-            table_nm="usr_mgmt",
-            where_info=[
-                {"table_nm": "usr_mgmt", "key": "usridx", "value": params.usridx, "compare_op": "=", "op": ""},
-                {"table_nm": "usr_mgmt", "key": "id", "value": params.id, "compare_op": "=", "op": "AND"},
-            ],
-        ).first()
+        row = session.query(**LoginTable.get_query_data(param.user_id)).first()
+        logger.info(f"row:: {row}")
         if row:
             return JSONResponse(status_code=200, content={"result": 1, "errorMessage": "Already registered"})
-        session.execute(method="INSERT", table_nm="usr_mgmt", data=params.dict())
+
+        session.execute(auto_commit=False, **RegisterTable.get_query_data(param.dict()))
+
+        await create_keycloak_user(**param.dict())
+
+        session.commit()
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
-@router.post("/user/login")
-async def login(params: LoginInfo, session: Executor = Depends(db.get_db)) -> JSONResponse:
+@router.post("/user/commonLogin")
+async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -> JSONResponse:
     """
-    F01: id, pwd 불일치
-    F02: 관리자 승인 필요
-    F03: 삭제된 계정
+        keycloak 인중 후 토큰 발급
+        table data
+        {
+            'user_id': 'swyang',
+            'user_password': '$2b$12$eL47K7Pi5.Ee9GCTftZ1GuwFMO96jFltAuhnMvropsu/JtyzB26UO',
+            'login_type': None,
+            'user_type': None,
+            'user_sttus': None,
+            'user_nm': 'seok',
+            'email': 'test@test.com',
+            'moblphon': None,
+            'blng_org_cd': None,
+            'blng_org_nm': None,
+            'blng_org_desc': None,
+            'service_terms_yn': None,
+            'pwd_fail_tms': None,
+            'login_fail_date': None,
+            'last_login_date': None,
+            'reg_date': None,
+            'amd_date': None,
+            'user_uuid': None,
+            'reg_user': None,
+            'amd_user': None,
+            'user_role': None,
+            'user_normal': 'zxcv1234!',
+            'adm_yn': None
+        }
+
+    Args:
+        params (LoginInfoWrap): _description_
+        session (Executor, optional): _description_. Defaults to Depends(db.get_db).
+
+    Returns:
+        JSONResponse: _description_
     """
+    param = params.data
     try:
-        row = session.query(
-            table_nm="USR_MGMT",
-            where_info=[{"table_nm": "USR_MGMT", "key": "id", "value": params.user_id, "compare_op": "=", "op": ""}],
-        ).first()
-
+        row = session.query(**LoginTable.get_query_data(param.user_id)).first()
         if not row:
-            return JSONResponse(content={"result": 0, "errorMessage": "F01"})
-        elif row["useyn"] != "Y":
-            return JSONResponse(content={"result": 0, "errorMessage": "F03"})
+            return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "id or password not found"})
 
-        is_verified = bcrypt.checkpw(params.password.encode("utf-8"), row["pwd"].encode("utf-8"))
-        if not is_verified:
-            return JSONResponse(content={"result": 0, "errorMessage": "F01"})
+        token = await get_normal_token(grant_type="password", username=param.user_id, password=row["user_password"])
+        logger.info(f"token :: {token}")
 
-        if row["aprvyn"] != "Y":
-            return JSONResponse(content={"result": 0, "errorMessage": "F02"})
-
-        access_token = create_access_token(data=row)
-        return JSONResponse(
-            status_code=200,
-            content={"result": 1, "errorMessage": "", "data": {"body": [{"Authorization": f"{access_token}"}]}},
-        )
+        response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+        response.set_cookie(key=COOKIE_NAME, value=token)
+        return response
     except Exception as e:
         logger.error(e, exc_info=True)
         logger.error(f"data :: {params}")
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
-@router.get("/user/info")
-async def info(request: Request):
-    token = request.headers.get("Authorization")
-    if token.startswith("bearer "):
-        token = token[7:]
-    try:
-        return jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
-    except jwt.DecodeError as e:
-        logger.error(f"{e}, token :: {token}", exc_info=True)
+@router.get("/user/commonUserInfo")
+async def info(request: Request, session: Executor = Depends(db.get_db)):
+    """
+    {
+        "result": 1,
+        "errorMessage": "",
+        "data": {
+            "body": {
+                "user_id": "admin@test.com",
+                "email": "admin@test.com",
+                "login_type": "MEMBER",
+                "moblphon": "010-1111-1112",
+                "user_nm": "관리자",
+                "user_type": "GENL",
+                "user_role": "ROLE_USER|ROLE_ADMIN",
+                "user_uuid": "6d77d874-e613-480f-8e86-dba491c28167",
+                "blng_org_cd": "None",
+                "blng_org_nm": "None",
+                "blng_org_desc": "None",
+                "exp": 1689053022
+            }
+        }
+    }
+
+    Args:
+        request (Request): _description_
+        session (Executor, optional): _description_. Defaults to Depends(db.get_db).
+    """
+    token = request.cookies.get(COOKIE_NAME)
+
+    token = literal_eval(token)
+    logger.info(f"type :: {type(token)}, token :: {token}")
+    username = await username_from_token(token["data"]["access_token"])
+    row = session.query(**LoginTable.get_query_data(username)).first()
+
+    return JSONResponse(
+        status_code=200,
+        content={"result": 1, "errorMessage": "", "data": {"body": row}},
+    )
 
 
-def create_access_token(data: dict = None, expires_delta: int = EXPIRE_DELTA):
-    to_encode = data.copy()
-    to_encode.pop("pwd")
-    if expires_delta:
-        to_encode.update({"exp": datetime.utcnow() + timedelta(hours=expires_delta)})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+async def get_admin_token() -> None:
+    res = await keycloak.generate_admin_token(
+        username=settings.KEYCLOAK_INFO.admin_username,
+        password=settings.KEYCLOAK_INFO.admin_password,
+        grant_type="password",
+    )
+
+    return res.get("data").get("access_token")
+
+
+async def create_keycloak_user(**kwargs):
+    admin_token = await get_admin_token()
+    logger.info(kwargs)
+    logger.info(f"admin_token :: {admin_token}")
+    reg_data = {
+        "username": kwargs["user_id"],
+        "firstName": kwargs["user_nm"],
+        "email": kwargs["email"],
+        "emailVerified": True,
+        "enabled": True,
+        "credentials": [{"value": kwargs["user_password"]}],
+        "attributes": kwargs,
+    }
+    logger.info(f"reg_data :: {reg_data}")
+    res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
+    logger.info(f"res :: {res}")
+    if res["status_code"] != 201:
+        raise
+
+
+async def get_normal_token(**kwargs):
+    return await keycloak.generate_normal_token(
+        realm=settings.KEYCLOAK_INFO.realm,
+        client_id=settings.KEYCLOAK_INFO.client_id,
+        client_secret=settings.KEYCLOAK_INFO.client_secret,
+        grant_type=kwargs.pop("grant_type", "password"),
+        **kwargs,
+    )
+
+
+async def username_from_token(access_token: str):
+    logger.info(access_token)
+    res = await keycloak.user_info(
+        realm=settings.KEYCLOAK_INFO.realm,
+        token=access_token,
+    )
+    logger.info(f"token info res :: {res}")
+    return res["data"]["preferred_username"]
+
+
+async def delete_user(**kwargs):
+    """
+    keycloak delete api 호출
+    params:
+        user_id: str
+    """
+    admin_token = await get_admin_token()
+    res = await keycloak.delete_user(
+        token=admin_token, realm=settings.KEYCLOAK_INFO.realm, user_id=kwargs.get("user_id")
+    )
+    logger.info(f"delete res :: {res}")

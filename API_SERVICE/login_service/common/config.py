@@ -2,7 +2,7 @@ import json
 import logging.config
 import os
 from functools import lru_cache
-from typing import Union
+from typing import Optional, Union
 
 from pydantic import BaseSettings, PostgresDsn, validator, SecretStr
 
@@ -49,6 +49,19 @@ class TiberoInfo(DBInfo):
         return f"DSN={self.BASE};UID={self.USER};PWD={self.PASS.get_secret_value()}"
 
 
+class KeycloakInfo(BaseSettings):
+    keycloak_url: Optional[str]
+    admin_username: Optional[str]
+    admin_password: Optional[str]
+    realm: Optional[str]
+    client_id: Optional[str]
+    client_secret: Optional[str]
+
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
+
+
 class Settings(BaseSettings):
     BASE_DIR = base_dir
     DB_POOL_RECYCLE: int = 900
@@ -58,6 +71,8 @@ class Settings(BaseSettings):
 
     DB_INFO: DBInfo = DBInfo()
     DB_URL: Union[str, PostgresDsn] = None
+
+    KEYCLOAK_INFO: KeycloakInfo = KeycloakInfo()
 
     @validator("DB_URL", pre=True, always=True)
     def assemble_db_url(cls, v, values):
@@ -71,6 +86,8 @@ class ProdSettings(Settings):
     DB_POOL_RECYCLE: int = 900
     DB_ECHO: bool = True
     RELOAD: bool = False
+
+    DB_INFO: PGInfo = PGInfo()
 
 
 class LocalSettings(Settings):
@@ -88,13 +105,22 @@ class LocalSettings(Settings):
         SCHEMA="sitemng,users,meta,iag,ckan,board,analysis",
     )
 
+    KEYCLOAK_INFO = KeycloakInfo(
+        keycloak_url="http://192.168.101.44:8080",
+        admin_username="admin",
+        admin_password="zxcv1234!",
+        realm="kadap",
+        client_id="uyuni",
+        client_secret="04esVekOjeJZKLHBkgsCQxpbwda41aKW",
+    )
+
 
 class TestSettings(LocalSettings):
     ...
 
 
 @lru_cache
-def get_settings():
+def get_settings() -> Settings:
     env = os.getenv("APP_ENV", "prod")
     print(env)
     return {"local": LocalSettings(), "test": TestSettings(), "prod": ProdSettings()}[env]
@@ -106,4 +132,3 @@ print(settings)
 with open(os.path.join(base_dir, "logging.json")) as f:
     log_config = json.load(f)
     logging.config.dictConfig(log_config)
-logger = logging.getLogger()

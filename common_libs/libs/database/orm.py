@@ -136,17 +136,19 @@ class OrmExecutor(Executor):
         return data, self._cnt
 
     def first(self):
-        columns = self.get_query_columns()
-        return dict(zip(columns, self._q.first()))
+        try:
+            columns = self.get_query_columns()
+            dat = self._q.first()
+            return dict(zip(columns, dat)) if dat else None
+        except Exception as e:
+            raise e
 
     def execute(self, **kwargs):
         try:
-            self._session.begin()
-
-            method = kwargs.pop("method").lower()
-            table = self.get_table(kwargs.pop("table_nm"))
-            data = kwargs.pop("data")
-            keys = kwargs.pop("key")
+            method = kwargs["method"].lower()
+            table = self.get_table(kwargs["table_nm"])
+            data = kwargs["data"]
+            keys = kwargs.get("key", [])
             cond = [getattr(table.columns, k) == data[k] for k in keys]
             if method == "insert":
                 stmt = table.insert().values(**data)
@@ -158,10 +160,18 @@ class OrmExecutor(Executor):
                 raise NotImplementedError
 
             self._session.execute(stmt)
-            self._session.commit()
+
+            if auto_commit := kwargs.get("auto_commit", True):
+                self._session.commit()
         except Exception as e:
             self._session.rollback()
             raise e
+
+    def commit(self):
+        self._session.commit()
+
+    def rollback(self):
+        self._session.rollback()
 
     def get_table(self, table_nm) -> Table:
         for nm, t in self._metadata.tables.items():
