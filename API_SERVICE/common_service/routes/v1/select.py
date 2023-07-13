@@ -59,7 +59,7 @@ async def common_select(params: CommonSelect, session: Executor = Depends(db.get
             content={
                 "data": {
                     "count": rows[1] if rows else 0,
-                    "body": rows if rows else [],
+                    "body": rows[0] if rows else [],
                     # "header": session.get_column_info(params.table_nm, settings.DB_INFO.SCHEMA),
                     "header": [
                         {"column_name": info["eng_nm"], "kor_column_name": info["kor_nm"]} for info in header[0]
