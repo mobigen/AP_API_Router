@@ -140,6 +140,8 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
 
         token = await get_normal_token(grant_type="password", username=param.user_id, password=row["user_password"])
         logger.info(f"token :: {token}")
+        if token["status_code"] == 401:
+            await create_keycloak_user(**row)
 
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
         response.set_cookie(key=COOKIE_NAME, value=token)
@@ -191,6 +193,13 @@ async def info(request: Request, session: Executor = Depends(db.get_db)):
     )
 
 
+@router.post("/user/commonLogout")
+async def logout():
+    response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+    response.delete_cookie(COOKIE_NAME)
+    return response
+
+
 async def get_admin_token() -> None:
     res = await keycloak.generate_admin_token(
         username=settings.KEYCLOAK_INFO.admin_username,
@@ -212,7 +221,7 @@ async def create_keycloak_user(**kwargs):
         "emailVerified": True,
         "enabled": True,
         "credentials": [{"value": kwargs["user_password"]}],
-        "attributes": kwargs,
+        "attributes": json.dumps(kwargs, default=str),
     }
     logger.info(f"reg_data :: {reg_data}")
     res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
