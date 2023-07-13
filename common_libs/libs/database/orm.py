@@ -6,6 +6,7 @@ import sqlalchemy
 from fastapi import FastAPI
 from sqlalchemy import Column, MetaData, and_, create_engine, not_, or_, Table
 from sqlalchemy.orm import sessionmaker, declarative_base, Session, Query
+from sqlalchemy.sql import column
 
 from .connector import Connector, Executor
 
@@ -148,7 +149,8 @@ class OrmExecutor(Executor):
         try:
             method = kwargs["method"].lower()
             table = self.get_table(kwargs["table_nm"])
-            data = kwargs["data"]
+            data = self._data_parse(kwargs["data"])
+
             keys = kwargs.get("key", [])
             cond = [getattr(table.columns, k) == data[k] for k in keys]
             if method == "insert":
@@ -176,7 +178,7 @@ class OrmExecutor(Executor):
 
     def get_table(self, table_nm) -> Table:
         for nm, t in self._metadata.tables.items():
-            if table_nm in nm:
+            if nm.endswith(table_nm):
                 return t
 
     def get_query_columns(self):
@@ -214,3 +216,17 @@ class OrmExecutor(Executor):
 
     def close(self):
         self._session.close()
+
+    def _data_parse(self, data):
+        ret = {}
+        for k, v in data.items():
+            if v.startswith("`"):
+                if "+" in v:
+                    v = v[1:].split("+")
+                    ret[k] = column(v[0].strip()) + int(v[1])
+                elif "-" in v:
+                    v = v[1:].split("-")
+                    data[k] = column(v[0].strip()) - int(v[1])
+            else:
+                ret[k] = v
+        return ret
