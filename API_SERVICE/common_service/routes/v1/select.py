@@ -54,12 +54,16 @@ async def common_select(params: CommonSelect, session: Executor = Depends(db.get
     try:
         logger.info(f"params :: {params}")
         rows = session.query(**params.dict()).all()
+        header = get_column_desc(params.table_nm, session)
         return JSONResponse(
             content={
                 "data": {
                     "count": rows[1] if rows else 0,
-                    "body": rows[0] if rows else [],
-                    "header": session.get_column_info(params.table_nm, settings.DB_INFO.SCHEMA),
+                    "body": rows if rows else [],
+                    # "header": session.get_column_info(params.table_nm, settings.DB_INFO.SCHEMA),
+                    "header": [
+                        {"column_name": info["eng_nm"], "kor_column_name": info["kor_nm"]} for info in header[0]
+                    ],
                 },
                 "result": 1,
                 "errorMessage": "",
@@ -70,3 +74,12 @@ async def common_select(params: CommonSelect, session: Executor = Depends(db.get
     except Exception as e:
         logger.error(f"{params.dict()}, {str(e)}", exc_info=True)
         return JSONResponse(content={"result": 0, "errorMessage": str(e)}, status_code=400)
+
+
+def get_column_desc(table_nm, session: Executor):
+    return session.query(
+        table_nm="tb_table_list",
+        key="table_id",
+        join_info={"table_nm": "tb_table_column_info", "key": "table_id"},
+        where_info=[{"table_nm": "tb_table_list", "key": "table_nm", "value": table_nm, "compare_op": "="}],
+    ).all()

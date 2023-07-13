@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Dict, List, Union, Tuple, Optional
 
@@ -133,13 +134,13 @@ class OrmExecutor(Executor):
         columns = self.get_query_columns()
         data = [dict(zip(columns, data)) for data in self._q.all()]
 
-        return data, self._cnt
+        return json.loads(json.dumps(data, default=str)), self._cnt
 
     def first(self):
         try:
             columns = self.get_query_columns()
             dat = self._q.first()
-            return dict(zip(columns, dat)) if dat else None
+            return json.loads(json.dumps(dict(zip(columns, dat)), default=str)) if dat else None
         except Exception as e:
             raise e
 
