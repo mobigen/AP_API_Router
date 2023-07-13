@@ -181,6 +181,10 @@ async def info(request: Request, session: Executor = Depends(db.get_db)):
         session (Executor, optional): _description_. Defaults to Depends(db.get_db).
     """
     token = request.cookies.get(COOKIE_NAME)
+    if not token:
+        msg = "TokenDoesNotExist"
+        logger.info(msg)
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
 
     token = literal_eval(token)
     logger.info(f"type :: {type(token)}, token :: {token}")
