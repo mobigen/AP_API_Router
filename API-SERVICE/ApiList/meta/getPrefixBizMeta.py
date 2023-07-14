@@ -1,4 +1,5 @@
-from typing import Dict, Optional
+from typing import Dict
+from fastapi.logger import logger
 from pydantic import BaseModel
 from ELKSearch.Manager.manager import ElasticSearchManager
 from Utils.CommonUtil import get_exception_info
@@ -7,10 +8,10 @@ from ApiService.ApiServiceConfig import config
 
 
 class Prefix(BaseModel):
+    index: str
     size: int
-    keyword: str
-    index: Optional[str] = ""
-    field: Optional[str] = ""
+    fields: list
+    query: str
 
 
 def api(input: Prefix) -> Dict:
@@ -20,18 +21,34 @@ def api(input: Prefix) -> Dict:
     :param keyword: type dict, ex) {"data_name" : "테"}
     :return:
     """
-    if input.field == "":
-        input.field = "data_nm"
-    query = {input.field: input.keyword}
+    if not len(input.fields):
+        input.fields = ["data_nm"]
     els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
     try:
         if input.index != "":
             els_config["index"] = input.index
         es = ElasticSearchManager(**els_config)
-
         es.size = input.size
-        prefix_data = es.prefix(query,[input.field])
+        input.query = f"(*{input.query}*)"
+        del input.index
+        del input.size
+        search_query = {"query_string": input.dict()}
+        logger.info(search_query)
 
+        body = {
+            "query": {
+                "bool": {
+                    "must": [search_query]
+                }
+            }
+        }
+        es.body = body
+        logger.info(es.body)
+        prefix_data = es.search(input.fields)
+        logger.info(prefix_data)
+
+        if not len(prefix_data):
+            return {"result": 1,"data": []}
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
