@@ -151,8 +151,10 @@ class OrmExecutor(Executor):
             table = self.get_table(kwargs["table_nm"])
             data = self._data_parse(kwargs["data"])
 
-            keys = kwargs.get("key", [])
-            cond = [getattr(table.columns, k) == data[k] for k in keys]
+            cond = []
+            if keys := kwargs.get("key", []):
+                cond = [getattr(table.columns, k) == data[k] for k in keys]
+
             if method == "insert":
                 stmt = table.insert().values(**data)
             elif method == "update":
@@ -220,7 +222,7 @@ class OrmExecutor(Executor):
     def _data_parse(self, data):
         ret = {}
         for k, v in data.items():
-            if v.startswith("`"):
+            if str(v).startswith("`"):
                 if "+" in v:
                     v = v[1:].split("+")
                     ret[k] = column(v[0].strip()) + int(v[1])
