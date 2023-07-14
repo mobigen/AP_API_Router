@@ -15,6 +15,9 @@ db = declarative_base()
 logger = logging.getLogger()
 
 
+class TableNotFoundException(Exception):
+    ...
+
 class SQLAlchemyConnector(Connector):
     def __init__(self, base=None, app: FastAPI = None, **kwargs):
         self._engine = None
@@ -182,6 +185,9 @@ class OrmExecutor(Executor):
         for nm, t in self._metadata.tables.items():
             if nm.endswith(table_nm):
                 return t
+        err_msg = f"table not found :: {table_nm}"
+        logger.error(err_msg)
+        raise TableNotFoundException(err_msg)
 
     def get_query_columns(self):
         return [desc["name"] for desc in self._q.column_descriptions] if self._q else None
