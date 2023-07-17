@@ -8,7 +8,7 @@ class ElasticSearchManager:
         self,
         host: str = "192.168.101.44",
         port: str = "39200",
-        page: int = 1,
+        page: int = 0,
         size: int = 10,
         index: str = "biz_meta",
     ):
