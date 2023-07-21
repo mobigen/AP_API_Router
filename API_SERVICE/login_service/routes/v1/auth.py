@@ -42,21 +42,21 @@ class RegisterInfoWrap(BaseModel):
     class RegisterInfo(BaseModel):
         user_id: str
         user_password: str
-        login_type: Optional[str]
-        user_type: Optional[str]
-        user_sttus: Optional[str]
+        login_type: Optional[str] = "MEMBER"
+        user_type: Optional[str] = "GENL"
+        user_sttus: Optional[str] = "SBSCRB"
         user_nm: Optional[str]
         email: Optional[str]
         moblphon: Optional[str]
-        blng_org_cd: Optional[str]
-        blng_org_nm: Optional[str]
-        blng_org_desc: Optional[str]
-        service_terms_yn: Optional[str]
+        blng_org_cd: Optional[str] = None
+        blng_org_nm: Optional[str] = None
+        blng_org_desc: Optional[str] = None
+        service_terms_yn: Optional[str] = "Y"
         pwd_fail_tms: Optional[int]
         login_fail_date: Optional[datetime]
         last_login_date: Optional[datetime]
-        reg_date: Optional[datetime]
-        amd_date: Optional[datetime]
+        reg_date: Optional[datetime] = datetime.now()
+        amd_date: Optional[datetime] = datetime.now()
         user_uuid: Optional[str]
         reg_user: Optional[str]
         amd_user: Optional[str]
