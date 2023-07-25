@@ -70,7 +70,6 @@ async def common_select(params: CommonSelect, session: Executor = Depends(db.get
             },
             status_code=200,
         )
-
     except Exception as e:
         logger.error(f"{params.dict()}, {str(e)}", exc_info=True)
         return JSONResponse(content={"result": 0, "errorMessage": str(e)}, status_code=400)

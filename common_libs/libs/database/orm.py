@@ -5,12 +5,11 @@ from typing import Dict, List, Union, Tuple, Optional
 import sqlalchemy
 from fastapi import FastAPI
 from sqlalchemy import Column, MetaData, and_, create_engine, not_, or_, Table
-from sqlalchemy.orm import sessionmaker, declarative_base, Session, Query
+from sqlalchemy.orm import sessionmaker, Session, Query
 from sqlalchemy.sql import column
 
 from .connector import Connector, Executor
 
-db = declarative_base()
 
 logger = logging.getLogger()
 
@@ -18,12 +17,14 @@ logger = logging.getLogger()
 class TableNotFoundException(Exception):
     ...
 
+
 class SQLAlchemyConnector(Connector):
     def __init__(self, base=None, app: FastAPI = None, **kwargs):
         self._engine = None
         self._Base = base
         self._session = None
         self._metadata = None
+        self._schemas = []
         if app is not None:
             self.init_app(app=app, **kwargs)
 
@@ -33,6 +34,7 @@ class SQLAlchemyConnector(Connector):
         is_testing = kwargs.get("TESTING", False)
         echo = kwargs.get("DB_ECHO", False)
         is_reload = kwargs.get("RELOAD", False)
+        self._schemas = kwargs.get("DB_INFO").get("SCHEMA").split(",")
 
         self._engine = create_engine(
             database_url,
@@ -42,10 +44,7 @@ class SQLAlchemyConnector(Connector):
         )
 
         self._session = sessionmaker(autocommit=False, autoflush=False, bind=self._engine)
-
-        self._metadata = MetaData()
-        for schema in kwargs.get("DB_INFO").get("SCHEMA").split(","):
-            self._metadata.reflect(bind=self._engine, views=True, schema=schema)
+        self.reset_metadata()
 
         @app.on_event("startup")
         def startup():
@@ -59,17 +58,23 @@ class SQLAlchemyConnector(Connector):
     def get_db(self) -> Executor:
         if self._session is None:
             raise Exception("must be called 'init_db'")
-        executor = OrmExecutor(self._session(), self._metadata)
+        executor = OrmExecutor(self._session(), self._metadata, self)
         try:
             yield executor
         finally:
             executor.close()
 
+    def reset_metadata(self):
+        self._metadata = MetaData()
+        for schema in self._schemas:
+            self._metadata.reflect(bind=self._engine, views=True, schema=schema)
+
 
 class OrmExecutor(Executor):
-    def __init__(self, session: Session, metadata: MetaData):
+    def __init__(self, session: Session, metadata: MetaData, conn: SQLAlchemyConnector):
         self._session = session
         self._metadata = metadata
+        self._conn = conn
         self._cnt = 0
         self._q: Optional[Query] = None
 
@@ -182,11 +187,19 @@ class OrmExecutor(Executor):
         self._session.rollback()
 
     def get_table(self, table_nm) -> Table:
-        for nm, t in self._metadata.tables.items():
-            if nm.endswith(table_nm):
-                return t
+        def __search(table_nm):
+            for nm, t in self._metadata.tables.items():
+                if nm.endswith(table_nm):
+                    return t
+
+        for _ in range(2):
+            ret = __search(table_nm)
+            if ret is not None:
+                return ret
+            self._conn.reset_metadata()
+
         err_msg = f"table not found :: {table_nm}"
-        logger.error(err_msg)
+        logger.error(f"{err_msg}, {self._metadata.tables.keys()}, {self._conn._schemas}")
         raise TableNotFoundException(err_msg)
 
     def get_query_columns(self):
