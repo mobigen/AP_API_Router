@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import logging
 from typing import Dict, List, Union, Tuple, Optional
@@ -248,6 +249,8 @@ class OrmExecutor(Executor):
                 elif "-" in v:
                     v = v[1:].split("-")
                     data[k] = column(v[0].strip()) - int(v[1])
+            elif str(v).upper().startswith("NOW"):
+                ret[k] = datetime.now()
             else:
                 ret[k] = v
         return ret
