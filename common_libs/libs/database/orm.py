@@ -189,8 +189,9 @@ class OrmExecutor(Executor):
 
     def get_table(self, table_nm) -> Table:
         def __search(table_nm):
+            table_nm = table_nm.lower()
             for nm, t in self._metadata.tables.items():
-                if nm.endswith(table_nm):
+                if nm.lower().endswith(table_nm):
                     return t
 
         for _ in range(2):
