@@ -2,7 +2,7 @@ from ast import literal_eval
 import json
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import bcrypt
 import jwt
@@ -18,6 +18,10 @@ from login_service.database.conn import db
 
 
 logger = logging.getLogger()
+
+
+class CreateKeycloakFailError(Exception):
+    ...
 
 
 class LoginInfoWrap(BaseModel):
@@ -55,8 +59,8 @@ class RegisterInfoWrap(BaseModel):
         pwd_fail_tms: Optional[int]
         login_fail_date: Optional[datetime]
         last_login_date: Optional[datetime]
-        reg_date: Optional[datetime] = datetime.now()
-        amd_date: Optional[datetime] = datetime.now()
+        reg_date: Union[datetime, str] = "NOW()"
+        amd_date: Union[datetime, str] = datetime.now()
         user_uuid: Optional[str]
         reg_user: Optional[str]
         amd_user: Optional[str]
@@ -231,7 +235,7 @@ async def create_keycloak_user(**kwargs):
     res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
     logger.info(f"res :: {res}")
     if res["status_code"] != 201:
-        raise
+        raise CreateKeycloakFailError(f"CreateKeycloakFailError :: {res}")
 
 
 async def get_normal_token(**kwargs):
