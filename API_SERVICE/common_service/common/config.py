@@ -18,6 +18,10 @@ class DBInfo(BaseSettings):
     BASE: str = ""
     SCHEMA: str = ""
 
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
+
     def get_dsn(self):
         return ""
 
@@ -49,9 +53,9 @@ class TiberoInfo(DBInfo):
 class Settings(BaseSettings):
     BASE_DIR = base_dir
     DB_POOL_RECYCLE: int = 900
-    DB_ECHO: bool = False
-    RELOAD: bool = True
-    TESTING: bool = True
+    DB_ECHO: bool = True
+    RELOAD: bool = False
+    TESTING: bool = False
 
     DB_INFO: DBInfo = DBInfo()
     DB_URL: Union[str, PostgresDsn] = None
@@ -64,9 +68,9 @@ class Settings(BaseSettings):
 
 
 class ProdSettings(Settings):
-    TESTING: bool = False
     DB_POOL_RECYCLE: int = 900
     DB_ECHO: bool = True
+    TESTING: bool = False
     RELOAD: bool = False
 
     DB_INFO: PGInfo = PGInfo()

@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, List, Optional
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
@@ -23,12 +23,11 @@ router = APIRouter()
 
 
 @router.post("/common-execute")
-async def common_execute(request: Request, params: List[CommonExecute], session: Executor = Depends(db.get_db)):
+async def common_execute(params: List[CommonExecute], session: Executor = Depends(db.get_db)):
     try:
         for param in params:
             if param.table_nm in NOT_ALLOWED_TABLES:
-                ...
-                # TODO: 유저 테이블등 수정,삭제 제한이 있는 테이블에 관한 필터링 필요
+                return JSONResponse(content={"result": 0, "errorMessage": "NotAllowedTable"})
 
             session.execute(**param.dict())
         return JSONResponse(content={"result": 1, "errorMessage": ""}, status_code=200)
