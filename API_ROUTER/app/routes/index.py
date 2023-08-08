@@ -1,6 +1,7 @@
 import copy
 import json
 import logging
+from datetime import datetime
 
 import aiohttp
 from fastapi import APIRouter, Depends
@@ -23,11 +24,13 @@ async def me(request: Request):
 
 @router.api_route("{route_path:path}", methods=["GET", "POST"])
 async def index(request: Request, route_path: str, session: Executor = Depends(db.get_db)):
+    status = 200
     method = request.method
     headers = get_headers(request.headers)
-    query_params = request.query_params
+    query_params = {"workip": request.scope["client"][0], "workdt": datetime.now().strftime("%Y%m%d%H%M%S")}
+    query_params.update(request.query_params.items())
+
     data = None
-    status = 200
     if method == "POST":
         try:
             data = await request.json()
