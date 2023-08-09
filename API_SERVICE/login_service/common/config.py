@@ -53,9 +53,9 @@ class TiberoInfo(DBInfo):
 class Settings(BaseSettings):
     BASE_DIR = base_dir
     DB_POOL_RECYCLE: int = 900
-    DB_ECHO: bool = False
-    RELOAD: bool = True
-    TESTING: bool = True
+    DB_ECHO: bool = True
+    RELOAD: bool = False
+    TESTING: bool = False
 
     DB_INFO: DBInfo = DBInfo()
     DB_URL: Union[str, PostgresDsn] = None
@@ -68,9 +68,9 @@ class Settings(BaseSettings):
 
 
 class ProdSettings(Settings):
-    TESTING: bool = False
     DB_POOL_RECYCLE: int = 900
     DB_ECHO: bool = True
+    TESTING: bool = False
     RELOAD: bool = False
 
 
@@ -92,7 +92,7 @@ class TestSettings(LocalSettings):
 
 
 @lru_cache
-def get_settings():
+def get_settings() -> Settings:
     env = os.getenv("APP_ENV", "prod")
     print(env)
     return {"local": LocalSettings(), "test": TestSettings(), "prod": ProdSettings()}[env]

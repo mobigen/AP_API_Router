@@ -10,8 +10,8 @@ from starlette.responses import JSONResponse
 
 from libs.database.connector import Executor
 from login_service.common.const import ALGORITHM, EXPIRE_DELTA, SECRET_KEY
+from login_service.common.const import RegisterTable, LoginTable
 from login_service.database.conn import db
-
 
 logger = logging.getLogger()
 
@@ -57,16 +57,10 @@ async def register(params: RegisterInfo, session: Executor = Depends(db.get_db))
     params.pwd = hash_pw
     try:
         logger.info(params)
-        row = session.query(
-            table_nm="usr_mgmt",
-            where_info=[
-                {"table_nm": "usr_mgmt", "key": "usridx", "value": params.usridx, "compare_op": "=", "op": ""},
-                {"table_nm": "usr_mgmt", "key": "id", "value": params.id, "compare_op": "=", "op": "AND"},
-            ],
-        ).first()
+        row = session.query(**LoginTable().get_query_data(params.id)).first()
         if row:
             return JSONResponse(status_code=200, content={"result": 1, "errorMessage": "Already registered"})
-        session.execute(method="INSERT", table_nm="usr_mgmt", data=params.dict())
+        session.execute(**RegisterTable.get_query_data(params.dict()))
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     except Exception as e:
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
