@@ -1,4 +1,5 @@
 import copy
+from datetime import datetime
 import json
 import logging
 
@@ -25,7 +26,8 @@ async def me(request: Request):
 async def index(request: Request, route_path: str, session: Executor = Depends(db.get_db)):
     method = request.method
     headers = get_headers(request.headers)
-    query_params = request.query_params
+    query_params = {"workip": request.scope["client"][0], "workdt": datetime.now().strftime("%Y%m%d%H%M%S")}
+    query_params.update(request.query_params.items())
     data = None
     status = 200
     if method == "POST":
@@ -44,16 +46,12 @@ async def index(request: Request, route_path: str, session: Executor = Depends(d
 
     remote_url = "http://" + row[const.ROUTE_IP_FIELD] + row[const.ROUTE_API_URL_FIELD]
 
-    cookies = {}
-    try:
-        cookies, result, status = await request_to_service(remote_url, method, query_params, data, headers)
-    except Exception as e:
-        logger.error(e, exc_info=True)
-        result = {"result": 0, "errorMessage": type(e).__name__}
+    cookies, result, status = await request_to_service(remote_url, method, query_params, data, headers)
 
     response = JSONResponse(content=result, status_code=status)
-    for k, v in cookies.items():
-        response.set_cookie(key=k, value=v, max_age=3600, secure=False, httponly=True)
+    if cookies:
+        for k, v in cookies.items():
+            response.set_cookie(key=k, value=v, max_age=3600, secure=False, httponly=True)
 
     return response
 
