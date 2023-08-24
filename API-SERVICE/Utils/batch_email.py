@@ -25,7 +25,10 @@ def email_handler():
                 subject = "[자동차데이터포털] 자동차데이터포털에서 공유한 데이터입니다."
                 html = html.replace("URL", email_info['contents'])
             else:
-                subject = f"[자동차데이터포털] {email_info['title']} 신청 메일 입니다."
+                if email_info["tmplt_cd"] == "noty":
+                    subject = "[자동차데이터포털] 자동차데이터포털에서 보내는 알림 메일입니다."
+                else:
+                    subject = f"[자동차데이터포털] {email_info['title']} 신청 메일입니다."
                 content = email_info["contents"].split("|")
                 html = html.replace("TITLE", email_info['title'])
                 html = html.replace("CONTENTS1", content[0])
