@@ -6,6 +6,7 @@ from common_service.common.config import settings
 from common_service.database.conn import db
 from common_service.routes.v1 import select, execute
 import logging
+from libs.auth.keycloak import keycloak
 
 from libs.middlewares.keycloak_middleware import refresh_token_from_cookie_wrapper
 
@@ -17,10 +18,11 @@ def create_app():
     logger.info(settings.dict())
     db.init_app(app_, **settings.dict())
 
+    keycloak.set_url("http://192.168.101.44:8080")
     app_.add_middleware(
         BaseHTTPMiddleware,
         dispatch=refresh_token_from_cookie_wrapper(
-            realm="kadap", client_id="uyuni", client_secret="8UDolCR5j1vHt4rsyHnwTDlYkuRmOUp8"
+            keycloak=keycloak, realm="kadap", client_id="uyuni", client_secret="8UDolCR5j1vHt4rsyHnwTDlYkuRmOUp8"
         ),
     )
 

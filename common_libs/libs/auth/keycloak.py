@@ -184,9 +184,9 @@ if __name__ == "__main__":
     client_id = "uyuni"
     client_secret = "8UDolCR5j1vHt4rsyHnwTDlYkuRmOUp8"
 
-    normal_username = "swyagngggg"
+    normal_username = "swyang"
     normal_user_password = "zxcv1234!"
-    normal_user_email = "sw@mobigen.com"
+    normal_user_email = "swyang@mobigen.com"
 
     manager = KeycloakManager("http://192.168.101.44:8080")
     d = asyncio.run(manager.generate_admin_token(username="admin", password="zxcv1234!", grant_type="password"))
@@ -241,10 +241,10 @@ if __name__ == "__main__":
     data = {
         "firstName": "seokwoo",
         "lastName": "yang",
-        "email": "sw@mobigen.com",
-        "emailVerified": False,
-        "credentials": [{"value": "zxcv1234!"}],
-        "attributes": {"phoneNumber": "010-1111-1234", "gender": "male"},
+        "email": normal_user_email,
+        "emailVerified": True,
+        "credentials": [{"value": normal_user_password}],
+        "attributes": {"phoneNumber": "010-9999-1234", "gender": "male"},
     }
     r = asyncio.run(manager.alter_user(token=admin_access_token, realm=realm, user_id=user_id, **data))
     print(f"alter {r}")

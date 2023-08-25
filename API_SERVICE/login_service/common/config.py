@@ -111,7 +111,7 @@ class LocalSettings(Settings):
         admin_password="zxcv1234!",
         realm="kadap",
         client_id="uyuni",
-        client_secret="LAVJxMWpBT9DzNQwQIarVnbuVMUmQTAc",
+        client_secret="8UDolCR5j1vHt4rsyHnwTDlYkuRmOUp8",
     )
 
 

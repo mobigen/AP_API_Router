@@ -145,6 +145,7 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
         logger.info(f"token :: {token}")
         if token["status_code"] == 401:
             await create_keycloak_user(**row)
+            token = await get_normal_token(grant_type="password", username=param.user_id, password=row["user_password"])
 
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
         response.set_cookie(key=COOKIE_NAME, value=token)
