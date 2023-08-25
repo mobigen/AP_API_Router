@@ -4,10 +4,8 @@ from typing import Dict, List, Optional
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
-from common_service.common.const import ALGORITHM, NOT_ALLOWED_TABLES, SECRET_KEY
 
 from common_service.database.conn import db
-import jwt
 from libs.database.connector import Executor
 
 

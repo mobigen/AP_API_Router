@@ -1,11 +1,10 @@
 from ast import literal_eval
 import json
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, Optional, Union
+from datetime import datetime
+from typing import Optional, Union
 
 import bcrypt
-import jwt
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
@@ -13,7 +12,7 @@ from libs.auth.keycloak import keycloak
 
 from libs.database.connector import Executor
 from login_service.common.config import settings
-from login_service.common.const import ALGORITHM, COOKIE_NAME, EXPIRE_DELTA, SECRET_KEY, LoginTable, RegisterTable
+from login_service.common.const import COOKIE_NAME, LoginTable, RegisterTable
 from login_service.database.conn import db
 
 

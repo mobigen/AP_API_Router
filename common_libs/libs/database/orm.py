@@ -200,7 +200,7 @@ class OrmExecutor(Executor):
                 return ret
             self._conn.reset_metadata()
 
-        err_msg = f"table not found :: {table_nm}"
+            err_msg = f"table not found :: {table_nm}"
         logger.error(f"{err_msg}, {self._metadata.tables.keys()}, {self._conn._schemas}")
         raise TableNotFoundException(err_msg)
 
