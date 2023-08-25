@@ -12,9 +12,12 @@ def get_token_from_cookie(cookies):
 
 
 async def refresh_with_cookie(request: Request, call_next):
-    cookie_name, token = get_token_from_cookie(request.cookies)
-    if not token:
-        raise TokenDoesNotExist
+    dat = get_token_from_cookie(request.cookies)
+    if not dat or not dat[1]:
+        return await call_next(request)
+
+    cookie_name = dat[0]
+    token = dat[1]
 
     res = await keycloak.refresh_token(
         realm=settings.KEYCLOAK_INFO.realm,
