@@ -12,11 +12,14 @@ def get_token_from_cookie(cookies):
 
 
 def refresh_token_from_cookie_wrapper(keycloak: KeycloakManager, **kwargs):
+    logger: logging.Logger = kwargs.get("logger")
+
     async def refresh_with_cookie(request: Request, call_next):
         dat = get_token_from_cookie(request.cookies)
         if not dat:
             return await call_next(request)
 
+        logger.info(dat)
         cookie_name = dat[0]
         try:
             token = literal_eval(dat[1])

@@ -22,7 +22,11 @@ def create_app():
     app_.add_middleware(
         BaseHTTPMiddleware,
         dispatch=refresh_token_from_cookie_wrapper(
-            keycloak=keycloak, realm="kadap", client_id="uyuni", client_secret="8UDolCR5j1vHt4rsyHnwTDlYkuRmOUp8"
+            keycloak=keycloak,
+            realm="kadap",
+            client_id="uyuni",
+            client_secret="8UDolCR5j1vHt4rsyHnwTDlYkuRmOUp8",
+            logger=logger,
         ),
     )
 
