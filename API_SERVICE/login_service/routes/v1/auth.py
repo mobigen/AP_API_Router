@@ -190,7 +190,6 @@ async def info(request: Request, session: Executor = Depends(db.get_db)):
         return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
 
     token = literal_eval(token)
-    logger.info(f"type :: {type(token)}, token :: {token}")
     username = await username_from_token(token["data"]["access_token"])
     row = session.query(**LoginTable.get_query_data(username)).first()
 
@@ -219,8 +218,6 @@ async def get_admin_token() -> None:
 
 async def create_keycloak_user(**kwargs):
     admin_token = await get_admin_token()
-    logger.info(kwargs)
-    logger.info(f"admin_token :: {admin_token}")
     reg_data = {
         "username": kwargs["user_id"],
         "firstName": kwargs["user_nm"],
@@ -230,7 +227,6 @@ async def create_keycloak_user(**kwargs):
         "credentials": [{"value": kwargs["user_password"]}],
         "attributes": json.dumps(kwargs, default=str),
     }
-    logger.info(f"reg_data :: {reg_data}")
     res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
     logger.info(f"res :: {res}")
     if res["status_code"] != 201:
@@ -248,7 +244,6 @@ async def get_normal_token(**kwargs):
 
 
 async def username_from_token(access_token: str):
-    logger.info(access_token)
     res = await keycloak.user_info(
         realm=settings.KEYCLOAK_INFO.realm,
         token=access_token,
@@ -268,3 +263,21 @@ async def delete_user(**kwargs):
         token=admin_token, realm=settings.KEYCLOAK_INFO.realm, user_id=kwargs.get("user_id")
     )
     logger.info(f"delete res :: {res}")
+
+
+"""
+token
+{
+    'status_code': 200,
+    'data': {
+        'access_token': 'eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJIZFFycEJGTk9YOElCWEtpeDlPY0ZEWmZvUzQ4eF9YT2lZcEU0a2x6Tl9RIn0.eyJleHAiOjE2OTI3NzAzNzYsImlhdCI6MTY5Mjc3MDA3NiwianRpIjoiM2Q3ZTAzMGQtODNiNi00MWFhLWI4NjMtNzk4YWJhZDA3OGNkIiwiaXNzIjoiaHR0cDovLzE5Mi4xNjguMTAxLjQ0OjgwODAvcmVhbG1zL2thZGFwIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjgwNDA2YjBjLTVhYmUtNDc2YS05MDNiLTIzNmVmZDljZmMzNSIsInR5cCI6IkJlYXJlciIsImF6cCI6InV5dW5pIiwic2Vzc2lvbl9zdGF0ZSI6ImUyMGJjZjI0LTgwNjYtNDBjOC04YjEzLTY1MmM3NGNiNmI5YiIsImFjciI6IjEiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImRlZmF1bHQtcm9sZXMta2FkYXAiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6InByb2ZpbGUgZW1haWwiLCJzaWQiOiJlMjBiY2YyNC04MDY2LTQwYzgtOGIxMy02NTJjNzRjYjZiOWIiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6IuyepeyGjOudvCIsInByZWZlcnJlZF91c2VybmFtZSI6ImphczM1NUBuYXZlci5jb20iLCJnaXZlbl9uYW1lIjoi7J6l7IaM6528IiwiZW1haWwiOiJqYXMzNTVAbmF2ZXIuY29tIn0.Qy4AtcdkfnGHFeAChSJC1qExXrBuF7AgUycLM5IxM0f2Z4s6rFNgSB_Nksbkh8LJMgH5zAONztNxkbiTAYDRaCcfM8uCdWYpF9Ig3Qol7kGGSkxk4kr6UA7i-GRoOjCe4esY8IC0W-0ApCHSMlycqClMs9o4q8CHgkohFMtg93kBhs4A-UAtwesJ5RrwIWOsLsiqWwNXhfOEZnA1FjKYaoYuSzilYC4AQUsxXm6AJNilLTMSD1jDlqFti7RDFrg1OXutg13m4SNbUbm4G5wsqX7_XK2DYSP_14LdBVw0fMDRSb0hy9oPmtXORR4rwWAPUHWNDkR0YPYB0sqQ44lm2Q',
+        'expires_in': 300,
+        'refresh_expires_in': 1800,
+        'refresh_token': 'eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIxYjIzMDI3MC1lZTRiLTQ2ZDMtODBhNS0xYzJmZWFhNGUxMGQifQ.eyJleHAiOjE2OTI3NzE4NzYsImlhdCI6MTY5Mjc3MDA3NiwianRpIjoiMDI2MzE2YjEtN2UyOC00MTlhLTlmN2YtOWY4MDBjM2NkZGI0IiwiaXNzIjoiaHR0cDovLzE5Mi4xNjguMTAxLjQ0OjgwODAvcmVhbG1zL2thZGFwIiwiYXVkIjoiaHR0cDovLzE5Mi4xNjguMTAxLjQ0OjgwODAvcmVhbG1zL2thZGFwIiwic3ViIjoiODA0MDZiMGMtNWFiZS00NzZhLTkwM2ItMjM2ZWZkOWNmYzM1IiwidHlwIjoiUmVmcmVzaCIsImF6cCI6InV5dW5pIiwic2Vzc2lvbl9zdGF0ZSI6ImUyMGJjZjI0LTgwNjYtNDBjOC04YjEzLTY1MmM3NGNiNmI5YiIsInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsInNpZCI6ImUyMGJjZjI0LTgwNjYtNDBjOC04YjEzLTY1MmM3NGNiNmI5YiJ9.Z0GpFutReJaibOK9wjXFPvovsRCfIkXFfx8nlmubqwU',
+        'token_type': 'Bearer',
+        'not-before-policy': 0,
+        'session_state': 'e20bcf24-8066-40c8-8b13-652c74cb6b9b',
+        'scope': 'profile email'
+    }
+}
+"""

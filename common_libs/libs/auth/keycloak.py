@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Dict
 import logging
 import aiohttp
 import urllib.parse
@@ -167,9 +167,26 @@ class KeycloakManager:
             **kwargs,
         )
 
+    async def refresh_token(self, realm, **kwargs):
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        return await self._request_to_keycloak(
+            api_url=f"{self.base_url}/realms/{realm}/protocol/openid-connect/token",
+            method="POST",
+            headers=headers,
+            **kwargs,
+        )
+
 
 if __name__ == "__main__":
     import asyncio
+
+    realm = "kadap"
+    client_id = "uyuni"
+    client_secret = "8UDolCR5j1vHt4rsyHnwTDlYkuRmOUp8"
+
+    normal_username = "swyagngggg"
+    normal_user_password = "zxcv1234!"
+    normal_user_email = "sw@mobigen.com"
 
     manager = KeycloakManager("http://192.168.101.44:8080")
     d = asyncio.run(manager.generate_admin_token(username="admin", password="zxcv1234!", grant_type="password"))
@@ -177,30 +194,31 @@ if __name__ == "__main__":
     admin_access_token = d.get("data").get("access_token")
     admin_refresh_token = d.get("data").get("refresh_token")
     data = {
-        "username": "swyang",
+        "username": normal_username,
         "firstName": "seokwoo",
         "lastName": "yang",
-        "email": "sw@mobigen.com",
-        "emailVerified": False,
+        "email": normal_user_email,
+        "emailVerified": True,
         "enabled": True,
-        "credentials": [{"value": "zxcv1234!"}],
+        "credentials": [{"value": normal_user_password}],
         "attributes": {"phoneNumber": "010-1234-5678", "gender": "male"},
     }
     r = asyncio.run(
         manager.create_user(
-            realm="kadap",
+            realm=realm,
             token=admin_access_token,
             **data,
         )
     )
+    print(f"create :: {r}")
     d = asyncio.run(
         manager.generate_normal_token(
-            realm="kadap",
-            username="swyang",
-            password="zxcv1234!",
+            realm=realm,
+            username=normal_username,
+            password=normal_user_password,
             grant_type="password",
-            client_id="uyuni",
-            client_secret="04esVekOjeJZKLHBkgsCQxpbwda41aKW",
+            client_id=client_id,
+            client_secret=client_secret,
         )
     )
     print(f"normal token :: {d}")
@@ -208,17 +226,17 @@ if __name__ == "__main__":
     normal_refresh_token = d.get("data").get("refresh_token")
     r = asyncio.run(
         manager.token_info(
-            realm="kadap",
+            realm=realm,
             token=normal_access_token,
-            client_id="uyuni",
-            client_secret="04esVekOjeJZKLHBkgsCQxpbwda41aKW",
+            client_id=client_id,
+            client_secret=client_secret,
         )
     )
     print(f"token info :: {r}")
-    r = asyncio.run(manager.user_info(realm="kadap", token=normal_access_token))
+    r = asyncio.run(manager.user_info(realm=realm, token=normal_access_token))
     print(f"user info :: {r}")
     user_id = r.get("data").get("sub")
-    r = asyncio.run(manager.user_info_detail(token=admin_access_token, realm="kadap", user_id=user_id))
+    r = asyncio.run(manager.user_info_detail(token=admin_access_token, realm=realm, user_id=user_id))
     print(f"detail :: {r}")
     data = {
         "firstName": "seokwoo",
@@ -228,23 +246,46 @@ if __name__ == "__main__":
         "credentials": [{"value": "zxcv1234!"}],
         "attributes": {"phoneNumber": "010-1111-1234", "gender": "male"},
     }
-    r = asyncio.run(manager.alter_user(token=admin_access_token, realm="kadap", user_id=user_id, **data))
+    r = asyncio.run(manager.alter_user(token=admin_access_token, realm=realm, user_id=user_id, **data))
     print(f"alter {r}")
-    r = asyncio.run(manager.check_user_session(token=admin_access_token, realm="kadap", user_id=user_id))
+    r = asyncio.run(manager.check_user_session(token=admin_access_token, realm=realm, user_id=user_id))
     print(f"check :: {r}")
     r = asyncio.run(
+        manager.refresh_token(
+            realm=realm,
+            client_id=client_id,
+            client_secret=client_secret,
+            grant_type="refresh_token",
+            refresh_token=normal_refresh_token,
+        )
+    )
+    print(f"refresh :: {r}")
+    # subject_issuer = kakao | naver | google
+    r = asyncio.run(
+        manager.generate_normal_token(
+            realm=realm,
+            client_id=client_id,
+            client_secret=client_secret,
+            grant_type="urn:ietf:params:oauth:grant-type:token-exchange",
+            requested_token_type="urn:ietf:params:oauth:token-type:refresh_token",
+            subject_issuer="google",
+            subject_token=normal_access_token,
+        )
+    )
+    print(f"social regist :: {r}")
+    r = asyncio.run(
         manager.logout(
-            realm="kadap",
+            realm=realm,
             grant_type="password",
             refresh_token=normal_refresh_token,
-            client_id="uyuni",
-            client_secret="04esVekOjeJZKLHBkgsCQxpbwda41aKW",
+            client_id=client_id,
+            client_secret=client_secret,
         )
     )
     print(f"logout :: {r}")
-    r = asyncio.run(manager.delete_user(token=admin_access_token, realm="kadap", user_id=user_id))
+    r = asyncio.run(manager.delete_user(token=admin_access_token, realm=realm, user_id=user_id))
     print(f"delete :: {r}")
-    r = asyncio.run(manager.get_user_list(token=admin_access_token, realm="kadap"))
+    r = asyncio.run(manager.get_user_list(token=admin_access_token, realm=realm))
     print(f"list :: {r}")
 
 keycloak = KeycloakManager()
