@@ -138,22 +138,14 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
     """
     param = params.data
     try:
-        logger.info(param.login_type)
-        query = LoginTable.get_query_data(param.user_id)
-        # member의 로그인인 경우 pw까지 체크
+        row = session.query(**LoginTable.get_query_data(param.user_id)).first()
+        # 보안 때문에
         if param.login_type == "member":
-            query["where_info"].append(
-                {
-                    "table_name": "tb_user_info",
-                    "key": "user_normal",
-                    "value": param.user_password,
-                    "compare_op": "=",
-                    "op": "AND"
-                }
-            )
-        row = session.query(**query).first()
-        #row = session.query(**LoginTable.get_query_data(param.user_id)).first()
-        if not row:
+            check_pw = bcrypt.checkpw(param.user_password.encode('utf-8'), row["user_password"].encode('utf-8'))
+        else:
+            check_pw = True
+
+        if not row and not check_pw:
             return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "id or password not found"})
 
         token = await get_normal_token(grant_type="password", username=param.user_id, password=row["user_password"])
