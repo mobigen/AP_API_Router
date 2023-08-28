@@ -192,7 +192,11 @@ async def info(request: Request, session: Executor = Depends(db.get_db)):
 
     token = literal_eval(token)
     username = await username_from_token(token["data"]["access_token"])
-    row = session.query(**LoginTable.get_query_data(username)).first()
+    # keycloak API가 token을 소문자로 저장, DB 조회 코드를 소문자로 변경
+    login_table = LoginTable.get_query_data(username)
+    login_table["where_info"][0]["compare_op"] = "ilike"
+    row = session.query(**login_table).first()
+    # row = session.query(**LoginTable.get_query_data(username)).first()
 
     return JSONResponse(
         status_code=200,
