@@ -32,6 +32,7 @@ class LoginInfoWrap(BaseModel):
     class LoginInfo(BaseModel):
         user_id: str
         user_password: str
+        login_type: str
 
     data: LoginInfo
 
@@ -137,7 +138,21 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
     """
     param = params.data
     try:
-        row = session.query(**LoginTable.get_query_data(param.user_id)).first()
+        logger.info(param.login_type)
+        query = LoginTable.get_query_data(param.user_id)
+        # member의 로그인인 경우 pw까지 체크
+        if param.login_type == "member":
+            query["where_info"].append(
+                {
+                    "table_name": "tb_user_info",
+                    "key": "user_normal",
+                    "value": param.user_password,
+                    "compare_op": "=",
+                    "op": "AND"
+                }
+            )
+        row = session.query(**query).first()
+        #row = session.query(**LoginTable.get_query_data(param.user_id)).first()
         if not row:
             return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "id or password not found"})
 
