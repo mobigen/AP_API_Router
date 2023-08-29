@@ -8,15 +8,16 @@ from ApiService.ApiServiceConfig import config
 
 def api(nms) -> Dict:
     data_dict = {}
-    key = "ctgry"
+    key = "re_ctgry"
     els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
     try:
         ctgry_nm_list = nms.split(",")
         es = ElasticSearchManager(**els_config)
         for c_id in ctgry_nm_list:
-            cnt_query = make_query("query", "match_phrase", {key: c_id})
+            c_v = c_id.replace(" ","")
+            cnt_query = make_query("query", "match_phrase", {key: c_v})
             cnt = es.conn.count(index=es.index, body=cnt_query)["count"]
-            data_dict[c_id.replace("+", "_")] = cnt
+            data_dict[c_id.replace(" ", "_")] = cnt
 
     except Exception:
         except_name = get_exception_info()
