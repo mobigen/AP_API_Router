@@ -18,14 +18,14 @@ def create_app():
     logger.info(settings.dict())
     db.init_app(app_, **settings.dict())
 
-    keycloak.set_url("http://192.168.101.44:8080")
+    keycloak.set_url("https://auth.bigdata-car.kr")
     app_.add_middleware(
         BaseHTTPMiddleware,
         dispatch=refresh_token_from_cookie_wrapper(
             keycloak=keycloak,
-            realm="kadap",
-            client_id="uyuni",
-            client_secret="8UDolCR5j1vHt4rsyHnwTDlYkuRmOUp8",
+            realm="mobigen",
+            client_id="katech",
+            client_secret="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
             logger=logger,
         ),
     )
