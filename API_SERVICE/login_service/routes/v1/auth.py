@@ -148,11 +148,11 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
         if not row and not check_pw:
             return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "id or password not found"})
 
-        token = await get_normal_token(grant_type="password", username=param.user_id, password=row["user_password"])
+        token = await get_normal_token(grant_type="password", username=param.user_id, password=param.user_password)
         logger.info(f"token :: {token}")
         if token["status_code"] == 401:
             await create_keycloak_user(**row)
-            token = await get_normal_token(grant_type="password", username=param.user_id, password=row["user_password"])
+            token = await get_normal_token(grant_type="password", username=param.user_id, password=param.user_password)
 
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
         response.set_cookie(key=COOKIE_NAME, value=token)
@@ -228,7 +228,7 @@ async def get_admin_token() -> None:
     return res.get("data").get("access_token")
 
 
-async def create_keycloak_user(**kwargs):
+async def create_keycloak_user(password, **kwargs):
     admin_token = await get_admin_token()
     reg_data = {
         "username": kwargs["user_id"],
@@ -236,7 +236,8 @@ async def create_keycloak_user(**kwargs):
         "email": kwargs["email"],
         "emailVerified": True,
         "enabled": True,
-        "credentials": [{"value": kwargs["user_password"]}],
+        # "credentials": [{"value": kwargs["user_password"]}],
+        "credentials": [{"value": password}],
         "attributes": json.dumps(kwargs, default=str),
     }
     res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
