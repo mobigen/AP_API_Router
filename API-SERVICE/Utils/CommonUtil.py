@@ -144,6 +144,8 @@ def prepare_config() -> None:
         config.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         config.email_auth = api_router_cfg["email_auth"]
         config.keycloak_info = api_router_cfg["keycloak_info"]
+    if config.category == "meta":
+        config.email_auth = api_router_cfg["email_auth"]
 
 
 def get_keycloak_manager():
