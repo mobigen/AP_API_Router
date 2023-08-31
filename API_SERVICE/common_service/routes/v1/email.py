@@ -50,6 +50,17 @@ class EmailAthnSend(BaseModel):
     msg_type: str  # register or password
 
 
+# emailAthnCnfm
+class EmailAuthFail(Exception):
+    pass
+
+
+class EmailAthnCnfm(BaseModel):
+    email: str
+    athn_no: str
+
+
+# emailAthnSend
 def make_auth_no():
     string_pool = string.ascii_letters + string.digits
     auth_no = ""
@@ -120,6 +131,24 @@ def auth_send(auth_send: EmailAthnSend, session: Executor = Depends(db.get_db)):
         session.execute(**EmailSendInfoTable.get_execute_query("INSERT", history))
 
         result = {"result": 1, "msg": "Successfully Auth Password."}
+    except Exception as e:
+        result = {"result": 0, "errorMessage": str(e)}
+        logger.error(e, exc_info=True)
+    return result
+
+
+@router.post("/emailAthnCnfm")
+def auth_confirm(auth_conf: EmailAthnCnfm, session: Executor = Depends(db.get_db)):
+    try:
+        email_info = session.query(**EmailAuthTable.get_select_query(auth_conf.email)).first()
+        if email_info["athn_no"] == auth_conf.athn_no:
+            email_info["athn_yn"] = "Y"
+            email_info["athn_date"] = "NOW()"
+            session.execute(**EmailAuthTable.get_execute_query("UPDATE",email_info))
+        else:
+            raise EmailAuthFail
+
+        result = {"result": 1, "msg": "Successfully Auth Confirm."}
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
