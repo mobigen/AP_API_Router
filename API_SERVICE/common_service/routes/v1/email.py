@@ -60,6 +60,13 @@ class EmailAthnCnfm(BaseModel):
     athn_no: str
 
 
+# emailDataShare
+class EmailInfo(BaseModel):
+    email: str
+    msg_type: str  # share
+    message: str
+
+
 # emailAthnSend
 def make_auth_no():
     string_pool = string.ascii_letters + string.digits
@@ -67,6 +74,19 @@ def make_auth_no():
     for _ in range(int(auth_no_len)):
         auth_no += random.choice(string_pool)
     return auth_no
+
+
+def email_history(session, contents, param):
+    history = {
+        "email_id": uuid.uuid4(),
+        "rcv_adr": param.email,
+        "title": subject_dict[param.msg_type],
+        "contents": contents,
+        "tmplt_cd": param.msg_type,
+        "sttus": "REQ",
+        "reg_date": datetime.now()
+    }
+    session.execute(**EmailSendInfoTable.get_execute_query("INSERT", history))
 
 
 @router.post("/emailAthnPass")
@@ -119,16 +139,7 @@ def auth_send(auth_send: EmailAthnSend, session: Executor = Depends(db.get_db)):
         EmailAuthTable.get_execute_query(method, exist_mail)
 
         # mail history insert
-        history = {
-            "email_id": uuid.uuid4(),
-            "rcv_adr": auth_send.email,
-            "title": subject_dict[auth_send.msg_type],
-            "contents": auth_no,
-            "tmplt_cd": auth_send.msg_type,
-            "sttus": "REQ",
-            "reg_date": datetime.now()
-        }
-        session.execute(**EmailSendInfoTable.get_execute_query("INSERT", history))
+        email_history(session, auth_no, auth_send)
 
         result = {"result": 1, "msg": "Successfully Auth Password."}
     except Exception as e:
@@ -152,4 +163,14 @@ def auth_confirm(auth_conf: EmailAthnCnfm, session: Executor = Depends(db.get_db
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
+    return result
+
+
+@router.post("/emailDataShare")
+def data_share(email_info: EmailInfo, session: Executor = Depends(db.get_db)):
+    try:
+        email_history(session, email_info.message, email_info)
+        result = {"result": 1, "msg": "200"}
+    except Exception as e:
+        result = {"result": 0, "errorMessage": e}
     return result
