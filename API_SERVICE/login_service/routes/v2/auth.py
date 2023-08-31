@@ -72,7 +72,7 @@ class RegisterInfoWrap(BaseModel):
 
 
 router = APIRouter()
-@router.get("/user/v2/commonLogin")
+@router.get("/user/v2/commonUserInfo")
 async def info(request: Request, session: Executor = Depends(db.get_db)):
     """
     {
