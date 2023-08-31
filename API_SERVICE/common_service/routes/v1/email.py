@@ -34,7 +34,7 @@ def auth_pass(email_pass: EmailAthnPass, session: Executor = Depends(db.get_db))
             new_password = CryptContext(schemes=["bcrypt"], deprecated="auto").hash(email_pass.new_password)
             user_info = session.query(**UserInfoTable.get_select_query(email_pass.email)).first()
             user_info["user_password"] = new_password
-            session.execute(**UserInfoTable.get_update_query(user_info))
+            session.execute(**UserInfoTable.get_execute_query("UPDATE", user_info))
         else:
             raise EmailAuthFail
         result = {"result": 1, "msg": "Successfully Auth Password."}

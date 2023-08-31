@@ -1,52 +1,49 @@
+from typing import Union
+
+
 NOT_ALLOWED_TABLES = [""]
 time_zone = "Asia/Seoul"
+auth_no_len = 10
 
 
-class EmailAuthTable:
-    table_nm = ""
-    key_column = ""
+class Base:
+    table_nm: str
+    key_column: Union[str, list]
 
-    @staticmethod
-    def get_select_query(email: str) -> dict:
+    @classmethod
+    def get_select_query(cls, key_value: str) -> dict:
         return {
-            "table_nm": EmailAuthTable.table_nm,
+            "table_nm": cls.table_nm,
             "where_info": [
                 {
-                    "table_nm": EmailAuthTable.table_nm,
-                    "key": EmailAuthTable.key_column,
-                    "value": email,
+                    "table_nm": cls.table_nm,
+                    "key": cls.key_column,
+                    "value": key_value,
                     "compare_op": "=",
                     "op": "",
                 }
             ],
         }
+
+    @classmethod
+    def get_execute_query(cls, method: str, row: dict) -> dict:
+        query = {
+            "method": method,
+            "table_nm": cls.table_nm,
+            "data": row,
+            "key": cls.key_column if type(cls.key_column) is list else [cls.key_column]
+        }
+        if method.upper() == "INSERT":
+            query.pop("key")
+        return query
+
+
+class EmailAuthTable(Base):
+    table_nm = "tb_email_athn_info"
+    key_column = "email"
 
 
 # login_service/LoginTable과 같음
-class UserInfoTable:
+class UserInfoTable(Base):
     table_nm = "tb_user_info"
     key_column = "user_id"
-
-    @staticmethod
-    def get_select_query(user_id: str) -> dict:
-        return {
-            "table_nm": UserInfoTable.table_nm,
-            "where_info": [
-                {
-                    "table_nm": UserInfoTable.table_nm,
-                    "key": UserInfoTable.key_column,
-                    "value": user_id,
-                    "compare_op": "=",
-                    "op": "",
-                }
-            ],
-        }
-
-    @staticmethod
-    def get_update_query(row: dict) -> dict:
-        return {
-            "method": "UPDATE",
-            "table_nm": UserInfoTable.table_nm,
-            "data": row,
-            "key": [UserInfoTable.key_column]
-        }
