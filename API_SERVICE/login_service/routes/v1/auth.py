@@ -162,55 +162,6 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
         logger.error(f"data :: {params}")
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
-@router.get("/user/commonKeyCloakUserInfo")
-async def info(request: Request, session: Executor = Depends(db.get_db)):
-    """
-    {
-        "result": 1,
-        "errorMessage": "",
-        "data": {
-            "body": {
-                "user_id": "admin@test.com",
-                "email": "admin@test.com",
-                "login_type": "MEMBER",
-                "moblphon": "010-1111-1112",
-                "user_nm": "관리자",
-                "user_type": "GENL",
-                "user_role": "ROLE_USER|ROLE_ADMIN",
-                "user_uuid": "6d77d874-e613-480f-8e86-dba491c28167",
-                "blng_org_cd": "None",
-                "blng_org_nm": "None",
-                "blng_org_desc": "None",
-                "exp": 1689053022
-            }
-        }
-    }
-
-    Args:
-        request (Request): _description_
-        session (Executor, optional): _description_. Defaults to Depends(db.get_db).
-    """
-    token = request.cookies.get(COOKIE_NAME)
-
-    if not token:
-        msg = "TokenDoesNotExist"
-        logger.info(msg)
-        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
-
-    token = literal_eval(token)
-    resToken = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm )
-
-    if resToken.get("status_code") == 200 :
-        return JSONResponse(
-            status_code=200,
-            content={"result": 1, "errorMessage": "", "data": {"body": resToken.get("data")}},
-        )
-    else :
-        return JSONResponse(
-            status_code=400,
-            content={"result": 0, "errorMessage": resToken.get("data").get("error_description")},
-        )
-
 @router.get("/user/commonUserInfo")
 async def info(request: Request, session: Executor = Depends(db.get_db)):
     """

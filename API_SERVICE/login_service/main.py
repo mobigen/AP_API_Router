@@ -1,7 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
 from libs.auth.keycloak import keycloak
-from login_service.routes.v1 import auth
+from login_service.routes.v1 import authV1
+from login_service.routes.v2 import authV2
 from login_service.common.config import settings
 from login_service.database.conn import db
 
@@ -16,7 +17,8 @@ def create_app():
     db.init_app(app_, **settings.dict())
     keycloak.set_url(settings.KEYCLOAK_INFO.keycloak_url)
 
-    app_.include_router(auth.router, prefix="/portal/api/common")
+    app_.include_router(authV1.router, prefix="/portal/api/common")
+    app_.include_router(authV2.router, prefix="/portal/api/common")
 
     return app_
 
