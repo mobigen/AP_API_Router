@@ -15,6 +15,14 @@ from login_service.common.config import settings
 from login_service.common.const import COOKIE_NAME, LoginTable, RegisterTable
 from login_service.database.conn import db
 
+''''
+ Status Code :
+    200 : OK
+    201 : Created  => create
+    202 : Accepted  
+    204 : No Content  => modify
+'''
+
 
 logger = logging.getLogger()
 
