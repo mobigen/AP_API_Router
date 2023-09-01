@@ -140,12 +140,12 @@ class KeycloakManager:
             api_url=f"{self.base_url}/admin/realms/{realm}/users/{user_id}", method="GET", headers=headers
         )
 
-    async def alter_user(self, token, realm, user_id, **kwargs):
-        print(f"kwargs :: {kwargs}")
+    async def alter_user(self, token, realm, sub, **kwargs):
         headers = {"Content-Type": "application/json", "Authorization": "bearer " + token}
+
         async with aiohttp.ClientSession() as session:
             async with session.request(
-                url=f"{self.base_url}/admin/realms/{realm}/users/{user_id}",
+                url=f"{self.base_url}/admin/realms/{realm}/users/{sub}",
                 method="PUT",
                 headers=headers,
                 json=kwargs,

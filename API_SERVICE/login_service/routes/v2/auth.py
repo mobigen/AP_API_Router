@@ -54,7 +54,7 @@ class RegisterInfoWrap(BaseModel):
 
     class RegisterInfo(BaseModel):
         user_id: str
-        user_password: str
+        user_password: Optional[str]
         login_type: Optional[str] = "MEMBER"
         user_type: Optional[str] = "GENL"
         user_sttus: Optional[str] = "SBSCRB"
@@ -334,9 +334,9 @@ async def modify(request: Request, params: RegisterInfoWrap, session: Executor =
     param = params.data
 
     try :
-        resToken = await modify_keycloak_user(**param.dict)
-        logger.info(f"token :: {token}")
-        if resToken["status_code"] == 200:
+        resToken = await modify_keycloak_user(userInfo.get("sub"), **param.dict())
+        logger.info(f"token :: {resToken}")
+        if resToken["status_code"] == 204:
             return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
         else :
             return JSONResponse(
@@ -354,7 +354,7 @@ async def get_query_keycloak(query):
     logger.info(f"res :: {res}")
     return res
 
-async def modify_keycloak_user(**kwargs):
+async def modify_keycloak_user(sub, **kwargs):
     admin_token = await get_admin_token()
 
     reg_data = {
@@ -383,21 +383,19 @@ async def modify_keycloak_user(**kwargs):
             "blng_org_desc":    kwargs.get("blng_org_desc"),
             "service_terms_yn": kwargs.get("service_terms_yn"),
             "reg_user":         kwargs.get("reg_user"),
-            "reg_date":         kwargs.get("reg_date"),
+            "reg_date":         kwargs.get("reg_date").strftime('%Y-%m-%d %H:%M:%S'),
             "amd_user":         kwargs.get("amd_user"),
-            "amd_date":         kwargs.get("amd_date")
+            "amd_date":         kwargs.get("amd_date").strftime('%Y-%m-%d %H:%M:%S')
         }
     }
 
     # value가 존재할때만 넣어주어야 하는 값에 대한 처리
-    if kwargs.get("user_nm") is None: del kwargs["firstName"]
-    if kwargs.get("email") is None : del kwargs["email"]
-    if kwargs.get("user_password") is None : del kwargs["credentials"]
+    if kwargs.get("user_nm") is None: del reg_data["firstName"]
+    if kwargs.get("email") is None : del reg_data["email"]
+    if kwargs.get("user_password") is None : del reg_data["credentials"]
 
-    res = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, user_id=kwargs["user_id"], **reg_data)
+    res = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub, **reg_data)
     logger.info(f"res :: {res}")
-    if res["status_code"] != 200:
-        raise CreateKeycloakFailError(f"CreateKeycloakFailError :: {res}")
     return res
 
 async def create_keycloak_user(**kwargs):
