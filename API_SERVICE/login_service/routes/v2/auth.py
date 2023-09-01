@@ -217,6 +217,30 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
             content={"result": 0, "errorMessage": token.get("data").get("error_description")},
         )
 
+@router.post("/user/v2/commonLoginDB")
+async def loginDB(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -> JSONResponse:
+    param = params.data
+
+    check_pw = True
+    try :
+        row = session.query(**LoginTable.get_query_data(param.user_id)).first()
+        check_pw = bcrypt.checkpw(param.user_password.encode('utf-8'), row["user_password"].encode('utf-8'))
+
+        if row and check_pw:
+            return JSONResponse(
+                status_code=200,
+                content={"result": 0, "errorMessage": "", "data": {"body": row} }
+            )
+        else :
+            return JSONResponse(
+                status_code=200,
+                content={"result": 0, "errorMessage": "no user" }
+            )
+    except Exception as e:
+        logger.error(e, exc_info=True)
+        logger.error(f"data :: {params}")
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
 async def get_normal_token(**kwargs):
     return await keycloak.generate_normal_token(
         realm=settings.KEYCLOAK_INFO.realm,
