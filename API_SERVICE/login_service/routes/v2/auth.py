@@ -241,6 +241,43 @@ async def loginDB(params: LoginInfoWrap, session: Executor = Depends(db.get_db))
         logger.error(f"data :: {params}")
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
+@router.post("/user/v2/commonRegisterNormal")
+async def register(params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
+    param = params.data
+    try:
+        await create_keycloak_user(**param.dict())
+        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+async def create_keycloak_user(**kwargs):
+    admin_token = await get_admin_token()
+    reg_data = {
+        "username": kwargs["user_id"],
+        "firstName": kwargs["user_nm"],
+        "email": kwargs["email"],
+        "emailVerified": True,
+        "enabled": True,
+        "credentials": [{"value": kwargs["user_password"]}],
+        "attributes": json.dumps(kwargs, default=str),
+    }
+    res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
+    logger.info(f"res :: {res}")
+    if res["status_code"] != 201:
+        raise CreateKeycloakFailError(f"CreateKeycloakFailError :: {res}")
+
+async def get_admin_token() -> None:
+    res = await keycloak.generate_admin_token(
+        username=settings.KEYCLOAK_INFO.admin_username,
+        password=settings.KEYCLOAK_INFO.admin_password,
+        grant_type="password",
+    )
+
+    return res.get("data").get("access_token")
+
+
 async def get_normal_token(**kwargs):
     return await keycloak.generate_normal_token(
         realm=settings.KEYCLOAK_INFO.realm,
