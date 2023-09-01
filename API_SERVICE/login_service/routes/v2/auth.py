@@ -32,7 +32,6 @@ class LoginInfoWrap(BaseModel):
     class LoginInfo(BaseModel):
         user_id: str
         user_password: str
-        login_type: str
 
     data: LoginInfo
 
@@ -201,4 +200,28 @@ async def register(request: Request, session: Executor = Depends(db.get_db)):
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
+@router.post("/user/v2/commonLogin")
+async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -> JSONResponse:
+    param = params.data
 
+    token = await get_normal_token(grant_type="password", username=param.user_id, password=param.user_password)
+    logger.info(f"token :: {token}")
+
+    if token["status_code"] == 200:
+        response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+        response.set_cookie(key=COOKIE_NAME, value=token)
+        return response
+    else :
+        return JSONResponse(
+            status_code=400,
+            content={"result": 0, "errorMessage": token.get("data").get("error_description")},
+        )
+
+async def get_normal_token(**kwargs):
+    return await keycloak.generate_normal_token(
+        realm=settings.KEYCLOAK_INFO.realm,
+        client_id=settings.KEYCLOAK_INFO.client_id,
+        client_secret=settings.KEYCLOAK_INFO.client_secret,
+        grant_type=kwargs.pop("grant_type", "password"),
+        **kwargs,
+    )
