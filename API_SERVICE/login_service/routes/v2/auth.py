@@ -226,6 +226,21 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
             content={"result": 0, "errorMessage": token.get("data").get("error_description")},
         )
 
+@router.post("/user/v2/commonLoginSocial")
+async def loginSocial(request: Request, params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
+    param = params.data
+
+    token = await get_social_token(**param.dict())
+    if token["status_code"] == 200:
+        response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+        response.set_cookie(key=COOKIE_NAME, value=token)
+        return response
+    else :
+        return JSONResponse(
+            status_code=400,
+            content={"result": 0, "errorMessage": token.get("data").get("error_description")},
+        )
+
 @router.post("/user/v2/commonLoginDB")
 async def loginDB(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -> JSONResponse:
     param = params.data
@@ -412,4 +427,15 @@ async def get_normal_token(**kwargs):
         client_secret=settings.KEYCLOAK_INFO.client_secret,
         grant_type=kwargs.pop("grant_type", "password"),
         **kwargs,
+    )
+
+async def get_social_token(**kwargs):
+    return await keycloak.generate_normal_token(
+        realm=settings.KEYCLOAK_INFO.realm,
+        client_id=settings.KEYCLOAK_INFO.client_id,
+        client_secret=settings.KEYCLOAK_INFO.client_secret,
+        requested_token_type="urn:ietf:params:oauth:token-type:refresh_token",
+        subject_issuer=kwargs.get("social_type"),
+        subject_token=kwargs.get("access_token"),
+        grant_type="urn:ietf:params:oauth:grant-type:token-exchange"
     )
