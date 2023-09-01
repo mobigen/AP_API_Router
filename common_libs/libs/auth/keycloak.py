@@ -177,11 +177,10 @@ class KeycloakManager:
         )
 
     async def get_query(self, token, realm, query):
-        async with aiohttp.ClientSession() as session:
-            async with session.request(
-                url=f"{self.base_url}/admin/realms/{realm}/users?{query}",
-            ) as response:
-                return {"status_code": response.status, "data": await response.read()}
+        headers = {"Authorization": "bearer " + token}
+        return await self._request_to_keycloak(
+            api_url=f"{self.base_url}/admin/realms/{realm}/users?{query}", method="GET", headers=headers
+        )
 
 
 if __name__ == "__main__":

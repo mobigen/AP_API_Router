@@ -169,11 +169,10 @@ async def register(request: Request, session: Executor = Depends(db.get_db)):
     userData = userInfo.get("data")
     userId = userData.get("user_id")
 
-    if userId == None:
+    if userId is None:
         msg = userInfo.get("data").get("error_description")
         logger.info(msg)
         return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
-    return
 
     userParam = {
        "keycloak_uuid": userData.get("sub"),
@@ -239,7 +238,7 @@ async def loginDB(params: LoginInfoWrap, session: Executor = Depends(db.get_db))
         if row and check_pw:
             return JSONResponse(
                 status_code=200,
-                content={"result": 0, "errorMessage": "", "data": {"body": row} }
+                content={"result": 1, "errorMessage": "", "data": {"body": row} }
             )
         else :
             return JSONResponse(
@@ -252,7 +251,7 @@ async def loginDB(params: LoginInfoWrap, session: Executor = Depends(db.get_db))
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 @router.post("/user/v2/commonRegisterNormal")
-async def register(params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
+async def registerNormal(params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
     param = params.data
     try:
         await create_keycloak_user(**param.dict())
@@ -269,7 +268,41 @@ async def getCount(params: QueryInfoWrap, session: Executor = Depends(db.get_db)
     try:
         res = await get_query_keycloak(query)
         logger.info(res)
-        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+        objectCount = len(res.get("data"))
+        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": "","data": objectCount})
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+@router.post("/user/v2/commonUserModify")
+async def modify(request: Request, params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
+    token = request.cookies.get(COOKIE_NAME)
+    if not token:
+        msg = "TokenDoesNotExist"
+        logger.info(msg)
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+
+    token = literal_eval(token)
+    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm )
+    userId = userInfo.get("user_id")
+    if userId is None:
+        msg = userInfo.get("data").get("error_description")
+        logger.info(msg)
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+
+    param = params.data
+
+    try :
+        resToken = await modify_keycloak_user(**param.dict)
+        logger.info(f"token :: {token}")
+        if resToken["status_code"] == 200:
+            return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+        else :
+            return JSONResponse(
+                status_code=400,
+                content={"result": 0, "errorMessage": resToken.get("data").get("error_description")},
+            )
     except Exception as e:
         session.rollback()
         logger.error(e, exc_info=True)
@@ -279,9 +312,52 @@ async def get_query_keycloak(query):
     admin_token = await get_admin_token()
     res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = query)
     logger.info(f"res :: {res}")
-    if res["status_code"] != 201:
-        raise CreateKeycloakFailError(f"CreateKeycloakFailError :: {res}")
+    return res
 
+async def modify_keycloak_user(**kwargs):
+    admin_token = await get_admin_token()
+
+    reg_data = {
+        # key 이름이 "attributes"가 아닌 것은 value가 존재할때만 넣어주어야 함
+        "firstName": kwargs.get("user_nm"),   # value가 존재할때만 넣어주어야 함
+        "email": kwargs.get("email"),         # value가 존재할때만 넣어주어야 함
+
+        # value가 존재할때만 넣어주어야 함
+        "credentials": [{"value": kwargs.get("user_password")}],
+        "emailVerified": True,            # 항상 true
+        "enabled": True,                  # 항상 true
+
+        # value가 존재하지 않아도 모두 넣어주어야 함
+        "attributes": {
+            "user_uuid":        kwargs.get("user_uuid"),
+            "user_id":          kwargs.get("user_id"),
+            "user_nm":          kwargs.get("user_nm"),
+            "moblphon":         kwargs.get("moblphon"),
+            "user_type":        kwargs.get("user_type"),
+            "login_type":       kwargs.get("login_type"),
+            "user_role":        kwargs.get("user_role"),
+            "adm_yn":           kwargs.get("adm_yn"),
+            "user_sttus":       kwargs.get("user_sttus"),
+            "blng_org_cd":      kwargs.get("blng_org_cd"),
+            "blng_org_nm":      kwargs.get("blng_org_nm"),
+            "blng_org_desc":    kwargs.get("blng_org_desc"),
+            "service_terms_yn": kwargs.get("service_terms_yn"),
+            "reg_user":         kwargs.get("reg_user"),
+            "reg_date":         kwargs.get("reg_date"),
+            "amd_user":         kwargs.get("amd_user"),
+            "amd_date":         kwargs.get("amd_date")
+        }
+    }
+
+    # value가 존재할때만 넣어주어야 하는 값에 대한 처리
+    if kwargs.get("user_nm") is None: del kwargs["firstName"]
+    if kwargs.get("email") is None : del kwargs["email"]
+    if kwargs.get("user_password") is None : del kwargs["credentials"]
+
+    res = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, user_id=kwargs["user_id"], **reg_data)
+    logger.info(f"res :: {res}")
+    if res["status_code"] != 200:
+        raise CreateKeycloakFailError(f"CreateKeycloakFailError :: {res}")
     return res
 
 async def create_keycloak_user(**kwargs):
