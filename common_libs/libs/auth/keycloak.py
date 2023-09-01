@@ -176,6 +176,13 @@ class KeycloakManager:
             **kwargs,
         )
 
+    async def get_query(self, token, realm, query):
+        async with aiohttp.ClientSession() as session:
+            async with session.request(
+                url=f"{self.base_url}/admin/realms/{realm}/users?{query}",
+            ) as response:
+                return {"status_code": response.status, "data": await response.read()}
+
 
 if __name__ == "__main__":
     import asyncio

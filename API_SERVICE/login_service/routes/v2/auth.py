@@ -22,6 +22,16 @@ logger = logging.getLogger()
 class CreateKeycloakFailError(Exception):
     ...
 
+class QueryInfoWrap(BaseModel):
+    """
+    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
+    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
+    """
+
+    class QueryInfo(BaseModel):
+        query: str
+
+    data: QueryInfo
 
 class LoginInfoWrap(BaseModel):
     """
@@ -251,6 +261,28 @@ async def register(params: RegisterInfoWrap, session: Executor = Depends(db.get_
         session.rollback()
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+@router.post("/user/v2/commonKeyCloakQuery")
+async def getCount(params: QueryInfoWrap, session: Executor = Depends(db.get_db)):
+    param = params.data
+    query = param.query
+    try:
+        res = await get_query_keycloak(query)
+        logger.info(res)
+        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+async def get_query_keycloak(query):
+    admin_token = await get_admin_token()
+    res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = query)
+    logger.info(f"res :: {res}")
+    if res["status_code"] != 201:
+        raise CreateKeycloakFailError(f"CreateKeycloakFailError :: {res}")
+
+    return res
 
 async def create_keycloak_user(**kwargs):
     admin_token = await get_admin_token()
