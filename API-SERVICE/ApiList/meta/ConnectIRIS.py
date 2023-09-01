@@ -79,7 +79,7 @@ def api(user_id: str) -> Dict:
                 "userId": iris_id,
                 "userPass": iris_pw,
                 "roleCode": "USER",
-                "groupId": None,
+                "groupId": "62b3fa2f-f3f5-4f88-a6de-dfef48c5c37a", # Default Group
                 "name": user_info["user_nm"],
                 "desc": "테스트용 아이디",
                 "email": user_id,
