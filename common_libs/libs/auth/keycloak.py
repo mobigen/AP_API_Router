@@ -182,6 +182,24 @@ class KeycloakManager:
             api_url=f"{self.base_url}/admin/realms/{realm}/users?{query}", method="GET", headers=headers
         )
 
+    async def social_link(self, token, realm, user_id, **kwargs):
+        headers = {"Content-Type": "application/json", "Authorization": "bearer " + token}
+        social_type = kwargs.get("social_type")
+
+        params = {
+            "identityProvider": social_type,
+            "userId": kwargs.get("social_id"),
+            "userName": kwargs.get(".social_email")
+        }
+
+        async with session.request(
+                url=f"{self.base_url}/admin/realms/{realm}/users/{user_id}/federated-identity/{social_type}",
+                method="PUT",
+                headers=headers,
+                json=params,
+        ) as response:
+            return {"status_code": response.status, "data": await response.read()}
+
 
 if __name__ == "__main__":
     import asyncio

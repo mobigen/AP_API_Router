@@ -241,6 +241,31 @@ async def loginSocial(request: Request, params: RegisterInfoWrap, session: Execu
             content={"result": 0, "errorMessage": token.get("data").get("error_description")},
         )
 
+@router.post("/user/v2/commonSocialLink")
+async def socialLink(request: Request, params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
+    param = params.data
+
+    admin_token = await get_admin_token(**param.dict())
+    userInfo = await keycloak.user_info(token=admin_token, realm=settings.KEYCLOAK_INFO.realm )
+
+    userId = userInfo.get("user_id")
+    if userId is None:
+        msg = userInfo.get("data").get("error_description")
+        logger.info(msg)
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+
+    token = await keycloak.social_link(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, user_id=userId, **param.dict() )
+
+    if token["status_code"] == 200:
+        response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+        return response
+    else :
+        return JSONResponse(
+            status_code=400,
+            content={"result": 0, "errorMessage": token.get("data").get("error_description")},
+        )
+
+
 @router.post("/user/v2/commonLoginDB")
 async def loginDB(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -> JSONResponse:
     param = params.data
