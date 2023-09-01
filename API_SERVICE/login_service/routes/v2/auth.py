@@ -319,13 +319,13 @@ async def modify_keycloak_user(**kwargs):
 
     reg_data = {
         # key 이름이 "attributes"가 아닌 것은 value가 존재할때만 넣어주어야 함
+        # value가 존재할때만 넣어주어야 함
         "firstName": kwargs.get("user_nm"),   # value가 존재할때만 넣어주어야 함
         "email": kwargs.get("email"),         # value가 존재할때만 넣어주어야 함
-
-        # value가 존재할때만 넣어주어야 함
         "credentials": [{"value": kwargs.get("user_password")}],
+
         "emailVerified": True,            # 항상 true
-        "enabled": True,                  # 항상 true
+        "enabled": kwargs.get("enabled"),
 
         # value가 존재하지 않아도 모두 넣어주어야 함
         "attributes": {
@@ -363,13 +363,33 @@ async def modify_keycloak_user(**kwargs):
 async def create_keycloak_user(**kwargs):
     admin_token = await get_admin_token()
     reg_data = {
-        "username": kwargs["user_id"],
-        "firstName": kwargs["user_nm"],
-        "email": kwargs["email"],
-        "emailVerified": True,
-        "enabled": True,
-        "credentials": [{"value": kwargs["user_password"]}],
-        "attributes": json.dumps(kwargs, default=str),
+        "username": kwargs.get("user_id"),
+        "firstName": kwargs.get("user_nm"),   # value가 존재할때만 넣어주어야 함
+        "email": kwargs.get("email"),         # value가 존재할때만 넣어주어야 함
+
+        "credentials": [{"value": kwargs.get("user_password")}],
+        "emailVerified": True,            # 항상 true
+        "enabled": True,                  # 항상 true
+
+        "attributes": {
+            "user_uuid":        kwargs.get("user_uuid"),
+            "user_id":          kwargs.get("user_id"),
+            "user_nm":          kwargs.get("user_nm"),
+            "moblphon":         kwargs.get("moblphon"),
+            "user_type":        kwargs.get("user_type"),
+            "login_type":       kwargs.get("login_type"),
+            "user_role":        kwargs.get("user_role"),
+            "adm_yn":           kwargs.get("adm_yn"),
+            "user_sttus":       kwargs.get("user_sttus"),
+            "blng_org_cd":      kwargs.get("blng_org_cd"),
+            "blng_org_nm":      kwargs.get("blng_org_nm"),
+            "blng_org_desc":    kwargs.get("blng_org_desc"),
+            "service_terms_yn": kwargs.get("service_terms_yn"),
+            "reg_user":         kwargs.get("reg_user"),
+            "reg_date":         kwargs.get("reg_date").strftime('%Y-%m-%d %H:%M:%S'),
+            "amd_user":         kwargs.get("amd_user"),
+            "amd_date":         kwargs.get("amd_date").strftime('%Y-%m-%d %H:%M:%S')
+        }
     }
     res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
     logger.info(f"res :: {res}")
@@ -384,7 +404,6 @@ async def get_admin_token() -> None:
     )
 
     return res.get("data").get("access_token")
-
 
 async def get_normal_token(**kwargs):
     return await keycloak.generate_normal_token(
