@@ -33,3 +33,11 @@ class RegisterTable:
     @staticmethod
     def get_query_data(data: Dict) -> Dict:
         return {"method": "INSERT", "table_nm": RegisterTable.table_nm, "data": data}
+
+    @staticmethod
+    def upsert_query_data(method: str, data: Dict) -> Dict:
+        method = method.upper()
+        queryDict = { "method": method, "table_nm": RegisterTable.table_nm, "data": data}
+        if method == "UPDATE" :
+            queryDict["key"] = ["user_id"]
+        return queryDict

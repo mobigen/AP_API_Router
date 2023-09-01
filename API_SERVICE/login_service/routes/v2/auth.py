@@ -121,7 +121,7 @@ async def info(request: Request, session: Executor = Depends(db.get_db)):
             content={"result": 0, "errorMessage": userInfo.get("data").get("error_description")},
         )
 @router.get("/user/v2/commonUserUpsert")
-async def info(request: Request, session: Executor = Depends(db.get_db)):
+async def register(request: Request, session: Executor = Depends(db.get_db)):
     """
     {
         "result": 1,
@@ -159,40 +159,12 @@ async def info(request: Request, session: Executor = Depends(db.get_db)):
     userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm )
     userData = userInfo.get("data")
     userId = userData.get("user_id")
-    row = session.query(**LoginTable.get_query_data(userId)).first()
-    logger.info(f"row:: {row}")
 
-    '''
-    {
-       "status_code":200,
-       "data":{
-          "sub":"3b3e4411-e1d7-48e8-bdb4-aefde2225356",
-          "blng_org_cd":"BLNG_ORG_3",
-          "email_verified":true,
-          "login_type":"MEMBER",
-          "reg_user":"792a8948-6c78-4228-90a6-cf53dbdfe2ac",
-          "user_nm":"김준영",
-          "preferred_username":"kjy9337@gmail.com",
-          "given_name":"김준영",
-          "blng_org_desc":"테스트",
-          "user_sttus":"SBSCRB",
-          "blng_org_nm":"한국교통연구원",
-          "adm_yn":"N",
-          "reg_date":"2022-10-06 10:37:16.188364",
-          "user_role":"ROLE_INSTN",
-          "amd_date":"2022-10-06 10:37:16.188364",
-          "user_uuid":"792a8948-6c78-4228-90a6-cf53dbdfe2ac",
-          "user_type":"INSTN",
-          "user_id":"kjy9337@gmail.com",
-          "moblphon":"010-0000-0002",
-          "name":"김준영",
-          "amd_user":"792a8948-6c78-4228-90a6-cf53dbdfe2ac",
-          "email":"kjy9337@gmail.com",
-          "service_terms_yn":"Y"
-       }
-    }
-    '''
-
+    if userId == None:
+        msg = userInfo.get("data").get("error_description")
+        logger.info(msg)
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+    return
 
     userParam = {
        "keycloak_uuid": userData.get("sub"),
@@ -216,22 +188,17 @@ async def info(request: Request, session: Executor = Depends(db.get_db)):
        "amd_date": userData.get("amd_date")
     }
 
-    logger.info(**RegisterTable.get_query_data(userParam))
+    method = "INSERT"
+    row = session.query(**LoginTable.get_query_data(userId)).first()
+    if row : method = "UPDATE"
+    try :
+        logger.info(userParam)
+        session.execute(auto_commit=False, **RegisterTable.upsert_query_data(method, userParam))
+        session.commit()
+        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
-    '''
-    if row :
-        session.execute(auto_commit=False, **RegisterTable.get_query_data(userParam.dict()))
-    else :
-
-    if resToken.get("status_code") == 200 :
-        return JSONResponse(
-            status_code=200,
-            content={"result": 1, "errorMessage": "", "data": {"body": resToken.get("data")}},
-        )
-    else :
-        return JSONResponse(
-            status_code=400,
-            content={"result": 0, "errorMessage": resToken.get("data").get("error_description")},
-        )
-    '''
 
