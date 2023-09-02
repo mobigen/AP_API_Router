@@ -213,7 +213,7 @@ async def info(request: Request, session: Executor = Depends(db.get_db)):
 @router.post("/user/commonLogout")
 async def logout():
     response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
-    response.delete_cookie(COOKIE_NAME)
+    response.delete_cookie(COOKIE_NAME, domain="bigdata-car.kr")
     return response
 
 
