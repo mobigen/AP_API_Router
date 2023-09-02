@@ -51,7 +51,7 @@ async def index(request: Request, route_path: str, session: Executor = Depends(d
     response = JSONResponse(content=result, status_code=status)
     if cookies:
         for k, v in cookies.items():
-            response.set_cookie(key=k, value=v, max_age=3600, secure=False, httponly=True)
+            response.set_cookie(key=k, value=v, max_age=3600, secure=False, httponly=False)
 
     return response
 
