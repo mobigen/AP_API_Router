@@ -101,6 +101,17 @@ class RegisterSocialInfoWrap(BaseModel):
 
     data: RegisterSocialInfo
 
+class ActivateInfoWrap(BaseModel):
+    """
+    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
+    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
+    """
+
+    class ActivateInfo(BaseModel):
+        user_id: str
+
+    data: ActivateInfo
+
 router = APIRouter()
 
 @router.post("/user/v2/commonLogout")
@@ -324,6 +335,38 @@ async def registerNormal(params: RegisterInfoWrap, session: Executor = Depends(d
     try:
         await create_keycloak_user(**param.dict())
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+@router.post("/user/v2/commonActivateUser")
+async def activateUser(params: ActivateInfoWrap, session: Executor = Depends(db.get_db)):
+    param = params.data
+    user_id = param.user_id
+    logger.info(param)
+    try:
+        admin_token = await get_admin_token()
+        res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = "")
+        userList = res.get("data")
+        user_info = list(filter(lambda item : item['username'] == user_id, userList))
+        if len(user_info) == 0 :
+            return JSONResponse(status_code=200, content={"result": 0, "errorMessage": "Invalid User!!"})
+        user_info = user_info[0]
+        sub = user_info.get("id")
+
+        # enabled 만 True 로 변경
+        reg_data = {"enabled": "true"}
+
+        resToken = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub, **reg_data)
+        logger.info(f"resToken = {resToken}")
+        if resToken["status_code"] == 204:
+            return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+        else :
+            return JSONResponse(
+                status_code=400,
+                content={"result": 0, "errorMessage": resToken.get("data").get("error_description")}
+            )
     except Exception as e:
         session.rollback()
         logger.error(e, exc_info=True)
