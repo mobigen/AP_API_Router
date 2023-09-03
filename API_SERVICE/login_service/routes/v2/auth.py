@@ -396,7 +396,7 @@ async def modify(request: Request, params: RegisterInfoWrap, session: Executor =
 
     token = literal_eval(token)
     userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm )
-    userId = userInfo.get("user_id")
+    userId = userInfo.get("preferred_username")
     if userId is None:
         msg = userInfo.get("data").get("error_description")
         logger.info(msg)
