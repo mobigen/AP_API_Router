@@ -281,21 +281,25 @@ async def loginSocial(params: RegisterSocialInfoWrap, session: Executor = Depend
         )
 
 @router.post("/user/v2/commonSocialLink")
-async def socialLink( params: RegisterSocialInfoWrap, session: Executor = Depends(db.get_db)):
+async def socialLink(params: RegisterSocialInfoWrap, session: Executor = Depends(db.get_db)):
     param = params.data
+    social_email = param.social_email
 
-    admin_token = await get_admin_token(**param.dict())
-    userInfo = await keycloak.user_info(token=admin_token, realm=settings.KEYCLOAK_INFO.realm )
+    admin_token = await get_admin_token()
+    res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = f"username={social_email}&exact=true")
 
-    userId = userInfo.get("user_id")
-    if userId is None:
-        msg = userInfo.get("data").get("error_description")
-        logger.info(msg)
-        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+    userList = res.get("data")
+    if len(userList) == 0 :
+        return JSONResponse(status_code=200, content={"result": 0, "errorMessage": "Invalid User!!"})
 
-    token = await keycloak.social_link(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, user_id=userId, **param.dict() )
+    logger.info(f"res :: {res}")
+    user_info = userList[0]
+    sub = user_info.get("id")
 
-    if token["status_code"] == 200:
+    token = await keycloak.social_link(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub, **param.dict() )
+    logger.info(f"token :: {token}")
+
+    if token["status_code"] == 204:
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
         return response
     else :
@@ -303,7 +307,6 @@ async def socialLink( params: RegisterSocialInfoWrap, session: Executor = Depend
             status_code=400,
             content={"result": 0, "errorMessage": token.get("data").get("error_description")},
         )
-
 
 @router.post("/user/v2/commonLoginDB")
 async def loginDB(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -> JSONResponse:
