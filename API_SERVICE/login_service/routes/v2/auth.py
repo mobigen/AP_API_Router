@@ -87,6 +87,19 @@ class RegisterInfoWrap(BaseModel):
 
     data: RegisterInfo
 
+class RegisterSocialInfoWrap(BaseModel):
+    """
+    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
+    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
+    """
+
+    class RegisterSocialInfo(BaseModel):
+        social_type: str
+        social_id: Optional[str]
+        social_email: Optional[str]
+        access_token: Optional[str]
+
+    data: RegisterSocialInfo
 
 router = APIRouter()
 
@@ -242,7 +255,7 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
         )
 
 @router.post("/user/v2/commonLoginSocial")
-async def loginSocial(request: Request, params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
+async def loginSocial(params: RegisterSocialInfoWrap, session: Executor = Depends(db.get_db)):
     param = params.data
 
     token = await get_social_token(**param.dict())
@@ -257,7 +270,7 @@ async def loginSocial(request: Request, params: RegisterInfoWrap, session: Execu
         )
 
 @router.post("/user/v2/commonSocialLink")
-async def socialLink(request: Request, params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
+async def socialLink( params: RegisterSocialInfoWrap, session: Executor = Depends(db.get_db)):
     param = params.data
 
     admin_token = await get_admin_token(**param.dict())
