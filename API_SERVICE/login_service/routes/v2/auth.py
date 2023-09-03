@@ -89,6 +89,13 @@ class RegisterInfoWrap(BaseModel):
 
 
 router = APIRouter()
+
+@router.post("/user/v2/commonLogout")
+async def logout():
+    response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+    response.delete_cookie(COOKIE_NAME, domain="bigdata-car.kr")
+    return response
+
 @router.get("/user/v2/commonUserInfo")
 async def info(request: Request, session: Executor = Depends(db.get_db)):
     """
