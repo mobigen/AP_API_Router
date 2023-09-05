@@ -162,6 +162,7 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
         logger.error(f"data :: {params}")
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
+
 @router.get("/user/commonUserInfo")
 async def info(request: Request, session: Executor = Depends(db.get_db)):
     """

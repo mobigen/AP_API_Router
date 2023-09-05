@@ -41,3 +41,33 @@ class RegisterTable:
         if method == "UPDATE" :
             queryDict["key"] = ["user_id"]
         return queryDict
+
+
+class IrisInfoTable:
+    table_nm = "tb_iris_user_info"
+    key_column = "user_id"
+
+    def get_query_data(self, user_id: str) -> Dict:
+        return {
+            "table_nm": self.table_nm,
+            "where_info": [
+                {
+                    "table_nm": self.table_nm,
+                    "key": self.key_column,
+                    "value": user_id,
+                    "compare_op": "=",
+                    "op": "",
+                }
+            ],
+        }
+
+    @staticmethod
+    def upsert_query_data(method: str, data: Dict) -> Dict:
+        method = method.upper()
+        queryDict = { "method": method, "table_nm": IrisInfoTable.table_nm, "data": data}
+        if method == "UPDATE":
+            queryDict["key"] = ["user_id"]
+        if method == "INSERT":
+            queryDict.pop("key")
+
+        return queryDict
