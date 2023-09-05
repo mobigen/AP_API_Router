@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from libs.auth.keycloak import keycloak
 from login_service.routes.v1 import authV1
-from login_service.routes.v2 import authV2
+from login_service.routes.v2 import authV2, iris_sso
 from login_service.common.config import settings
 from login_service.database.conn import db
 
@@ -19,6 +19,7 @@ def create_app():
 
     app_.include_router(authV1.router, prefix="/portal/api/common")
     app_.include_router(authV2.router, prefix="/portal/api/common")
+    app_.include_router(iris_sso.router, prefix="/portal/api/common")
 
     return app_
 
