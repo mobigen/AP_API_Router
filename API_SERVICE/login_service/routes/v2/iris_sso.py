@@ -132,6 +132,7 @@ def api(user_id: str, session: Executor = Depends(db.get_db)) -> dict:
 
         result = {"result": 1, "errorMessage": "", "data": user_token}
     except Exception:
-        result = {"result": 0, "errorMessage": ""}
+        except_name = get_exception_info()
+        result = {"result": 0, "errorMessage": except_name}
 
     return result
