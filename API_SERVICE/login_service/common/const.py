@@ -69,3 +69,33 @@ class IrisInfoTable:
             queryDict["key"] = ["user_id"]
 
         return queryDict
+
+class EmailAuthTable:
+    table_nm = "tb_email_athn_info"
+    key_column = "email"
+
+    @staticmethod
+    def get_query_data(user_id: str) -> Dict:
+        return {
+            "table_nm": EmailAuthTable.table_nm,
+            "where_info": [
+                {
+                    "table_nm": EmailAuthTable.table_nm,
+                    "key": EmailAuthTable.key_column,
+                    "value": user_id,
+                    "compare_op": "=",
+                    "op": "",
+                }
+            ],
+        }
+
+    @staticmethod
+    def get_execute_query(data: Dict) -> Dict:
+        queryDict = {
+            "table_nm" :EmailAuthTable.table_nm,
+            "key": EmailAuthTable.key_column,
+            "method": "UPDATE",
+            "data": data,
+        }
+
+        return queryDict

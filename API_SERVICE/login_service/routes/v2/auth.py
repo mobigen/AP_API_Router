@@ -12,7 +12,7 @@ from libs.auth.keycloak import keycloak
 
 from libs.database.connector import Executor
 from login_service.common.config import settings
-from login_service.common.const import COOKIE_NAME, LoginTable, RegisterTable
+from login_service.common.const import COOKIE_NAME, LoginTable, RegisterTable, EmailAuthTable
 from login_service.database.conn import db
 
 ''''
@@ -29,6 +29,9 @@ logger = logging.getLogger()
 
 class CreateKeycloakFailError(Exception):
     ...
+
+class EmailAuthFail(Exception):
+    pass
 
 class QueryInfoWrap(BaseModel):
     """
@@ -109,6 +112,7 @@ class ActivateInfoWrap(BaseModel):
 
     class ActivateInfo(BaseModel):
         user_id: str
+        athn_no: str
 
     data: ActivateInfo
 
@@ -347,10 +351,20 @@ async def registerNormal(params: RegisterInfoWrap, session: Executor = Depends(d
 
 @router.post("/user/v2/commonActivateUser")
 async def activateUser(params: ActivateInfoWrap, session: Executor = Depends(db.get_db)):
+
     param = params.data
     user_id = param.user_id
+    athn_no = param.athn_no
     logger.info(param)
     try:
+        email_info = session.query(**EmailAuthTable.get_query_data(user_id)).first()
+        if email_info["athn_no"] == athn_no:
+            email_info["athn_yn"] = "Y"
+            email_info["athn_date"] = "NOW()"
+            session.execute(**EmailAuthTable.get_execute_query(email_info))
+        else:
+            raise EmailAuthFail
+
         admin_token = await get_admin_token()
         res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = "")
         userList = res.get("data")
