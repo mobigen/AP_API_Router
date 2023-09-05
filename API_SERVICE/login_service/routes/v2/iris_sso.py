@@ -56,7 +56,7 @@ def get_random_str(is_num: bool) -> str:
     return "".join(result)
 
 
-@router.get("/user/ConnectIRIS")
+@router.get("/user/v2/ConnectIRIS")
 def api(user_id: str, session: Executor = Depends(db.get_db)) -> dict:
     header = {"Content-Type": "application/json"}
     iris_table = IrisInfoTable()
