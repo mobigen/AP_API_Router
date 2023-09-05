@@ -67,7 +67,5 @@ class IrisInfoTable:
         queryDict = { "method": method, "table_nm": IrisInfoTable.table_nm, "data": data}
         if method == "UPDATE":
             queryDict["key"] = ["user_id"]
-        if method == "INSERT":
-            queryDict.pop("key")
 
         return queryDict

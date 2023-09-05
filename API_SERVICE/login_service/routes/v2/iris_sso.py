@@ -65,7 +65,7 @@ def api(user_id: str, session: Executor = Depends(db.get_db)) -> dict:
         iris_info = session.query(**iris_table.get_query_data(user_id)).first()
 
         # join iris
-        if not len(iris_info):
+        if iris_info is None:
             # get user info
             user_info = session.query(**LoginTable.get_query_data(user_id)).first()
 
@@ -85,7 +85,7 @@ def api(user_id: str, session: Executor = Depends(db.get_db)) -> dict:
                 dup_check = session.query(**iris_table.get_query_data(iris_id)).first()
                 logger.info(dup_check)
 
-                if not len(dup_check):
+                if dup_check is None:
                     logger.info("break")
                     break
             # insert 구문
@@ -94,7 +94,7 @@ def api(user_id: str, session: Executor = Depends(db.get_db)) -> dict:
                 "iris_id": iris_id,
                 "iris_pw": iris_pw
             }
-            logger.info(session.execute(**iris_table.upsert_query(insert_query)))
+            logger.info(session.execute(**iris_table.upsert_query_data("INSERT", insert_query)))
 
             # iris join API
             join_info = {
@@ -127,8 +127,7 @@ def api(user_id: str, session: Executor = Depends(db.get_db)) -> dict:
             del header["x-access-token"]
 
         iris_info = session.query(**iris_table.get_query_data(user_id)).first()
-        logger.info(iris_info)
-        user_token = get_token(iris_info, header)
+        user_token = get_token([iris_info], header)
 
         result = {"result": 1, "errorMessage": "", "data": user_token}
     except Exception:
