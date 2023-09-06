@@ -24,26 +24,25 @@ def send_mail():
             port = setting.SMTP_PORT
             from_ = setting.EMAIL_ADDR
             password = setting.EMAIL_PASSWORD
-            tmplt = row["tmplt"]
-
-            # templete
-            with open() as fp:
-                html = "\n".join(fp.readlines())
+            tmplt = row["tmplt_cd"]
 
             # replace
             # todo 함수화
-            if row["tmplt_cd"] in ["register","password"]:
-                html = html.replace("AUTH_NO", row['contents'])
+            if row["tmplt_cd"] in ["register","password","share"]:
+                with open(msg_setting[row[tmplt]]["tmplt"],"r") as fp:
+                    html = "\n".join(fp.readlines())
+                html = html.replace("CONTENTS1", row['contents'])
             else:
+                with open(msg_setting[row[tmplt]]["tmplt"] + "","r") as fp:
+                    html = "\n".join(fp.readlines())
                 content = row["contents"].split("|")
                 html = html.replace("TITLE", row['title'])
                 html = html.replace("CONTENTS1", content[0])
                 html = html.replace("CONTENTS2", content[1])
 
-
             # send
             message = MIMEMultipart("alternative")
-            message["Subject"] = msg_setting[row[tmplt]]
+            message["Subject"] = msg_setting[row[tmplt]]["sub"]
             message["From"] = from_
             message["To"] = row["rcv_adr"]
             html_part = MIMEText(html, "html")

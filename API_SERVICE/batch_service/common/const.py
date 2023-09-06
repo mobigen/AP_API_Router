@@ -20,7 +20,7 @@ msg_setting = {
         "replace": ["AUTH_NO"]
     },
     "noty": {
-        "tmplt": f"{base_dir}/template/notyEmail.html",
+        "tmplt": f"{base_dir}/template/",
         "sub": "[자동차데이터포털] 자동차데이터포털에서 보내는 알림 메일입니다.",
         "replace": ["AUTH_NO"]
     },
