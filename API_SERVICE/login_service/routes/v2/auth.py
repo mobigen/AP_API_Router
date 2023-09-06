@@ -18,7 +18,7 @@ from login_service.database.conn import db
  Status Code :
     200 : OK
     201 : Created  => create
-    202 : Accepted  
+    202 : Accepted
     204 : No Content  => modify
 '''
 
@@ -86,6 +86,7 @@ class RegisterInfoWrap(BaseModel):
         user_role: Optional[str]
         user_normal: Optional[str]
         adm_yn: Optional[str]
+        enabled: Optional[str]
 
     data: RegisterInfo
 
@@ -203,25 +204,25 @@ async def register(request: Request, session: Executor = Depends(db.get_db)):
         return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
 
     userParam = {
-       "keycloak_uuid": userData.get("sub"),
-       "user_uuid": userData.get("user_uuid"),
-       "user_id": userData.get("user_id"),
-       "user_nm": userData.get("user_nm"),
-       "email": userData.get("email"),
-       "moblphon": userData.get("moblphon"),
-       "user_type": userData.get("user_type"),
-       "login_type": userData.get("login_type"),
-       "user_role": userData.get("user_role"),
-       "adm_yn": userData.get("adm_yn"),
-       "user_sttus": userData.get("user_sttus"),
-       "blng_org_cd": userData.get("blng_org_cd"),
-       "blng_org_nm": userData.get("blng_org_nm"),
-       "blng_org_desc": userData.get("blng_org_desc"),
-       "service_terms_yn": userData.get("service_terms_yn"),
-       "reg_user": userData.get("reg_user"),
-       "reg_date": userData.get("reg_date"),
-       "amd_user": userData.get("amd_user"),
-       "amd_date": userData.get("amd_date")
+        "keycloak_uuid": userData.get("sub"),
+        "user_uuid": userData.get("user_uuid"),
+        "user_id": userData.get("user_id"),
+        "user_nm": userData.get("user_nm"),
+        "email": userData.get("email"),
+        "moblphon": userData.get("moblphon"),
+        "user_type": userData.get("user_type"),
+        "login_type": userData.get("login_type"),
+        "user_role": userData.get("user_role"),
+        "adm_yn": userData.get("adm_yn"),
+        "user_sttus": userData.get("user_sttus"),
+        "blng_org_cd": userData.get("blng_org_cd"),
+        "blng_org_nm": userData.get("blng_org_nm"),
+        "blng_org_desc": userData.get("blng_org_desc"),
+        "service_terms_yn": userData.get("service_terms_yn"),
+        "reg_user": userData.get("reg_user"),
+        "reg_date": userData.get("reg_date"),
+        "amd_user": userData.get("amd_user"),
+        "amd_date": userData.get("amd_date")
     }
 
     method = "INSERT"
@@ -435,6 +436,9 @@ async def get_query_keycloak(query):
     admin_token = await get_admin_token()
     res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = query)
     logger.info(f"res :: {res}")
+    if res["status_code"] != 200:
+        raise CreateKeycloakFailError(f"CreateKeycloakFailError :: {res}")
+
     return res
 
 async def modify_keycloak_user(sub, **kwargs):

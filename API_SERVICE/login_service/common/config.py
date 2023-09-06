@@ -89,6 +89,15 @@ class ProdSettings(Settings):
 
     DB_INFO: PGInfo = PGInfo()
 
+    KEYCLOAK_INFO = KeycloakInfo(
+        keycloak_url="https://auth.bigdata-car.kr",
+        admin_username="admin",
+        admin_password="2021@katech",
+        realm="kadap",
+        client_id="katech",
+        client_secret="pwLZG5EaWph1nJAOjwYJ32YGtXdAj5SL",
+    )
+
 
 class LocalSettings(Settings):
     TESTING: bool = False
