@@ -1,16 +1,50 @@
+from pydantic import BaseSettings
+from batch_service.common.config import base_dir
 from common_libs.libs.database.dml_controller import Base
 
 
-NOT_ALLOWED_TABLES = ["USR_MGMT"]
-INSERT_NOT_ALLOWED_TABLES = [""]
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-EXPIRE_DELTA = 1
-COOKIE_NAME = "user-docean-access-token"
+msg_setting = {
+    "register": {
+        "tmplt": f"{base_dir}/template/emailAthnSend.html",
+        "sub": "[자동차데이터포털]회원가입을 위한 인증 메일입니다.",
+        "replace": ["AUTH_NO"]
+    },
+    "password": {
+        "tmplt": f"{base_dir}/template/pwdEmailAthn.html",
+        "sub": "[자동차데이터포털]비밀번호 변경을 위한 인증 메일입니다.",
+        "replace": ["AUTH_NO"]
+    },
+    "share": {
+        "tmplt": f"{base_dir}/template/shareEmail.html",
+        "sub": "[자동차데이터포털] 자동차데이터포털에서 공유한 데이터입니다.",
+        "replace": ["AUTH_NO"]
+    },
+    "noty": {
+        "tmplt": f"{base_dir}/template/notyEmail.html",
+        "sub": "[자동차데이터포털] 자동차데이터포털에서 보내는 알림 메일입니다.",
+        "replace": ["AUTH_NO"]
+    },
+    "ex": {
+        "tmplt": f"{base_dir}/template/",
+        "sub": "[자동차데이터포털] {0} 신청 메일입니다.",
+        "replace": ["AUTH_NO"]
+    }
+}
 
 
-class EmailInfoTable(Base):
-    table_nm = ""
-    key_column = ""
+class Settings(BaseSettings):
+    EMAIL_ADDR: str = ""
+    EMAIL_PASSWORD: str = ""
+    SMTP_SERVER: str = ""
+    SMTP_PORT: str = ""
+
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
+
+
+class EmailSendInfoTable(Base):
+    table_nm = "tb_email_send_info"
+    key_column = "email_id"
 
 
