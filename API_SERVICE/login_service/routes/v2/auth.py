@@ -480,6 +480,8 @@ async def modify_keycloak_user(sub, **kwargs):
     if kwargs.get("user_nm") is None: del reg_data["firstName"]
     if kwargs.get("email") is None : del reg_data["email"]
     if kwargs.get("user_password") is None : del reg_data["credentials"]
+    # attributes 는 하나라도 값이 None 이면 값을 넘기면 안됨
+    if any(value is None for value in reg_data["attributes"].values()) : del reg_data["attributes"]
 
     res = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub, **reg_data)
     logger.info(f"res :: {res}")
