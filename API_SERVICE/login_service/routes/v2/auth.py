@@ -31,7 +31,7 @@ class CreateKeycloakFailError(Exception):
     ...
 
 class EmailAuthFail(Exception):
-    pass
+    ...
 
 class QueryInfoWrap(BaseModel):
     """
@@ -361,9 +361,9 @@ async def activateUser(params: ActivateInfoWrap, session: Executor = Depends(db.
         if email_info["athn_no"] == athn_no:
             email_info["athn_yn"] = "Y"
             email_info["athn_date"] = "NOW()"
-            session.execute(**EmailAuthTable.get_execute_query(email_info))
+            session.execute(auto_commit=False, **EmailAuthTable.get_execute_query(email_info))
         else:
-            raise EmailAuthFail
+            raise EmailAuthFail("EmailAuthFail")
 
         admin_token = await get_admin_token()
         res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = "")

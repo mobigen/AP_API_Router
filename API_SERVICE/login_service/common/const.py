@@ -93,7 +93,7 @@ class EmailAuthTable:
     def get_execute_query(data: Dict) -> Dict:
         queryDict = {
             "table_nm" :EmailAuthTable.table_nm,
-            "key": EmailAuthTable.key_column,
+            "key": [EmailAuthTable.key_column],
             "method": "UPDATE",
             "data": data,
         }
