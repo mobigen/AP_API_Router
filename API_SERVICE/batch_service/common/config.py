@@ -82,7 +82,7 @@ class LocalSettings(Settings):
     RELOAD: bool = False
 
     DB_INFO: TiberoInfo = TiberoInfo(
-        HOST="192.168.101.164", PORT="8629", USERNAME="dhub", PASS="dhub1234", BASE="tibero", SCHEMA="DHUB"
+        HOST="192.168.100.126", PORT="25432", USERNAME="dpme", PASS="hello.meta12#$", BASE="dataportal", SCHEMA="sitemng,users"
     )
 
 
