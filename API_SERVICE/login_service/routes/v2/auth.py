@@ -1,5 +1,4 @@
 from ast import literal_eval
-import json
 import logging
 from datetime import datetime
 from typing import Optional, Union
@@ -263,6 +262,7 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
 
     if token["status_code"] == 200:
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+        token["create_time"] = datetime.now().strftime("%s")
         response.set_cookie(key=COOKIE_NAME, value=token, domain=".bigdata-car.kr")
         return response
     else :
@@ -277,6 +277,7 @@ async def loginSocial(params: RegisterSocialInfoWrap, session: Executor = Depend
 
     token = await get_social_token(**param.dict())
     if token["status_code"] == 200:
+        token["create_time"] = datetime.now().strftime("%s")
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
         response.set_cookie(key=COOKIE_NAME, value=token, domain=".bigdata-car.kr")
         return response
