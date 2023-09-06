@@ -263,7 +263,7 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
 
     if token["status_code"] == 200:
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
-        response.set_cookie(key=COOKIE_NAME, value=token, domain="bigdata-car.kr")
+        response.set_cookie(key=COOKIE_NAME, value=token, domain=".bigdata-car.kr")
         return response
     else :
         return JSONResponse(
@@ -278,7 +278,7 @@ async def loginSocial(params: RegisterSocialInfoWrap, session: Executor = Depend
     token = await get_social_token(**param.dict())
     if token["status_code"] == 200:
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
-        response.set_cookie(key=COOKIE_NAME, value=token, domain="bigdata-car.kr")
+        response.set_cookie(key=COOKIE_NAME, value=token, domain=".bigdata-car.kr")
         return response
     else :
         return JSONResponse(
