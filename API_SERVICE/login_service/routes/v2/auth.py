@@ -153,15 +153,7 @@ async def info(request: Request, session: Executor = Depends(db.get_db)):
         request (Request): _description_
         session (Executor, optional): _description_. Defaults to Depends(db.get_db).
     """
-    token = request.cookies.get(COOKIE_NAME)
-
-    if not token:
-        msg = "TokenDoesNotExist"
-        logger.info(msg)
-        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
-
-    token = literal_eval(token)
-    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm )
+    userInfo = await get_user_info_from_request(request)
 
     if userInfo.get("status_code") == 200 :
         return JSONResponse(
@@ -201,15 +193,7 @@ async def register(request: Request, session: Executor = Depends(db.get_db)):
         request (Request): _description_
         session (Executor, optional): _description_. Defaults to Depends(db.get_db).
     """
-    token = request.cookies.get(COOKIE_NAME)
-
-    if not token:
-        msg = "TokenDoesNotExist"
-        logger.info(msg)
-        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
-
-    token = literal_eval(token)
-    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm )
+    userInfo = await get_user_info_from_request(request)
     userData = userInfo.get("data")
     userId = userData.get("user_id")
 
@@ -408,14 +392,7 @@ async def getCount(params: QueryInfoWrap, session: Executor = Depends(db.get_db)
 
 @router.post("/user/v2/commonUserModify")
 async def modify(request: Request, params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
-    token = request.cookies.get(COOKIE_NAME)
-    if not token:
-        msg = "TokenDoesNotExist"
-        logger.info(msg)
-        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
-
-    token = literal_eval(token)
-    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm )
+    userInfo = await get_user_info_from_request(request)
     userId = userInfo.get("preferred_username")
     if userId is None:
         msg = userInfo.get("data").get("error_description")
@@ -438,6 +415,18 @@ async def modify(request: Request, params: RegisterInfoWrap, session: Executor =
         session.rollback()
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+async def get_user_info_from_request(request: Request) :
+    token = request.cookies.get(COOKIE_NAME)
+
+    if not token:
+        msg = "TokenDoesNotExist"
+        logger.info(msg)
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+
+    token = literal_eval(token)
+    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm )
+    return userInfo
 
 async def get_query_keycloak(query):
     admin_token = await get_admin_token()
