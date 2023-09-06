@@ -342,13 +342,7 @@ async def activateUser(params: ActivateInfoWrap, session: Executor = Depends(db.
     athn_no = param.athn_no
     logger.info(param)
     try:
-        email_info = session.query(**EmailAuthTable.get_query_data(user_id)).first()
-        if email_info["athn_no"] == athn_no:
-            email_info["athn_yn"] = "Y"
-            email_info["athn_date"] = "NOW()"
-            session.execute(auto_commit=False, **EmailAuthTable.get_execute_query(email_info))
-        else:
-            raise EmailAuthFail("EmailAuthFail")
+        await check_email_auth(user_id, athn_no)
 
         admin_token = await get_admin_token()
         res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = "")
@@ -415,6 +409,15 @@ async def modify(request: Request, params: RegisterInfoWrap, session: Executor =
         session.rollback()
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+async def check_email_auth(user_id: str, ahtn_no: str) :
+    email_info = session.query(**EmailAuthTable.get_query_data(user_id)).first()
+    if email_info["athn_no"] == athn_no:
+        email_info["athn_yn"] = "Y"
+        email_info["athn_date"] = "NOW()"
+        session.execute(auto_commit=False, **EmailAuthTable.get_execute_query(email_info))
+    else:
+        raise EmailAuthFail("EmailAuthFail")
 
 async def get_user_info_from_request(request: Request) :
     token = request.cookies.get(COOKIE_NAME)
