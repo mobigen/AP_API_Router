@@ -65,6 +65,9 @@ class SQLAlchemyConnector(Connector):
         finally:
             executor.close()
 
+    def get_db_manager(self):
+        return OrmExecutor(self._session(), self._metadata, self)
+
     def reset_metadata(self):
         self._metadata = MetaData()
         for schema in self._schemas:
@@ -78,6 +81,12 @@ class OrmExecutor(Executor):
         self._conn = conn
         self._cnt = 0
         self._q: Optional[Query] = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
     def query(self, **kwargs) -> "OrmExecutor":
         base_table = self.get_table(kwargs["table_nm"])
