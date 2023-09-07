@@ -13,7 +13,8 @@ logger = logging.getLogger()
 
 def send_mail():
     with db.get_db_manager() as session:
-        rows = session.query(**EmailSendInfoTable.get_select_query("REQ")).all()
+        email_send_table = EmailSendInfoTable()
+        rows = session.query(**email_send_table.get_query_data()).all()
         rows = rows[0] if rows else []
 
         for row in rows:
@@ -60,4 +61,4 @@ def send_mail():
 
             # update
             row["sttus"] = "SEND"
-            EmailSendInfoTable.get_execute_query("UPDATE", row)
+            session.execute(**EmailSendInfoTable.get_execute_query("UPDATE", row))

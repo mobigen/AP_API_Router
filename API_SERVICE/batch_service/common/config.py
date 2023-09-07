@@ -81,8 +81,13 @@ class LocalSettings(Settings):
     DB_ECHO: bool = True
     RELOAD: bool = False
 
-    DB_INFO: TiberoInfo = TiberoInfo(
-        HOST="192.168.100.126", PORT="25432", USERNAME="dpme", PASS="hello.meta12#$", BASE="dataportal", SCHEMA="sitemng,users"
+    DB_INFO = PGInfo(
+        HOST="192.168.100.126",
+        PORT="25432",
+        USER="dpmanager",
+        PASS="hello.dp12#$",
+        BASE="dataportal",
+        SCHEMA="sitemng,users,meta,iag,ckan,board,analysis",
     )
 
 

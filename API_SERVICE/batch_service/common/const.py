@@ -42,4 +42,17 @@ class EmailSendInfoTable(Base):
     table_nm = "tb_email_send_info"
     key_column = "email_id"
 
+    def get_query_data(self) -> dict:
+        return {
+            "table_nm": self.table_nm,
+            "where_info": [
+                {
+                    "table_nm": self.table_nm,
+                    "key": "sttus",
+                    "value": "REQ",
+                    "compare_op": "=",
+                    "op": "",
+                }
+            ],
+        }
 

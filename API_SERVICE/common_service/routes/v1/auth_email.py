@@ -113,7 +113,7 @@ def auth_send(auth_send: EmailAthnSend, session: Executor = Depends(db.get_db)):
     # todo: insert 구문 축약
     try:
         auth_no = make_auth_no()
-        exist_mail = session.query(**EmailAuthTable(auth_send.email)).first()
+        exist_mail = session.query(**EmailAuthTable.get_select_query(auth_send.email)).first()
 
         if auth_send.msg_type == "password":
             if exist_mail is None:
