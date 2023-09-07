@@ -388,11 +388,10 @@ async def getCount(params: QueryInfoWrap, session: Executor = Depends(db.get_db)
 @router.post("/user/v2/commonUserModify")
 async def modify(request: Request, params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
     userInfo = await get_user_info_from_request(request)
+    userInfo = userInfo.get("data")
     userId = userInfo.get("preferred_username")
     if userId is None:
-        msg = userInfo.get("data").get("error_description")
-        logger.info(msg)
-        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User"})
 
     param = params.data
 
@@ -404,7 +403,7 @@ async def modify(request: Request, params: RegisterInfoWrap, session: Executor =
         else :
             return JSONResponse(
                 status_code=400,
-                content={"result": 0, "errorMessage": resToken.get("data").get("error_description")},
+                content={"result": 0, "errorMessage": "Invalid User"},
             )
     except Exception as e:
         session.rollback()
