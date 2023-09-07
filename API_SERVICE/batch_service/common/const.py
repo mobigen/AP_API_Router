@@ -7,27 +7,22 @@ msg_setting = {
     "register": {
         "tmplt": f"{base_dir}/template/emailAthnSend.html",
         "sub": "[자동차데이터포털]회원가입을 위한 인증 메일입니다.",
-        "replace": ["AUTH_NO"]
     },
     "password": {
         "tmplt": f"{base_dir}/template/pwdEmailAthn.html",
         "sub": "[자동차데이터포털]비밀번호 변경을 위한 인증 메일입니다.",
-        "replace": ["AUTH_NO"]
     },
     "share": {
         "tmplt": f"{base_dir}/template/shareEmail.html",
         "sub": "[자동차데이터포털] 자동차데이터포털에서 공유한 데이터입니다.",
-        "replace": ["AUTH_NO"]
     },
     "noty": {
-        "tmplt": f"{base_dir}/template/",
+        "tmplt": f"{base_dir}/template/notyEmail.html",
         "sub": "[자동차데이터포털] 자동차데이터포털에서 보내는 알림 메일입니다.",
-        "replace": ["AUTH_NO"]
     },
-    "ex": {
-        "tmplt": f"{base_dir}/template/",
+    "analysisRequest": {
+        "tmplt": f"{base_dir}/template/analysisRequestEmail.html",
         "sub": "[자동차데이터포털] {0} 신청 메일입니다.",
-        "replace": ["AUTH_NO"]
     }
 }
 
