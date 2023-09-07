@@ -417,10 +417,9 @@ async def adminGetUser(request: Request, params: UserInfoWrap):
 @router.post("/user/v2/commonAdminModifyUser")
 async def adminModifyUser(request: Request, params: RegisterInfoWrap):
     param = params.data
-    userName = param.user_id
     sub = param.sub
     await check_admin(request)
-    await modify_keycloak_user(sub, **param.dict())
+    return await modify_keycloak_user(sub, **param.dict())
 
 @router.post("/user/v2/commonNewPassword")
 async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(db.get_db)):
@@ -430,9 +429,9 @@ async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(
     new_password = param.new_password
     logger.info(param)
     await check_email_auth(user_id, athn_no, session)
-    # enabled 만 True 로 변경
+    # credentials 만 변경
     reg_data = {"credentials": [{"value": new_password}]}
-    await alter_user_info(**reg_data)
+    return await alter_user_info(**reg_data)
 
 async def check_admin(request: Request) :
     userInfo = await get_user_info_from_request(request)
