@@ -116,6 +116,17 @@ class ActivateInfoWrap(BaseModel):
 
     data: ActivateInfo
 
+class UserInfoWrap(BaseModel):
+    """
+    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
+    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
+    """
+
+    class UserInfo(BaseModel):
+        user_id: str
+
+    data: UserInfoo
+
 router = APIRouter()
 
 @router.post("/user/v2/commonLogout")
@@ -282,7 +293,7 @@ async def socialLink(params: RegisterSocialInfoWrap, session: Executor = Depends
 
     userList = res.get("data")
     if len(userList) == 0 :
-        return JSONResponse(status_code=200, content={"result": 0, "errorMessage": "Invalid User!!"})
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
 
     logger.info(f"res :: {res}")
     user_info = userList[0]
@@ -409,6 +420,26 @@ async def modify(request: Request, params: RegisterInfoWrap, session: Executor =
         session.rollback()
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+@router.post("/user/v2/commonAdminGetUserInfo")
+async def adminGetUser(request: Request, params: UserInfoWrap):
+    param = params.data
+    userName = param.user_id
+    userInfo = await get_user_info_from_request(request)
+    userInfo = userInfo.get("data")
+    userRoleList = [val.strip() for val in userInfo.get("user_role").split("|")]
+
+    if "ROLE_ADMIN" not in userRoleList:
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Required Admin Role"})
+
+    admin_token = await get_admin_token()
+    res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = f"username={userName}&exact=true")
+
+    userList = res.get("data")
+    if len(userList) != 0 :
+        return JSONResponse(status_code=400, content={"result": 1, "errorMessage": "", "data": res.get("data")})
+    else :
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
 
 async def check_email_auth(user_id: str, athn_no: str, session: Executor) :
     email_info = session.query(**EmailAuthTable.get_query_data(user_id)).first()
