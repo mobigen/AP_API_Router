@@ -1,4 +1,4 @@
-from common_libs.libs.database.dml_controller import Base
+from libs.database.dml_controller import Base
 
 
 NOT_ALLOWED_TABLES = [""]

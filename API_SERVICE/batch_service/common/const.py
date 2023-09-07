@@ -1,6 +1,6 @@
 from pydantic import BaseSettings
 from batch_service.common.config import base_dir
-from common_libs.libs.database.dml_controller import Base
+from libs.database.dml_controller import Base
 
 
 msg_setting = {
