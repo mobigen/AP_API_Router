@@ -343,7 +343,7 @@ async def activateUser(params: ActivateInfoWrap, session: Executor = Depends(db.
     athn_no = param.athn_no
     logger.info(param)
     try:
-        await check_email_auth(user_id, athn_no)
+        await check_email_auth(user_id, athn_no, session)
 
         admin_token = await get_admin_token()
         res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = "")
@@ -410,7 +410,7 @@ async def modify(request: Request, params: RegisterInfoWrap, session: Executor =
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
-async def check_email_auth(user_id: str, ahtn_no: str) :
+async def check_email_auth(user_id: str, athn_no: str, session: Executor) :
     email_info = session.query(**EmailAuthTable.get_query_data(user_id)).first()
     if email_info["athn_no"] == athn_no:
         email_info["athn_yn"] = "Y"
