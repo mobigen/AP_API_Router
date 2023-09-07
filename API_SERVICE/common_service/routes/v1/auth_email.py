@@ -136,7 +136,7 @@ def auth_send(auth_send: EmailAthnSend, session: Executor = Depends(db.get_db)):
             exist_mail["athn_no"] = auth_no
             exist_mail["send_date"] = "NOW()"
 
-        EmailAuthTable.get_execute_query(method, exist_mail)
+        session.execute(**EmailAuthTable.get_execute_query(method, exist_mail))
 
         # mail history insert
         email_history(session, auth_no, auth_send)
