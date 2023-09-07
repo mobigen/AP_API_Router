@@ -24,25 +24,28 @@ def send_mail():
             port = setting.SMTP_PORT
             from_ = setting.EMAIL_ADDR
             password = setting.EMAIL_PASSWORD
-            key = msg_setting[row["tmplt_cd"]]
+            category = msg_setting[row["tmplt_cd"]]
+
+            # template
+            with open(category["tmplt"],"r") as fp:
+                html = "\n".join(fp.readlines())
 
             # replace
             # todo 함수화
             if row["tmplt_cd"] in ["register","password","share"]:
-                with open(key["tmplt"],"r") as fp:
-                    html = "\n".join(fp.readlines())
                 html = html.replace("CONTENTS1", row['contents'])
             else:
-                with open(key["tmplt"] + "","r") as fp:
-                    html = "\n".join(fp.readlines())
                 content = row["contents"].split("|")
                 html = html.replace("TITLE", row['title'])
                 html = html.replace("CONTENTS1", content[0])
                 html = html.replace("CONTENTS2", content[1])
 
+            if category == "analysisRequest":
+                category["sub"] = category["sub"].format(row["title"])
+
             # send
             message = MIMEMultipart("alternative")
-            message["Subject"] = key["sub"]
+            message["Subject"] = category["sub"]
             message["From"] = from_
             message["To"] = row["rcv_adr"]
             html_part = MIMEText(html, "html")
@@ -58,11 +61,3 @@ def send_mail():
             # update
             row["sttus"] = "SEND"
             EmailSendInfoTable.get_execute_query("UPDATE", row)
-
-
-def send(msg, **kwargs):
-    try:
-        pass
-
-    except Exception as e:
-        raise e
