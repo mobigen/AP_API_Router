@@ -129,7 +129,20 @@ class UserInfoWrap(BaseModel):
     class UserInfo(BaseModel):
         user_id: str
 
-    data: UserInfoo
+    data: UserInfo
+
+class PasswordInfoWrap(BaseModel):
+    """
+    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
+    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
+    """
+
+    class PasswordInfo(BaseModel):
+        user_id: str
+        athn_no: str
+        new_password: str
+
+    data: PasswordInfo
 
 router = APIRouter()
 
@@ -352,39 +365,14 @@ async def registerNormal(params: RegisterInfoWrap, session: Executor = Depends(d
 
 @router.post("/user/v2/commonActivateUser")
 async def activateUser(params: ActivateInfoWrap, session: Executor = Depends(db.get_db)):
-
     param = params.data
     user_id = param.user_id
     athn_no = param.athn_no
     logger.info(param)
-    try:
-        await check_email_auth(user_id, athn_no, session)
-
-        admin_token = await get_admin_token()
-        res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = "")
-        userList = res.get("data")
-        user_info = list(filter(lambda item : item['username'] == user_id, userList))
-        if len(user_info) == 0 :
-            return JSONResponse(status_code=200, content={"result": 0, "errorMessage": "Invalid User!!"})
-        user_info = user_info[0]
-        sub = user_info.get("id")
-
-        # enabled 만 True 로 변경
-        reg_data = {"enabled": "true"}
-
-        resToken = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub, **reg_data)
-        logger.info(f"resToken = {resToken}")
-        if resToken["status_code"] == 204:
-            return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
-        else :
-            return JSONResponse(
-                status_code=400,
-                content={"result": 0, "errorMessage": resToken.get("data").get("error_description")}
-            )
-    except Exception as e:
-        session.rollback()
-        logger.error(e, exc_info=True)
-        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+    await check_email_auth(user_id, athn_no, session)
+    # enabled 만 True 로 변경
+    reg_data = {"enabled": "true"}
+    await alter_user_info(**reg_data)
 
 @router.post("/user/v2/commonKeyCloakQuery")
 async def getCount(params: QueryInfoWrap, session: Executor = Depends(db.get_db)):
@@ -434,6 +422,18 @@ async def adminModifyUser(request: Request, params: RegisterInfoWrap):
     await check_admin(request)
     await modify_keycloak_user(sub, **param.dict())
 
+@router.post("/user/v2/commonNewPassword")
+async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(db.get_db)):
+    param = params.data
+    user_id = param.user_id
+    athn_no = param.athn_no
+    new_password = param.new_password
+    logger.info(param)
+    await check_email_auth(user_id, athn_no, session)
+    # enabled 만 True 로 변경
+    reg_data = {"credentials": [{"value": new_password}]}
+    await alter_user_info(**reg_data)
+
 async def check_admin(request: Request) :
     userInfo = await get_user_info_from_request(request)
     userInfo = userInfo.get("data")
@@ -441,6 +441,32 @@ async def check_admin(request: Request) :
 
     if "ROLE_ADMIN" not in userRoleList:
         raise AdminAuthFail("Required Admin Role")
+
+async def alter_user_info(**kwargs) :
+    try:
+        admin_token = await get_admin_token()
+        res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = "")
+        userList = res.get("data")
+        user_info = list(filter(lambda item : item['username'] == user_id, userList))
+        if len(user_info) == 0 :
+            return JSONResponse(status_code=200, content={"result": 0, "errorMessage": "Invalid User!!"})
+        user_info = user_info[0]
+        sub = user_info.get("id")
+
+        resToken = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub, **kwargs)
+        logger.info(f"resToken = {resToken}")
+        if resToken["status_code"] == 204:
+            return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+        else :
+            return JSONResponse(
+                status_code=400,
+                content={"result": 0, "errorMessage": resToken.get("data").get("error_description")}
+            )
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
 async def check_email_auth(user_id: str, athn_no: str, session: Executor) :
     email_info = session.query(**EmailAuthTable.get_query_data(user_id)).first()
     if email_info["athn_no"] == athn_no:
