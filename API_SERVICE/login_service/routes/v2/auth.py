@@ -372,7 +372,7 @@ async def activateUser(params: ActivateInfoWrap, session: Executor = Depends(db.
     await check_email_auth(user_id, athn_no, session)
     # enabled 만 True 로 변경
     reg_data = {"enabled": "true"}
-    await alter_user_info(**reg_data)
+    return await alter_user_info(user_id, **reg_data)
 
 @router.post("/user/v2/commonKeyCloakQuery")
 async def getCount(params: QueryInfoWrap, session: Executor = Depends(db.get_db)):
@@ -397,7 +397,8 @@ async def modify(request: Request, params: RegisterInfoWrap, session: Executor =
         return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User"})
 
     param = params.data
-    await modify_keycloak_user(userInfo.get("sub"), **param.dict())
+    param.sub = userInfo.get("sub")
+    return await modify_keycloak_user(**param.dict())
 
 @router.post("/user/v2/commonAdminGetUserInfo")
 async def adminGetUser(request: Request, params: UserInfoWrap):
@@ -417,9 +418,8 @@ async def adminGetUser(request: Request, params: UserInfoWrap):
 @router.post("/user/v2/commonAdminModifyUser")
 async def adminModifyUser(request: Request, params: RegisterInfoWrap):
     param = params.data
-    sub = param.sub
     await check_admin(request)
-    return await modify_keycloak_user(sub, **param.dict())
+    return await modify_keycloak_user(**param.dict())
 
 @router.post("/user/v2/commonNewPassword")
 async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(db.get_db)):
@@ -431,17 +431,21 @@ async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(
     await check_email_auth(user_id, athn_no, session)
     # credentials 만 변경
     reg_data = {"credentials": [{"value": new_password}]}
-    return await alter_user_info(**reg_data)
+    return await alter_user_info(user_id, **reg_data)
 
 async def check_admin(request: Request) :
-    userInfo = await get_user_info_from_request(request)
-    userInfo = userInfo.get("data")
+    resToken = await get_user_info_from_request(request)
+    logger.info(resToken)
+    if resToken["status_code"] != 200 :
+        raise AdminAuthFail("Required Admin Role")
+
+    userInfo = resToken.get("data")
     userRoleList = [val.strip() for val in userInfo.get("user_role").split("|")]
 
     if "ROLE_ADMIN" not in userRoleList:
         raise AdminAuthFail("Required Admin Role")
 
-async def alter_user_info(**kwargs) :
+async def alter_user_info(user_id:str, **kwargs) :
     try:
         admin_token = await get_admin_token()
         res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = "")
@@ -496,7 +500,7 @@ async def get_query_keycloak(query):
 
     return res
 
-async def modify_keycloak_user(sub, **kwargs):
+async def modify_keycloak_user(**kwargs):
     admin_token = await get_admin_token()
 
     reg_data = {
@@ -539,8 +543,8 @@ async def modify_keycloak_user(sub, **kwargs):
     if any(value is None for value in reg_data["attributes"].values()) : del reg_data["attributes"]
 
     try :
-        res = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub, **reg_data)
-        logger.info(f"res :: {res}")
+        resToken = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=kwargs.get("sub"), **reg_data)
+        logger.info(f"resToken :: {resToken}")
         if resToken["status_code"] == 204:
             return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
         else :
