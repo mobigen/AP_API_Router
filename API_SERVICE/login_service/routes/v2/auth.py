@@ -32,6 +32,9 @@ class CreateKeycloakFailError(Exception):
 class EmailAuthFail(Exception):
     ...
 
+class AdminAuthFail(Exception):
+    ...
+
 class QueryInfoWrap(BaseModel):
     """
     기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
@@ -87,6 +90,7 @@ class RegisterInfoWrap(BaseModel):
         user_normal: Optional[str]
         adm_yn: Optional[str]
         enabled: Optional[str]
+        sub: Optional[str]
 
     data: RegisterInfo
 
@@ -405,32 +409,13 @@ async def modify(request: Request, params: RegisterInfoWrap, session: Executor =
         return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User"})
 
     param = params.data
-
-    try :
-        resToken = await modify_keycloak_user(userInfo.get("sub"), **param.dict())
-        logger.info(f"token :: {resToken}")
-        if resToken["status_code"] == 204:
-            return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
-        else :
-            return JSONResponse(
-                status_code=400,
-                content={"result": 0, "errorMessage": "Invalid User"},
-            )
-    except Exception as e:
-        session.rollback()
-        logger.error(e, exc_info=True)
-        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+    await modify_keycloak_user(userInfo.get("sub"), **param.dict())
 
 @router.post("/user/v2/commonAdminGetUserInfo")
 async def adminGetUser(request: Request, params: UserInfoWrap):
     param = params.data
     userName = param.user_id
-    userInfo = await get_user_info_from_request(request)
-    userInfo = userInfo.get("data")
-    userRoleList = [val.strip() for val in userInfo.get("user_role").split("|")]
-
-    if "ROLE_ADMIN" not in userRoleList:
-        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Required Admin Role"})
+    await check_admin(request)
 
     admin_token = await get_admin_token()
     res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = f"username={userName}&exact=true")
@@ -441,6 +426,21 @@ async def adminGetUser(request: Request, params: UserInfoWrap):
     else :
         return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
 
+@router.post("/user/v2/commonAdminModifyUser")
+async def adminModifyUser(request: Request, params: RegisterInfoWrap):
+    param = params.data
+    userName = param.user_id
+    sub = param.sub
+    await check_admin(request)
+    await modify_keycloak_user(sub, **param.dict())
+
+async def check_admin(request: Request) :
+    userInfo = await get_user_info_from_request(request)
+    userInfo = userInfo.get("data")
+    userRoleList = [val.strip() for val in userInfo.get("user_role").split("|")]
+
+    if "ROLE_ADMIN" not in userRoleList:
+        raise AdminAuthFail("Required Admin Role")
 async def check_email_auth(user_id: str, athn_no: str, session: Executor) :
     email_info = session.query(**EmailAuthTable.get_query_data(user_id)).first()
     if email_info["athn_no"] == athn_no:
@@ -513,9 +513,20 @@ async def modify_keycloak_user(sub, **kwargs):
     # attributes 는 하나라도 값이 None 이면 값을 넘기면 안됨
     if any(value is None for value in reg_data["attributes"].values()) : del reg_data["attributes"]
 
-    res = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub, **reg_data)
-    logger.info(f"res :: {res}")
-    return res
+    try :
+        res = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub, **reg_data)
+        logger.info(f"res :: {res}")
+        if resToken["status_code"] == 204:
+            return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+        else :
+            return JSONResponse(
+                status_code=400,
+                content={"result": 0, "errorMessage": "Invalid User"},
+            )
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 async def create_keycloak_user(**kwargs):
     admin_token = await get_admin_token()
