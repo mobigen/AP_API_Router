@@ -33,8 +33,12 @@ def refresh_token_from_cookie_wrapper(keycloak: KeycloakManager, **kwargs):
             return response
 
         now = datetime.now().strftime("%s")
-        createTime = token.get('create_time')
-        diffTime = float(now) - float(createTime)
+        diffTime = REFRESH_SEC + 1
+        try :
+            createTime = token.get('create_time')
+            diffTime = float(now) - float(createTime)
+        except Exception :
+            pass
 
         logger.info(f"createTime :: {createTime}")
         logger.info(f"diffTime :: {diffTime}")
