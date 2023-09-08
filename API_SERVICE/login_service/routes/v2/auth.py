@@ -409,22 +409,32 @@ async def modify(request: Request, params: RegisterInfoWrap, session: Executor =
 async def adminGetUser(request: Request, params: UserInfoWrap):
     param = params.data
     userName = param.user_id
-    await check_admin(request)
+    try :
+        await check_admin(request)
 
-    admin_token = await get_admin_token()
-    res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = f"username={userName}&exact=true")
+        admin_token = await get_admin_token()
+        res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = f"username={userName}&exact=true")
 
-    userList = res.get("data")
-    if len(userList) != 0 :
-        return JSONResponse(status_code=400, content={"result": 1, "errorMessage": "", "data": res.get("data")})
-    else :
-        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
+        userList = res.get("data")
+        if len(userList) != 0 :
+            return JSONResponse(status_code=400, content={"result": 1, "errorMessage": "", "data": res.get("data")})
+        else :
+            return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 @router.post("/user/v2/commonAdminModifyUser")
 async def adminModifyUser(request: Request, params: RegisterInfoWrap):
     param = params.data
-    await check_admin(request)
-    return await modify_keycloak_user(**param.dict())
+    try :
+        await check_admin(request)
+        return await modify_keycloak_user(**param.dict())
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 @router.post("/user/v2/commonNewPassword")
 async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(db.get_db)):
