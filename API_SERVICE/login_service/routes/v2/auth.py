@@ -369,10 +369,15 @@ async def activateUser(params: ActivateInfoWrap, session: Executor = Depends(db.
     user_id = param.user_id
     athn_no = param.athn_no
     logger.info(param)
-    await check_email_auth(user_id, athn_no, session)
-    # enabled 만 True 로 변경
-    reg_data = {"enabled": "true"}
-    return await alter_user_info(user_id, **reg_data)
+    try :
+        await check_email_auth(user_id, athn_no, session)
+        # enabled 만 True 로 변경
+        reg_data = {"enabled": "true"}
+        return await alter_user_info(user_id, **reg_data)
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 @router.post("/user/v2/commonKeyCloakQuery")
 async def getCount(params: QueryInfoWrap, session: Executor = Depends(db.get_db)):
@@ -428,10 +433,16 @@ async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(
     athn_no = param.athn_no
     new_password = param.new_password
     logger.info(param)
-    await check_email_auth(user_id, athn_no, session)
-    # credentials 만 변경
-    reg_data = {"credentials": [{"value": new_password}]}
-    return await alter_user_info(user_id, **reg_data)
+    try :
+        await check_email_auth(user_id, athn_no, session)
+        # credentials 만 변경
+        reg_data = {"credentials": [{"value": new_password}]}
+        return await alter_user_info(user_id, **reg_data)
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
 
 async def check_admin(request: Request) :
     resToken = await get_user_info_from_request(request)
