@@ -13,7 +13,7 @@ print(f"common base_dir :: {base_dir}")
 class DBInfo(BaseSettings):
     HOST: str = ""
     PORT: str = ""
-    USER: str = ""
+    USERNAME: str = ""
     PASS: SecretStr = ""
     BASE: str = ""
     SCHEMA: str = ""
@@ -36,7 +36,7 @@ class PGInfo(DBInfo):
                 scheme="postgresql",
                 host=self.HOST,
                 port=self.PORT,
-                user=self.USER,
+                user=self.USERNAME,
                 password=self.PASS.get_secret_value(),
                 path=f"/{self.BASE}",
             )
