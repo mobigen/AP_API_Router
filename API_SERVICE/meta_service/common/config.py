@@ -13,7 +13,7 @@ print(f"project base_dir :: {base_dir}")
 class DBInfo(BaseSettings):
     HOST: str = ""
     PORT: str = ""
-    USERNAME: str = ""
+    USER: str = ""
     PASS: SecretStr = ""
     BASE: str = ""
     SCHEMA: str = ""

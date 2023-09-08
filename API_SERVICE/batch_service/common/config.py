@@ -13,7 +13,7 @@ print(f"common base_dir :: {base_dir}")
 class DBInfo(BaseSettings):
     HOST: str = ""
     PORT: str = ""
-    USERNAME: str = ""
+    USER: str = ""
     PASS: SecretStr = ""
     BASE: str = ""
     SCHEMA: str = ""
@@ -36,7 +36,7 @@ class PGInfo(DBInfo):
                 scheme="postgresql",
                 host=self.HOST,
                 port=self.PORT,
-                user=self.USERNAME,
+                user=self.USER,
                 password=self.PASS.get_secret_value(),
                 path=f"/{self.BASE}",
             )
@@ -47,7 +47,7 @@ class TiberoInfo(DBInfo):
     type: str = "tibero"
 
     def get_dsn(self):
-        return f"DSN={self.BASE};UID={self.USERNAME};PWD={self.PASS.get_secret_value()}"
+        return f"DSN={self.BASE};UID={self.USER};PWD={self.PASS.get_secret_value()}"
 
 
 class Settings(BaseSettings):
