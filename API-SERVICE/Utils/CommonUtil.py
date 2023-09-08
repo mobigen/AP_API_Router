@@ -1,0 +1,294 @@
+import argparse
+import configparser
+import os
+import smtplib
+import sys
+import traceback
+import uuid
+from datetime import datetime, timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from pathlib import Path
+from typing import Any, Optional, Dict
+from Utils.keycloak import KeycloakManager
+
+import jwt
+from fastapi.logger import logger
+from passlib.context import CryptContext
+from psycopg2 import pool
+from pytz import timezone
+
+from ApiService.ApiServiceConfig import config
+from ConnectManager import PostgresManager
+
+
+def insert_mail_history(rcv_adr: str, title: str, contents: str, tmplt_cd: str):
+    db = connect_db()
+    sql = f"""
+        INSERT INTO
+            sitemng.tb_email_send_info (email_id, rcv_adr, title, contents, tmplt_cd, sttus, reg_date)
+        VALUES
+            ('{uuid.uuid4()}', '{rcv_adr}', '{title}', '{contents}', '{tmplt_cd}', 'SEND', '{datetime.now()}');"""
+    db.execute(sql)
+
+
+def send_template_mail(replace_text, receiver_addr, msg_type):
+    html_part = template_html(msg_type, replace_text)
+    send_mail(
+        html_part,
+        subject=config.email_auth[f"subject_{msg_type}"],
+        from_=config.email_auth["login_user"],
+        to_=receiver_addr,
+    )
+
+
+def send_mail(msg, **kwargs):
+    try:
+        host = kwargs.pop("email_server_host", config.email_auth.get("server_addr"))
+        port = kwargs.pop("email_server_port", config.email_auth.get("port"))
+        from_ = kwargs.pop("from_", config.email_auth.get("login_user"))
+        password = kwargs.pop("password", config.email_auth.get("login_pass"))
+
+        message = MIMEMultipart("alternative")
+        message["Subject"] = kwargs.pop("subject", "")
+        message["From"] = from_
+        message["To"] = kwargs.pop("to_", "")
+        message.attach(msg)
+
+        stmp = smtplib.SMTP(host=host, port=port)
+        stmp.ehlo()
+        stmp.starttls()
+        stmp.login(from_, password)
+        stmp.send_message(message)
+        stmp.quit()
+    except Exception as e:
+        raise e
+
+
+def template_html(msg_type, msg):
+    template = {
+        "register": (f"{config.root_path}/conf/common/template/emailAthnSend.html", "AUTH_NO"),
+        "password": (f"{config.root_path}/conf/common/template/pwdEmailAthn.html", "AUTH_NO"),
+        "share": (f"{config.root_path}/conf/common/template/shareEmail.html", "URL"),
+    }
+
+    with open(template[msg_type][0], "r") as fd:
+        html = "\n".join(fd.readlines())
+    html = html.replace(template[msg_type][1], msg)
+
+    return MIMEText(html, "html")
+
+
+def convert_data(data) -> str:
+    data = str(data)
+    if data:
+        if data == "now()" or data == "NOW()":
+            return data
+        if data[0] == "`":
+            return data[1:]
+    return f"'{data.strip()}'"
+
+
+def set_log_path():
+    parser = configparser.ConfigParser()
+    parser.read(f"{config.root_path}/conf/{config.category}/logging.conf", encoding="utf-8")
+
+    parser.set(
+        "handler_rotatingFileHandler",
+        "args",
+        f"('{config.root_path}/log/{config.category}/{config.category}.log', 'a', 20000000, 10)",
+    )
+
+    with open(f"{config.root_path}/conf/{config.category}/logging.conf", "w") as f:
+        parser.write(f)
+
+
+def get_config(config_name: str):
+    ano_cfg = {}
+
+    conf = configparser.ConfigParser()
+    config_path = config.root_path + f"/conf/{config.category}/{config_name}"
+    conf.read(config_path, encoding="utf-8")
+    for section in conf.sections():
+        ano_cfg[section] = {}
+        for option in conf.options(section):
+            ano_cfg[section][option] = conf.get(section, option)
+
+    return ano_cfg
+
+
+def parser_params() -> Any:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", type=str, default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=19000)
+    parser.add_argument("--category", default="meta")
+    parser.add_argument("--db_type", default="test")
+
+    return parser.parse_args()
+
+
+def prepare_config() -> None:
+    args = parser_params()
+    config.root_path = str(Path(os.path.dirname(os.path.abspath(__file__))).parent)
+    config.category = args.category
+    api_router_cfg = get_config("config.ini")
+    config.api_config = get_config("api_config.ini")
+    config.server_host = args.host
+    config.server_port = args.port
+    config.db_type = f"{args.db_type}_db"
+    config.db_info = api_router_cfg[config.db_type]
+    config.conn_pool = make_connection_pool(config.db_info)
+    if config.category == "common":
+        config.secret_info = api_router_cfg["secret_info"]
+        config.user_info = api_router_cfg["user_info"]
+        config.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        config.email_auth = api_router_cfg["email_auth"]
+        config.keycloak_info = api_router_cfg["keycloak_info"]
+    if config.category == "meta":
+        config.user_info = api_router_cfg["user_info"]
+        config.email_auth = api_router_cfg["email_auth"]
+
+
+def get_keycloak_manager():
+    return KeycloakManager(config.keycloak_info["keycloak_url"])
+
+
+async def get_admin_token():
+    res = await get_keycloak_manager().generate_admin_token(
+        username=config.keycloak_info["admin_username"],
+        password=config.keycloak_info["admin_password"],
+        grant_type="password",
+    )
+
+    return res.get("data").get("access_token")
+
+
+def make_connection_pool(db_info):
+    conn_pool = pool.SimpleConnectionPool(
+        1,
+        20,
+        user=db_info["user"],
+        password=db_info["password"],
+        host=db_info["host"],
+        port=db_info["port"],
+        database=db_info["database"],
+        options=f'-c search_path={db_info["schema"]}',
+        connect_timeout=10,
+    )
+    return conn_pool
+
+
+def connect_db():
+    db = PostgresManager()
+    return db
+
+
+def save_file_for_reload():
+    with open(__file__, "a") as fd:
+        fd.write(" ")
+
+
+def make_res_msg(result, err_msg, data=None, column_names=None, kor_column_names=None):
+    header_list = []
+    for index, column_name in enumerate(column_names):
+        if kor_column_names:
+            header = {
+                "column_name": column_name,
+                "kor_column_name": kor_column_names[index],
+            }
+        else:
+            header = {"column_name": column_name}
+        header_list.append(header)
+
+    if data is None or column_names is None:
+        res_msg = {"result": result, "errorMessage": err_msg}
+    else:
+        res_msg = {
+            "result": result,
+            "errorMessage": err_msg,
+            "data": {"body": data, "header": header_list},
+        }
+    return res_msg
+
+
+def get_exception_info():
+    ex_type, ex_value, ex_traceback = sys.exc_info()
+    trace_back = traceback.extract_tb(ex_traceback)
+    trace_log = "\n".join([str(trace) for trace in trace_back])
+    logger.error(
+        f"\n- Exception Type : {ex_type}\n- Exception Message : {str(ex_value).strip()}\n- Exception Log : \n{trace_log}"
+    )
+    return ex_type.__name__
+
+
+def convert_error_message(exception_name: str):
+    error_message = None
+    if exception_name == "UniqueViolation":
+        error_message = "UNIQUE_VIOLATION"
+    else:
+        error_message = exception_name
+
+    return error_message
+
+
+##### for user info #####
+class IncorrectUserName(Exception):
+    pass
+
+
+class IncorrectPassword(Exception):
+    pass
+
+
+class LeavedUser(Exception):
+    pass
+
+
+def get_user(user_name: str):
+    db = connect_db()
+    user = db.select(
+        f'SELECT * FROM {config.user_info["table"]} WHERE {config.user_info["id_column"]} = {convert_data(user_name)}'
+    )
+    return user
+
+
+def create_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone("Asia/Seoul")) + expires_delta
+    else:
+        expire = datetime.now(timezone("Asia/Seoul")) + timedelta(minutes=15)
+
+    logger.info(f"commonToken Expire : {expire}")
+    to_encode.update({"exp": expire})
+
+    encoded_jwt = jwt.encode(
+        to_encode,
+        config.secret_info["secret_key"],
+        algorithm=config.secret_info["algorithm"],
+    )
+    return encoded_jwt
+
+
+def make_token_data(user: Dict) -> Dict:
+    token_data_column = config.secret_info["token_data_column"].split(",")
+    token_data = {column: user[column] for column in token_data_column}
+    return token_data
+
+
+def verify_password(plain_password, hashed_password):
+    return config.pwd_context.verify(plain_password, hashed_password)
+
+
+def authenticate_user(username: str, password: str):
+    user = get_user(username)
+    if not user[0]:
+        raise IncorrectUserName
+
+    user = user[0][0]
+    if user["user_sttus"] == "SCSN":
+        raise LeavedUser("user_sttus :: SCSN}")
+
+    if not verify_password(password, user[config.user_info["password_column"]]):
+        raise IncorrectPassword
+    return user
