@@ -255,6 +255,40 @@ async def register(request: Request, session: Executor = Depends(db.get_db)):
 
     return user_upsert(session, **userParam)
 
+@router.post("/user/v2/commonAdminUserUpsert")
+async def admin_register(request: Request, params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
+    param = params.data
+    try :
+        await check_admin(request)
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+    user_data = {
+        "keycloak_uuid": param.sub,
+        "user_uuid": param.user_uuid,
+        "user_id": param.user_id,
+        "user_nm": param.user_nm,
+        "email": param.email,
+        "moblphon": param.moblphon,
+        "user_type": param.user_type,
+        "login_type": param.login_type,
+        "user_role": param.user_role,
+        "adm_yn": param.adm_yn,
+        "user_sttus": param.user_sttus,
+        "blng_org_cd": param.blng_org_cd,
+        "blng_org_nm": param.blng_org_nm,
+        "blng_org_desc": param.blng_org_desc,
+        "service_terms_yn": param.service_terms_yn,
+        "reg_user": param.reg_user,
+        "reg_date": param.reg_date,
+        "amd_user": param.amd_user,
+        "amd_date": param.amd_date
+    }
+
+    return user_upsert(session, **user_data)
+
 @router.post("/user/v2/commonLogin")
 async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -> JSONResponse:
     param = params.data
