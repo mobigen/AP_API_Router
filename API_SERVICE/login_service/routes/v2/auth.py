@@ -417,7 +417,7 @@ async def adminGetUser(request: Request, params: UserInfoWrap):
 
         userList = res.get("data")
         if len(userList) != 0 :
-            return JSONResponse(status_code=400, content={"result": 1, "errorMessage": "", "data": res.get("data")})
+            return JSONResponse(status_code=200, content={"result": 1, "errorMessage": "", "data": userList})
         else :
             return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
     except Exception as e:
@@ -473,7 +473,7 @@ async def alter_user_info(user_id:str, **kwargs) :
         userList = res.get("data")
         user_info = list(filter(lambda item : item['username'] == user_id, userList))
         if len(user_info) == 0 :
-            return JSONResponse(status_code=200, content={"result": 0, "errorMessage": "Invalid User!!"})
+            return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
         user_info = user_info[0]
         sub = user_info.get("id")
 
