@@ -32,7 +32,7 @@ class PGInfo(DBInfo):
                 scheme="postgresql",
                 host=self.HOST,
                 port=self.PORT,
-                user=self.USERNAME,
+                user=self.USER,
                 password=self.PASS.get_secret_value(),
                 path=f"/{self.BASE}",
             )
