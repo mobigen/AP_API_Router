@@ -253,18 +253,7 @@ async def register(request: Request, session: Executor = Depends(db.get_db)):
         "amd_date": userData.get("amd_date")
     }
 
-    method = "INSERT"
-    row = session.query(**LoginTable.get_query_data(userId)).first()
-    if row : method = "UPDATE"
-    try :
-        logger.info(userParam)
-        session.execute(auto_commit=False, **RegisterTable.upsert_query_data(method, userParam))
-        session.commit()
-        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
-    except Exception as e:
-        session.rollback()
-        logger.error(e, exc_info=True)
-        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+    return user_upsert(session, **userParam)
 
 @router.post("/user/v2/commonLogin")
 async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -> JSONResponse:
@@ -465,6 +454,21 @@ async def check_admin(request: Request) :
 
     if "ROLE_ADMIN" not in userRoleList:
         raise AdminAuthFail("Required Admin Role")
+
+async def user_upsert(session: Executor, **kwargs) :
+    method = "INSERT"
+    row = session.query(**LoginTable.get_query_data(kwargs.get("user_id"))).first()
+    if row : method = "UPDATE"
+    try :
+        logger.info(kwargs)
+        session.execute(auto_commit=False, **RegisterTable.upsert_query_data(method, **kwargs))
+        session.commit()
+        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
 
 async def alter_user_info(user_id:str, **kwargs) :
     try:
