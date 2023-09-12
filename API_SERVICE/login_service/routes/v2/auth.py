@@ -532,7 +532,9 @@ async def alter_user_info(user_id:str, user_sttus:str, **kwargs) :
                      'user_id': ['conodof447@docwl.com'],
                      'moblphon': ['010-1111-0000'],
                      'amd_user': ['459b95f5-0a82-4318-866f-0aba85d59897'],
-                     'service_terms_yn': ['Y']
+                     'service_terms_yn': ['Y'],
+                     'openstack-default-project' : ['default'],
+                     'openstack-user-domain' : ['Default']
                 }
             }
         ]
@@ -549,26 +551,35 @@ async def alter_user_info(user_id:str, user_sttus:str, **kwargs) :
         attributes = user_info.get("attributes")
         sub = user_info.get("id")
         attributes_user_sttus =  attributes.get("user_sttus")[0]
+        openstack_default_project = None
+        openstack_user_domain = "Defalut"
+        try :
+            openstack_default_project = attributes.get("openstack-default-project")[0]
+            openstack_user_domain = attributes.get("openstack-user-domain")[0]
+        except :
+            pass
 
         # user_sttus 처리를 위해 attributes 값을 만든다.
         if user_sttus is not None : attributes_user_sttus = user_sttus
         kwargs = {
             **kwargs,
             "attributes" : {
-                "login_type": attributes.get("login_type")[0],
-                "reg_user": attributes.get("reg_user")[0],
-                "user_nm": attributes.get("user_nm")[0],
-                "user_sttus": attributes_user_sttus,
-                "adm_yn": attributes.get("adm_yn")[0],
-                "user_role": attributes.get("user_role")[0],
-                "reg_date": attributes.get("reg_date")[0],
-                "user_uuid": attributes.get("user_uuid")[0],
-                "amd_date": attributes.get("amd_date")[0],
-                "user_type": attributes.get("user_type")[0],
-                "user_id": attributes.get("user_id")[0],
-                "moblphon": attributes.get("moblphon")[0],
-                "amd_user": attributes.get("amd_user")[0],
-                "service_terms_yn": attributes.get("service_terms_yn")[0]
+                "login_type":                   attributes.get("login_type")[0],
+                "reg_user":                     attributes.get("reg_user")[0],
+                "user_nm":                      attributes.get("user_nm")[0],
+                "user_sttus":                   attributes_user_sttus,
+                "adm_yn":                       attributes.get("adm_yn")[0],
+                "user_role":                    attributes.get("user_role")[0],
+                "reg_date":                     attributes.get("reg_date")[0],
+                "user_uuid":                    attributes.get("user_uuid")[0],
+                "amd_date":                     attributes.get("amd_date")[0],
+                "user_type":                    attributes.get("user_type")[0],
+                "user_id":                      attributes.get("user_id")[0],
+                "moblphon":                     attributes.get("moblphon")[0],
+                "amd_user":                     attributes.get("amd_user")[0],
+                "service_terms_yn":             attributes.get("service_terms_yn")[0],
+                "openstack-default-project":    openstack_default_project,
+                "openstack-user-domain":        openstack_user_domain
             }
         }
 
@@ -618,6 +629,13 @@ async def get_query_keycloak(query):
 
 async def modify_keycloak_user(**kwargs):
     admin_token = await get_admin_token()
+    openstack_default_project = None
+    openstack_user_domain = "Defalut"
+    try :
+        openstack_default_project = kwargs.get("openstack-default-project")
+        openstack_user_domain = kwargs.get("openstack-user-domain")
+    except :
+        pass
 
     reg_data = {
         # key 이름이 "attributes"가 아닌 것은 value가 존재할때만 넣어주어야 함
@@ -631,23 +649,25 @@ async def modify_keycloak_user(**kwargs):
 
         # value가 존재하지 않아도 모두 넣어주어야 함
         "attributes": {
-            "user_uuid":        kwargs.get("user_uuid"),
-            "user_id":          kwargs.get("user_id"),
-            "user_nm":          kwargs.get("user_nm"),
-            "moblphon":         kwargs.get("moblphon"),
-            "user_type":        kwargs.get("user_type"),
-            "login_type":       kwargs.get("login_type"),
-            "user_role":        kwargs.get("user_role"),
-            "adm_yn":           kwargs.get("adm_yn"),
-            "user_sttus":       kwargs.get("user_sttus"),
-            "blng_org_cd":      kwargs.get("blng_org_cd"),
-            "blng_org_nm":      kwargs.get("blng_org_nm"),
-            "blng_org_desc":    kwargs.get("blng_org_desc"),
-            "service_terms_yn": kwargs.get("service_terms_yn"),
-            "reg_user":         kwargs.get("reg_user"),
-            "reg_date":         kwargs.get("reg_date").strftime('%Y-%m-%d %H:%M:%S'),
-            "amd_user":         kwargs.get("amd_user"),
-            "amd_date":         kwargs.get("amd_date").strftime('%Y-%m-%d %H:%M:%S')
+            "user_uuid":                    kwargs.get("user_uuid"),
+            "user_id":                      kwargs.get("user_id"),
+            "user_nm":                      kwargs.get("user_nm"),
+            "moblphon":                     kwargs.get("moblphon"),
+            "user_type":                    kwargs.get("user_type"),
+            "login_type":                   kwargs.get("login_type"),
+            "user_role":                    kwargs.get("user_role"),
+            "adm_yn":                       kwargs.get("adm_yn"),
+            "user_sttus":                   kwargs.get("user_sttus"),
+            "blng_org_cd":                  kwargs.get("blng_org_cd"),
+            "blng_org_nm":                  kwargs.get("blng_org_nm"),
+            "blng_org_desc":                kwargs.get("blng_org_desc"),
+            "service_terms_yn":             kwargs.get("service_terms_yn"),
+            "reg_user":                     kwargs.get("reg_user"),
+            "reg_date":                     kwargs.get("reg_date").strftime('%Y-%m-%d %H:%M:%S'),
+            "amd_user":                     kwargs.get("amd_user"),
+            "amd_date":                     kwargs.get("amd_date").strftime('%Y-%m-%d %H:%M:%S'),
+            "openstack-default-project":    openstack_default_project,
+            "openstack-user-domain":        openstack_user_domain
         }
     }
 
@@ -673,6 +693,13 @@ async def modify_keycloak_user(**kwargs):
 
 async def create_keycloak_user(**kwargs):
     admin_token = await get_admin_token()
+    openstack_default_project = None
+    openstack_user_domain = "Defalut"
+    try :
+        openstack_default_project = kwargs.get("openstack-default-project")
+        openstack_user_domain = kwargs.get("openstack-user-domain")
+    except :
+        pass
     reg_data = {
         "username": kwargs.get("user_id"),
         "firstName": kwargs.get("user_nm"),   # value가 존재할때만 넣어주어야 함
@@ -683,23 +710,25 @@ async def create_keycloak_user(**kwargs):
         "enabled": True,                  # 항상 true
 
         "attributes": {
-            "user_uuid":        kwargs.get("user_uuid"),
-            "user_id":          kwargs.get("user_id"),
-            "user_nm":          kwargs.get("user_nm"),
-            "moblphon":         kwargs.get("moblphon"),
-            "user_type":        kwargs.get("user_type"),
-            "login_type":       kwargs.get("login_type"),
-            "user_role":        kwargs.get("user_role"),
-            "adm_yn":           kwargs.get("adm_yn"),
-            "user_sttus":       kwargs.get("user_sttus"),
-            "blng_org_cd":      kwargs.get("blng_org_cd"),
-            "blng_org_nm":      kwargs.get("blng_org_nm"),
-            "blng_org_desc":    kwargs.get("blng_org_desc"),
-            "service_terms_yn": kwargs.get("service_terms_yn"),
-            "reg_user":         kwargs.get("reg_user"),
-            "reg_date":         kwargs.get("reg_date").strftime('%Y-%m-%d %H:%M:%S'),
-            "amd_user":         kwargs.get("amd_user"),
-            "amd_date":         kwargs.get("amd_date").strftime('%Y-%m-%d %H:%M:%S')
+            "user_uuid":                    kwargs.get("user_uuid"),
+            "user_id":                      kwargs.get("user_id"),
+            "user_nm":                      kwargs.get("user_nm"),
+            "moblphon":                     kwargs.get("moblphon"),
+            "user_type":                    kwargs.get("user_type"),
+            "login_type":                   kwargs.get("login_type"),
+            "user_role":                    kwargs.get("user_role"),
+            "adm_yn":                       kwargs.get("adm_yn"),
+            "user_sttus":                   kwargs.get("user_sttus"),
+            "blng_org_cd":                  kwargs.get("blng_org_cd"),
+            "blng_org_nm":                  kwargs.get("blng_org_nm"),
+            "blng_org_desc":                kwargs.get("blng_org_desc"),
+            "service_terms_yn":             kwargs.get("service_terms_yn"),
+            "reg_user":                     kwargs.get("reg_user"),
+            "reg_date":                     kwargs.get("reg_date").strftime('%Y-%m-%d %H:%M:%S'),
+            "amd_user":                     kwargs.get("amd_user"),
+            "amd_date":                     kwargs.get("amd_date").strftime('%Y-%m-%d %H:%M:%S'),
+            "openstack-default-project":    openstack_default_project,
+            "openstack-user-domain":        openstack_user_domain
         }
     }
     res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
