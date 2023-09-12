@@ -253,7 +253,7 @@ async def register(request: Request, session: Executor = Depends(db.get_db)):
         "amd_date": userData.get("amd_date")
     }
 
-    return user_upsert(session, **userParam)
+    return await user_upsert(session, **userParam)
 
 @router.post("/user/v2/commonAdminUserUpsert")
 async def admin_register(request: Request, params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
@@ -282,12 +282,12 @@ async def admin_register(request: Request, params: RegisterInfoWrap, session: Ex
         "blng_org_desc": param.blng_org_desc,
         "service_terms_yn": param.service_terms_yn,
         "reg_user": param.reg_user,
-        "reg_date": param.reg_date,
+        "reg_date": param.reg_date.strftime('%Y-%m-%d %H:%M:%S'),
         "amd_user": param.amd_user,
-        "amd_date": param.amd_date
+        "amd_date": param.amd_date.strftime('%Y-%m-%d %H:%M:%S')
     }
 
-    return user_upsert(session, **user_data)
+    return await user_upsert(session, **user_data)
 
 @router.post("/user/v2/commonLogin")
 async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -> JSONResponse:
@@ -495,7 +495,7 @@ async def user_upsert(session: Executor, **kwargs) :
     if row : method = "UPDATE"
     try :
         logger.info(kwargs)
-        session.execute(auto_commit=False, **RegisterTable.upsert_query_data(method, **kwargs))
+        session.execute(auto_commit=False, **RegisterTable.upsert_query_data(method, kwargs))
         session.commit()
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     except Exception as e:
