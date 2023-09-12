@@ -396,7 +396,7 @@ async def activateUser(params: ActivateInfoWrap, session: Executor = Depends(db.
         await check_email_auth(user_id, athn_no, session)
         # enabled 만 True 로 변경
         reg_data = {"enabled": "true"}
-        return await alter_user_info(user_id, **reg_data)
+        return await alter_user_info(user_id, "SBSCRB", **reg_data)
     except Exception as e:
         session.rollback()
         logger.error(e, exc_info=True)
@@ -470,7 +470,7 @@ async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(
         await check_email_auth(user_id, athn_no, session)
         # credentials 만 변경
         reg_data = {"credentials": [{"value": new_password}]}
-        return await alter_user_info(user_id, **reg_data)
+        return await alter_user_info(user_id, None,  **reg_data)
     except Exception as e:
         session.rollback()
         logger.error(e, exc_info=True)
@@ -504,7 +504,40 @@ async def user_upsert(session: Executor, **kwargs) :
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
-async def alter_user_info(user_id:str, **kwargs) :
+async def alter_user_info(user_id:str, user_sttus:str, **kwargs) :
+
+    '''
+
+        [
+            {
+                'id': '0bb4fcf6-62f2-46c2-a97d-665e7723f69d',
+                'createdTimestamp': 1694062222925,
+                'username': 'conodof447@docwl.com',
+                'enabled': True,
+                'totp': False,
+                'emailVerified': True,
+                'firstName': 'TEST',
+                'email': 'conodof447@docwl.com',
+                'attributes': {
+                     'login_type': ['MEMBER'],
+                     'reg_user': ['459b95f5-0a82-4318-866f-0aba85d59897'],
+                     'user_nm': ['TEST'],
+                     'user_sttus': ['SBSCRB'],
+                     'adm_yn': ['N'],
+                     'user_role': ['ROLE_USER'],
+                     'reg_date': ['2023-09-07 13: 50: 22'],
+                     'user_uuid': ['459b95f5-0a82-4318-866f-0aba85d59897'],
+                     'amd_date': ['2023-09-07 13: 50: 22'],
+                     'user_type': ['GENL'],
+                     'user_id': ['conodof447@docwl.com'],
+                     'moblphon': ['010-1111-0000'],
+                     'amd_user': ['459b95f5-0a82-4318-866f-0aba85d59897'],
+                     'service_terms_yn': ['Y']
+                }
+            }
+        ]
+    '''
+
     try:
         admin_token = await get_admin_token()
         res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = "")
@@ -513,7 +546,31 @@ async def alter_user_info(user_id:str, **kwargs) :
         if len(user_info) == 0 :
             return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
         user_info = user_info[0]
+        attributes = user_info.get("attributes")
         sub = user_info.get("id")
+        attributes_user_sttus =  attributes.get("user_sttus")[0]
+
+        # user_sttus 처리를 위해 attributes 값을 만든다.
+        if user_sttus is not None : attributes_user_sttus = user_sttus
+        kwargs = {
+            **kwargs,
+            "attributes" : {
+                "login_type": attributes.get("login_type")[0],
+                "reg_user": attributes.get("reg_user")[0],
+                "user_nm": attributes.get("user_nm")[0],
+                "user_sttus": attributes_user_sttus,
+                "adm_yn": attributes.get("adm_yn")[0],
+                "user_role": attributes.get("user_role")[0],
+                "reg_date": attributes.get("reg_date")[0],
+                "user_uuid": attributes.get("user_uuid")[0],
+                "amd_date": attributes.get("amd_date")[0],
+                "user_type": attributes.get("user_type")[0],
+                "user_id": attributes.get("user_id")[0],
+                "moblphon": attributes.get("moblphon")[0],
+                "amd_user": attributes.get("amd_user")[0],
+                "service_terms_yn": attributes.get("service_terms_yn")[0]
+            }
+        }
 
         resToken = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub, **kwargs)
         logger.info(f"resToken = {resToken}")
