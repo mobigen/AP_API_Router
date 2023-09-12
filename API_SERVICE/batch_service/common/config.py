@@ -27,7 +27,7 @@ class DBInfo(BaseSettings):
 
 
 class PGInfo(DBInfo):
-    type: str = "postgres"
+    type: str = "orm"
     SCHEMA: str = ""
 
     def get_dsn(self):
@@ -68,11 +68,12 @@ class Settings(BaseSettings):
 
 
 class ProdSettings(Settings):
-    RELOAD = False
-    TESTING = False
-    DB_ECHO = True
+    TESTING: bool = False
+    DB_POOL_RECYCLE: int = 900
+    DB_ECHO: bool = True
+    RELOAD: bool = False
 
-    DB_INFO: TiberoInfo = TiberoInfo()
+    DB_INFO: PGInfo = PGInfo()
 
 
 class LocalSettings(Settings):
@@ -108,4 +109,3 @@ print(settings)
 with open(os.path.join(base_dir, "logging.json")) as f:
     log_config = json.load(f)
     logging.config.dictConfig(log_config)
-logger = logging.getLogger()
