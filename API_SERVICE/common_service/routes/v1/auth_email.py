@@ -108,7 +108,7 @@ def auth_pass(email_pass: EmailAthnPass, session: Executor = Depends(db.get_db))
     return result
 
 
-@router.post("emailAthnSend")
+@router.post("/emailAthnSend")
 def auth_send(auth_send: EmailAthnSend, session: Executor = Depends(db.get_db)):
     # todo: insert 구문 축약
     try:
