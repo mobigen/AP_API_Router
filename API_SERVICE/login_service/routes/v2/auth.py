@@ -553,13 +553,11 @@ async def alter_user_info(user_id:str, user_sttus:str, **kwargs) :
         attributes = user_info.get("attributes")
         sub = user_info.get("id")
         attributes_user_sttus =  attributes.get("user_sttus")[0]
-        openstack_default_project = None
-        openstack_user_domain = "Defalut"
-        try :
-            openstack_default_project = attributes.get("openstack-default-project")[0]
-            openstack_user_domain = attributes.get("openstack-user-domain")[0]
-        except :
-            pass
+        openstack_default_project = attributes.get("openstack_default_project")
+        openstack_user_domain = attributes.get("openstack_user_domain")
+
+        if openstack_default_project is None : openstack_default_project = ""
+        if openstack_user_domain is None : openstack_user_domain = "Default"
 
         # user_sttus 처리를 위해 attributes 값을 만든다.
         if user_sttus is not None : attributes_user_sttus = user_sttus
@@ -631,13 +629,11 @@ async def get_query_keycloak(query):
 
 async def modify_keycloak_user(**kwargs):
     admin_token = await get_admin_token()
-    openstack_default_project = None
-    openstack_user_domain = "Defalut"
-    try :
-        openstack_default_project = kwargs.get("openstack_default_project")
-        openstack_user_domain = kwargs.get("openstack_user_domain")
-    except :
-        pass
+    openstack_default_project = kwargs.get("openstack_default_project")
+    openstack_user_domain = kwargs.get("openstack_user_domain")
+
+    if openstack_default_project is None : openstack_default_project = ""
+    if openstack_user_domain is None : openstack_user_domain = "Default"
 
     reg_data = {
         # key 이름이 "attributes"가 아닌 것은 value가 존재할때만 넣어주어야 함
@@ -723,7 +719,7 @@ async def create_keycloak_user(**kwargs):
             "reg_date":                     kwargs.get("reg_date").strftime('%Y-%m-%d %H:%M:%S'),
             "amd_user":                     kwargs.get("amd_user"),
             "amd_date":                     kwargs.get("amd_date").strftime('%Y-%m-%d %H:%M:%S'),
-            "openstack-default-project":    None,
+            "openstack-default-project":    "",
             "openstack-user-domain":        "Default"
         }
     }
