@@ -91,6 +91,8 @@ class RegisterInfoWrap(BaseModel):
         adm_yn: Optional[str]
         enabled: Optional[str]
         sub: Optional[str]
+        openstack_default_project: Optional[str]
+        openstack_user_domain: Optional[str]
 
     data: RegisterInfo
 
@@ -632,8 +634,8 @@ async def modify_keycloak_user(**kwargs):
     openstack_default_project = None
     openstack_user_domain = "Defalut"
     try :
-        openstack_default_project = kwargs.get("openstack-default-project")
-        openstack_user_domain = kwargs.get("openstack-user-domain")
+        openstack_default_project = kwargs.get("openstack_default_project")
+        openstack_user_domain = kwargs.get("openstack_user_domain")
     except :
         pass
 
@@ -693,13 +695,7 @@ async def modify_keycloak_user(**kwargs):
 
 async def create_keycloak_user(**kwargs):
     admin_token = await get_admin_token()
-    openstack_default_project = None
-    openstack_user_domain = "Defalut"
-    try :
-        openstack_default_project = kwargs.get("openstack-default-project")
-        openstack_user_domain = kwargs.get("openstack-user-domain")
-    except :
-        pass
+
     reg_data = {
         "username": kwargs.get("user_id"),
         "firstName": kwargs.get("user_nm"),   # value가 존재할때만 넣어주어야 함
@@ -727,8 +723,8 @@ async def create_keycloak_user(**kwargs):
             "reg_date":                     kwargs.get("reg_date").strftime('%Y-%m-%d %H:%M:%S'),
             "amd_user":                     kwargs.get("amd_user"),
             "amd_date":                     kwargs.get("amd_date").strftime('%Y-%m-%d %H:%M:%S'),
-            "openstack-default-project":    openstack_default_project,
-            "openstack-user-domain":        openstack_user_domain
+            "openstack-default-project":    None,
+            "openstack-user-domain":        "Default"
         }
     }
     res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
