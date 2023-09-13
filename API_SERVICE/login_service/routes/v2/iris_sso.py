@@ -18,6 +18,7 @@ logger = logging.getLogger()
 router = APIRouter()
 
 base_url = "https://b-iris.mobigen.com"
+#base_url = "http://studio.bigdata-car.kr:32180"
 
 
 def get_exception_info():
@@ -112,7 +113,7 @@ def api(user_id: str, session: Executor = Depends(db.get_db)) -> dict:
             # login
             iris_root = [{
                 "iris_id": "root",
-                "iris_pw": "!dufmaQkdgkr202208"
+                "iris_pw": "!dufmaQkdgkr202208"  # "Katech12#$"
             }]
             root_token = get_token(iris_root, header)["token"]
             header["x-access-token"] = root_token
