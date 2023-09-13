@@ -42,7 +42,7 @@ class EmailSendInfoTable(Base):
     table_nm = "tb_email_send_info"
     key_column = "email_id"
 
-    def get_query_data(self) -> dict:
+    def get_query_data(self, st_time) -> dict:
         return {
             "table_nm": self.table_nm,
             "where_info": [
@@ -52,6 +52,13 @@ class EmailSendInfoTable(Base):
                     "value": "REQ",
                     "compare_op": "=",
                     "op": "",
+                },
+                {
+                    "table_nm": self.table_nm,
+                    "key": "rgstdt",
+                    "value": st_time,
+                    "compare_op": ">=",
+                    "op": "AND"
                 }
             ],
         }

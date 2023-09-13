@@ -12,9 +12,12 @@ logger = logging.getLogger()
 
 
 def send_mail():
+    st_time = datetime.today() - timedelta(minutes=1)
+    st_time = st_time.strftime("%Y-%m-%d %H:%M:00")
+
     with db.get_db_manager() as session:
         email_send_table = EmailSendInfoTable()
-        rows = session.query(**email_send_table.get_query_data()).all()
+        rows = session.query(**email_send_table.get_query_data(st_time)).all()
         rows = rows[0] if rows else []
 
         for row in rows:
