@@ -99,9 +99,9 @@ def auth_pass(email_pass: EmailAthnPass, session: Executor = Depends(db.get_db))
             user_info = session.query(**UserInfoTable.get_select_query(email_pass.email)).first()
             user_info["user_password"] = new_password
             session.execute(**UserInfoTable.get_execute_query("UPDATE", user_info))
+            result = {"result": 1, "msg": "Successfully Auth Confirm."}
         else:
-            raise EmailAuthFail
-        result = {"result": 1, "msg": "Successfully Auth Password."}
+            result = {"result": 0, "msg": "EmailAuthFail"}
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
@@ -156,10 +156,9 @@ def auth_confirm(auth_conf: EmailAthnCnfm, session: Executor = Depends(db.get_db
             email_info["athn_yn"] = "Y"
             email_info["athn_date"] = "NOW()"
             session.execute(**EmailAuthTable.get_execute_query("UPDATE",email_info))
+            result = {"result": 1, "msg": "Successfully Auth Confirm."}
         else:
-            raise EmailAuthFail
-
-        result = {"result": 1, "msg": "Successfully Auth Confirm."}
+            result = {"result": 0, "msg": "EmailAuthFail"}
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
