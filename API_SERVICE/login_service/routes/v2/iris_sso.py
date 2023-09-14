@@ -6,11 +6,14 @@ import logging
 import requests
 import traceback
 
+from ast import literal_eval
+from fastapi import APIRouter, Depends, Request
 
-from fastapi import APIRouter, Depends
-
+from libs.auth.keycloak import keycloak
+from starlette.responses import JSONResponse
 from libs.database.connector import Executor
-from login_service.common.const import LoginTable, IrisInfoTable
+from login_service.common.config import settings
+from login_service.common.const import COOKIE_NAME, IRIS_COOKIE_NAME, LoginTable, IrisInfoTable
 from login_service.database.conn import db
 
 
@@ -58,8 +61,22 @@ def get_random_str(is_num: bool) -> str:
 
 
 @router.get("/user/v2/ConnectIRIS")
-def api(user_id: str, session: Executor = Depends(db.get_db)) -> dict:
+async def api(request: Request, session: Executor = Depends(db.get_db)) -> JSONResponse:
     header = {"Content-Type": "application/json"}
+    token = request.cookies.get(COOKIE_NAME)
+
+    if not token:
+        msg = "TokenDoesNotExist"
+        logger.info(msg)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": msg})
+
+    token = literal_eval(token)
+    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm )
+    if userInfo.get("status_code") != 200 :
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": userInfo.get("data").get("error_description")})
+
+    user_id = userInfo.get("data").get("user_id")
+
     iris_table = IrisInfoTable()
     try:
         # join check
@@ -130,9 +147,9 @@ def api(user_id: str, session: Executor = Depends(db.get_db)) -> dict:
         iris_info = session.query(**iris_table.get_query_data(user_id)).first()
         user_token = get_token([iris_info], header)
 
-        result = {"result": 1, "errorMessage": "", "data": user_token}
+        result = JSONResponse(status_code=200, content={"result": 1, "errorMessage": "", "data": user_token})
     except Exception:
         except_name = get_exception_info()
-        result = {"result": 0, "errorMessage": except_name}
+        result = JSONResponse(status_code=400, content={"result": 0, "errorMessage": except_name})
 
     return result
