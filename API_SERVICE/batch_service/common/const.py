@@ -23,7 +23,12 @@ msg_setting = {
     "analysisRequest": {
         "tmplt": f"{base_dir}/template/analysisRequestEmail.html",
         "sub": "[자동차데이터포털] {0} 신청 메일입니다.",
-    }
+    },
+    "toolApply": {
+        "tmplt": f"{base_dir}/template/toolApplyEmail.html",
+        "sub": "[자동차데이터포털] {0} 신청 메일입니다.",
+    },
+
 }
 
 
@@ -55,7 +60,7 @@ class EmailSendInfoTable(Base):
                 },
                 {
                     "table_nm": self.table_nm,
-                    "key": "rgstdt",
+                    "key": "reg_date",
                     "value": st_time,
                     "compare_op": ">=",
                     "op": "AND"
