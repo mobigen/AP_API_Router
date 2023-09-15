@@ -27,8 +27,7 @@ msg_setting = {
     "toolApply": {
         "tmplt": f"{base_dir}/template/toolApplyEmail.html",
         "sub": "[자동차데이터포털] {0} 신청 메일입니다.",
-    },
-
+    }
 }
 
 

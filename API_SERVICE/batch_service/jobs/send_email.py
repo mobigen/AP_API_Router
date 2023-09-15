@@ -44,7 +44,7 @@ def send_mail():
                 html = html.replace("CONTENTS1", content[0])
                 html = html.replace("CONTENTS2", content[1])
 
-            if category == "analysisRequest":
+            if category in ["analysisRequest", "toolApply"]:
                 category["sub"] = category["sub"].format(row["title"])
 
             # send
