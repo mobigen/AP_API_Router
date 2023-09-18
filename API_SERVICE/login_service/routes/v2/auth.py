@@ -58,6 +58,18 @@ class LoginInfoWrap(BaseModel):
 
     data: LoginInfo
 
+class LoginAuthInfoWrap(BaseModel):
+    """
+    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
+    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
+    """
+
+    class LoginAuthInfo(BaseModel):
+        code: str
+        scope: str
+        redirect_uri: str
+
+    data: LoginAuthInfo
 
 class RegisterInfoWrap(BaseModel):
     """
@@ -296,6 +308,24 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
     param = params.data
 
     token = await get_normal_token(grant_type="password", username=param.user_id, password=param.user_password)
+    logger.info(f"token :: {token}")
+
+    if token["status_code"] == 200:
+        response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+        token["create_time"] = datetime.now().strftime("%s")
+        response.set_cookie(key=COOKIE_NAME, value=token, domain=".bigdata-car.kr")
+        return response
+    else :
+        return JSONResponse(
+            status_code=400,
+            content={"result": 0, "errorMessage": token.get("data").get("error_description")},
+        )
+
+@router.post("/user/v2/commonLoginAuth")
+async def loginAuth(params: LoginAuthInfoWrap, session: Executor = Depends(db.get_db)) -> JSONResponse:
+    param = params.data
+
+    token = await get_normal_token(grant_type="authorization_code", code=param.code, scope=param.scope, redirect_uri=param.redirect_uri)
     logger.info(f"token :: {token}")
 
     if token["status_code"] == 200:
