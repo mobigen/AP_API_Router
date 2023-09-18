@@ -60,6 +60,8 @@ def data_process(data):
 
     # test 환경에서 updt_dt가 None값인 경우가 있음
     if "updt_dt" in data.keys() and data["updt_dt"] and len(data["updt_dt"]) > 25:
+        if len(data["updt_dt"]) > 27:
+            data["updt_dt"] = data["updt_dt"][:-3]
         data["updt_dt"] = datetime.strptime(data["updt_dt"], "%Y-%m-%d %H:%M:%S.%f")
 
     els_dict = default_process(els_dict, data)
