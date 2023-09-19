@@ -59,6 +59,18 @@ class KeycloakInfo(BaseSettings):
         env_file = f"{base_dir}/.env"
         env_file_encoding = "utf-8"
 
+class MydiskInfo(BaseSettings):
+    mydisk_url: Optional[str]
+    admin_username: Optional[str]
+    admin_password: Optional[str]
+    scope: Optional[str]
+    client_id: Optional[str]
+    client_secret: Optional[str]
+
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
+
 class Settings(BaseSettings):
     BASE_DIR = base_dir
     DB_POOL_RECYCLE: int = 900
@@ -101,6 +113,15 @@ class ProdSettings(Settings):
         client_secret="pwLZG5EaWph1nJAOjwYJ32YGtXdAj5SL",
     )
 
+    MYDISK_INFO = MydiskInfo(
+        mydisk_url="https://mydisk.bigdata-car.kr",
+        admin_username="superuser",
+        admin_password="35ldxxhbd1",
+        scope="upload profile admin list",
+        client_id="86e9aaff5afc7d7828035500e11cb48c",
+        client_secret="lfb5RQK9SH3GcRqGgq0QcLlW5mJf0JDBNkrn1729"
+    )
+
 class LocalSettings(Settings):
     TESTING: bool = False
     DB_POOL_RECYCLE: int = 900
@@ -135,6 +156,15 @@ class LocalSettings(Settings):
         realm="mobigen",
         client_id="katech",
         client_secret="pwLZG5EaWph1nJAOjwYJ32YGtXdAj5SL",
+    )
+
+    MYDISK_INFO = MydiskInfo(
+        mydisk_url="https://mydisk.bigdata-car.kr",
+        admin_username="superuser",
+        admin_password="35ldxxhbd1",
+        scope="upload profile admin list",
+        client_id="86e9aaff5afc7d7828035500e11cb48c",
+        client_secret="lfb5RQK9SH3GcRqGgq0QcLlW5mJf0JDBNkrn1729"
     )
 
 @lru_cache
