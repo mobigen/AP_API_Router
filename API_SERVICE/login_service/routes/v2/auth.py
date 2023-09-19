@@ -168,6 +168,29 @@ async def logout():
     response.delete_cookie("x-access-token", domain=".bigdata-car.kr")
     return response
 
+@router.post("/user/v2/commonLogoutKeyCloak")
+async def logout_keycloak(request: Request):
+    token = request.cookies.get(COOKIE_NAME)
+    if not token:
+        msg = "TokenDoesNotExist"
+        logger.info(msg)
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+
+    token = literal_eval(token)
+    refresh_token = token["data"]["refresh_token"]
+    logger.info(refresh_token)
+    res = await keycloak_logout(refresh_token=refresh_token)
+    logger.info(f"res :: {res}")
+    if res.get("status_code") != 204:
+        msg = res.get("data").get("error_description")
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+
+    response.delete_cookie(COOKIE_NAME, domain=".bigdata-car.kr")
+    # studio cookie 삭제
+    response.delete_cookie("x-access-token", domain=".bigdata-car.kr")
+    response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+    return response
+
 @router.get("/user/v2/commonUserInfo")
 async def info(request: Request, session: Executor = Depends(db.get_db)):
     """
@@ -318,7 +341,7 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
     else :
         return JSONResponse(
             status_code=400,
-            content={"result": 0, "errorMessage": token.get("data").get("error_description")},
+            content={"result": 0, "errorMessage": token["data"]["error_description"]},
         )
 
 @router.post("/user/v2/commonLoginAuth")
@@ -336,7 +359,7 @@ async def loginAuth(params: LoginAuthInfoWrap, session: Executor = Depends(db.ge
     else :
         return JSONResponse(
             status_code=400,
-            content={"result": 0, "errorMessage": token.get("data").get("error_description")},
+            content={"result": 0, "errorMessage": token["data"]["error_description"]},
         )
 
 @router.post("/user/v2/commonLoginSocial")
@@ -352,7 +375,7 @@ async def loginSocial(params: RegisterSocialInfoWrap, session: Executor = Depend
     else :
         return JSONResponse(
             status_code=400,
-            content={"result": 0, "errorMessage": token.get("data").get("error_description")},
+            content={"result": 0, "errorMessage": token["data"]["error_description"]},
         )
 
 @router.post("/user/v2/commonSocialLink")
@@ -380,7 +403,7 @@ async def socialLink(params: RegisterSocialInfoWrap, session: Executor = Depends
     else :
         return JSONResponse(
             status_code=400,
-            content={"result": 0, "errorMessage": token.get("data").get("error_description")},
+            content={"result": 0, "errorMessage": token["data"]["error_description"]},
         )
 
 @router.post("/user/v2/commonLoginDB")
@@ -535,7 +558,6 @@ async def user_upsert(session: Executor, **kwargs) :
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
-
 async def alter_user_info(user_id:str, user_sttus:str, **kwargs) :
 
     '''
@@ -620,7 +642,7 @@ async def alter_user_info(user_id:str, user_sttus:str, **kwargs) :
         else :
             return JSONResponse(
                 status_code=400,
-                content={"result": 0, "errorMessage": resToken.get("data").get("error_description")}
+                content={"result": 0, "errorMessage": resToken["data"]["error_description"]}
             )
     except Exception as e:
         session.rollback()
@@ -785,4 +807,12 @@ async def get_social_token(**kwargs):
         subject_issuer=kwargs.get("social_type"),
         subject_token=kwargs.get("access_token"),
         grant_type="urn:ietf:params:oauth:grant-type:token-exchange"
+    )
+
+async def keycloak_logout(**kwargs) :
+    return await keycloak.logout(
+        realm=settings.KEYCLOAK_INFO.realm,
+        refresh_token=kwargs.get("refresh_token"),
+        client_id=settings.KEYCLOAK_INFO.client_id,
+        client_secret=settings.KEYCLOAK_INFO.client_secret
     )
