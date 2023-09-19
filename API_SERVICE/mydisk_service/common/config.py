@@ -4,7 +4,7 @@ import os
 from functools import lru_cache
 from typing import Optional, Union
 
-from pydantic import BaseSettings, PostgresDsn, validator, SecretStr
+from pydantic import BaseSettings, PostgresDsn, validator, SecretStr, AnyUrl
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print(f"login base_dir :: {base_dir}")
@@ -47,12 +47,27 @@ class TiberoInfo(DBInfo):
     def get_dsn(self):
         return f"DSN={self.BASE};UID={self.USER};PWD={self.PASS.get_secret_value()}"
 
+class KeycloakInfo(BaseSettings):
+    keycloak_url: Optional[str]
+    admin_username: Optional[str]
+    admin_password: Optional[str]
+    realm: Optional[str]
+    client_id: Optional[str]
+    client_secret: Optional[str]
+
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
+
 class Settings(BaseSettings):
     BASE_DIR = base_dir
     DB_POOL_RECYCLE: int = 900
     DB_ECHO: bool = False
     RELOAD: bool = True
     TESTING: bool = True
+
+    MYDISK_ROOT_DIR: str
+    MYDISK_CONN_URL: AnyUrl
 
     DB_INFO: DBInfo = DBInfo()
     DB_URL: Union[str, PostgresDsn] = None
@@ -72,13 +87,28 @@ class ProdSettings(Settings):
     DB_ECHO: bool = True
     RELOAD: bool = False
 
+    MYDISK_ROOT_DIR = "./"
+    MYDISK_CONN_URL: AnyUrl = "https://mydisk.bigdata-car.kr"
+
     DB_INFO: PGInfo = PGInfo()
+
+    KEYCLOAK_INFO = KeycloakInfo(
+        keycloak_url="https://auth.bigdata-car.kr",
+        admin_username="admin",
+        admin_password="2021@katech",
+        realm="kadap",
+        client_id="katech",
+        client_secret="pwLZG5EaWph1nJAOjwYJ32YGtXdAj5SL",
+    )
 
 class LocalSettings(Settings):
     TESTING: bool = False
     DB_POOL_RECYCLE: int = 900
     DB_ECHO: bool = True
     RELOAD: bool = False
+
+    MYDISK_ROOT_DIR = "./"
+    MYDISK_CONN_URL: AnyUrl = "https://mydisk.bigdata-car.kr"
 
     DB_INFO = PGInfo(
         HOST="192.168.100.126",
@@ -89,15 +119,29 @@ class LocalSettings(Settings):
         SCHEMA="sitemng,users,meta,iag,ckan,board,analysis",
     )
 
-class TestSettings(LocalSettings):
-    ...
+    #KEYCLOAK_INFO = KeycloakInfo(
+    #    keycloak_url="http://192.168.101.44:8080",
+    #    admin_username="admin",
+    #    admin_password="zxcv1234!",
+    #    realm="kadap",
+    #    client_id="uyuni",
+    #    client_secret="8UDolCR5j1vHt4rsyHnwTDlYkuRmOUp8",
+    #)
 
+    KEYCLOAK_INFO = KeycloakInfo(
+        keycloak_url="https://auth.bigdata-car.kr",
+        admin_username="admin",
+        admin_password="2021@katech",
+        realm="mobigen",
+        client_id="katech",
+        client_secret="pwLZG5EaWph1nJAOjwYJ32YGtXdAj5SL",
+    )
 
 @lru_cache
 def get_settings() -> Settings:
     env = os.getenv("APP_ENV", "prod")
     print(env)
-    return {"local": LocalSettings(), "test": TestSettings(), "prod": ProdSettings()}[env]
+    return {"local": LocalSettings(), "prod": ProdSettings()}[env]
 
 
 settings = get_settings()
