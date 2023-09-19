@@ -170,6 +170,7 @@ async def logout():
 
 @router.post("/user/v2/commonLogoutKeyCloak")
 async def logout_keycloak(request: Request):
+    response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     token = request.cookies.get(COOKIE_NAME)
     if not token:
         msg = "TokenDoesNotExist"
@@ -181,6 +182,7 @@ async def logout_keycloak(request: Request):
     logger.info(refresh_token)
     res = await keycloak_logout(refresh_token=refresh_token)
     logger.info(f"res :: {res}")
+
     if res.get("status_code") != 204:
         msg = res.get("data").get("error_description")
         return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
@@ -188,7 +190,6 @@ async def logout_keycloak(request: Request):
     response.delete_cookie(COOKIE_NAME, domain=".bigdata-car.kr")
     # studio cookie 삭제
     response.delete_cookie("x-access-token", domain=".bigdata-car.kr")
-    response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     return response
 
 @router.get("/user/v2/commonUserInfo")
@@ -525,7 +526,7 @@ async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(
         await check_email_auth(user_id, athn_no, session)
         # credentials 만 변경
         reg_data = {"credentials": [{"value": new_password}]}
-        return await alter_user_info(user_id, None,  **reg_data)
+        return await alter_user_info(user_id, None, **reg_data)
     except Exception as e:
         session.rollback()
         logger.error(e, exc_info=True)
