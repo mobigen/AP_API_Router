@@ -18,7 +18,6 @@ gunicorn==20.1.0
 h11==0.14.0
 idna==3.4
 multidict==6.0.4
-pandas==1.4.4
 passlib==1.7.4
 psycopg2-binary==2.9.6
 pycparser==2.21
