@@ -1,42 +1,32 @@
 import os
-import json
-import bcrypt
 import logging
 import pandas as pd
 
 from pathlib import Path
-from ast import literal_eval
-from datetime import datetime
-from typing import Optional, Union
+from typing import Dict
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
-from starlette.responses import JSONResponse
 
 from libs.auth.keycloak import keycloak
 from libs.disk.mydisk import mydisk
-from libs.database.connector import Executor
 from mydisk_service.common.config import settings
-from mydisk_service.common.const import COOKIE_NAME, LoginTable
-from mydisk_service.database.conn import db
 
 
 logger = logging.getLogger()
 
-class LoginInfoWrap(BaseModel):
-    """
-    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
-    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
-    """
+class TreeParams(BaseModel):
+    target_directory: str
 
-    class LoginInfo(BaseModel):
-        user_id: str
-        user_password: str
-        login_type: str
+    def get_path(self) -> Path:
+        return Path(
+            os.path.join(
+                settings.MYDISK_ROOT_DIR,
+                self.target_directory.lstrip("/") if self.target_directory.startswith("/") else self.target_directory,
+            )
+        )
 
-    data: LoginInfo
-
-class Params(BaseModel):
+class PreviewParam(BaseModel):
     target_file_directory: str
     rows: int
 
@@ -55,7 +45,7 @@ router = APIRouter()
 
 
 @router.post("/v1/preview")
-async def head(params: Params):
+async def head(params: PreviewParam):
     try:
         path = params.get_path()
         lines = params.rows
@@ -65,6 +55,33 @@ async def head(params: Params):
         result = {"result": 1, "errorMessage": "", "data": {"body": df[:lines].values.tolist()}}
     except Exception as e:
         result = {"result": 1, "errorMessage": str(e)}
+    return result
+
+@router.post("/v1/listdir")
+async def walk(param: TreeParams) -> Dict:
+    id = 0
+
+    def nodes(p: Path):
+        nonlocal id
+        lst = []
+        for i in p.iterdir():
+            id += 1
+            data = {"text": i.name, "id": id, "type": "file"}
+            if i.is_dir():
+                node = nodes(i)
+                if node:
+                    data["nodes"] = node
+                data["type"] = "directory"
+
+            lst.append(data)
+        return lst
+
+    try:
+        result = {"result": 1, "errorMessage": "", "data": {"body": nodes(param.get_path())}}
+    except FileNotFoundError as fe:
+        result = {"result": 1, "errorMessage": str(fe), "data": []}
+    except Exception as e:
+        result = {"result": 0, "errorMessage": str(e), "data": []}
     return result
 
 async def get_admin_token() -> None:
