@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
 from libs.auth.keycloak import keycloak
+from libs.disk.mydisk import mydisk
 from libs.database.connector import Executor
 from mydisk_service.common.config import settings
 from mydisk_service.common.const import COOKIE_NAME, LoginTable
@@ -64,3 +65,14 @@ async def head(params: Params):
     except Exception as e:
         result = {"result": 1, "errorMessage": str(e)}
     return result
+
+async def get_admin_token() -> None:
+    res = await mydisk.generate_admin_token(
+        username=settings.MYDISK_INFO.admin_username,
+        password=settings.MYDISK_INFO.admin_password,
+        scope=settings.MYDISK_INFO.scope,
+        client_id=settings.MYDISK_INFO.client_id,
+        client_secret=settings.MYDISK_INFO.client_secret,
+    )
+
+    return res.get("data").get("access_token")
