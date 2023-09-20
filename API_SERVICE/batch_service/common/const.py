@@ -67,3 +67,12 @@ class EmailSendInfoTable(Base):
             ],
         }
 
+
+class BizDataTable(Base):
+    table_nm = "v_biz_meta_info"
+    key_column = "status"
+
+
+class CkanDataTable(Base):
+    table_nm = "v_biz_meta_ckan"
+    key_column = "biz_dataset_id"

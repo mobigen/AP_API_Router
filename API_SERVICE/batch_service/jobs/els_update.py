@@ -1,74 +1,46 @@
-import os
-import re
-from pathlib import Path
+import logging
 from datetime import datetime
-from elasticsearch import helpers
-from ELKSearch.Utils.database_utils import prepare_config, connect_db, select, config
-from ELKSearch.Utils.elasticsearch_utils import data_process, default_process
 
-root_path = str(Path(os.path.dirname(os.path.abspath(__file__))))
-prepare_config(root_path)
+from meta_service.ELKSearch.config import dev_server
+from meta_service.common.utils import default_search_set, data_process, default_process
+
+from batch_service.database.conn import db
+from batch_service.common.const import BizDataTable, CkanDataTable
 
 
-def insert_meta(db, es):
+logger = logging.getLogger()
+
+
+def insert_meta():
     bulk_meta_item = list()
-    db_query = f"SELECT * FROM v_biz_meta_info  WHERE status = 'D'"
-    if config.check == "True":
-        today = datetime.today().date()
-        condition = f"AND (DATE(amd_date) >= DATE('{today}')" \
-                    f"OR DATE(reg_date) >= DATE('{today}'))"
-        db_query = db_query + condition
+    docmanager = default_search_set(dev_server, "biz_meta")
 
-    meta_wrap_list = select(db, db_query)[0]
-
+    with db.get_db_manager() as session:
+        meta_list = session.query(**BizDataTable.get_select_query("D")).all()
     try:
-        for meta_wrap in meta_wrap_list:
-            els_dict = data_process(meta_wrap)
-            bulk_meta_item.append(els_dict)
-        helpers.bulk(es.conn, bulk_meta_item, index=es.index)
+        for data in meta_list:
+            insert_body = data_process(data)
+            bulk_meta_item.append(insert_body)
+            docmanager.set_body(insert_body)
+            logger.info(docmanager.insert(insert_body["biz_dataset_id"]))
     except Exception as e:
         print(e)
 
 
-def insert_ckan(db, es):
+def insert_ckan():
     bulk_meta_item = list()
-    db_query = "SELECT biz_dataset_id, data_nm, data_desc, notes, reg_date, tags, updt_dt" \
-               " FROM v_biz_meta_ckan"
-
-    if config.check == "True":
-        today = datetime.today().date()
-        condition = f"WHERE (DATE(updt_dt) >= DATE('{today}')" \
-                    f"OR DATE(reg_date) >= DATE('{today}'))"
-        db_query = db_query + condition
-
-    ckan_wrap_list = select(db, db_query)[0]
+    docmanager = default_search_set(dev_server, "ckan_data")
+    with db.get_db_manager() as session:
+        select_query = CkanDataTable.get_select_query("*")
+        select_query.pop("where_info")
+        ckan_list = session.query(**select_query).all()
     try:
-        for ckan in ckan_wrap_list:
-            els_dict = default_process(dict(), ckan)
-            bulk_meta_item.append(els_dict)
-        helpers.bulk(es.conn, bulk_meta_item, index=es.index)
+        for ckan in ckan_list:
+            insert_body = default_process(dict(), ckan)
+            bulk_meta_item.append(insert_body)
+            docmanager.set_body(insert_body)
+            logger.info(docmanager.insert(insert_body["biz_dataset_id"]))
     except Exception as e:
         print(e)
 
 
-def main():
-    """
-    :param
-    config dir path: {project_path}/ELKSearch/config
-        --category=ckan|meta, elasticsearch config
-        --db_type=test|commercial , database config
-        --check=True|False, True=today False=All
-    :return:
-    """
-    prepare_config(root_path)
-    es = config.es
-    db = connect_db()
-
-    if config.category == "meta":
-        insert_meta(db, es)
-    else:
-        insert_ckan(db, es)
-
-
-if __name__ == "__main__":
-    main()
