@@ -117,7 +117,7 @@ class ProdSettings(Settings):
         mydisk_url="https://mydisk.bigdata-car.kr",
         admin_username="superuser",
         admin_password="35ldxxhbd1",
-        scope="upload profile admin list",
+        scope="download",
         client_id="86e9aaff5afc7d7828035500e11cb48c",
         client_secret="lfb5RQK9SH3GcRqGgq0QcLlW5mJf0JDBNkrn1729"
     )
@@ -162,7 +162,7 @@ class LocalSettings(Settings):
         mydisk_url="https://mydisk.bigdata-car.kr",
         admin_username="superuser",
         admin_password="35ldxxhbd1",
-        scope="upload profile admin list",
+        scope="download",
         client_id="86e9aaff5afc7d7828035500e11cb48c",
         client_secret="lfb5RQK9SH3GcRqGgq0QcLlW5mJf0JDBNkrn1729"
     )

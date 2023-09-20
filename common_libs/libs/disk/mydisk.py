@@ -51,9 +51,7 @@ class MydiskManager:
             scope (str): upload profile admin list
             grant_type (str) : password
             client_id (str) :
-            client_secret (str)
-            curl -X POST -d "username=superuser&password=35ldxxhbd1&scope=upload profile admin list&client_id=86e9aaff5afc7d7828035500e11cb48c&client_secret=lfb5RQK9SH3GcRqGgq0QcLlW5mJf0JDBNkrn1729&redirect_uri=http://mydisk.bigdata-car.kr:8895&grant_type=password"
-             http://mydisk.bigdata-car.kr:8895/oauth2/token/
+            client_secret (str) :
 
         Returns:
             Dict: _description_
@@ -66,10 +64,14 @@ class MydiskManager:
             grant_type="password",
             **kwargs,
         )
-    async def user_info_detail(self, token, realm, user_id):
+
+    async def file_download(self, token, path):
         headers = {"Authorization": "bearer " + token}
-        return await self._request_to_keycloak(
-            api_url=f"{self.base_url}/admin/realms/{realm}/users/{user_id}", method="GET", headers=headers
+        return await self._request_to_mydisk(
+            api_url=f"{self.base_url}/api.php/files/download/",
+            method="POST",
+            headers=headers,
+            path=path,
         )
 
 

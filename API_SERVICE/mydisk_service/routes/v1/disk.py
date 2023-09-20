@@ -1,19 +1,33 @@
 import os
+import zipfile
+import random
+import string
 import logging
 import shutil
+import base64
 import pandas as pd
 
 from pathlib import Path
-from typing import Union, Dict
+from typing import Optional, Union, Dict
 
 from fastapi import APIRouter, Depends, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from libs.auth.keycloak import keycloak
 from libs.disk.mydisk import mydisk
 from mydisk_service.common.config import settings
 
 logger = logging.getLogger()
+
+class DownloadParams(BaseModel):
+    src_target_path: str
+
+    def get_path(self) -> Path:
+        return Path(
+            os.path.join(
+                settings.MYDISK_ROOT_DIR, self.src_target_path.lstrip("/") if self.src_target_path.startswith("/") else self.src_target_path,
+            )
+        )
 
 class CopyParams(BaseModel):
     src_path: str
@@ -125,6 +139,41 @@ async def copy(params: CopyParams):
         result = {"result": 1, "errorMessage": str(e)}
     return result
 
+@router.post("/v1/download")
+async def download(params: DownloadParams):
+    src_path = params.get_path()
+    logger.info(f"param src_path :: {src_path}")
+    try:
+        # dir 이면 zip 으로 압축함
+        if os.path.isdir(src_path) :
+            zip_file_path = "/tmp/bigdata_portal_" + "".join([random.choice(string.ascii_lowercase) for _ in range(0,5)]) + ".zip"
+            os.chdir(src_path)  # 압축 파일 생성할 폴더로 working directory 를 이동시킨다
+
+            zip_file = zipfile.ZipFile(zip_file_path, "w")
+            for (path, dir, files) in os.walk(src_path):
+                for file in files:
+                    logger.info(f"Adding file :: {file}")
+                    # 상대경로를 활용하여 압축한다. (os.path.relpath)
+                    zip_file.write(os.path.join(os.path.relpath(path, src_path), file), compress_type=zipfile.ZIP_DEFLATED)
+
+            zip_file.close()
+            # zip 파일을 읽도록 주소 변경
+            src_path = zip_file_path
+
+        logger.info(f"read src_path :: {src_path}")
+        read_file = open(src_path, 'rb').read()
+        decode_data = base64.b64encode(read_file).decode()
+        logger.info(f"decode_data :: {decode_data[:20]} ..")
+        result = {"result": 1, "errorMessage": "", "data": {"body": decode_data }}
+    except Exception as e:
+        result = {"result": 0, "errorMessage": str(e)}
+    return result
+
+
+def is_dir(src_path):
+    return os.path.isdir(
+        os.path.join(settings.MYDISK_ROOT_DIR, src_path.lstrip("/") if src_path.startswith("/") else src_path)
+    )
 
 def run(src_path, dst_path, is_force, is_copy):
     os.makedirs(os.path.dirname(dst_path), exist_ok=True)
@@ -153,6 +202,5 @@ async def get_admin_token() -> None:
         client_id=settings.MYDISK_INFO.client_id,
         client_secret=settings.MYDISK_INFO.client_secret,
     )
-    logger.info(res)
 
     return res.get("data").get("access_token")
