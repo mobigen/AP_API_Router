@@ -515,6 +515,24 @@ async def adminModifyUser(request: Request, params: RegisterInfoWrap):
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
+@router.get("/user/v2/commonCheckSocialType")
+async def adminCheckSocialtype(request: Request):
+    try :
+        admin_token = await get_admin_token()
+        userInfo = await get_user_info_from_request(request)
+        userInfo = userInfo.get("data")
+        if userInfo is None :
+            return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
+
+        sub = userInfo.get("sub")
+        logger.info(f"userInfo :: {userInfo}")
+        res = await keycloak.check_idp(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub)
+        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": "", "data": res.get("data")})
+    except Exception as e:
+        session.rollback()
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
 @router.post("/user/v2/commonNewPassword")
 async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(db.get_db)):
     param = params.data

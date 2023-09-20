@@ -201,6 +201,13 @@ class KeycloakManager:
             ) as response:
                 return {"status_code": response.status, "data": await response.read()}
 
+    async def check_idp(self, token, realm, sub):
+        headers = {"Content-Type": "application/json", "Authorization": "bearer " + token}
+        return await self._request_to_keycloak(
+            api_url=f"{self.base_url}/admin/realms/{realm}/users/{sub}/federated-identity", method="GET", headers=headers
+        )
+
+
 if __name__ == "__main__":
     import asyncio
 
