@@ -158,6 +158,17 @@ class PasswordInfoWrap(BaseModel):
 
     data: PasswordInfo
 
+class PurchaseInfoWrap(BaseModel):
+    """
+    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
+    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
+    """
+
+    class PurchaseInfo(BaseModel):
+        data_id: str
+
+    data: PurchaseInfo
+
 router = APIRouter()
 
 @router.post("/user/v2/commonLogout")
@@ -549,6 +560,29 @@ async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(
         session.rollback()
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+@router.post("/user/v2/checkPurchase")
+async def checkPurchase(params: PurchaseInfoWrap, request: Request):
+    params = param.data
+    data_id = params.data_id
+    token = request.cookies.get(COOKIE_NAME)
+
+    if not token:
+        msg = "TokenDoesNotExist"
+        logger.info(msg)
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+
+    token = literal_eval(token)
+    access_token =token["data"]["access_token"]
+    api_url = f"https://211.218.247.36:23080/api/v1/purchase-status/{data_id}"
+    headers = {"Content-Type": "application/json", "Authorization": "Bearer " + access_token}
+    async with aiohttp.ClientSession() as session:
+        async with session.request(url=api_url, method="GET", headers=headers) as response:
+            try:
+                ret = await response.json()
+            except Exception:
+                ret = await response.read()
+            return {"status_code": response.status, "data": ret}
 
 
 async def check_admin(request: Request) :
