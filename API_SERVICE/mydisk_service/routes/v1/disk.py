@@ -2,6 +2,7 @@ import os
 import json
 import bcrypt
 import logging
+import pandas as pd
 
 from pathlib import Path
 from ast import literal_eval
@@ -53,15 +54,15 @@ class Params(BaseModel):
 router = APIRouter()
 
 
-@router.post("/preview")
+@router.post("/v1/preview")
 async def head(params: Params):
     try:
         path = params.get_path()
         lines = params.rows
-        #df = pd.read_excel(path, header=None) if path.suffix in [".xls", ".xlsx"] else pd.read_csv(path, header=None)
-        #df = df.fillna("")
-        #result = {"result": 1, "errorMessage": "", "data": {"body": df[:lines].values.tolist()}}
-        return JSONResponse(status_code=500, content={"result": 1, "errorMessage": "", "data": {"body": "TEST"}})
+        logger.info(path)
+        df = pd.read_excel(path, header=None) if path.suffix in [".xls", ".xlsx"] else pd.read_csv(path, header=None)
+        df = df.fillna("")
+        result = {"result": 1, "errorMessage": "", "data": {"body": df[:lines].values.tolist()}}
     except Exception as e:
         result = {"result": 1, "errorMessage": str(e)}
     return result
@@ -74,5 +75,6 @@ async def get_admin_token() -> None:
         client_id=settings.MYDISK_INFO.client_id,
         client_secret=settings.MYDISK_INFO.client_secret,
     )
+    logger.info(res)
 
     return res.get("data").get("access_token")
