@@ -1,8 +1,8 @@
 import logging
 from datetime import datetime
 
-from meta_service.ELKSearch.config import dev_server
-from meta_service.common.utils import default_search_set, data_process, default_process
+from batch_service.ELKSearch.config import dev_server
+from batch_service.common.utils import default_search_set, data_process, default_process
 
 from batch_service.database.conn import db
 from batch_service.common.const import BizDataTable, CkanDataTable
