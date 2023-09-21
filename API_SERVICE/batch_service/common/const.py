@@ -1,7 +1,9 @@
+import os
 from pydantic import BaseSettings
 from batch_service.common.config import base_dir
 from libs.database.dml_controller import Base
 
+service_dir = os.path.dirname(base_dir)
 
 msg_setting = {
     "register": {
@@ -76,3 +78,8 @@ class BizDataTable(Base):
 class CkanDataTable(Base):
     table_nm = "v_biz_meta_ckan"
     key_column = "biz_dataset_id"
+
+
+class RecommendKeyTable(Base):
+    table_nm = "tb_recommend_keyword"
+    key_column = "keyword"

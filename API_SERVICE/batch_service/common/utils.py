@@ -1,8 +1,8 @@
 import re
 from datetime import datetime
 
-from meta_service.ELKSearch.Utils.base import set_els
-from meta_service.ELKSearch.document import DocumentManager
+from batch_service.ELKSearch.Utils.base import set_els
+from batch_service.ELKSearch.document import DocumentManager
 
 
 def default_search_set(server_config, index, size=10, from_=0):
