@@ -11,7 +11,7 @@ from batch_service.common.const import log_dir, RecommendKeyTable
 logger = logging.getLogger()
 
 
-def main():
+def recommend_search_word():
     """
     """
     with db.get_db_manager() as session:
@@ -23,7 +23,7 @@ def main():
             search_log_file = fp.read().split("\n")[:-1]
 
         # 필터링할 단어 리스트 불러오기
-        fword_file_name = f"{service_dir}/batch_service/common/bad_word.txt"
+        fword_file_name = f"{log_dir}/batch_service/common/bad_word.txt"
         with open(fword_file_name, "r") as fp:
             bad_word_list = fp.read().split("\n")
 
@@ -45,8 +45,8 @@ def main():
 
         for word, cnt in today_search_word.most_common(10):
             data = {
-                "word": word,
-                "cnt": cnt,
+                "keyword": word,
+                "count": cnt,
                 "use_yn": "N"
             }
             if session.query(**RecommendKeyTable.get_select_query(word)).first():

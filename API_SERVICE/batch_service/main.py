@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from batch_service.common.config import settings
 from batch_service.database.conn import db
-from batch_service.jobs import send_email
+from batch_service.jobs import send_email, recommend_word
 from batch_service.routes import v1
 
 
@@ -27,6 +27,7 @@ scheduler = BackgroundScheduler()
 @app.on_event("startup")
 def _app_startup():
     scheduler.add_job(send_email.send_mail, "cron",second="*/5",id="email")
+    scheduler.add_job(recommend_word.recommend_search_word, "cron",hour='23', minute='59',id="email")
     scheduler.start()
 
 
