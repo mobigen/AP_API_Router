@@ -99,7 +99,7 @@ class ProdSettings(Settings):
     DB_ECHO: bool = True
     RELOAD: bool = False
 
-    MYDISK_ROOT_DIR = "./"
+    MYDISK_ROOT_DIR = "/kadap-portal"
     MYDISK_CONN_URL: AnyUrl = "https://mydisk.bigdata-car.kr"
 
     DB_INFO: PGInfo = PGInfo()
@@ -128,7 +128,7 @@ class LocalSettings(Settings):
     DB_ECHO: bool = True
     RELOAD: bool = False
 
-    MYDISK_ROOT_DIR = "./"
+    MYDISK_ROOT_DIR = "/home/deep/workspace/ysw/katech/filebrowser_datas/file_data"
     MYDISK_CONN_URL: AnyUrl = "https://mydisk.bigdata-car.kr"
 
     DB_INFO = PGInfo(
