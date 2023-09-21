@@ -5,7 +5,7 @@ from datetime import datetime
 from collections import Counter
 
 from batch_service.database.conn import db
-from batch_service.common.const import service_dir, RecommendKeyTable
+from batch_service.common.const import log_dir, RecommendKeyTable
 
 
 logger = logging.getLogger()
@@ -17,7 +17,7 @@ def main():
     with db.get_db_manager() as session:
         # 검색어 로그 불러오기
         search_file_name = (
-            f"{service_dir}/meta_service/log/{datetime.today().date().strftime('%Y%m%d')}_search.log"
+            f"{log_dir}/{datetime.today().date().strftime('%Y%m%d')}_search.log"
         )
         with open(search_file_name, "r") as fp:
             search_log_file = fp.read().split("\n")[:-1]

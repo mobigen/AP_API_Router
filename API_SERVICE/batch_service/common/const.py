@@ -3,7 +3,8 @@ from pydantic import BaseSettings
 from batch_service.common.config import base_dir
 from libs.database.dml_controller import Base
 
-service_dir = os.path.dirname(base_dir)
+# log_dir = "{os.path.dirname(base_dir)}/meta_service/log/"
+log_dir = f"{os.path.dirname(os.path.dirname(base_dir))}/API-SERVICE/log/meta"
 
 msg_setting = {
     "register": {
