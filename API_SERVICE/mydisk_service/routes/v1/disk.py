@@ -19,6 +19,16 @@ from mydisk_service.common.config import settings
 
 logger = logging.getLogger()
 
+class UserParams(BaseModel):
+    uuid: str
+
+    def get_path(self) -> Path:
+        return Path(
+            os.path.join(
+                settings.MYDISK_ROOT_DIR, self.uuid,
+            )
+        )
+
 class DownloadParams(BaseModel):
     src_target_path: str
 
@@ -169,6 +179,19 @@ async def download(params: DownloadParams):
         result = {"result": 0, "errorMessage": str(e)}
     return result
 
+@router.post("/v1/user")
+async def create_user_dir(params: UserParams):
+    target_path = params.get_path()
+    logger.info(f"param target_path :: {target_path}")
+    dirs = ["favorite", "upload", "purchase"]
+    try:
+        # 세개의 디렉토리 미리 생성
+        for dir in dirs : os.makedirs(f"{target_path}/{dir}")
+        result = {"result": 1, "errorMessage": "", "data": "success"}
+    except Exception as e:
+        logger.error(e)
+        result = {"result": 0, "errorMessage": str(e)}
+    return result
 
 def is_dir(src_path):
     return os.path.isdir(
