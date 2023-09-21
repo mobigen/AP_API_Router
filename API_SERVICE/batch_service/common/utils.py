@@ -3,6 +3,7 @@ from datetime import datetime
 
 from batch_service.ELKSearch.Utils.base import set_els
 from batch_service.ELKSearch.document import DocumentManager
+from batch_service.ELKSearch.index import Index
 
 
 def default_search_set(server_config, index, size=10, from_=0):
@@ -14,6 +15,11 @@ def default_search_set(server_config, index, size=10, from_=0):
     docmanger = DocumentManager(es, index)
     docmanger.set_pagination(size, from_)
     return docmanger
+
+
+def index_set(server_config):
+    es = set_els(server_config)
+    return Index(es)
 
 
 def data_process(row):
