@@ -96,12 +96,13 @@ router = APIRouter()
 async def head(params: PreviewParam):
     try:
         path = params.get_path()
-        suffix = path.suffix.lower()
+        suffix = path.suffix[1:].lower()
         lines = params.rows
         logger.info(f"path :: {path}")
         file_type = "txt"
 
-        if suffix in ['.jpg','.png'] :
+        if suffix in ['jpg', 'jpeg','png','gif','tiff'] :
+            file_type = "image"
             byte_str = BytesIO()
             thumb_image = Image.open(path)
             thumb_image.thumbnail((90,90))
@@ -110,7 +111,7 @@ async def head(params: PreviewParam):
             logger.info(f"image str :: {image_base64str[:30]}...")
             contents = image_base64str
         else : # txt, csv
-            df = pd.read_excel(path, header=None) if path.suffix in [".xls", ".xlsx"] else pd.read_csv(path, header=None)
+            df = pd.read_excel(path, header=None) if path.suffix in ["xls", "xlsx"] else pd.read_csv(path, header=None)
             df = df.fillna("")
             contents = df[:lines].values.tolist()
 
