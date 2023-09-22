@@ -16,6 +16,6 @@ local_server = ElkServerConfig(
 )
 
 dev_server = ElkServerConfig(
-    host="192.168.101.164",
-    port="9200"
+    host="192.168.101.44",
+    port="39200"
 )
