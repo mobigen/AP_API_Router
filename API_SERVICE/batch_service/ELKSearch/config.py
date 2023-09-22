@@ -1,4 +1,4 @@
-from meta_service.ELKSearch.model import ElkServerConfig
+from batch_service.ELKSearch.model import ElkServerConfig
 """
 검색에 사용할 설정을 정의
 local_els와 비슷한 양식으로 정의

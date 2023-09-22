@@ -1,5 +1,5 @@
-from meta_service.ELKSearch.Utils.base import make_format
-from meta_service.ELKSearch.Utils.document_utils import set_source
+from batch_service.ELKSearch.Utils.base import make_format
+from batch_service.ELKSearch.Utils.document_utils import set_source
 
 
 class DocumentManager:
