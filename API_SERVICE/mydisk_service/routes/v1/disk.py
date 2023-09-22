@@ -100,7 +100,7 @@ async def head(params: PreviewParam):
         df = df.fillna("")
         result = {"result": 1, "errorMessage": "", "data": {"body": df[:lines].values.tolist()}}
     except Exception as e:
-        result = {"result": 1, "errorMessage": str(e)}
+        result = {"result": 0, "errorMessage": str(e)}
     return result
 
 @router.post("/v1/listdir")
@@ -125,7 +125,7 @@ async def walk(param: TreeParams) -> Dict:
     try:
         result = {"result": 1, "errorMessage": "", "data": {"body": nodes(param.get_path())}}
     except FileNotFoundError as fe:
-        result = {"result": 1, "errorMessage": str(fe), "data": []}
+        result = {"result": 0, "errorMessage": str(fe), "data": []}
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e), "data": []}
     return result
@@ -136,7 +136,7 @@ async def hardlink(params: CopyParams):
         run(params.get_src(), params.get_dst(), params.is_force(), False)
         result = {"result": 1, "errorMessage": "", "data": {"body": 200}}
     except Exception as e:
-        result = {"result": 1, "errorMessage": str(e)}
+        result = {"result": 0, "errorMessage": str(e)}
     return result
 
 
@@ -146,7 +146,7 @@ async def copy(params: CopyParams):
         run(params.get_src(), params.get_dst(), params.is_force(), True)
         result = {"result": 1, "errorMessage": "", "data": {"body": 200}}
     except Exception as e:
-        result = {"result": 1, "errorMessage": str(e)}
+        result = {"result": 0, "errorMessage": str(e)}
     return result
 
 @router.post("/v1/download")
