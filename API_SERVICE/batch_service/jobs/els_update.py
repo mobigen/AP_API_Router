@@ -21,7 +21,9 @@ def insert_meta():
         docmanager = default_search_set(dev_server, index_nm)
 
         with db.get_db_manager() as session:
-            meta_list = session.query(**BizDataTable.get_select_query("D")).all()[0]
+            query = BizDataTable.get_select_query("")
+            query.pop("where_info")
+            meta_list = session.query(**query).all()[0]
 
         logger.info(len(meta_list))
 
