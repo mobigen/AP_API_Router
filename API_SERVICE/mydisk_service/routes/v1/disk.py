@@ -7,6 +7,8 @@ import shutil
 import base64
 import pandas as pd
 
+from PIL import Image
+from io import BytesIO
 from pathlib import Path
 from typing import Optional, Union, Dict
 
@@ -94,11 +96,31 @@ router = APIRouter()
 async def head(params: PreviewParam):
     try:
         path = params.get_path()
+        suffix = path.suffix[1:].lower()
         lines = params.rows
-        logger.info(path)
-        df = pd.read_excel(path, header=None) if path.suffix in [".xls", ".xlsx"] else pd.read_csv(path, header=None)
-        df = df.fillna("")
-        result = {"result": 1, "errorMessage": "", "data": {"body": df[:lines].values.tolist()}}
+        logger.info(f"path :: {path}")
+        file_type = "txt"
+
+        if suffix in ['jpg', 'jpeg','png','gif','tiff'] :
+            file_type = "image"
+            byte_str = BytesIO()
+            thumb_image = Image.open(path)
+            thumb_image.thumbnail((90,90))
+            thumb_image.save(byte_str, format="png")
+            image_base64str = base64.b64encode(byte_str.getvalue())
+            logger.info(f"image str :: {image_base64str[:30]}...")
+            contents = image_base64str
+        else : # txt, csv
+            df = pd.read_excel(path, header=None) if path.suffix in ["xls", "xlsx"] else pd.read_csv(path, header=None)
+            df = df.fillna("")
+            contents = df[:lines].values.tolist()
+
+        result = {
+            "result": 1,
+            "errorMessage": "",
+            "data": {"body": contents},
+            "type": file_type
+        }
     except Exception as e:
         result = {"result": 1, "errorMessage": str(e)}
     return result
@@ -125,7 +147,7 @@ async def walk(param: TreeParams) -> Dict:
     try:
         result = {"result": 1, "errorMessage": "", "data": {"body": nodes(param.get_path())}}
     except FileNotFoundError as fe:
-        result = {"result": 1, "errorMessage": str(fe), "data": []}
+        result = {"result": 0, "errorMessage": str(fe), "data": []}
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e), "data": []}
     return result
@@ -136,7 +158,7 @@ async def hardlink(params: CopyParams):
         run(params.get_src(), params.get_dst(), params.is_force(), False)
         result = {"result": 1, "errorMessage": "", "data": {"body": 200}}
     except Exception as e:
-        result = {"result": 1, "errorMessage": str(e)}
+        result = {"result": 0, "errorMessage": str(e)}
     return result
 
 
@@ -146,7 +168,7 @@ async def copy(params: CopyParams):
         run(params.get_src(), params.get_dst(), params.is_force(), True)
         result = {"result": 1, "errorMessage": "", "data": {"body": 200}}
     except Exception as e:
-        result = {"result": 1, "errorMessage": str(e)}
+        result = {"result": 0, "errorMessage": str(e)}
     return result
 
 @router.post("/v1/download")
