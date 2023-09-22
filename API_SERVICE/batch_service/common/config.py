@@ -7,7 +7,7 @@ from typing import Union
 from pydantic import BaseSettings, PostgresDsn, validator, SecretStr
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print(f"common base_dir :: {base_dir}")
+print(f"batch base_dir :: {base_dir}")
 
 
 class DBInfo(BaseSettings):

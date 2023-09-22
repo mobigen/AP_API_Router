@@ -37,6 +37,11 @@
       "level": "INFO",
       "handlers": ["console", "file"],
       "propagate": false
+    },
+    "apscheduler.scheduler": {
+      "level": "INFO",
+      "handlers": ["console", "file"],
+      "propagate": false
     }
   }
 }

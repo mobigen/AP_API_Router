@@ -1,7 +1,10 @@
+import os
 from pydantic import BaseSettings
 from batch_service.common.config import base_dir
 from libs.database.dml_controller import Base
 
+# log_dir = "{os.path.dirname(base_dir)}/meta_service/log/"
+log_dir = f"{os.path.dirname(os.path.dirname(base_dir))}/API-SERVICE/log/meta"
 
 msg_setting = {
     "register": {
@@ -67,3 +70,17 @@ class EmailSendInfoTable(Base):
             ],
         }
 
+
+class BizDataTable(Base):
+    table_nm = "v_biz_meta_info"
+    key_column = "status"
+
+
+class CkanDataTable(Base):
+    table_nm = "v_biz_meta_ckan"
+    key_column = "biz_dataset_id"
+
+
+class RecommendKeyTable(Base):
+    table_nm = "tb_recommend_keyword"
+    key_column = "keyword"

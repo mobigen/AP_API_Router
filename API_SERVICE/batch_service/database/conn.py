@@ -1,6 +1,6 @@
 from sqlalchemy.ext.automap import automap_base
 
-from common_service.common.config import settings
+from batch_service.common.config import settings
 
 Base = automap_base()
 db = None

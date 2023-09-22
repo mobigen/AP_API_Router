@@ -1,0 +1,35 @@
+{
+  "settings":{
+    "queries.cache.enabled":"true",
+    "refresh_interval":"10s",
+    "max_shingle_diff":10
+  },
+  "mappings":{
+    "properties":{
+      "biz_dataset_id":{
+        "type":"keyword"
+      },
+      "data_nm":{
+        "type":"text",
+        "fielddata":true
+      },
+      "data_desc":{
+        "type":"text"
+      },
+      "tags":{
+        "type":"keyword"
+      },
+      "notes":{
+        "type":"keyword"
+      },
+      "updt_dt":{
+        "type":"date",
+        "format":"strict_date_optional_time_nanos||yyyy-MM-dd'T'HH:mm:ss.SSSSSS||yyyy-MM-dd||yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||date_hour_minute_second"
+      },
+      "reg_date":{
+        "type":"date",
+        "format":"strict_date_optional_time_nanos||yyyy-MM-dd'T'HH:mm:ss.SSSSSS||yyyy-MM-dd||yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||date_hour_minute_second"
+      }
+    }
+  }
+}
