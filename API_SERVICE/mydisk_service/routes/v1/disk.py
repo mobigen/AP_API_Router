@@ -1,7 +1,5 @@
 import os
 import zipfile
-import random
-import string
 import logging
 import shutil
 import base64
@@ -15,7 +13,6 @@ from typing import Optional, Union, Dict
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 
-from libs.auth.keycloak import keycloak
 from libs.disk.mydisk import mydisk
 from mydisk_service.common.config import settings
 
@@ -178,10 +175,10 @@ async def download(params: DownloadParams):
     try:
         # dir 이면 zip 으로 압축함
         if os.path.isdir(src_path) :
-            zip_file_path = "/tmp/bigdata_portal_" + "".join([random.choice(string.ascii_lowercase) for _ in range(0,5)]) + ".zip"
             os.chdir(src_path)  # 압축 파일 생성할 폴더로 working directory 를 이동시킨다
+            byte_io = BytesIO()
 
-            zip_file = zipfile.ZipFile(zip_file_path, "w")
+            zip_file = zipfile.ZipFile(byte_io, "w")
             for (path, dir, files) in os.walk(src_path):
                 for file in files:
                     logger.info(f"Adding file :: {file}")
@@ -190,11 +187,11 @@ async def download(params: DownloadParams):
 
             zip_file.close()
             # zip 파일을 읽도록 주소 변경
-            src_path = zip_file_path
+            decode_data = base64.b64encode(byte_io.getvalue()).decode()
+        else :
+            read_file = open(src_path, 'rb').read()
+            decode_data = base64.b64encode(read_file).decode()
 
-        logger.info(f"read src_path :: {src_path}")
-        read_file = open(src_path, 'rb').read()
-        decode_data = base64.b64encode(read_file).decode()
         logger.info(f"decode_data :: {decode_data[:20]} ..")
         result = {"result": 1, "errorMessage": "", "data": {"body": decode_data }}
     except Exception as e:

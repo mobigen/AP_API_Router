@@ -29,7 +29,7 @@ def refresh_token_from_cookie_wrapper(keycloak: KeycloakManager, **kwargs):
                 raise HTTPException(status_code=token.get("status_code"))
         except Exception as e:
             response = await call_next(request)
-            response.delete_cookie(cookie_name)
+            response.delete_cookie(cookie_name, domain="bigdata-car.kr")
             return response
 
         now = datetime.now().strftime("%s")
