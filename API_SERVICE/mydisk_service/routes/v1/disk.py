@@ -24,7 +24,7 @@ class UserParams(BaseModel):
     def get_path(self) -> Path:
         return Path(
             os.path.join(
-                settings.MYDISK_ROOT_DIR, self.uuid,
+                settings.MYDISK_ROOT_DIR, "USER", self.uuid,
             )
         )
 
