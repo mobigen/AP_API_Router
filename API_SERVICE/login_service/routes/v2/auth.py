@@ -641,6 +641,30 @@ async def setRoleMapping(params: ClientRoleMappingWrap, request: Request):
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
+@router.get("/user/v2/getUyuniRole")
+async def getUyuniRole(request: Request):
+    token = request.cookies.get(COOKIE_NAME)
+
+    if not token:
+        msg = "TokenDoesNotExist"
+        logger.info(msg)
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+
+    try :
+        token = literal_eval(token)
+        access_token = token["data"]["access_token"]
+        res = await get_token_info(token=access_token)
+        if res["status_code"] == 200:
+            return JSONResponse(status_code=200, content={"result": 1, "data": res["data"]})
+        else :
+            return JSONResponse(
+                status_code=400,
+                content={"result": 0, "errorMessage": res["data"]["error_description"]},
+            )
+    except Exception as e :
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
 async def check_admin(request: Request) :
     resToken = await get_user_info_from_request(request)
     logger.info(resToken)
@@ -922,6 +946,14 @@ async def keycloak_logout(**kwargs) :
     return await keycloak.logout(
         realm=settings.KEYCLOAK_INFO.realm,
         refresh_token=kwargs.get("refresh_token"),
+        client_id=settings.KEYCLOAK_INFO.client_id,
+        client_secret=settings.KEYCLOAK_INFO.client_secret
+    )
+
+async def get_token_info(**kwargs):
+    return await keycloak.token_info(
+        realm=settings.KEYCLOAK_INFO.realm,
+        token=kwargs.get("token"),
         client_id=settings.KEYCLOAK_INFO.client_id,
         client_secret=settings.KEYCLOAK_INFO.client_secret
     )
