@@ -43,6 +43,37 @@ class PGInfo(DBInfo):
         )
 
 
+class SeoulPGInfo(DBInfo):
+    type: str = "orm"
+    SEOUL_HOST: str = ""
+    SEOUL_PORT: str = ""
+    SEOUL_BASE: str = ""
+    SEOUL_USER: str = ""
+    SEOUL_PASS: SecretStr = ""
+    SEOUL_SCHEMA: str = ""
+
+    def settings(self):
+        self.HOST = self.SEOUL_HOST
+        self.PORT = self.SEOUL_PORT
+        self.BASE = self.SEOUL_BASE
+        self.USER = self.SEOUL_USER
+        self.PASS = self.SEOUL_PASS
+        self.SCHEMA = self.SEOUL_SCHEMA
+        return self
+
+    def get_dsn(self):
+        return str(
+            PostgresDsn.build(
+                scheme="postgresql",
+                host=self.SEOUL_HOST,
+                port=self.SEOUL_PORT,
+                user=self.SEOUL_USER,
+                password=self.SEOUL_PASS.get_secret_value(),
+                path=f"/{self.SEOUL_BASE}",
+            )
+        )
+
+
 class TiberoInfo(DBInfo):
     type: str = "tibero"
 
@@ -58,12 +89,20 @@ class Settings(BaseSettings):
     TESTING: bool = True
 
     DB_INFO: DBInfo = DBInfo()
+    SEOUL_DB_INFO: SeoulPGInfo = SeoulPGInfo()
     DB_URL: Union[str, PostgresDsn] = None
+    SEOUL_DB_URL: Union[str, PostgresDsn] = None
 
     @validator("DB_URL", pre=True, always=True)
     def assemble_db_url(cls, v, values):
         if all(value is not None for value in values.values()):
             return values.get("DB_INFO").get_dsn()
+        raise ValueError("Not all PostgreSQL database connection values were provided.")
+
+    @validator("SEOUL_DB_URL", pre=True, always=True)
+    def assemble_seoul_db_url(cls, v, values):
+        if all(value is not None for value in values.values()):
+            return values.get("SEOUL_DB_INFO").get_dsn()
         raise ValueError("Not all PostgreSQL database connection values were provided.")
 
 
@@ -74,6 +113,7 @@ class ProdSettings(Settings):
     RELOAD: bool = False
 
     DB_INFO: PGInfo = PGInfo()
+    SEOUL_DB_INFO: SeoulPGInfo = SeoulPGInfo()
 
 
 class LocalSettings(Settings):
@@ -88,7 +128,16 @@ class LocalSettings(Settings):
         USER="dpmanager",
         PASS="hello.dp12#$",
         BASE="dataportal",
-        SCHEMA="sitemng,users,meta,iag,ckan,board,analysis",
+        SCHEMA="sitemng,users,meta,ckan",
+    )
+
+    SEOUL_DB_INFO = SeoulPGInfo(
+        SEOUL_HOST="147.47.200.145",
+        SEOUL_PORT="34543",
+        SEOUL_USER="openplatform",
+        SEOUL_PASS="openplatform",
+        SEOUL_BASE="katechdb",
+        SEOUL_SCHEMA="public",
     )
 
 
@@ -104,6 +153,7 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+settings.SEOUL_DB_INFO = settings.SEOUL_DB_INFO.settings()
 print(settings)
 
 with open(os.path.join(base_dir, "logging.json")) as f:

@@ -1,14 +1,10 @@
 from sqlalchemy.ext.automap import automap_base
+from batch_service.common.utils import SeoulOrmConnector
+from libs.database.orm import SQLAlchemyConnector
 
-from batch_service.common.config import settings
+db = None
+seoul_db = None
 
 Base = automap_base()
-db = None
-if settings.DB_INFO.type == "tibero":
-    from libs.database.tibero import TiberoConnector
-
-    db = TiberoConnector()
-elif settings.DB_INFO.type == "orm":
-    from libs.database.orm import SQLAlchemyConnector
-
-    db = SQLAlchemyConnector(Base)
+db = SQLAlchemyConnector(Base)
+seoul_db = SeoulOrmConnector(Base)

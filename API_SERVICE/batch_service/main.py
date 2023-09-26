@@ -3,7 +3,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 
 from batch_service.common.config import settings
-from batch_service.database.conn import db
+from batch_service.database.conn import seoul_db, db
 from batch_service.jobs import send_email, recommend_word, els_update
 from batch_service.routes import v1
 
@@ -12,8 +12,9 @@ def create_app():
     app_ = FastAPI()
     print(settings.dict())
     db.init_app(app_, **settings.dict())
+    seoul_db.init_app(app_, **settings.dict())
 
-    app_.include_router(v1.router, prefix="/portal/api/batch")
+    app_.include_router(test.router, prefix="/portal/api/batch")
 
     return app_
 
