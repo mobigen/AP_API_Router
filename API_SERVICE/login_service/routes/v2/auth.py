@@ -47,10 +47,6 @@ class QueryInfoWrap(BaseModel):
     data: QueryInfo
 
 class LoginInfoWrap(BaseModel):
-    """
-    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
-    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
-    """
 
     class LoginInfo(BaseModel):
         user_id: str
@@ -59,10 +55,6 @@ class LoginInfoWrap(BaseModel):
     data: LoginInfo
 
 class LoginAuthInfoWrap(BaseModel):
-    """
-    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
-    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
-    """
 
     class LoginAuthInfo(BaseModel):
         code: str
@@ -72,10 +64,6 @@ class LoginAuthInfoWrap(BaseModel):
     data: LoginAuthInfo
 
 class RegisterInfoWrap(BaseModel):
-    """
-    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
-    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 RegisterInfo 객체를 생성
-    """
 
     class RegisterInfo(BaseModel):
         user_id: str
@@ -109,10 +97,6 @@ class RegisterInfoWrap(BaseModel):
     data: RegisterInfo
 
 class RegisterSocialInfoWrap(BaseModel):
-    """
-    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
-    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
-    """
 
     class RegisterSocialInfo(BaseModel):
         social_type: str
@@ -123,10 +107,6 @@ class RegisterSocialInfoWrap(BaseModel):
     data: RegisterSocialInfo
 
 class ActivateInfoWrap(BaseModel):
-    """
-    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
-    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
-    """
 
     class ActivateInfo(BaseModel):
         user_id: str
@@ -135,10 +115,6 @@ class ActivateInfoWrap(BaseModel):
     data: ActivateInfo
 
 class UserInfoWrap(BaseModel):
-    """
-    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
-    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
-    """
 
     class UserInfo(BaseModel):
         user_id: str
@@ -146,10 +122,6 @@ class UserInfoWrap(BaseModel):
     data: UserInfo
 
 class PasswordInfoWrap(BaseModel):
-    """
-    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
-    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
-    """
 
     class PasswordInfo(BaseModel):
         user_id: str
@@ -159,10 +131,6 @@ class PasswordInfoWrap(BaseModel):
     data: PasswordInfo
 
 class PurchaseInfoWrap(BaseModel):
-    """
-    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
-    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
-    """
 
     class PurchaseInfo(BaseModel):
         data_id: str
@@ -170,10 +138,6 @@ class PurchaseInfoWrap(BaseModel):
     data: PurchaseInfo
 
 class ClientInfoWrap(BaseModel):
-    """
-    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
-    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
-    """
 
     class ClientInfo(BaseModel):
         client_name: str
