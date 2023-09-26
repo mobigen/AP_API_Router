@@ -73,6 +73,8 @@ class TreeParams(BaseModel):
 
 class PreviewParam(BaseModel):
     target_file_directory: str
+    width: Optional[int] = 90
+    height: Optional[int] = 90
     rows: int
 
     def get_path(self) -> Path:
@@ -93,6 +95,8 @@ router = APIRouter()
 async def head(params: PreviewParam):
     try:
         path = params.get_path()
+        width = params.width
+        height = params.height
         suffix = path.suffix[1:].lower()
         lines = params.rows
         logger.info(f"path :: {path}")
@@ -102,7 +106,7 @@ async def head(params: PreviewParam):
             file_type = "image"
             byte_str = BytesIO()
             thumb_image = Image.open(path)
-            thumb_image.thumbnail((90,90))
+            thumb_image.thumbnail((width,height))
             thumb_image.save(byte_str, format="png")
             image_base64str = base64.b64encode(byte_str.getvalue())
             logger.info(f"image str :: {image_base64str[:30]}...")
