@@ -207,6 +207,12 @@ class KeycloakManager:
             api_url=f"{self.base_url}/admin/realms/{realm}/users/{sub}/federated-identity", method="GET", headers=headers
         )
 
+    async def check_client_id(self, token, realm):
+        headers = {"Content-Type": "application/json", "Authorization": "bearer " + token}
+        return await self._request_to_keycloak(
+            api_url=f"{self.base_url}/admin/realms/{realm}/clients", method="GET", headers=headers
+        )
+
 
 if __name__ == "__main__":
     import asyncio

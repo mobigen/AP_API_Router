@@ -169,6 +169,17 @@ class PurchaseInfoWrap(BaseModel):
 
     data: PurchaseInfo
 
+class ClientInfoWrap(BaseModel):
+    """
+    기존 파리미터 인터페이스와 맞추기 위해 wrap 후 유효 데이터를 삽입
+    dict를 그대로 사용할 수도 있으나, 개발 편의상 자동완성을 위해 LoginInfo 객체를 생성
+    """
+
+    class ClientInfo(BaseModel):
+        client_name: str
+
+    data: ClientInfo
+
 router = APIRouter()
 
 @router.post("/user/v2/commonLogout")
@@ -583,6 +594,23 @@ async def checkPurchase(params: PurchaseInfoWrap, request: Request):
             except Exception:
                 ret = await response.read()
             return {"status_code": response.status, "data": ret}
+
+@router.post("/user/v2/checkClientInfo")
+async def checkClientInfo(params: ClientInfoWrap, request: Request):
+    params = params.data
+    client_name = params.client_name
+    try :
+        admin_token = await get_admin_token()
+        res = await keycloak.check_client_id(token=admin_token, realm=settings.KEYCLOAK_INFO.realm)
+        client_list = res.get("data")
+        client_info = list(filter(lambda item : item["clientId"] == client_name, client_list))
+        logger.info(f"client_info :: {client_info}")
+        if len(client_info) == 0 :
+            return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid Client Name!!"})
+        return JSONResponse(status_code=200, content={"result": 1, "data": client_info})
+    except Exception as e :
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
 async def check_admin(request: Request) :
