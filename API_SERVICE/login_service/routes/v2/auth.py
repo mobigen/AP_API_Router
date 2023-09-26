@@ -144,6 +144,13 @@ class ClientInfoWrap(BaseModel):
 
     data: ClientInfo
 
+class ClientRoleWrap(BaseModel):
+
+    class ClientRole(BaseModel):
+        client_sub: str
+
+    data: ClientRole
+
 router = APIRouter()
 
 @router.post("/user/v2/commonLogout")
@@ -572,6 +579,20 @@ async def checkClientInfo(params: ClientInfoWrap, request: Request):
         if len(client_info) == 0 :
             return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid Client Name!!"})
         return JSONResponse(status_code=200, content={"result": 1, "data": client_info})
+    except Exception as e :
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+@router.post("/user/v2/checkClientRole")
+async def checkClientRole(params: ClientRoleWrap, request: Request):
+    params = params.data
+    client_sub = params.client_sub
+    try :
+        admin_token = await get_admin_token()
+        res = await keycloak.check_client_role(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, client_sub=client_sub)
+        client_role = res.get("data")
+        logger.info(f"client_role :: {client_role}")
+        return JSONResponse(status_code=200, content={"result": 1, "data": client_role})
     except Exception as e :
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})

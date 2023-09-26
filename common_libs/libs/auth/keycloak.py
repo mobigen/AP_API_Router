@@ -213,6 +213,12 @@ class KeycloakManager:
             api_url=f"{self.base_url}/admin/realms/{realm}/clients", method="GET", headers=headers
         )
 
+    async def check_client_role(self, token, realm, client_sub):
+        headers = {"Content-Type": "application/json", "Authorization": "bearer " + token}
+        return await self._request_to_keycloak(
+            api_url=f"{self.base_url}/admin/realms/{realm}/clients/{client_sub}/roles", method="GET", headers=headers
+        )
+
 
 if __name__ == "__main__":
     import asyncio
