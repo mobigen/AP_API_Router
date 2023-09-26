@@ -219,6 +219,23 @@ class KeycloakManager:
             api_url=f"{self.base_url}/admin/realms/{realm}/clients/{client_sub}/roles", method="GET", headers=headers
         )
 
+    async def set_client_role_mapping(self, token, realm, **kwargs):
+        headers = {"Content-Type": "application/json", "Authorization": "bearer " + token}
+        user_sub = kwargs.get("user_sub")
+        client_sub = kwargs.get("client_sub")
+        params = [{
+            "id": kwargs.get("role_sub"),
+            "name": kwargs.get("role_name")
+        }]
+
+        async with aiohttp.ClientSession() as session:
+            async with session.request(
+                    url=f"{self.base_url}/admin/realms/{realm}/users/{user_sub}/role-mappings/clients/{client_sub}",
+                    method="POST",
+                    headers=headers,
+                    json=params,
+            ) as response:
+                return {"status_code": response.status, "data": await response.read()}
 
 if __name__ == "__main__":
     import asyncio
