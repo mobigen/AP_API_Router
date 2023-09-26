@@ -153,7 +153,7 @@ class ClientRoleWrap(BaseModel):
 class ClientRoleMappingWrap(BaseModel):
 
     class ClientRoleMapping(BaseModel):
-        user_sub: str
+        user_id: str
         client_sub: str
         role_sub: str
         role_name: str
@@ -609,9 +609,26 @@ async def checkClientRole(params: ClientRoleWrap, request: Request):
 @router.post("/user/v2/setRoleMapping")
 async def setRoleMapping(params: ClientRoleMappingWrap, request: Request):
     params = params.data
+    user_id = params.user_id
+
     try :
         admin_token = await get_admin_token()
-        resToken = await keycloak.set_client_role_mapping(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **params.dict())
+        res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query = f"username={user_id}&exact=true")
+
+        userList = res.get("data")
+        if len(userList) == 0 :
+            return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
+
+        user_info = userList[0]
+        user_sub = user_info.get("id")
+        kwargs = {
+            "user_sub" : user_sub,
+            "client_sub" : params.client_sub,
+            "role_sub" : params.role_sub,
+            "role_name" : params.role_name
+        }
+
+        resToken = await keycloak.set_client_role_mapping(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **kwargs)
         if resToken["status_code"] == 204:
             return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
         else :
