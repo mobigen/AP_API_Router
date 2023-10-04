@@ -7,7 +7,7 @@ from batch_service.common.const import DatasetDomesticTable, ResourceReportTable
 
 
 logger = logging.getLogger()
-today = datetime.today()
+today = datetime.today().strftime("%Y-%m-%d")
 
 
 def insert_db(sess, table_nm, data_list, insert_query):

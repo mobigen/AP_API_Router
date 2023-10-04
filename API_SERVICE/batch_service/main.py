@@ -4,8 +4,8 @@ from fastapi import FastAPI
 
 from batch_service.common.config import settings
 from batch_service.database.conn import seoul_db, db
-from batch_service.jobs import send_email, recommend_word, els_update
-from batch_service.routes import v1
+from batch_service.jobs import send_email, recommend_word, els_update, seoul_db_upload
+from batch_service.routes.v1 import test
 
 
 def create_app():
@@ -27,10 +27,13 @@ scheduler = BackgroundScheduler()
 
 @app.on_event("startup")
 def _app_startup():
-    # scheduler.add_job(send_email.send_mail, "cron",second="*/5",id="email")
-    # scheduler.add_job(recommend_word.recommend_search_word, "cron",hour='23', minute='59',id="recommend")
-    # scheduler.add_job(els_update.insert_meta, "cron", hour='00', minute='15',id="update_meta")
+    scheduler.add_job(send_email.send_mail, "cron",second="*/5",id="email")
+    scheduler.add_job(recommend_word.recommend_search_word, "cron",hour='23', minute='59',id="recommend")
+    scheduler.add_job(els_update.insert_meta, "cron", hour='00', minute='15',id="update_meta")
     scheduler.add_job(els_update.insert_ckan, "cron", hour='00', minute='40',id="update_ckan")
+    scheduler.add_job(seoul_db_upload.update_ddr, "cron",hour='23', minute='59',id="update_ddr")
+    scheduler.add_job(seoul_db_upload.update_rr, "cron",hour='23', minute='59',id="update_rr")
+
     scheduler.start()
 
 
