@@ -84,3 +84,13 @@ class CkanDataTable(Base):
 class RecommendKeyTable(Base):
     table_nm = "tb_recommend_keyword"
     key_column = "keyword"
+
+
+class DatasetDomesticTable(Base):
+    table_nm = "tbdataset_domestic_recommendation"
+    key_column = "ds_id"
+
+
+class ResourceReportTable(Base):
+    table_nm = "tbresource_report"
+    key_column = "rp_id"
