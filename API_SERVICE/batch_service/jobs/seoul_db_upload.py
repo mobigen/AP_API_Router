@@ -63,18 +63,16 @@ def insert_rr():
         }
     }
     update_query = ResourceReportTable.get_execute_query("update",{})
-
-    while True:
-        query["page_info"]["cur_page"] = i
-        with seoul_db.get_db_manager() as session:
-            data_list, item_len = session.query(**query).all()
-        with db.get_db_manager() as session:
-            insert_db(session, table_nm, data_list, update_query)
-
-        if i == item_len:
-            break
-        else:
-            i = i+1
+    with seoul_db.get_db_manager() as s_sess:
+        with db.get_db_manager() as d_sess:
+            while True:
+                query["page_info"]["cur_page"] = i
+                data_list, item_len = s_sess.query(**query).all()
+                insert_db(d_sess, table_nm, data_list, update_query)
+                if i == item_len:
+                    break
+                else:
+                    i = i+1
 
 
 def update_ddr():
@@ -129,18 +127,15 @@ def update_rr():
             "cur_page": i
         }
     }
+    with seoul_db.get_db_manager() as s_sess:
+        with db.get_db_manager() as d_sess:
+            while True:
+                query["page_info"]["cur_page"] = i
+                data_list, item_len = s_sess.query(**query).all()
+                update_query = ResourceReportTable.get_execute_query("update",data_list)
+                d_sess.execute(**update_query)
 
-    while True:
-        query["page_info"]["cur_page"] = i
-        with seoul_db.get_db_manager() as session:
-            data_list, item_len = session.query(**query).all()
-
-        update_query = ResourceReportTable.get_execute_query("update",data_list)
-
-        with db.get_db_manager() as session:
-            session.execute(**update_query)
-
-        if i == item_len:
-            break
-        else:
-            i = i+1
+                if i == item_len:
+                    break
+                else:
+                    i = i+1
