@@ -68,7 +68,7 @@ async def api(request: Request, session: Executor = Depends(db.get_db)) -> JSONR
     if not token:
         msg = "TokenDoesNotExist"
         logger.info(msg)
-        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": msg})
+        return JSONResponse(status_code=200, content={"result": 0, "errorMessage": msg})
 
     token = literal_eval(token)
     userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm )
