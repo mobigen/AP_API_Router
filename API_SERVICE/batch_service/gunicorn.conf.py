@@ -17,7 +17,7 @@
 #       range.
 #
 
-bind = "0.0.0.0:21000"
+bind = "0.0.0.0:8000"
 backlog = 2048
 
 #
@@ -144,10 +144,10 @@ tmp_upload_dir = None
 #
 #       A string of "debug", "info", "warning", "error", "critical"
 #
-logfile = "./log/batch.log"
-errorlog = "./log/batch-error.log"
+logfile = "./log/gunicorn-batch.log"
+errorlog = "./log/gunicorn-batch-error.log"
 loglevel = "info"
-accesslog = "./log/batch.log"
+accesslog = "./log/gunicorn-batch.log"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
 #
