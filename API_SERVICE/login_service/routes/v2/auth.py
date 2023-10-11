@@ -93,6 +93,9 @@ class RegisterInfoWrap(BaseModel):
         sub: Optional[str]
         openstack_default_project: Optional[str]
         openstack_user_domain: Optional[str]
+        limit_cpu: Optional[str]
+        limit_mem: Optional[str]
+        limit_app_count: Optional[str]
 
     data: RegisterInfo
 
@@ -720,8 +723,11 @@ async def alter_user_info(user_id:str, user_sttus:str, **kwargs) :
                      'moblphon': ['010-1111-0000'],
                      'amd_user': ['459b95f5-0a82-4318-866f-0aba85d59897'],
                      'service_terms_yn': ['Y'],
-                     'openstack-default-project' : ['default'],
-                     'openstack-user-domain' : ['Default']
+                     'openstack-default-project' : Optional[str],
+                     'openstack-user-domain' : Optional[str],
+                     'limit_cpu': Optional[str],
+                     'limit_mem': Optional[str],
+                     'limit_app_count': Optional[str]
                 }
             }
         ]
@@ -740,9 +746,15 @@ async def alter_user_info(user_id:str, user_sttus:str, **kwargs) :
         attributes_user_sttus =  attributes.get("user_sttus")[0]
         openstack_default_project = attributes.get("openstack_default_project")
         openstack_user_domain = attributes.get("openstack_user_domain")
+        limit_cpu = attributes.get("limit_cpu")
+        limit_mem = attributes.get("limit_mem")
+        limit_app_count = attributes.get("limit_app_count")
 
         if openstack_default_project is None : openstack_default_project = ""
         if openstack_user_domain is None : openstack_user_domain = "Default"
+        if limit_cpu is None : limit_cpu = "2"
+        if limit_mem is None : limit_mem = "2048"
+        if limit_app_count is None : limit_app_count = "5"
 
         # user_sttus 처리를 위해 attributes 값을 만든다.
         if user_sttus is not None : attributes_user_sttus = user_sttus
@@ -764,7 +776,10 @@ async def alter_user_info(user_id:str, user_sttus:str, **kwargs) :
                 "amd_user":                     attributes.get("amd_user")[0],
                 "service_terms_yn":             attributes.get("service_terms_yn")[0],
                 "openstack-default-project":    openstack_default_project,
-                "openstack-user-domain":        openstack_user_domain
+                "openstack-user-domain":        openstack_user_domain,
+                "limit_cpu" :                   limit_cpu,
+                "limit_mem" :                   limit_mem,
+                "limit_app_count" :             limit_app_count
             }
         }
 
@@ -816,9 +831,15 @@ async def modify_keycloak_user(**kwargs):
     admin_token = await get_admin_token()
     openstack_default_project = kwargs.get("openstack_default_project")
     openstack_user_domain = kwargs.get("openstack_user_domain")
+    limit_cpu = kwargs.get("limit_cpu")
+    limit_mem = kwargs.get("limit_mem")
+    limit_app_count = kwargs.get("limit_app_count")
 
     if openstack_default_project is None : openstack_default_project = ""
     if openstack_user_domain is None : openstack_user_domain = "Default"
+    if limit_cpu is None : limit_cpu = "2"
+    if limit_mem is None : limit_mem = "2048"
+    if limit_app_count is None : limit_app_count = "5"
 
     reg_data = {
         # key 이름이 "attributes"가 아닌 것은 value가 존재할때만 넣어주어야 함
@@ -850,7 +871,10 @@ async def modify_keycloak_user(**kwargs):
             "amd_user":                     kwargs.get("amd_user"),
             "amd_date":                     kwargs.get("amd_date").strftime('%Y-%m-%d %H:%M:%S'),
             "openstack-default-project":    openstack_default_project,
-            "openstack-user-domain":        openstack_user_domain
+            "openstack-user-domain":        openstack_user_domain,
+            "limit_cpu" :                   limit_cpu,
+            "limit_mem" :                   limit_mem,
+            "limit_app_count" :             limit_app_count
         }
     }
 
@@ -905,7 +929,10 @@ async def create_keycloak_user(**kwargs):
             "amd_user":                     kwargs.get("amd_user"),
             "amd_date":                     kwargs.get("amd_date").strftime('%Y-%m-%d %H:%M:%S'),
             "openstack-default-project":    "",
-            "openstack-user-domain":        "Default"
+            "openstack-user-domain":        "Default",
+            "limit_cpu" :                   "2",
+            "limit_mem" :                   "2048",
+            "limit_app_count" :             "5"
         }
     }
     res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
