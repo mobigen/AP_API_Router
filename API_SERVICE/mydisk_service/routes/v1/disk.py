@@ -18,15 +18,19 @@ from mydisk_service.common.config import settings
 
 logger = logging.getLogger()
 
+
 class UserParams(BaseModel):
     uuid: str
 
     def get_path(self) -> Path:
         return Path(
             os.path.join(
-                settings.MYDISK_ROOT_DIR, "USER", self.uuid,
+                settings.MYDISK_ROOT_DIR,
+                "USER",
+                self.uuid,
             )
         )
+
 
 class DownloadParams(BaseModel):
     src_target_path: str
@@ -34,9 +38,11 @@ class DownloadParams(BaseModel):
     def get_path(self) -> Path:
         return Path(
             os.path.join(
-                settings.MYDISK_ROOT_DIR, self.src_target_path.lstrip("/") if self.src_target_path.startswith("/") else self.src_target_path,
+                settings.MYDISK_ROOT_DIR,
+                self.src_target_path.lstrip("/") if self.src_target_path.startswith("/") else self.src_target_path,
             )
         )
+
 
 class CopyParams(BaseModel):
     src_path: str
@@ -60,6 +66,7 @@ class CopyParams(BaseModel):
             settings.MYDISK_ROOT_DIR, self.dst_path.lstrip("/") if self.dst_path.startswith("/") else self.dst_path
         )
 
+
 class TreeParams(BaseModel):
     target_directory: str
 
@@ -70,6 +77,7 @@ class TreeParams(BaseModel):
                 self.target_directory.lstrip("/") if self.target_directory.startswith("/") else self.target_directory,
             )
         )
+
 
 class PreviewParam(BaseModel):
     target_file_directory: str
@@ -102,29 +110,25 @@ async def head(params: PreviewParam):
         logger.info(f"path :: {path}")
         file_type = "txt"
 
-        if suffix in ['jpg', 'jpeg','png','gif','tiff'] :
+        if suffix in ["jpg", "jpeg", "png", "gif", "tiff"]:
             file_type = "image"
             byte_str = BytesIO()
             thumb_image = Image.open(path)
-            thumb_image.thumbnail((width,height))
+            thumb_image.thumbnail((width, height))
             thumb_image.save(byte_str, format="png")
             image_base64str = base64.b64encode(byte_str.getvalue())
             logger.info(f"image str :: {image_base64str[:30]}...")
             contents = image_base64str
-        else : # txt, csv
+        else:  # txt, csv
             df = pd.read_excel(path, header=None) if path.suffix in ["xls", "xlsx"] else pd.read_csv(path, header=None)
             df = df.fillna("")
             contents = df[:lines].values.tolist()
 
-        result = {
-            "result": 1,
-            "errorMessage": "",
-            "data": {"body": contents},
-            "type": file_type
-        }
+        result = {"result": 1, "errorMessage": "", "data": {"body": contents}, "type": file_type}
     except Exception as e:
         result = {"result": 1, "errorMessage": str(e)}
     return result
+
 
 @router.post("/v1/listdir")
 async def walk(param: TreeParams) -> Dict:
@@ -153,6 +157,7 @@ async def walk(param: TreeParams) -> Dict:
         result = {"result": 0, "errorMessage": str(e), "data": []}
     return result
 
+
 @router.post("/v1/link")
 async def hardlink(params: CopyParams):
     try:
@@ -172,13 +177,14 @@ async def copy(params: CopyParams):
         result = {"result": 0, "errorMessage": str(e)}
     return result
 
+
 @router.post("/v1/download")
 async def download(params: DownloadParams):
     src_path = params.get_path()
     logger.info(f"param src_path :: {src_path}")
     try:
         # dir 이면 zip 으로 압축함
-        if os.path.isdir(src_path) :
+        if os.path.isdir(src_path):
             os.chdir(src_path)  # 압축 파일 생성할 폴더로 working directory 를 이동시킨다
             byte_io = BytesIO()
 
@@ -187,20 +193,23 @@ async def download(params: DownloadParams):
                 for file in files:
                     logger.info(f"Adding file :: {file}")
                     # 상대경로를 활용하여 압축한다. (os.path.relpath)
-                    zip_file.write(os.path.join(os.path.relpath(path, src_path), file), compress_type=zipfile.ZIP_DEFLATED)
+                    zip_file.write(
+                        os.path.join(os.path.relpath(path, src_path), file), compress_type=zipfile.ZIP_DEFLATED
+                    )
 
             zip_file.close()
             # zip 파일을 읽도록 주소 변경
             decode_data = base64.b64encode(byte_io.getvalue()).decode()
-        else :
-            read_file = open(src_path, 'rb').read()
+        else:
+            read_file = open(src_path, "rb").read()
             decode_data = base64.b64encode(read_file).decode()
 
         logger.info(f"decode_data :: {decode_data[:20]} ..")
-        result = {"result": 1, "errorMessage": "", "data": {"body": decode_data }}
+        result = {"result": 1, "errorMessage": "", "data": {"body": decode_data}}
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
     return result
+
 
 @router.post("/v1/user")
 async def create_user_dir(params: UserParams):
@@ -209,17 +218,20 @@ async def create_user_dir(params: UserParams):
     dirs = ["favorite", "upload", "purchase"]
     try:
         # 세개의 디렉토리 미리 생성
-        for dir in dirs : os.makedirs(f"{target_path}/{dir}")
+        for dir in dirs:
+            os.makedirs(f"{target_path}/{dir}")
         result = {"result": 1, "errorMessage": "", "data": "success"}
     except Exception as e:
         logger.error(e)
         result = {"result": 0, "errorMessage": str(e)}
     return result
 
+
 def is_dir(src_path):
     return os.path.isdir(
         os.path.join(settings.MYDISK_ROOT_DIR, src_path.lstrip("/") if src_path.startswith("/") else src_path)
     )
+
 
 def run(src_path, dst_path, is_force, is_copy):
     os.makedirs(os.path.dirname(dst_path), exist_ok=True)
@@ -239,6 +251,7 @@ def run(src_path, dst_path, is_force, is_copy):
             dirs_exist_ok=is_force,
             copy_function=os.link if not is_copy else shutil.copy2,
         )
+
 
 async def get_admin_token() -> None:
     res = await mydisk.generate_admin_token(
