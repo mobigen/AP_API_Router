@@ -17,7 +17,7 @@
 #       range.
 #
 
-bind = "0.0.0.0:22000"
+bind = "0.0.0.0:8000"
 backlog = 2048
 
 #
@@ -127,7 +127,7 @@ spew = False
 #
 
 daemon = False
-pidfile = "./gunicorn-login.pid"
+pidfile = "./gunicorn-mydisk.pid"
 umask = 0
 user = None
 group = None
@@ -144,10 +144,10 @@ tmp_upload_dir = None
 #
 #       A string of "debug", "info", "warning", "error", "critical"
 #
-logfile = "./log/mydisk.log"
-errorlog = "./log/mydisk-error.log"
+logfile = "./log/gunicorn-mydisk.log"
+errorlog = "./log/gunicorn-mydisk-error.log"
 loglevel = "info"
-accesslog = "./log/mydisk.log"
+accesslog = "./log/gunicorn-mydisk.log"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
 #
