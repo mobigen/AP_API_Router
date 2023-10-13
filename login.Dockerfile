@@ -3,7 +3,7 @@ FROM python:3.9-alpine
 RUN apk add --update alpine-sdk && \
    apk add --update --no-cache postgresql-client && \
    apk add --update --no-cache --virtual .tmp-build-deps \
-      build-base gcc python3-dev postgresql-dev musl-dev libffi-dev openssl-dev cargo
+      build-base gcc python3-dev postgresql-dev musl-dev libffi-dev openssl-dev cargo cmake openblas-dev
 
 COPY ./API_SERVICE/login_service /app/source/login_service
 COPY ./common_libs /app/common_libs
