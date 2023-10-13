@@ -143,10 +143,10 @@ tmp_upload_dir = None
 #
 #       A string of "debug", "info", "warning", "error", "critical"
 #
-logfile = "./log/common.log"
-errorlog = "./log/common-error.log"
+logfile = "./log/gunicorn-meta.log"
+errorlog = "./log/gunicorn-meta-error.log"
 loglevel = "info"
-accesslog = "./log/common.log"
+accesslog = "./log/gunicorn-meta.log"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
 #
@@ -162,7 +162,7 @@ access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"
 #       A string or None to choose a default of something like 'gunicorn'.
 #
 
-proc_name = "API-Service-common"
+proc_name = "API-Service-meta"
 
 
 #
