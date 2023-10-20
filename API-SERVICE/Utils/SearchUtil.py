@@ -49,6 +49,13 @@ def search_count(es, item_dict, query_dict):
 
 
 def ckan_query(search_option) -> dict:
+    """
+    2023-10-20 변경사항
+    ckan_data 사용X
+     해외데이터 외부데이터는 v_biz_meta_oversea_els 통합
+    :param search_option:
+    :return:
+    """
     search_format = "(*{0}*)"
     query_dict = []
 

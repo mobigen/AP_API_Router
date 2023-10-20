@@ -10,6 +10,13 @@ from ApiService.ApiServiceConfig import config
 
 
 def api(input: InputModel) -> Dict:
+    """
+    2023-10-20 변경사항
+    ckan_data 사용X
+    해외데이터 외부데이터는 v_biz_meta_oversea_els 통합
+    :param search_option:
+    :return:
+    """
     from_ = input.from_ - 1
     els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
     index = "ckan_data"
