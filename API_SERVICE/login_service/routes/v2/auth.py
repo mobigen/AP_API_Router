@@ -557,7 +557,7 @@ async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(
 
 @router.post("/user/v2/checkPurchase")
 async def checkPurchase(params: PurchaseInfoWrap, request: Request):
-    params = param.data
+    params = params.data
     data_id = params.data_id
     token = request.cookies.get(COOKIE_NAME)
 
@@ -568,7 +568,7 @@ async def checkPurchase(params: PurchaseInfoWrap, request: Request):
 
     token = literal_eval(token)
     access_token =token["data"]["access_token"]
-    api_url = f"https://211.218.247.36:23080/api/v1/purchase-status/{data_id}"
+    api_url = f"https://market.bigdata-car.k/api/v1/purchase-status/{data_id}"
     headers = {"Content-Type": "application/json", "Authorization": "Bearer " + access_token}
     async with aiohttp.ClientSession() as session:
         async with session.request(url=api_url, method="GET", headers=headers) as response:
