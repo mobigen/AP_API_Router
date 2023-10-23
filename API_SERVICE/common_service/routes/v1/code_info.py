@@ -22,4 +22,4 @@ async def get_code_detail(groupId, session: Executor = Depends(db.get_db)) -> Di
         for row in rows
     ]
 
-    return JSONResponse(status_code=200, content={"result": 1, "data": code_infos, "errorMessage": ""})
+    return JSONResponse(status_code=200, content={"result": 1, "data": {"list": code_infos}, "errorMessage": ""})
