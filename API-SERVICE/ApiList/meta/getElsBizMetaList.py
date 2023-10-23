@@ -5,7 +5,7 @@ from ELKSearch.Utils.model import InputModel
 from ELKSearch.Utils.elasticsearch_utils import make_query, base_search_query
 from ELKSearch.Utils.database_utils import get_config
 from Utils.CommonUtil import get_exception_info
-from Utils.SearchUtil import search_count, ckan_query
+from Utils.SearchUtil import search_count
 from ApiService.ApiServiceConfig import config
 
 
@@ -66,9 +66,7 @@ def api(input: InputModel) -> Dict:
         search_data = es.search(input.resultField)
 
         data_dict = search_count(es, item_dict, query_dict)
-        ckan_dict = ckan_query(input.searchOption)
 
-        data_dict["overseaCount"] = search_count(es, {'filter': []}, ckan_dict)["overseaCount"]
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
