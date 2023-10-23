@@ -5,7 +5,7 @@ from ELKSearch.Utils.model import InputModel
 from ELKSearch.Utils.elasticsearch_utils import make_query, base_search_query
 from ELKSearch.Utils.database_utils import get_config
 from Utils.CommonUtil import get_exception_info
-from Utils.SearchUtil import search_count, ckan_query
+from Utils.SearchUtil import search_count
 from ApiService.ApiServiceConfig import config
 
 
@@ -32,7 +32,6 @@ def extra_filter(option_list):
 
 def api(input: InputModel) -> Dict:
     from_ = input.from_ - 1
-    index = "biz_meta"
     els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
     try:
         if input.chk and len(input.searchOption):
@@ -43,7 +42,7 @@ def api(input: InputModel) -> Dict:
                 for search in input.searchOption:
                     fp.write(f"{str(search.keywords)}\n")
 
-        es = ElasticSearchManager(page=from_, size=input.size, index=index, **els_config)
+        es = ElasticSearchManager(page=from_, size=input.size, index=input.index, **els_config)
         es.set_sort(input.sortOption)
 
         ############ search option ############
@@ -66,9 +65,7 @@ def api(input: InputModel) -> Dict:
         search_data = es.search(input.resultField)
 
         data_dict = search_count(es, item_dict, query_dict)
-        ckan_dict = ckan_query(input.searchOption)
 
-        data_dict["overseaCount"] = search_count(es, {'filter': []}, ckan_dict)["overseaCount"]
     except Exception:
         except_name = get_exception_info()
         result = {"result": 0, "errorMessage": except_name}
