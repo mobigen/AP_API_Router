@@ -1,6 +1,7 @@
 import re
 from typing import Dict, Any
 from datetime import datetime
+from fastapi.logger import logger
 
 
 def is_space(text: str) -> int:
@@ -57,12 +58,16 @@ def data_process(data):
     data["re_ctgry"] = re.sub("[ ]", "", str(data["ctgry"]))
     data["re_data_shap"] = re.sub("[ ]", "", str(data["data_shap"]))
     data["re_data_prv_desk"] = re.sub("[ ]", "", str(data["data_prv_desk"]))
-
     # test 환경에서 updt_dt가 None값인 경우가 있음
-    if "updt_dt" in data.keys() and data["updt_dt"] and len(data["updt_dt"]) > 25:
+    if "updt_dt" in data.keys() and data["updt_dt"] and len(data["updt_dt"]) > 24:
+        mic_s = data["updt_dt"].split(".")[-1]
+        if len(data["updt_dt"]) < 27 and len(mic_s) != 6:
+            data["updt_dt"] = f"{data['updt_dt']}0"
+        logger.info(data["updt_dt"])
         if len(data["updt_dt"]) > 27:
             data["updt_dt"] = data["updt_dt"][:-3]
-        data["updt_dt"] = datetime.strptime(data["updt_dt"], "%Y-%m-%d %H:%M:%S.%f")
+
+        data["updt_dt"] = datetime.strptime(data["updt_dt"][:-3], "%Y-%m-%d %H:%M:%S.%f")
 
     els_dict = default_process(els_dict, data)
     return els_dict
