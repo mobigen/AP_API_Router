@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from common_service.common.config import settings
 from common_service.database.conn import db
-from common_service.routes.v1 import select, execute, auth_email
+from common_service.routes.v1 import code_info, select, execute, auth_email
 import logging
 from libs.auth.keycloak import keycloak
 
@@ -33,6 +33,7 @@ def create_app():
     app_.include_router(select.router, prefix="/portal/api/common")
     app_.include_router(execute.router, prefix="/portal/api/common")
     app_.include_router(auth_email.router, prefix="/portal/api/common")
+    app_.include_router(code_info.router, prefix="/portal/api/sitemng")
 
     return app_
 

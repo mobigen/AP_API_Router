@@ -5,7 +5,8 @@ from datetime import datetime
 
 from libs.auth.keycloak import KeycloakManager
 
-REFRESH_SEC = 60*50
+REFRESH_SEC = 60 * 50
+
 
 def get_token_from_cookie(cookies):
     for k, v in cookies.items():
@@ -34,16 +35,16 @@ def refresh_token_from_cookie_wrapper(keycloak: KeycloakManager, **kwargs):
 
         now = datetime.now().strftime("%s")
         diffTime = REFRESH_SEC + 1
-        try :
-            createTime = token.get('create_time')
+        try:
+            createTime = token.get("create_time")
             diffTime = float(now) - float(createTime)
-        except Exception :
+        except Exception:
             pass
 
         logger.info(f"createTime :: {createTime}")
         logger.info(f"diffTime :: {diffTime}")
 
-        if diffTime > REFRESH_SEC :
+        if diffTime > REFRESH_SEC:
             logger.info("Refresh Token!!")
             res = await keycloak.refresh_token(
                 realm=kwargs.get("realm"),
@@ -53,7 +54,7 @@ def refresh_token_from_cookie_wrapper(keycloak: KeycloakManager, **kwargs):
                 refresh_token=token["data"]["refresh_token"],
             )
             res["create_time"] = datetime.now().strftime("%s")
-        else :
+        else:
             logger.info("Token Maintain!!")
             res = token
 

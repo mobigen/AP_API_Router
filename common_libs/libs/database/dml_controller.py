@@ -26,7 +26,7 @@ class Base:
             "method": method,
             "table_nm": cls.table_nm,
             "data": row,
-            "key": cls.key_column if type(cls.key_column) is list else [cls.key_column]
+            "key": cls.key_column if type(cls.key_column) is list else [cls.key_column],
         }
         if method.upper() == "INSERT":
             query.pop("key")
