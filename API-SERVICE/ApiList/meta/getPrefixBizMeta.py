@@ -25,7 +25,7 @@ def api(input: Prefix) -> Dict:
         input.fields = ["data_nm"]
     els_config = get_config(config.root_path,"config.ini")[config.db_type[:-3]]
     try:
-        els_config["index"] = ["biz_meta","ckan_data"]
+        els_config["index"] = ["biz_meta","v_biz_meta_oversea_els"]
         es = ElasticSearchManager(**els_config)
         es.size = input.size
         input.query = f"(*{input.query}*)"

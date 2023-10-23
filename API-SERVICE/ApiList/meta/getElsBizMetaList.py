@@ -32,7 +32,6 @@ def extra_filter(option_list):
 
 def api(input: InputModel) -> Dict:
     from_ = input.from_ - 1
-    index = "biz_meta"
     els_config = get_config(config.root_path, "config.ini")[config.db_type[:-3]]
     try:
         if input.chk and len(input.searchOption):
@@ -43,7 +42,7 @@ def api(input: InputModel) -> Dict:
                 for search in input.searchOption:
                     fp.write(f"{str(search.keywords)}\n")
 
-        es = ElasticSearchManager(page=from_, size=input.size, index=index, **els_config)
+        es = ElasticSearchManager(page=from_, size=input.size, index=input.index, **els_config)
         es.set_sort(input.sortOption)
 
         ############ search option ############
