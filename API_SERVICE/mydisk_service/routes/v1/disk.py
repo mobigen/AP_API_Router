@@ -1,4 +1,5 @@
 import os
+import glob
 import zipfile
 import logging
 import shutil
@@ -78,6 +79,18 @@ class TreeParams(BaseModel):
             )
         )
 
+class LabelParams(BaseModel):
+    data_set_id: str
+
+    def get_path(self) -> Path:
+        return Path(
+            os.path.join(
+                settings.MYDISK_ROOT_DIR,
+                "ADMIN",
+                self.data_set_id,
+                "LABEL_DATA"
+            )
+        )
 
 class PreviewParam(BaseModel):
     target_file_directory: str
@@ -226,6 +239,43 @@ async def create_user_dir(params: UserParams):
         result = {"result": 0, "errorMessage": str(e)}
     return result
 
+@router.post("/v1/labelSearch")
+async def label(params: LabelParams):
+
+    def listFiles(p: Path):
+        index = 0
+        ret = []
+        lst = []
+        for i in p.iterdir():
+            if i.is_dir():
+                listFile = listFiles(i)
+                if listFile :
+                    lst = lst + listFile
+
+                absPath = os.path.abspath(i)
+                #imageDatas = glob.glob(fr'{absPath}/*[.jpg][.png][.gif]')
+                imageDatas = glob.glob(fr'{i}/*[.jpg][.png][.gif]')
+                imageCount = len(imageDatas)
+                if imageCount > 0:
+                    imageUrl = f"{i}"
+                    refUrl= "/".join(imageUrl.split("/")[-6:])
+                    folderName = imageUrl.split("/")[-2]
+                    for f in imageDatas :
+                        index += 1
+                        data = [folderName, refUrl, index]
+                        ret.append(data)
+                    lst = lst + ret
+        return lst
+
+    source_path = params.get_path()
+    logger.info(f"param source_path :: {source_path}")
+    try:
+        result = {"result": 1, "errorMessage": "", "data": {"body": listFiles(source_path)}}
+    except FileNotFoundError as fe:
+        result = {"result": 0, "errorMessage": str(fe), "data": []}
+    except Exception as e:
+        result = {"result": 0, "errorMessage": str(e), "data": []}
+    return result
 
 def is_dir(src_path):
     return os.path.isdir(
