@@ -243,7 +243,6 @@ async def create_user_dir(params: UserParams):
 async def label(params: LabelParams):
 
     def listFiles(p: Path):
-        index = 0
         ret = []
         lst = []
         for i in p.iterdir():
@@ -252,16 +251,15 @@ async def label(params: LabelParams):
                 if listFile :
                     lst = lst + listFile
 
-                absPath = os.path.abspath(i)
-                #imageDatas = glob.glob(fr'{absPath}/*[.jpg][.png][.gif]')
                 imageDatas = glob.glob(fr'{i}/*[.jpg][.png][.gif]')
                 imageCount = len(imageDatas)
                 if imageCount > 0:
-                    imageUrl = f"{i}"
-                    refUrl= "/".join(imageUrl.split("/")[-6:])
-                    folderName = imageUrl.split("/")[-2]
+                    folderName = f"{i}".split("/")[-2]
                     for f in imageDatas :
-                        index += 1
+                        fileArr = f.split("/")
+                        fileName = fileArr[-1].split(".")[0]
+                        refUrl = "/".join(fileArr[fileArr.index("ADMIN")+1:])
+                        index = f"{int(fileName)}"
                         data = [folderName, refUrl, index]
                         ret.append(data)
                     lst = lst + ret
