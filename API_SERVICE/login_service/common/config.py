@@ -93,9 +93,9 @@ class ProdSettings(Settings):
         keycloak_url="https://auth.bigdata-car.kr",
         admin_username="admin",
         admin_password="2021@katech",
-        realm="kadap",
+        realm="mobigen",
         client_id="katech",
-        client_secret="pwLZG5EaWph1nJAOjwYJ32YGtXdAj5SL",
+        client_secret="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
     )
 
 
@@ -115,12 +115,12 @@ class LocalSettings(Settings):
     )
 
     KEYCLOAK_INFO = KeycloakInfo(
-        keycloak_url="http://192.168.101.44:8080",
+        keycloak_url="https://auth.bigdata-car.kr",
         admin_username="admin",
-        admin_password="zxcv1234!",
-        realm="kadap",
-        client_id="uyuni",
-        client_secret="8UDolCR5j1vHt4rsyHnwTDlYkuRmOUp8",
+        admin_password="2021@katech",
+        realm="mobigen",
+        client_id="katech",
+        client_secret="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
     )
 
 
