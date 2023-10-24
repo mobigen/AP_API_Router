@@ -275,6 +275,15 @@ async def label(params: LabelParams):
         result = {"result": 0, "errorMessage": str(e), "data": []}
     return result
 
+@router.get("/v1/linkImage/")
+async def linkImage(dataset_id: str, fileloc:str):
+    fileBase = "/home/deep/workspace/ysw/katech/filebrowser_datas/file_data/ADMIN/"
+    imageSrc = f"{fileBase}/{dataset_id}/LABEL_DATA/raw/{fileloc}"
+    try :
+        return FileResponse(imageSrc)
+    except Exception as e:
+        logger.info(str(e))
+
 def is_dir(src_path):
     return os.path.isdir(
         os.path.join(settings.MYDISK_ROOT_DIR, src_path.lstrip("/") if src_path.startswith("/") else src_path)
