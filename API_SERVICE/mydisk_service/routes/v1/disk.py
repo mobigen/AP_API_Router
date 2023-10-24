@@ -253,7 +253,7 @@ async def label(params: LabelParams):
                 if listFile :
                     lst = lst + listFile
 
-                imageDatas = glob.glob(fr'{i}/*[.jpg][.png][.gif]')
+                imageDatas = sorted(glob.glob(fr'{i}/*[.jpg][.png][.gif]'))
                 imageCount = len(imageDatas)
                 if imageCount > 0:
                     folderName = f"{i}".split("/")[-2]
