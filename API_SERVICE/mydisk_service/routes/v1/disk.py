@@ -17,6 +17,8 @@ from pydantic import BaseModel, Field
 from libs.disk.mydisk import mydisk
 from mydisk_service.common.config import settings
 
+from starlette.responses import FileResponse
+
 logger = logging.getLogger()
 
 
@@ -258,7 +260,7 @@ async def label(params: LabelParams):
                     for f in imageDatas :
                         fileArr = f.split("/")
                         fileName = fileArr[-1].split(".")[0]
-                        refUrl = "/".join(fileArr[fileArr.index("ADMIN")+1:])
+                        refUrl = "/".join(fileArr[fileArr.index("raw")+1:])
                         index = f"{int(fileName)}"
                         data = [folderName, refUrl, index]
                         ret.append(data)
@@ -274,6 +276,15 @@ async def label(params: LabelParams):
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e), "data": []}
     return result
+
+@router.get("/v1/linkImage/")
+async def linkImage(dataset_id: str, fileloc:str):
+    fileBase = "/home/deep/workspace/ysw/katech/filebrowser_datas/file_data/ADMIN/"
+    imageSrc = f"{fileBase}/{dataset_id}/LABEL_DATA/raw/{fileloc}"
+    try :
+        return FileResponse(imageSrc)
+    except Exception as e:
+        logger.info(str(e))
 
 def is_dir(src_path):
     return os.path.isdir(
