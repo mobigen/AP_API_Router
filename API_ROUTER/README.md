@@ -1,2 +1,2 @@
-DB_URL=postgresql://{id}:{pwd}@{ip}:{port}/{dbname}
+DB_URL=postgresql://{id}:{pwd}@{ip}:{port}/{dbname}<br>
 SCHEMA=schema1, schema2, ...
