@@ -1,7 +1,7 @@
 import copy
-from datetime import datetime
 import json
 import logging
+from datetime import datetime
 
 import aiohttp
 from fastapi import APIRouter, Depends
@@ -17,7 +17,7 @@ logger = logging.getLogger()
 router = APIRouter()
 
 
-@router.get("/route/common/me")
+@router.get("/me")
 async def me(request: Request):
     return {"result": 1, "errorMesage": "", "data": request.scope["client"][0]}
 
@@ -26,7 +26,10 @@ async def me(request: Request):
 async def index(request: Request, route_path: str, session: Executor = Depends(db.get_db)):
     method = request.method
     headers = get_headers(request.headers)
-    query_params = {"workip": request.scope["client"][0], "workdt": datetime.now().strftime("%Y%m%d%H%M%S")}
+    query_params = {
+        "workip": request.scope["client"][0],
+        "workdt": datetime.now().strftime("%Y%m%d%H%M%S"),
+    }
     query_params.update(request.query_params.items())
     data = None
     status = 200
@@ -40,7 +43,10 @@ async def index(request: Request, route_path: str, session: Executor = Depends(d
 
     if not row:
         logger.error(f"API INFO NOT FOUND, url :: {route_path}, method :: {method}")
-        return JSONResponse(content={"result": 0, "errorMessage": "API INFO NOT FOUND."}, status_code=404)
+        return JSONResponse(
+            content={"result": 0, "errorMessage": "API INFO NOT FOUND."},
+            status_code=404,
+        )
 
     logger.info(f"API :: {row}")
 
@@ -51,7 +57,8 @@ async def index(request: Request, route_path: str, session: Executor = Depends(d
     response = JSONResponse(content=result, status_code=status)
     if cookies:
         for k, v in cookies.items():
-            response.set_cookie(key=k, value=v, max_age=3600, secure=False, httponly=False)
+            logger.debug(f"k :: {k} {type(k)}, v :: {v} {type(v)}")
+            response.set_cookie(key=k, value=v, domain=v.get("domain"), max_age=3600, secure=False, httponly=False)
 
     return response
 

@@ -1,76 +1,37 @@
-import json
+import logging.config
 import logging.config
 import os
 from functools import lru_cache
-from typing import Union
 
-from pydantic import BaseSettings, SecretStr, PostgresDsn, validator
-
+from pydantic import BaseSettings, PostgresDsn
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 print(f"router base_dir :: {base_dir}")
 
 
 class DBInfo(BaseSettings):
-    HOST: str = ""
-    PORT: str = ""
-    USER: str = ""
-    PASS: SecretStr = ""
-    BASE: str = ""
+    DB_POOL_RECYCLE: int = 900
+    IS_ECHO: bool = True
+    DB_URL: str
+
+
+class PGInfo(DBInfo):
+    SCHEMA: str
 
     class Config:
         env_file = f"{base_dir}/.env"
         env_file_encoding = "utf-8"
 
-    def get_dsn(self):
-        return ""
-
-
-class PGInfo(DBInfo):
-    type: str = "orm"
-    SCHEMA: str = ""
-
-    def get_dsn(self):
-        return str(
-            PostgresDsn.build(
-                scheme="postgresql",
-                host=self.HOST,
-                port=self.PORT,
-                user=self.USER,
-                password=self.PASS.get_secret_value(),
-                path=f"/{self.BASE}",
-            )
-        )
-
-
-class TiberoInfo(DBInfo):
-    type: str = "tibero"
-
-    def get_dsn(self):
-        return f"DSN={self.BASE};UID={self.USER};PWD={self.PASS.get_secret_value()}"
-
 
 class Settings(BaseSettings):
     BASE_DIR = base_dir
-    DB_POOL_RECYCLE: int
-    DB_ECHO: bool
     RELOAD: bool
     TESTING: bool
 
-    DB_INFO: DBInfo = DBInfo()
-
-    DB_URL: Union[str, PostgresDsn] = None
-
-    @validator("DB_URL", pre=True, always=True)
-    def assemble_db_url(cls, v, values):
-        if all(value is not None for value in values.values()):
-            return values.get("DB_INFO").get_dsn()
-        raise ValueError("Not all PostgreSQL database connection values were provided.")
+    DB_INFO: PGInfo
 
 
 class ProdSettings(Settings):
-    DB_POOL_RECYCLE: int = 900
-    DB_ECHO: bool = True
     RELOAD = False
     TESTING = False
 
@@ -79,12 +40,21 @@ class ProdSettings(Settings):
 
 class LocalSettings(Settings):
     TESTING: bool = False
-    DB_POOL_RECYCLE: int = 900
-    DB_ECHO: bool = True
     RELOAD: bool = False
 
-    DB_INFO = PGInfo(
-        HOST="192.168.100.126", PORT="25432", USER="dpmanager", PASS="hello.dp12#$", BASE="dataportal", SCHEMA="sitemng"
+    DB_INFO: PGInfo = PGInfo(
+        DB_POOL_RECYCLE=900,
+        IS_ECHO=True,
+        DB_URL=str(
+            PostgresDsn.build(
+                scheme="postgresql",
+                host="192.168.100.126",
+                port="25432",
+                user="dpmanager",
+                password="hello.dp12#$",
+                path=f"/dataportal",
+            )
+        ),
     )
 
 
@@ -103,7 +73,28 @@ def get_settings():
 settings = get_settings()
 print(settings)
 
-
-with open(os.path.join(base_dir, "logging.json")) as f:
-    log_config = json.load(f)
-    logging.config.dictConfig(log_config)
+log_config = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {"format": "%(asctime)s %(levelname)s [%(filename)s:%(lineno)d] - %(message)s"},
+    },
+    "handlers": {
+        "file_handler": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": "./log/router.log",
+            "mode": "a",
+            "maxBytes": 20000000,
+            "backupCount": 10,
+            "level": "DEBUG",
+            "formatter": "standard",
+        },
+        "console_handler": {
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+            "formatter": "standard",
+        },
+    },
+    "root": {"level": "DEBUG", "handlers": ["file_handler", "console_handler"], "propagate": False},
+}
+logging.config.dictConfig(log_config)

@@ -17,7 +17,7 @@
 #       range.
 #
 
-bind = "0.0.0.0:8010"
+bind = "0.0.0.0:8000"
 backlog = 2048
 
 #
@@ -144,10 +144,23 @@ tmp_upload_dir = None
 #
 #       A string of "debug", "info", "warning", "error", "critical"
 #
-logfile = "./log/router.log"
-errorlog = "./log/router-error.log"
+
+
+def get_log_path():
+    import os
+
+    path_ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "log")
+    if not os.path.exists(path_):
+        os.makedirs(path_)
+
+    return path_
+
+
+log_dir_path = get_log_path()
+logfile = "./log/gunicorn-router.log"
+errorlog = "./log/gunicorn-router-error.log"
 loglevel = "info"
-accesslog = "./log/router.log"
+accesslog = "./log/gunicorn-router.log"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
 #
