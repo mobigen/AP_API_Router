@@ -59,10 +59,13 @@ class QueryExecutor(Executor):
 
         order_clause = ""
         if order_info := kwargs.get("order_info"):
-            t = order_info["table_nm"]
-            k = order_info["key"]
-            o = order_info["order"]
-            order_clause += f"order by {t}.{k} {str(o).upper()} "
+            order_clause = "order by "
+            if type(order_info) is dict : order_info = [order_info]
+            for info in order_info :
+                t = info["table_nm"]
+                k = info["key"]
+                o = info["order"]
+                order_clause += f" {t}.{k} {str(o).upper()} "
 
         query = f"select * from {table_nm} " + join_clause + where_clause + order_clause
         self._cntq = f"select count(*) from {table_nm} " + join_clause + where_clause + order_clause
@@ -222,7 +225,7 @@ class TiberoConnector(Connector):
             if self.conn:
                 self.conn.close()
 
-    def get_db(self) -> "TiberoConnector":
+    def get_db(self) -> Executor:
         executor = QueryExecutor(self.conn)
         try:
             yield executor

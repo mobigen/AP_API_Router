@@ -17,19 +17,20 @@ logger = logging.getLogger()
 router = APIRouter()
 
 
-@router.get("/route/common/me")
+@router.get("/me")
 async def me(request: Request):
-    return {"result": 1, "errorMesage": "", "data": request.scope["client"][0]}
+    return {"result": 1, "errorMessage": "", "data": request.scope["client"][0]}
 
 
 @router.api_route("{route_path:path}", methods=["GET", "POST"])
 async def index(request: Request, route_path: str, session: Executor = Depends(db.get_db)):
-    status = 200
     method = request.method
     headers = get_headers(request.headers)
-    query_params = {"workip": request.scope["client"][0], "workdt": datetime.now().strftime("%Y%m%d%H%M%S")}
+    query_params = {
+        "workip": request.scope["client"][0],
+        "workdt": datetime.now().strftime("%Y%m%d%H%M%S"),
+    }
     query_params.update(request.query_params.items())
-
     data = None
     if method == "POST":
         try:
@@ -38,25 +39,24 @@ async def index(request: Request, route_path: str, session: Executor = Depends(d
             data = (await request.body()).decode()
 
     row = session.query(**const.RouteTable.get_query_data(route_path, method)).first()
-
     if not row:
         logger.error(f"API INFO NOT FOUND, url :: {route_path}, method :: {method}")
-        return JSONResponse(content={"result": 0, "errorMessage": "API INFO NOT FOUND."}, status_code=404)
+        return JSONResponse(
+            content={"result": 0, "errorMessage": "API INFO NOT FOUND."},
+            status_code=404,
+        )
 
     logger.info(f"API :: {row}")
 
     remote_url = "http://" + row[const.ROUTE_IP_FIELD] + row[const.ROUTE_API_URL_FIELD]
 
-    cookies = {}
-    try:
-        cookies, result, status = await request_to_service(remote_url, method, query_params, data, headers)
-    except Exception as e:
-        logger.error(e, exc_info=True)
-        result = {"result": 0, "errorMessage": type(e).__name__}
+    cookies, result, status = await request_to_service(remote_url, method, query_params, data, headers)
 
     response = JSONResponse(content=result, status_code=status)
-    for k, v in cookies.items():
-        response.set_cookie(key=k, value=v, max_age=3600, secure=False, httponly=True)
+    if cookies:
+        for k, v in cookies.items():
+            logger.debug(f"k :: {k} {type(k)}, v :: {v} {type(v)}")
+            response.set_cookie(key=k, value=v, domain=v.get("domain"), max_age=3600, secure=False, httponly=False)
 
     return response
 

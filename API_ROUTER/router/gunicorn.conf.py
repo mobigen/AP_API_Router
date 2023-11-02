@@ -16,8 +16,9 @@
 #       Must be a positive integer. Generally set in the 64-2048
 #       range.
 #
+import os
 
-bind = "0.0.0.0:8010"
+bind = "0.0.0.0:8000"
 backlog = 2048
 
 #
@@ -144,10 +145,33 @@ tmp_upload_dir = None
 #
 #       A string of "debug", "info", "warning", "error", "critical"
 #
-logfile = "./log/router.log"
-errorlog = "./log/router-error.log"
-loglevel = "info"
-accesslog = "./log/router.log"
+
+
+def get_log_path():
+    import os
+
+    path_ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "log")
+    if not os.path.exists(path_):
+        os.makedirs(path_)
+        print(f"make dir {path_}")
+
+    return path_
+
+
+app_env = os.getenv("APP_ENV", "prod")
+if app_env == "prod":
+    loglevel = "info"
+    log_name = "gunicorn-router"
+    log_dir_path = get_log_path()
+    logfile = os.path.join(log_dir_path, log_name + ".log")
+    errorlog = os.path.join(log_dir_path, log_name + "-error.log")
+    accesslog = logfile
+else:
+    loglevel = "debug"
+    logfile = "-"
+    errorlog = "-"
+    accesslog = "-"
+
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
 #
