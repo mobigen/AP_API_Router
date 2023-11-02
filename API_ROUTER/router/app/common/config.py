@@ -1,5 +1,4 @@
 import logging.config
-import logging.config
 import os
 from functools import lru_cache
 
@@ -28,7 +27,7 @@ class Settings(BaseSettings):
     RELOAD: bool
     TESTING: bool
 
-    DB_INFO: PGInfo
+    DB_INFO: DBInfo
 
 
 class ProdSettings(Settings):
@@ -53,7 +52,7 @@ class LocalSettings(Settings):
                 port="25432",
                 user="dpmanager",
                 password="hello.dp12#$",
-                path=f"/dataportal",
+                path="/dataportal",
             )
         ),
     )
@@ -81,21 +80,24 @@ log_config = {
         "standard": {"format": "%(asctime)s %(levelname)s [%(filename)s:%(lineno)d] - %(message)s"},
     },
     "handlers": {
-        "file_handler": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": "./log/router.log",
-            "mode": "a",
-            "maxBytes": 20000000,
-            "backupCount": 10,
-            "level": "DEBUG",
-            "formatter": "standard",
-        },
         "console_handler": {
             "class": "logging.StreamHandler",
             "level": "DEBUG",
             "formatter": "standard",
         },
     },
-    "root": {"level": "DEBUG", "handlers": ["file_handler", "console_handler"], "propagate": False},
+    "root": {"level": "DEBUG", "handlers": ["console_handler"], "propagate": False},
 }
+
+if "prod" == os.getenv("APP_ENV", "prod"):
+    log_config["handlers"]["file_handler"] = {
+        "class": "logging.handlers.RotatingFileHandler",
+        "filename": os.path.join(base_dir, "log", "router.log"),
+        "mode": "a",
+        "maxBytes": 20000000,
+        "backupCount": 10,
+        "level": "DEBUG",
+        "formatter": "standard",
+    }
+    log_config["root"]["handlers"].append("file_handler")
 logging.config.dictConfig(log_config)
