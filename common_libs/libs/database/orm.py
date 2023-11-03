@@ -33,9 +33,9 @@ class SQLAlchemyConnector(Connector):
         db_info = kwargs.get("DB_INFO")
         database_url = db_info.get("DB_URL")
         pool_recycle = db_info.get("DB_POOL_RECYCLE", 900)
+        echo = db_info.get("DB_ECHO", False)
         self._schemas = db_info.get("SCHEMA").split(",")
         is_testing = kwargs.get("TESTING", False)
-        echo = db_info.get("DB_ECHO", False)
         is_reload = kwargs.get("RELOAD", False)
 
         self._engine = create_engine(
