@@ -10,12 +10,11 @@ from passlib.context import CryptContext
 
 from libs.database.connector import Executor
 
-from common_service.database.conn import db
-from common_service.common.const import (
+from common_service.app.database.conn import db
+from common_service.app.common.const import (
     EmailSendInfoTable,
     EmailAuthTable,
     UserInfoTable,
-    time_zone,
     auth_no_len,
     subject_dict
 )

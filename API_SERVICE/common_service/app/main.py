@@ -1,13 +1,13 @@
-from starlette.middleware.base import BaseHTTPMiddleware
+import logging
+
 import uvicorn
 from fastapi import FastAPI
+from starlette.middleware.base import BaseHTTPMiddleware
 
-from common_service.common.config import settings
-from common_service.database.conn import db
-from common_service.routes.v1 import code_info, select, execute, auth_email
-import logging
+from common_service.app.common.config import settings
+from common_service.app.database.conn import db
+from common_service.app.routes.v1 import code_info, select, execute, auth_email
 from libs.auth.keycloak import keycloak
-
 from libs.middlewares.keycloak_middleware import refresh_token_from_cookie_wrapper
 
 logger = logging.getLogger()
@@ -18,14 +18,14 @@ def create_app():
     logger.info(settings.dict())
     db.init_app(app_, **settings.dict())
 
-    keycloak.set_url("https://auth.bigdata-car.kr")
+    keycloak.set_url(settings.KEYCLOAK_INFO.keycloak_url)
     app_.add_middleware(
         BaseHTTPMiddleware,
         dispatch=refresh_token_from_cookie_wrapper(
             keycloak=keycloak,
-            realm="mobigen",
-            client_id="katech",
-            client_secret="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
+            realm=settings.KEYCLOAK_INFO.realm,
+            client_id=settings.KEYCLOAK_INFO.client_id,
+            client_secret=settings.KEYCLOAK_INFO.client_secret,
             logger=logger,
         ),
     )

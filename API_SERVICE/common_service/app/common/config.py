@@ -1,6 +1,7 @@
 import logging.config
 import os
 from functools import lru_cache
+from typing import Optional
 
 from pydantic import BaseSettings, PostgresDsn
 
@@ -22,28 +23,43 @@ class PGInfo(DBInfo):
         env_file_encoding = "utf-8"
 
 
+class KeycloakInfo(BaseSettings):
+    keycloak_url: Optional[str]
+    admin_username: Optional[str]
+    admin_password: Optional[str]
+    realm: Optional[str]
+    client_id: Optional[str]
+    client_secret: Optional[str]
+
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
+
+
 class Settings(BaseSettings):
     BASE_DIR = base_dir
     RELOAD: bool
     TESTING: bool
 
     DB_INFO: DBInfo
+    KEYCLOAK_INFO: KeycloakInfo
 
 
 class ProdSettings(Settings):
     RELOAD = False
     TESTING = False
 
-    DB_INFO: PGInfo = PGInfo()
+    DB_INFO = PGInfo()
+    KEYCLOAK_INFO = KeycloakInfo()
 
 
 class LocalSettings(Settings):
     TESTING: bool = False
     RELOAD: bool = False
 
-    DB_INFO: PGInfo = PGInfo(
+    DB_INFO = PGInfo(
         DB_POOL_RECYCLE=900,
-        DB_ECHO=True,
+        DB_ECHO=False,
         SCHEMA="sitemng,users,meta,iag,ckan,board,analysis",
         DB_URL=str(
             PostgresDsn.build(
@@ -57,6 +73,15 @@ class LocalSettings(Settings):
         ),
     )
 
+    KEYCLOAK_INFO = KeycloakInfo(
+        keycloak_url="https://auth.bigdata-car.kr",
+        admin_username="admin",
+        admin_password="2021@katech",
+        realm="mobigen",
+        client_id="katech",
+        client_secret="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
+    )
+
 
 class TestSettings(LocalSettings):
     TESTING = True
@@ -64,7 +89,7 @@ class TestSettings(LocalSettings):
 
 
 @lru_cache
-def get_settings():
+def get_settings() -> Settings:
     env = os.getenv("APP_ENV", "prod")
     print(f"env :: {env}")
     return {"local": LocalSettings(), "test": TestSettings(), "prod": ProdSettings()}[env]

@@ -3,9 +3,9 @@ import logging
 import uvicorn
 from fastapi import FastAPI
 
-from app.common.config import settings
-from app.database.conn import db
-from app.routes import index
+from router.app.common.config import settings
+from router.app.database.conn import db
+from router.app.routes import index
 
 logger = logging.getLogger()
 

@@ -1,15 +1,14 @@
-from typing import Dict
 from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse
 
+from common_service.app.database.conn import db
 from libs.database.connector import Executor
-from common_service.database.conn import db
 
 router = APIRouter()
 
 
 @router.get("/getCodeInfo")
-async def get_code_detail(groupId, session: Executor = Depends(db.get_db)) -> Dict:
+async def get_code_detail(groupId, session: Executor = Depends(db.get_db)):
     table_nm = "tb_code_detail"
     rows, _ = session.query(
         table_nm=table_nm,
