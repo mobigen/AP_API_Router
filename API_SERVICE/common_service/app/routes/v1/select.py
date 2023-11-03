@@ -5,8 +5,8 @@ from fastapi import Depends, APIRouter
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
-from common_service.common.config import settings
-from common_service.database.conn import db
+from common_service.app.common.config import settings
+from common_service.app.database.conn import db
 from libs.database.connector import Executor
 
 
