@@ -6,7 +6,7 @@ from typing import Optional
 from pydantic import BaseSettings, PostgresDsn
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-print(f"router base_dir :: {base_dir}")
+print(f"common base_dir :: {base_dir}")
 
 
 class DBInfo(BaseSettings):
@@ -117,7 +117,7 @@ log_config = {
 if "prod" == os.getenv("APP_ENV", "prod"):
     log_config["handlers"]["file_handler"] = {
         "class": "logging.handlers.RotatingFileHandler",
-        "filename": os.path.join(base_dir, "log", "router.log"),
+        "filename": os.path.join(base_dir, "log", "common.log"),
         "mode": "a",
         "maxBytes": 20000000,
         "backupCount": 10,
