@@ -10,7 +10,7 @@ print(f"router base_dir :: {base_dir}")
 
 class DBInfo(BaseSettings):
     DB_POOL_RECYCLE: int = 900
-    IS_ECHO: bool = True
+    DB_ECHO: bool = True
     DB_URL: str
     """
         DB_INFO는 그때그때 프로젝트별 DB에 따라 필요한걸로 작성
@@ -50,7 +50,7 @@ class LocalSettings(Settings):
 
     DB_INFO: PGInfo = PGInfo(
         DB_POOL_RECYCLE=900,
-        IS_ECHO=True,
+        DB_ECHO=True,
         SCHEMA="sitemng,users,meta,iag,ckan,board,analysis",
         DB_URL=str(
             PostgresDsn.build(

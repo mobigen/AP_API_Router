@@ -33,12 +33,13 @@ class SQLAlchemyConnector(Connector):
             self.init_app(app=app, **kwargs)
 
     def init_app(self, app: FastAPI, **kwargs):
-        database_url = kwargs.get("DB_INFO").get("DB_URL")
-        pool_recycle = kwargs.get("DB_POOL_RECYCLE", 900)
+        db_info = kwargs.get("DB_INFO")
+        database_url = db_info.get("DB_URL")
+        pool_recycle = db_info.get("DB_POOL_RECYCLE", 900)
+        echo = db_info.get("DB_ECHO", False)
+        self._schemas = db_info.get("SCHEMA").split(",")
         is_testing = kwargs.get("TESTING", False)
-        echo = kwargs.get("DB_ECHO", False)
         is_reload = kwargs.get("RELOAD", False)
-        self._schemas = kwargs.get("DB_INFO").get("SCHEMA").split(",")
 
         self._engine = create_engine(
             database_url,

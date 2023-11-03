@@ -1,8 +1,8 @@
 from sqlalchemy import String, Column, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.orm import relationship
 
-from app.database.conn import Base
 from libs.database.models import BaseMixin
+from router.app.database.conn import Base
 
 
 class BaseMixinSitemng(BaseMixin):
@@ -22,7 +22,10 @@ class TbApiInfo(BaseMixinSitemng, Base):
 
     server_info = relationship("TbApiServerInfo")
 
-    __table_args__ = (PrimaryKeyConstraint(api_nm, route_url, mthd), BaseMixinSitemng.__table_args__,)
+    __table_args__ = (
+        PrimaryKeyConstraint(api_nm, route_url, mthd),
+        BaseMixinSitemng.__table_args__,
+    )
 
 
 class TbApiServerInfo(BaseMixinSitemng, Base):

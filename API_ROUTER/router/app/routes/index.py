@@ -8,9 +8,9 @@ from fastapi import APIRouter, Depends
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from app.common import const
-from app.database.conn import db
 from libs.database.connector import Executor
+from router.app.common import const
+from router.app.database.conn import db
 
 logger = logging.getLogger()
 
