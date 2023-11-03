@@ -1,27 +1,26 @@
-import sys
 import json
-import string
-import random
 import logging
-import requests
+import random
+import string
+import sys
 import traceback
-
 from ast import literal_eval
+
+import requests
 from fastapi import APIRouter, Depends, Request
+from starlette.responses import JSONResponse
 
 from libs.auth.keycloak import keycloak
-from starlette.responses import JSONResponse
 from libs.database.connector import Executor
-from login_service.common.config import settings
-from login_service.common.const import COOKIE_NAME, IRIS_COOKIE_NAME, LoginTable, IrisInfoTable
-from login_service.database.conn import db
-
+from login_service.app.common.config import settings
+from login_service.app.common.const import COOKIE_NAME, LoginTable, IrisInfoTable
+from login_service.app.database.conn import db
 
 logger = logging.getLogger()
 router = APIRouter()
 
 base_url = "https://b-iris.mobigen.com"
-#base_url = "http://studio.bigdata-car.kr:32180"
+# base_url = "http://studio.bigdata-car.kr:32180"
 
 
 def get_exception_info():
@@ -37,11 +36,8 @@ def get_exception_info():
 def get_token(iris_info, header):
     iris_id = iris_info[0]["iris_id"]
     iris_pw = iris_info[0]["iris_pw"]
-    login_iris = {
-        "userId": iris_id,
-        "userPass": iris_pw
-    }
-    res = requests.post(f"{base_url}/authenticate",data=json.dumps(login_iris), verify=False, headers=header)
+    login_iris = {"userId": iris_id, "userPass": iris_pw}
+    res = requests.post(f"{base_url}/authenticate", data=json.dumps(login_iris), verify=False, headers=header)
 
     return res.json()
 
@@ -54,9 +50,9 @@ def get_random_str(is_num: bool) -> str:
     :return:
     """
     if is_num:
-        result = [str(random.randrange(0,9)) for _ in range(0,5)]
+        result = [str(random.randrange(0, 9)) for _ in range(0, 5)]
     else:
-        result = [random.choice(string.ascii_lowercase) for _ in range(0,5)]
+        result = [random.choice(string.ascii_lowercase) for _ in range(0, 5)]
     return "".join(result)
 
 
@@ -71,9 +67,11 @@ async def api(request: Request, session: Executor = Depends(db.get_db)) -> JSONR
         return JSONResponse(status_code=200, content={"result": 0, "errorMessage": msg})
 
     token = literal_eval(token)
-    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm )
-    if userInfo.get("status_code") != 200 :
-        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": userInfo.get("data").get("error_description")})
+    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm)
+    if userInfo.get("status_code") != 200:
+        return JSONResponse(
+            status_code=400, content={"result": 0, "errorMessage": userInfo.get("data").get("error_description")}
+        )
 
     user_id = userInfo.get("data").get("user_id")
 
@@ -107,11 +105,7 @@ async def api(request: Request, session: Executor = Depends(db.get_db)) -> JSONR
                     logger.info("break")
                     break
             # insert 구문
-            insert_query = {
-                "user_id": user_id,
-                "iris_id": iris_id,
-                "iris_pw": iris_pw
-            }
+            insert_query = {"user_id": user_id, "iris_id": iris_id, "iris_pw": iris_pw}
             logger.info(session.execute(**iris_table.upsert_query_data("INSERT", insert_query)))
 
             # iris join API
@@ -119,26 +113,23 @@ async def api(request: Request, session: Executor = Depends(db.get_db)) -> JSONR
                 "userId": iris_id,
                 "userPass": iris_pw,
                 "roleCode": "USER",
-                "groupId": "62b3fa2f-f3f5-4f88-a6de-dfef48c5c37a", # Default Group
+                "groupId": "62b3fa2f-f3f5-4f88-a6de-dfef48c5c37a",  # Default Group
                 "name": user_info["user_nm"],
                 "desc": "테스트용 아이디",
                 "email": user_id,
-                "phone": user_info["moblphon"]
+                "phone": user_info["moblphon"],
             }
             logger.info(join_info)
 
             # login
-            iris_root = [{
-                "iris_id": "root",
-                "iris_pw": "!dufmaQkdgkr202208"  # "Katech12#$"
-            }]
+            iris_root = [{"iris_id": "root", "iris_pw": "!dufmaQkdgkr202208"}]  # "Katech12#$"
             root_token = get_token(iris_root, header)["token"]
             header["x-access-token"] = root_token
 
             logger.info(root_token)
             logger.info(header)
 
-            res = requests.post(f"{base_url}/meta/account",data=json.dumps(join_info), verify=False, headers=header)
+            res = requests.post(f"{base_url}/meta/account", data=json.dumps(join_info), verify=False, headers=header)
             logger.info(res.text)
 
             iris_table.key_column = "user_id"

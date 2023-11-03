@@ -1,6 +1,6 @@
-from ast import literal_eval
 import json
 import logging
+from ast import literal_eval
 from datetime import datetime
 from typing import Optional, Union
 
@@ -8,13 +8,12 @@ import bcrypt
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
+
 from libs.auth.keycloak import keycloak
-
 from libs.database.connector import Executor
-from login_service.common.config import settings
-from login_service.common.const import COOKIE_NAME, LoginTable, RegisterTable
-from login_service.database.conn import db
-
+from login_service.app.common.config import settings
+from login_service.app.common.const import COOKIE_NAME, LoginTable, RegisterTable
+from login_service.app.database.conn import db
 
 logger = logging.getLogger()
 
@@ -139,13 +138,14 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
     param = params.data
     try:
         row = session.query(**LoginTable.get_query_data(param.user_id)).first()
+        logger.debug(row)
         # 보안 때문에
         if param.login_type == "member":
             check_pw = bcrypt.checkpw(param.user_password.encode("utf-8"), row["user_password"].encode("utf-8"))
         else:
             check_pw = True
 
-        if not row and not check_pw:
+        if not row or not check_pw:
             return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "id or password not found"})
 
         token = await get_normal_token(grant_type="password", username=param.user_id, password=param.user_password)

@@ -38,8 +38,8 @@ class RegisterTable:
     @staticmethod
     def upsert_query_data(method: str, data: Dict) -> Dict:
         method = method.upper()
-        queryDict = { "method": method, "table_nm": RegisterTable.table_nm, "data": data}
-        if method == "UPDATE" :
+        queryDict = {"method": method, "table_nm": RegisterTable.table_nm, "data": data}
+        if method == "UPDATE":
             queryDict["key"] = ["user_id"]
         return queryDict
 
@@ -65,11 +65,12 @@ class IrisInfoTable:
     @staticmethod
     def upsert_query_data(method: str, data: Dict) -> Dict:
         method = method.upper()
-        queryDict = { "method": method, "table_nm": IrisInfoTable.table_nm, "data": data}
+        queryDict = {"method": method, "table_nm": IrisInfoTable.table_nm, "data": data}
         if method == "UPDATE":
             queryDict["key"] = ["user_id"]
 
         return queryDict
+
 
 class EmailAuthTable:
     table_nm = "tb_email_athn_info"
@@ -93,7 +94,7 @@ class EmailAuthTable:
     @staticmethod
     def get_execute_query(data: Dict) -> Dict:
         queryDict = {
-            "table_nm" :EmailAuthTable.table_nm,
+            "table_nm": EmailAuthTable.table_nm,
             "key": [EmailAuthTable.key_column],
             "method": "UPDATE",
             "data": data,

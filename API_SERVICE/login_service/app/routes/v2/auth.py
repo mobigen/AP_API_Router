@@ -11,9 +11,9 @@ from starlette.responses import JSONResponse
 from libs.auth.keycloak import keycloak
 
 from libs.database.connector import Executor
-from login_service.common.config import settings
-from login_service.common.const import COOKIE_NAME, LoginTable, RegisterTable, EmailAuthTable
-from login_service.database.conn import db
+from login_service.app.common.config import settings
+from login_service.app.common.const import COOKIE_NAME, LoginTable, RegisterTable, EmailAuthTable
+from login_service.app.database.conn import db
 
 """'
  Status Code :
@@ -315,38 +315,40 @@ async def admin_register(request: Request, params: RegisterInfoWrap, session: Ex
     param = params.data
     try:
         await check_admin(request)
+
+        user_data = {
+            "keycloak_uuid": param.sub,
+            "user_uuid": param.user_uuid,
+            "user_id": param.user_id,
+            "user_nm": param.user_nm,
+            "email": param.email,
+            "moblphon": param.moblphon,
+            "user_type": param.user_type,
+            "login_type": param.login_type,
+            "user_role": param.user_role,
+            "adm_yn": param.adm_yn,
+            "user_sttus": param.user_sttus,
+            "blng_org_cd": param.blng_org_cd,
+            "blng_org_nm": param.blng_org_nm,
+            "blng_org_desc": param.blng_org_desc,
+            "service_terms_yn": param.service_terms_yn,
+            "reg_user": param.reg_user,
+            "reg_date": param.reg_date.strftime("%Y-%m-%d %H:%M:%S"),
+            "amd_user": param.amd_user,
+            "amd_date": param.amd_date.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+        return await user_upsert(session, **user_data)
+    except AdminAuthFail as ae:
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": str(ae)})
     except Exception as e:
         session.rollback()
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
-    user_data = {
-        "keycloak_uuid": param.sub,
-        "user_uuid": param.user_uuid,
-        "user_id": param.user_id,
-        "user_nm": param.user_nm,
-        "email": param.email,
-        "moblphon": param.moblphon,
-        "user_type": param.user_type,
-        "login_type": param.login_type,
-        "user_role": param.user_role,
-        "adm_yn": param.adm_yn,
-        "user_sttus": param.user_sttus,
-        "blng_org_cd": param.blng_org_cd,
-        "blng_org_nm": param.blng_org_nm,
-        "blng_org_desc": param.blng_org_desc,
-        "service_terms_yn": param.service_terms_yn,
-        "reg_user": param.reg_user,
-        "reg_date": param.reg_date.strftime("%Y-%m-%d %H:%M:%S"),
-        "amd_user": param.amd_user,
-        "amd_date": param.amd_date.strftime("%Y-%m-%d %H:%M:%S"),
-    }
-
-    return await user_upsert(session, **user_data)
-
 
 @router.post("/user/v2/commonLogin")
-async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -> JSONResponse:
+async def login(params: LoginInfoWrap) -> JSONResponse:
     param = params.data
 
     token = await get_normal_token(grant_type="password", username=param.user_id, password=param.user_password)
@@ -365,7 +367,7 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
 
 
 @router.post("/user/v2/commonLoginAuth")
-async def loginAuth(params: LoginAuthInfoWrap, session: Executor = Depends(db.get_db)) -> JSONResponse:
+async def loginAuth(params: LoginAuthInfoWrap) -> JSONResponse:
     param = params.data
 
     token = await get_normal_token(
@@ -386,7 +388,7 @@ async def loginAuth(params: LoginAuthInfoWrap, session: Executor = Depends(db.ge
 
 
 @router.post("/user/v2/commonLoginSocial")
-async def loginSocial(params: RegisterSocialInfoWrap, session: Executor = Depends(db.get_db)):
+async def loginSocial(params: RegisterSocialInfoWrap):
     param = params.data
 
     token = await get_social_token(**param.dict())
@@ -403,7 +405,7 @@ async def loginSocial(params: RegisterSocialInfoWrap, session: Executor = Depend
 
 
 @router.post("/user/v2/commonSocialLink")
-async def socialLink(params: RegisterSocialInfoWrap, session: Executor = Depends(db.get_db)):
+async def socialLink(params: RegisterSocialInfoWrap):
     param = params.data
     social_email = param.social_email
 
@@ -497,7 +499,7 @@ async def getCount(params: QueryInfoWrap, session: Executor = Depends(db.get_db)
 
 
 @router.post("/user/v2/commonUserModify")
-async def modify(request: Request, params: RegisterInfoWrap, session: Executor = Depends(db.get_db)):
+async def modify(request: Request, params: RegisterInfoWrap):
     userInfo = await get_user_info_from_request(request)
     userInfo = userInfo.get("data")
     userId = userInfo.get("preferred_username")
@@ -527,7 +529,6 @@ async def adminGetUser(request: Request, params: UserInfoWrap):
         else:
             return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
     except Exception as e:
-        session.rollback()
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
@@ -539,7 +540,6 @@ async def adminModifyUser(request: Request, params: RegisterInfoWrap):
         await check_admin(request)
         return await modify_keycloak_user(**param.dict())
     except Exception as e:
-        session.rollback()
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
@@ -558,7 +558,6 @@ async def adminCheckSocialtype(request: Request):
         res = await keycloak.check_idp(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub)
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": "", "data": res.get("data")})
     except Exception as e:
-        session.rollback()
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
@@ -574,7 +573,7 @@ async def userNewPassword(params: PasswordInfoWrap, session: Executor = Depends(
         await check_email_auth(user_id, athn_no, session)
         # credentials 만 변경
         reg_data = {"credentials": [{"value": new_password}]}
-        return await alter_user_info(user_id, None, **reg_data)
+        return await alter_user_info(user_id, **reg_data)
     except Exception as e:
         session.rollback()
         logger.error(e, exc_info=True)
@@ -608,7 +607,7 @@ async def checkPurchase(params: PurchaseInfoWrap, request: Request):
 
 
 @router.post("/user/v2/checkClientInfo")
-async def checkClientInfo(params: ClientInfoWrap, request: Request):
+async def checkClientInfo(params: ClientInfoWrap):
     params = params.data
     client_name = params.client_name
     try:
@@ -626,7 +625,7 @@ async def checkClientInfo(params: ClientInfoWrap, request: Request):
 
 
 @router.post("/user/v2/checkClientRole")
-async def checkClientRole(params: ClientRoleWrap, request: Request):
+async def checkClientRole(params: ClientRoleWrap):
     params = params.data
     client_sub = params.client_sub
     try:
@@ -643,7 +642,7 @@ async def checkClientRole(params: ClientRoleWrap, request: Request):
 
 
 @router.post("/user/v2/setRoleMapping")
-async def setRoleMapping(params: ClientRoleMappingWrap, request: Request):
+async def setRoleMapping(params: ClientRoleMappingWrap):
     params = params.data
     user_id = params.user_id
 
@@ -732,7 +731,7 @@ async def user_upsert(session: Executor, **kwargs):
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
-async def alter_user_info(user_id: str, user_sttus: str, **kwargs):
+async def alter_user_info(user_id: str, user_sttus: str = None, **kwargs):
 
     """
 
@@ -836,7 +835,6 @@ async def alter_user_info(user_id: str, user_sttus: str, **kwargs):
                 status_code=400, content={"result": 0, "errorMessage": resToken["data"]["error_description"]}
             )
     except Exception as e:
-        session.rollback()
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
@@ -949,7 +947,6 @@ async def modify_keycloak_user(**kwargs):
                 content={"result": 0, "errorMessage": "Invalid User"},
             )
     except Exception as e:
-        session.rollback()
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
