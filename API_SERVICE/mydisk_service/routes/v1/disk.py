@@ -125,7 +125,7 @@ async def head(params: PreviewParam):
         logger.info(f"path :: {path}")
         file_type = "txt"
 
-        if suffix in ["jpg", "jpeg", "png", "gif", "tiff"]:
+        if suffix in ["jpg", "jpeg", "png", "gif", "tiff", "tif", "bmp"]:
             file_type = "image"
             byte_str = BytesIO()
             thumb_image = Image.open(path)
