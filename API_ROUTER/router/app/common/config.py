@@ -20,6 +20,15 @@ class DBInfo(BaseSettings):
 
     """
 
+    """
+        pydantic validator를 통한 변수할당 예시
+        @validator("DB_URL", pre=True, always=True)
+        def assemble_db_url(cls, v, values):
+            if all(value is not None for value in values.values()):
+                return values.get("DB_INFO").get_dsn()
+            raise ValueError("Not all PostgreSQL database connection values were provided.")
+    """
+
 
 class PGInfo(DBInfo):
     SCHEMA: str

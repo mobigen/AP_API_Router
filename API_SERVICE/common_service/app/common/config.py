@@ -5,7 +5,7 @@ from functools import lru_cache
 from pydantic import BaseSettings, PostgresDsn
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-print(f"router base_dir :: {base_dir}")
+print(f"common base_dir :: {base_dir}")
 
 
 class DBInfo(BaseSettings):
