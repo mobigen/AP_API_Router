@@ -1,23 +1,21 @@
-import os
-import glob
-import zipfile
-import logging
-import shutil
 import base64
-import pandas as pd
-
-from PIL import Image
+import glob
+import logging
+import os
+import shutil
+import zipfile
 from io import BytesIO
 from pathlib import Path
 from typing import Optional, Union, Dict
 
-from fastapi import APIRouter, Depends, Request
-from pydantic import BaseModel, Field
+import pandas as pd
+from PIL import Image
+from fastapi import APIRouter
+from pydantic import BaseModel
+from starlette.responses import FileResponse
 
 from libs.disk.mydisk import mydisk
-from mydisk_service.common.config import settings
-
-from starlette.responses import FileResponse
+from mydisk_service.app.common.config import settings
 
 logger = logging.getLogger()
 
@@ -28,7 +26,7 @@ class UserParams(BaseModel):
     def get_path(self) -> Path:
         return Path(
             os.path.join(
-                settings.MYDISK_ROOT_DIR,
+                settings.MYDISK_INFO.ROOT_DIR,
                 "USER",
                 self.uuid,
             )
@@ -41,7 +39,7 @@ class DownloadParams(BaseModel):
     def get_path(self) -> Path:
         return Path(
             os.path.join(
-                settings.MYDISK_ROOT_DIR,
+                settings.MYDISK_INFO.ROOT_DIR,
                 self.src_target_path.lstrip("/") if self.src_target_path.startswith("/") else self.src_target_path,
             )
         )
@@ -61,12 +59,12 @@ class CopyParams(BaseModel):
 
     def get_src(self):
         return os.path.join(
-            settings.MYDISK_ROOT_DIR, self.src_path.lstrip("/") if self.src_path.startswith("/") else self.src_path
+            settings.MYDISK_INFO.ROOT_DIR, self.src_path.lstrip("/") if self.src_path.startswith("/") else self.src_path
         )
 
     def get_dst(self):
         return os.path.join(
-            settings.MYDISK_ROOT_DIR, self.dst_path.lstrip("/") if self.dst_path.startswith("/") else self.dst_path
+            settings.MYDISK_INFO.ROOT_DIR, self.dst_path.lstrip("/") if self.dst_path.startswith("/") else self.dst_path
         )
 
 
@@ -74,25 +72,21 @@ class TreeParams(BaseModel):
     target_directory: str
 
     def get_path(self) -> Path:
+        print(f"target path :: {settings.MYDISK_INFO.ROOT_DIR}")
         return Path(
             os.path.join(
-                settings.MYDISK_ROOT_DIR,
+                settings.MYDISK_INFO.ROOT_DIR,
                 self.target_directory.lstrip("/") if self.target_directory.startswith("/") else self.target_directory,
             )
         )
+
 
 class LabelParams(BaseModel):
     data_set_id: str
 
     def get_path(self) -> Path:
-        return Path(
-            os.path.join(
-                settings.MYDISK_ROOT_DIR,
-                "ADMIN",
-                self.data_set_id,
-                "LABEL_DATA"
-            )
-        )
+        return Path(os.path.join(settings.MYDISK_INFO.ROOT_DIR, "ADMIN", self.data_set_id, "LABEL_DATA"))
+
 
 class PreviewParam(BaseModel):
     target_file_directory: str
@@ -103,7 +97,7 @@ class PreviewParam(BaseModel):
     def get_path(self) -> Path:
         return Path(
             os.path.join(
-                settings.MYDISK_ROOT_DIR,
+                settings.MYDISK_INFO.ROOT_DIR,
                 self.target_file_directory.lstrip("/")
                 if self.target_file_directory.startswith("/")
                 else self.target_file_directory,
@@ -241,26 +235,26 @@ async def create_user_dir(params: UserParams):
         result = {"result": 0, "errorMessage": str(e)}
     return result
 
+
 @router.post("/v1/labelSearch")
 async def label(params: LabelParams):
-
     def listFiles(p: Path):
         ret = []
         lst = []
         for i in p.iterdir():
             if i.is_dir():
                 listFile = listFiles(i)
-                if listFile :
+                if listFile:
                     lst = lst + listFile
 
-                imageDatas = sorted(glob.glob(fr'{i}/*[.jpg][.png][.gif]'))
+                imageDatas = sorted(glob.glob(rf"{i}/*[.jpg][.png][.gif]"))
                 imageCount = len(imageDatas)
                 if imageCount > 0:
                     folderName = f"{i}".split("/")[-2]
-                    for f in imageDatas :
+                    for f in imageDatas:
                         fileArr = f.split("/")
                         fileName = fileArr[-1].split(".")[0]
-                        refUrl = "/".join(fileArr[fileArr.index("raw")+1:])
+                        refUrl = "/".join(fileArr[fileArr.index("raw") + 1 :])
                         index = f"{int(fileName)}"
                         data = [folderName, refUrl, index]
                         ret.append(data)
@@ -277,18 +271,20 @@ async def label(params: LabelParams):
         result = {"result": 0, "errorMessage": str(e), "data": []}
     return result
 
+
 @router.get("/v1/linkImage/")
-async def linkImage(dataset_id: str, fileloc:str):
+async def linkImage(dataset_id: str, fileloc: str):
     fileBase = "/home/deep/workspace/ysw/katech/filebrowser_datas/file_data/ADMIN/"
     imageSrc = f"{fileBase}/{dataset_id}/LABEL_DATA/raw/{fileloc}"
-    try :
+    try:
         return FileResponse(imageSrc)
     except Exception as e:
         logger.info(str(e))
 
+
 def is_dir(src_path):
     return os.path.isdir(
-        os.path.join(settings.MYDISK_ROOT_DIR, src_path.lstrip("/") if src_path.startswith("/") else src_path)
+        os.path.join(settings.MYDISK_INFO.ROOT_DIR, src_path.lstrip("/") if src_path.startswith("/") else src_path)
     )
 
 

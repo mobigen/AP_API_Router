@@ -1,12 +1,13 @@
+import logging
+
 import uvicorn
 from fastapi import FastAPI
+
 from libs.auth.keycloak import keycloak
 from libs.disk.mydisk import mydisk
-from mydisk_service.routes.v1 import disk
-from mydisk_service.common.config import settings
-from mydisk_service.database.conn import db
-
-import logging
+from mydisk_service.app.common.config import settings
+from mydisk_service.app.database.conn import db
+from mydisk_service.app.routes.v1 import disk
 
 logger = logging.getLogger()
 

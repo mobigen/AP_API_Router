@@ -6,7 +6,7 @@ from typing import Optional
 from pydantic import BaseSettings, PostgresDsn
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-print(f"login base_dir :: {base_dir}")
+print(f"mydisk base_dir :: {base_dir}")
 
 
 class DBInfo(BaseSettings):
@@ -36,6 +36,21 @@ class KeycloakInfo(BaseSettings):
         env_file_encoding = "utf-8"
 
 
+class MydiskInfo(BaseSettings):
+    ROOT_DIR: str
+
+    mydisk_url: Optional[str]
+    admin_username: Optional[str]
+    admin_password: Optional[str]
+    scope: Optional[str]
+    client_id: Optional[str]
+    client_secret: Optional[str]
+
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
+
+
 class Settings(BaseSettings):
     BASE_DIR = base_dir
     RELOAD: bool
@@ -43,14 +58,16 @@ class Settings(BaseSettings):
 
     DB_INFO: DBInfo
     KEYCLOAK_INFO: KeycloakInfo
+    MYDISK_INFO: MydiskInfo
 
 
 class ProdSettings(Settings):
-    RELOAD = False
-    TESTING = False
+    TESTING: bool = False
+    RELOAD: bool = False
 
-    DB_INFO = PGInfo()
-    KEYCLOAK_INFO = KeycloakInfo()
+    DB_INFO: PGInfo = PGInfo()
+    KEYCLOAK_INFO: KeycloakInfo = KeycloakInfo()
+    MYDISK_INFO: MydiskInfo() = MydiskInfo()
 
     class Config:
         env_file = f"{base_dir}/.env"
@@ -59,8 +76,6 @@ class ProdSettings(Settings):
 
 class LocalSettings(Settings):
     TESTING: bool = False
-    DB_POOL_RECYCLE: int = 900
-    DB_ECHO: bool = True
     RELOAD: bool = False
 
     DB_INFO = PGInfo(
@@ -79,26 +94,40 @@ class LocalSettings(Settings):
         ),
     )
 
+    # KEYCLOAK_INFO = KeycloakInfo(
+    #    keycloak_url="http://192.168.101.44:8080",
+    #    admin_username="admin",
+    #    admin_password="zxcv1234!",
+    #    realm="kadap",
+    #    client_id="uyuni",
+    #    client_secret="8UDolCR5j1vHt4rsyHnwTDlYkuRmOUp8",
+    # )
+
     KEYCLOAK_INFO = KeycloakInfo(
         keycloak_url="https://auth.bigdata-car.kr",
         admin_username="admin",
         admin_password="2021@katech",
         realm="mobigen",
         client_id="katech",
-        client_secret="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
+        client_secret="pwLZG5EaWph1nJAOjwYJ32YGtXdAj5SL",
     )
 
-
-class TestSettings(LocalSettings):
-    TESTING = True
-    RELOAD = True
+    MYDISK_INFO = MydiskInfo(
+        ROOT_DIR="./",
+        mydisk_url="https://mydisk.bigdata-car.kr",
+        admin_username="superuser",
+        admin_password="35ldxxhbd1",
+        scope="download",
+        client_id="86e9aaff5afc7d7828035500e11cb48c",
+        client_secret="lfb5RQK9SH3GcRqGgq0QcLlW5mJf0JDBNkrn1729",
+    )
 
 
 @lru_cache
 def get_settings() -> Settings:
     env = os.getenv("APP_ENV", "prod")
     print(env)
-    return {"local": LocalSettings(), "test": TestSettings(), "prod": ProdSettings()}[env]
+    return {"local": LocalSettings(), "prod": ProdSettings()}[env]
 
 
 settings = get_settings()
@@ -123,7 +152,7 @@ log_config = {
 if "prod" == os.getenv("APP_ENV", "prod"):
     log_config["handlers"]["file_handler"] = {
         "class": "logging.handlers.RotatingFileHandler",
-        "filename": os.path.join(base_dir, "log", "login.log"),
+        "filename": os.path.join(base_dir, "log", "mydisk.log"),
         "mode": "a",
         "maxBytes": 20000000,
         "backupCount": 10,
