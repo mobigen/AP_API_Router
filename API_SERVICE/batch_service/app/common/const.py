@@ -1,9 +1,8 @@
 import os
-from pydantic import BaseSettings
-from batch_service.common.config import base_dir
+
+from batch_service.app.common.config import base_dir
 from libs.database.dml_controller import Base
 
-# log_dir = "{os.path.dirname(base_dir)}/meta_service/log/"
 log_dir = f"{os.path.dirname(os.path.dirname(base_dir))}/API-SERVICE/log/meta"
 
 msg_setting = {
@@ -32,17 +31,6 @@ msg_setting = {
         "sub": "[자동차데이터포털] {0} 신청 메일입니다.",
     }
 }
-
-
-class Settings(BaseSettings):
-    EMAIL_ADDR: str = ""
-    EMAIL_PASSWORD: str = ""
-    SMTP_SERVER: str = ""
-    SMTP_PORT: str = ""
-
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
 
 
 class EmailSendInfoTable(Base):

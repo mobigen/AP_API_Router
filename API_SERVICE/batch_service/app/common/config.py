@@ -1,21 +1,20 @@
 import logging.config
 import os
 from functools import lru_cache
-from typing import Optional
 
-from pydantic import BaseSettings, PostgresDsn
+from pydantic import BaseSettings, PostgresDsn, Field
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-print(f"login base_dir :: {base_dir}")
+print(f"batch base_dir :: {base_dir}")
 
 
 class DBInfo(BaseSettings):
-    DB_POOL_RECYCLE: int = 900
-    DB_ECHO: bool = True
-    DB_URL: str
+    DB_POOL_RECYCLE: int = Field(default=900)
+    DB_ECHO: bool = Field(default=False)
 
 
 class PGInfo(DBInfo):
+    DB_URL: str
     SCHEMA: str
 
     class Config:
@@ -23,13 +22,9 @@ class PGInfo(DBInfo):
         env_file_encoding = "utf-8"
 
 
-class KeycloakInfo(BaseSettings):
-    keycloak_url: Optional[str]
-    admin_username: Optional[str]
-    admin_password: Optional[str]
-    realm: Optional[str]
-    client_id: Optional[str]
-    client_secret: Optional[str]
+class SeoulPGInfo(DBInfo):
+    SEOUL_DB_URL: str = Field(..., alias="DB_URL")
+    SEOUL_SCHEMA: str = Field(..., alias="SCHEMA")
 
     class Config:
         env_file = f"{base_dir}/.env"
@@ -41,8 +36,13 @@ class Settings(BaseSettings):
     RELOAD: bool
     TESTING: bool
 
+    EMAIL_ADDR: str
+    EMAIL_PASSWORD: str
+    SMTP_SERVER: str
+    SMTP_PORT: str
+
     DB_INFO: DBInfo
-    KEYCLOAK_INFO: KeycloakInfo
+    SEOUL_DB_INFO: SeoulPGInfo
 
 
 class ProdSettings(Settings):
@@ -50,14 +50,21 @@ class ProdSettings(Settings):
     TESTING = False
 
     DB_INFO = PGInfo()
-    KEYCLOAK_INFO = KeycloakInfo()
+    SEOUL_DB_INFO = SeoulPGInfo()
+
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
 
 
 class LocalSettings(Settings):
     TESTING: bool = False
-    DB_POOL_RECYCLE: int = 900
-    DB_ECHO: bool = True
     RELOAD: bool = False
+
+    SMTP_SERVER = "smtp.office365.com"
+    SMTP_PORT = "587"
+    EMAIL_ADDR = "admin@bigdata-car.kr"
+    EMAIL_PASSWORD = "Pas07054354@katech!"
 
     DB_INFO = PGInfo(
         DB_POOL_RECYCLE=900,
@@ -75,13 +82,20 @@ class LocalSettings(Settings):
         ),
     )
 
-    KEYCLOAK_INFO = KeycloakInfo(
-        keycloak_url="https://auth.bigdata-car.kr",
-        admin_username="admin",
-        admin_password="2021@katech",
-        realm="mobigen",
-        client_id="katech",
-        client_secret="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
+    SEOUL_DB_INFO = SeoulPGInfo(
+        DB_POOL_RECYCLE=900,
+        DB_ECHO=False,
+        SCHEMA="public",
+        DB_URL=str(
+            PostgresDsn.build(
+                scheme="postgresql",
+                host="147.47.200.145",
+                port="34543",
+                user="openplatform",
+                password="openplatform",
+                path="/katechdb",
+            )
+        ),
     )
 
 
@@ -119,7 +133,7 @@ log_config = {
 if "prod" == os.getenv("APP_ENV", "prod"):
     log_config["handlers"]["file_handler"] = {
         "class": "logging.handlers.RotatingFileHandler",
-        "filename": os.path.join(base_dir, "log", "login.log"),
+        "filename": os.path.join(base_dir, "log", "batch.log"),
         "mode": "a",
         "maxBytes": 20000000,
         "backupCount": 10,

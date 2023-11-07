@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from batch_service.database.conn import db
-from batch_service.common.const import EmailSendInfoTable, Settings, msg_setting
-
+from batch_service.app.database.conn import db
+from batch_service.app.common.const import EmailSendInfoTable, msg_setting
+from batch_service.app.common.config import settings
 
 logger = logging.getLogger()
 
@@ -23,11 +23,10 @@ def send_mail():
         for row in rows:
 
             # send config
-            setting = Settings()
-            host = setting.SMTP_SERVER
-            port = setting.SMTP_PORT
-            from_ = setting.EMAIL_ADDR
-            password = setting.EMAIL_PASSWORD
+            host = settings.SMTP_SERVER
+            port = settings.SMTP_PORT
+            from_ = settings.EMAIL_ADDR
+            password = settings.EMAIL_PASSWORD
             category = msg_setting[row["tmplt_cd"]]
 
             # template
