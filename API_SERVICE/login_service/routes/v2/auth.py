@@ -604,7 +604,7 @@ async def checkPurchase(params: PurchaseInfoWrap, request: Request):
                 ret = await response.read()
             # {'purchaseStatus': False}
             ret = ret.get("purchaseStatus")
-            return {"status_code": response.status, "data": "Y" if ret == False else "N"}
+            return {"status_code": response.status, "data": "Y" if ret else "N"}
 
 
 @router.post("/user/v2/checkClientInfo")
