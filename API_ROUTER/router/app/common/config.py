@@ -4,6 +4,7 @@ from functools import lru_cache
 
 from pydantic import BaseSettings, PostgresDsn
 
+
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 print(f"router base_dir :: {base_dir}")
 
@@ -21,14 +22,15 @@ class PGInfo(DBInfo):
         env_file = f"{base_dir}/.env"
         env_file_encoding = "utf-8"
 
-"""
-    pydantic validator를 통한 변수할당 예시
-    @validator("DB_URL", pre=True, always=True)
-    def assemble_db_url(cls, v, values):
-        if all(value is not None for value in values.values()):
-            return values.get("DB_INFO").get_dsn()
-        raise ValueError("Not all PostgreSQL database connection values were provided.")
-"""
+    """
+        pydantic validator를 통한 변수할당 예시
+        @validator("DB_URL", pre=True, always=True)
+        def assemble_db_url(cls, v, values):
+            if all(value is not None for value in values.values()):
+                return values.get("DB_INFO").get_dsn()
+            raise ValueError("Not all PostgreSQL database connection values were provided.")
+    """
+
 
 class Settings(BaseSettings):
     BASE_DIR = base_dir
@@ -51,7 +53,7 @@ class LocalSettings(Settings):
 
     DB_INFO: PGInfo = PGInfo(
         DB_POOL_RECYCLE=900,
-        DB_ECHO=True,
+        DB_ECHO=False,
         SCHEMA="sitemng,users,meta,iag,ckan,board,analysis",
         DB_URL=str(
             PostgresDsn.build(
