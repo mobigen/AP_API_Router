@@ -1,11 +1,9 @@
 import logging
-import decimal
 
-from fastapi import Depends, APIRouter
-
-from meta_service.ELKSearch.config import dev_server
-from meta_service.ELKSearch.Utils.base import set_els
-from meta_service.ELKSearch.index import Index
+from fastapi import APIRouter
+from meta_service.app.ELKSearch.Utils.base import set_els
+from meta_service.app.ELKSearch.config import dev_server
+from meta_service.app.ELKSearch.index import Index
 
 router = APIRouter()
 
@@ -20,10 +18,9 @@ def els_update(index: str):
         indices = ind_manager.all_index().keys()
         if index not in indices:
             logger.info(ind_manager.create(index))
-            result = {"result": 1,"data": "success"}
+            result = {"result": 1, "data": "success"}
 
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
     return result
-

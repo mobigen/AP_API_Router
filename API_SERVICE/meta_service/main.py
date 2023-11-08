@@ -1,10 +1,13 @@
+import logging
+
 import uvicorn
 from fastapi import FastAPI
 
-from meta_service.common.config import logger
-from meta_service.common.config import settings
-from meta_service.database.conn import db
-from meta_service.routes.v2 import autocomplete, els_data_search, els_bulk_update, els_upsert, els_index_create
+from meta_service.app.common.config import settings
+from meta_service.app.database.conn import db
+from meta_service.app.routes.v2 import autocomplete, els_data_search, els_bulk_update, els_upsert, els_index_create
+
+logger = logging.getLogger()
 
 
 def create_app():

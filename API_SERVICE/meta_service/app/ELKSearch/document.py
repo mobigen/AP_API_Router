@@ -1,9 +1,9 @@
-from meta_service.ELKSearch.Utils.base import make_format
-from meta_service.ELKSearch.Utils.document_utils import set_source
+from meta_service.app.ELKSearch.Utils.base import make_format
+from meta_service.app.ELKSearch.Utils.document_utils import set_source
 
 
 class DocumentManager:
-    def __init__(self, connect, index: str, size: int = 0, from_:int = 0):
+    def __init__(self, connect, index: str, size: int = 0, from_: int = 0):
         """
         :param connect: Elasticsearch instance
         :param index: document를 사용할 index명 (DB의 table명과 유사)
@@ -16,7 +16,7 @@ class DocumentManager:
         self.size = size
         self.page = size * from_
 
-    def set_body(self,body: dict):
+    def set_body(self, body: dict):
         self.body = body
 
     def insert(self, doc_id: str):
@@ -42,13 +42,7 @@ class DocumentManager:
         :return:
         """
         source = set_source(source)
-        return self.connect.search(
-            index=self.index,
-            body=self.body,
-            from_=self.page,
-            size=self.size,
-            _source=source
-        )
+        return self.connect.search(index=self.index, body=self.body, from_=self.page, size=self.size, _source=source)
 
     def delete(self, pk_name: str, pk_value):
         """
@@ -77,16 +71,11 @@ class DocumentManager:
         :return:
         """
         source = set_source(source)
-        prefix_query = make_format("query","prefix", body)
-        return self.connect.search(
-            index=self.index,
-            body=prefix_query,
-            size=self.size,
-            _source=source
-        )
+        prefix_query = make_format("query", "prefix", body)
+        return self.connect.search(index=self.index, body=prefix_query, size=self.size, _source=source)
 
     def count(self, body: dict) -> int:
         """
         :param body: elasticsearch에 전송할 query
-        :return: query 결과로 나온 item 갯 수        """
+        :return: query 결과로 나온 item 갯 수"""
         return self.connect.count(index=self.index, body=body)["count"]

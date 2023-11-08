@@ -1,14 +1,12 @@
-import logging
 import decimal
+import logging
 
 from fastapi import Depends, APIRouter
+from meta_service.app.ELKSearch.config import dev_server
+from meta_service.app.common.search import default_search_set
+from meta_service.app.database.conn import db
 
-from meta_service.database.conn import db
 from libs.database.connector import Connector
-
-from meta_service.ELKSearch.config import dev_server
-from meta_service.common.search import default_search_set
-
 
 router = APIRouter()
 
@@ -37,7 +35,7 @@ def els_update(table_name: str, session: Connector = Depends(db.get_db)):
         # insert_dataset = []
         for row in cur.fetchall():
             insert_body = dict()
-            for i in range(0,len(columns)):
+            for i in range(0, len(columns)):
                 col = columns[i].lower()
                 if type(row[i]) == decimal.Decimal:
                     insert_body[col] = int(row[i])
@@ -48,7 +46,7 @@ def els_update(table_name: str, session: Connector = Depends(db.get_db)):
             logger.info(docmanager.insert(insert_body["idx"]))
         #     insert_dataset.append(insert_body)
         # logger.info(len(insert_dataset))
-        result = {"result":1,"data": "test"}
+        result = {"result": 1, "data": "test"}
 
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
