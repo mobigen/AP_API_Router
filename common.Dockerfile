@@ -16,4 +16,4 @@ ENV PYTHONPATH=/app/source:/app/common_libs
 
 EXPOSE 8000
 
-CMD [ "gunicorn", "app.main:app", "-c", "gunicorn.conf.py"]
+CMD [ "gunicorn", "app.app.main:app", "-c", "gunicorn.conf.py"]
