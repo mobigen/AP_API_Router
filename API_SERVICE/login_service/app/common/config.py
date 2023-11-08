@@ -59,8 +59,6 @@ class ProdSettings(Settings):
 
 class LocalSettings(Settings):
     TESTING: bool = False
-    DB_POOL_RECYCLE: int = 900
-    DB_ECHO: bool = True
     RELOAD: bool = False
 
     DB_INFO = PGInfo(
@@ -127,7 +125,7 @@ if "prod" == os.getenv("APP_ENV", "prod"):
         "mode": "a",
         "maxBytes": 20000000,
         "backupCount": 10,
-        "level": "DEBUG",
+        "level": "INFO",
         "formatter": "standard",
     }
     log_config["root"]["handlers"].append("file_handler")

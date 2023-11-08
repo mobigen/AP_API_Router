@@ -156,7 +156,7 @@ if "prod" == os.getenv("APP_ENV", "prod"):
         "mode": "a",
         "maxBytes": 20000000,
         "backupCount": 10,
-        "level": "DEBUG",
+        "level": "INFO",
         "formatter": "standard",
     }
     log_config["root"]["handlers"].append("file_handler")
