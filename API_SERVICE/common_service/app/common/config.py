@@ -59,7 +59,7 @@ class LocalSettings(Settings):
 
     DB_INFO = PGInfo(
         DB_POOL_RECYCLE=900,
-        DB_ECHO=False,
+        DB_ECHO=True,
         SCHEMA="sitemng,users,meta,iag,ckan,board,analysis",
         DB_URL=str(
             PostgresDsn.build(
