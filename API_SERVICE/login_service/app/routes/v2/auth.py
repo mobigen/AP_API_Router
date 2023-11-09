@@ -593,7 +593,7 @@ async def checkPurchase(params: PurchaseInfoWrap, request: Request):
 
     token = literal_eval(token)
     access_token = token["data"]["access_token"]
-    api_url = f"https://market.bigdata-car.kr/api/v1/purchase-status/{data_id}"
+    api_url = f"https://market-dev.bigdata-car.kr/api/v1/purchase-status/{data_id}"
     headers = {"Content-Type": "application/json", "Authorization": "Bearer " + access_token}
     async with aiohttp.ClientSession() as session:
         async with session.request(url=api_url, method="GET", headers=headers) as response:
@@ -603,7 +603,7 @@ async def checkPurchase(params: PurchaseInfoWrap, request: Request):
                 ret = await response.read()
             # {'purchaseStatus': False}
             ret = ret.get("purchaseStatus")
-            return {"status_code": response.status, "data": "Y" if ret == False else "N"}
+            return {"status_code": response.status, "data": "Y" if ret else "N"}
 
 
 @router.post("/user/v2/checkClientInfo")

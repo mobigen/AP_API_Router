@@ -119,7 +119,7 @@ async def head(params: PreviewParam):
         logger.info(f"path :: {path}")
         file_type = "txt"
 
-        if suffix in ["jpg", "jpeg", "png", "gif", "tiff"]:
+        if suffix in ["jpg", "jpeg", "png", "gif", "tiff", "tif", "bmp"]:
             file_type = "image"
             byte_str = BytesIO()
             thumb_image = Image.open(path)
@@ -129,7 +129,7 @@ async def head(params: PreviewParam):
             logger.info(f"image str :: {image_base64str[:30]}...")
             contents = image_base64str
         else:  # txt, csv
-            df = pd.read_excel(path, header=None) if path.suffix in ["xls", "xlsx"] else pd.read_csv(path, header=None)
+            df = pd.read_excel(path, header=None) if suffix in ["xls", "xlsx"] else pd.read_csv(path, header=None)
             df = df.fillna("")
             contents = df[:lines].values.tolist()
 
