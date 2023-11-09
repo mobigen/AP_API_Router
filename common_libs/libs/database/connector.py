@@ -40,3 +40,11 @@ class Executor(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def close(self):
         ...
+
+    @abc.abstractmethod
+    def commit(self):
+        ...
+
+    @abc.abstractmethod
+    def rollback(self):
+        ...

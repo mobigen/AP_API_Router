@@ -14,4 +14,6 @@ RUN pip install --no-cache --upgrade pip && pip install -r requirements.txt
 ENV APP_ENV=prod
 ENV PYTHONPATH=/app/source:/app/common_libs
 
-CMD [ "gunicorn", "main:app", "-c", "gunicorn.conf.py"]
+EXPOSE 8000
+
+CMD [ "gunicorn", "app.app.main:app", "-c", "gunicorn.conf.py"]

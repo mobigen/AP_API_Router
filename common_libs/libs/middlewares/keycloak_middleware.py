@@ -20,6 +20,7 @@ def refresh_token_from_cookie_wrapper(keycloak: KeycloakManager, **kwargs):
     async def refresh_with_cookie(request: Request, call_next):
         dat = get_token_from_cookie(request.cookies)
         if not dat:
+            logger.debug(f"token none :: {request.cookies}")
             return await call_next(request)
 
         logger.info(dat)
