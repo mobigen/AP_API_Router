@@ -17,7 +17,7 @@ class PGInfo(DBInfo):
     DB_URL: str
     SCHEMA: str
 
-    class Config:
+    class Config:  # TODO: Config 사용없이 개별로 env 읽어서 할당
         env_file = f"{base_dir}/.env"
         env_file_encoding = "utf-8"
 
@@ -25,6 +25,15 @@ class PGInfo(DBInfo):
 class SeoulPGInfo(DBInfo):
     SEOUL_DB_URL: str = Field(..., alias="DB_URL")
     SEOUL_SCHEMA: str = Field(..., alias="SCHEMA")
+
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
+
+
+class ELSInfo(BaseSettings):
+    ELS_HOST: str = Field(..., alias="host")
+    ELS_PORT: int = Field(..., alias="port")
 
     class Config:
         env_file = f"{base_dir}/.env"
@@ -43,6 +52,7 @@ class Settings(BaseSettings):
 
     DB_INFO: DBInfo
     SEOUL_DB_INFO: SeoulPGInfo
+    ELS_INFO: ELSInfo
 
 
 class ProdSettings(Settings):
@@ -51,6 +61,7 @@ class ProdSettings(Settings):
 
     DB_INFO = PGInfo()
     SEOUL_DB_INFO = SeoulPGInfo()
+    ELS_INFO = ELSInfo()
 
     class Config:
         env_file = f"{base_dir}/.env"
@@ -97,6 +108,8 @@ class LocalSettings(Settings):
             )
         ),
     )
+
+    ELS_INFO = ELSInfo(host="192.168.101.44", port=39200)
 
 
 class TestSettings(LocalSettings):

@@ -6,19 +6,19 @@ from batch_service.app.ELKSearch.document import DocumentManager
 from batch_service.app.ELKSearch.index import Index
 
 
-def default_search_set(server_config, index, size=10, from_=0):
+def default_search_set(host, port, index, size=10, from_=0):
     """
     검색에 필요한 default 세팅
     자동완성과 검색에 사용
     """
-    es = set_els(server_config)
+    es = set_els(host, port)
     docmanger = DocumentManager(es, index)
     docmanger.set_pagination(size, from_)
     return docmanger
 
 
-def index_set(server_config):
-    es = set_els(server_config)
+def index_set(host, port):
+    es = set_els(host, port)
     return Index(es)
 
 

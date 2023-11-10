@@ -4,6 +4,7 @@ import re
 from collections import Counter
 from datetime import datetime
 
+from batch_service.app.common.config import base_dir
 from batch_service.app.common.const import log_dir, RecommendKeyTable
 from batch_service.app.database.conn import db
 
@@ -19,7 +20,7 @@ def recommend_search_word():
             search_log_file = fp.read().split("\n")[:-1]
 
         # 필터링할 단어 리스트 불러오기
-        fword_file_name = f"{log_dir}/batch_service/common/bad_word.txt"
+        fword_file_name = f"{base_dir}/batch_service/common/bad_word.txt"
         with open(fword_file_name, "r") as fp:
             bad_word_list = fp.read().split("\n")
 

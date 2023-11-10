@@ -3,8 +3,8 @@ import string
 from elasticsearch import Elasticsearch
 
 
-def set_els(server_info):
-    return Elasticsearch(f"http://{server_info.host}:{server_info.port}")
+def set_els(host: str, port: int):
+    return Elasticsearch(f"http://{host}:{port}")
 
 
 def make_format(key, inner_key, value) -> dict:

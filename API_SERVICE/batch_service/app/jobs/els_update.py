@@ -1,6 +1,6 @@
 import logging
 
-from batch_service.app.ELKSearch.config import dev_server
+from batch_service.app.common.config import settings
 from batch_service.app.common.const import BizDataTable, CkanDataTable
 from batch_service.app.common.utils import default_search_set, data_process, default_process, index_set
 from batch_service.app.database.conn import db
@@ -10,12 +10,14 @@ logger = logging.getLogger()
 
 def insert_meta():
     index_nm = "biz_meta"
+    els_host = settings.ELS_INFO.ELS_HOST
+    els_port = settings.ELS_INFO.ELS_PORT
     try:
-        index = index_set(dev_server)
+        index = index_set(host=els_host, port=els_port)
         index.delete(index_nm)
         index.create(index_nm)
 
-        docmanager = default_search_set(dev_server, index_nm)
+        docmanager = default_search_set(host=els_host, port=els_port, index=index_nm)
 
         with db.get_db_manager() as session:
             query = BizDataTable.get_select_query("")
@@ -34,12 +36,14 @@ def insert_meta():
 
 def insert_ckan():
     index_nm = "ckan_data"
+    els_host = settings.ELS_INFO.ELS_HOST
+    els_port = settings.ELS_INFO.ELS_PORT
     try:
-        index = index_set(dev_server)
+        index = index_set(host=els_host, port=els_port)
         index.delete(index_nm)
         index.create(index_nm)
 
-        docmanager = default_search_set(dev_server, index_nm)
+        docmanager = default_search_set(host=els_host, port=els_port, index=index_nm)
 
         with db.get_db_manager() as session:
             select_query = CkanDataTable.get_select_query("")
@@ -53,5 +57,3 @@ def insert_ckan():
             logger.info(docmanager.insert(ckan["biz_dataset_id"]))
     except Exception as e:
         print(e)
-
-
