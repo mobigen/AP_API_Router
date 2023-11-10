@@ -74,7 +74,7 @@ class TestSettings(LocalSettings):
 
 
 @lru_cache
-def get_settings():
+def get_settings() -> Settings:
     env = os.getenv("APP_ENV", "prod")
     print(f"env :: {env}")
     return {"local": LocalSettings(), "test": TestSettings(), "prod": ProdSettings()}[env]
