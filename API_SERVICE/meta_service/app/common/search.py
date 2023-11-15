@@ -15,7 +15,7 @@ class Record(BaseModel):
 
 
 class SearchModel(InputModel):
-    chk: bool
+    chk: bool = False
 
 
 def exception_col(table_nm: str, insert_body: dict) -> dict:
