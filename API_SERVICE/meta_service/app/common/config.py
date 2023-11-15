@@ -2,9 +2,9 @@ import logging.config
 import os
 from functools import lru_cache
 
-from pydantic import BaseSettings, PostgresDsn
+from pydantic import BaseSettings, PostgresDsn, Field
 
-base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 print(f"meta base_dir :: {base_dir}")
 
 
@@ -22,12 +22,22 @@ class PGInfo(DBInfo):
         env_file_encoding = "utf-8"
 
 
+class ELSInfo(BaseSettings):
+    ELS_HOST: str = Field(..., alias="host")
+    ELS_PORT: int = Field(..., alias="port")
+
+    class Config:
+        env_file = f"{base_dir}/.env"
+        env_file_encoding = "utf-8"
+
+
 class Settings(BaseSettings):
     BASE_DIR = base_dir
     RELOAD: bool
     TESTING: bool
 
     DB_INFO: DBInfo
+    ELS_INFO: ELSInfo
 
 
 class ProdSettings(Settings):
@@ -35,6 +45,7 @@ class ProdSettings(Settings):
     TESTING = False
 
     DB_INFO = PGInfo()
+    ELS_INFO = ELSInfo()
 
     class Config:
         env_file = f"{base_dir}/.env"
@@ -60,6 +71,9 @@ class LocalSettings(Settings):
             )
         ),
     )
+
+    # ELS_INFO = ELSInfo(host="192.168.101.44", port=39200)
+    ELS_INFO = ELSInfo(host="localhost", port=9200)
 
 
 class TestSettings(LocalSettings):

@@ -7,7 +7,7 @@ echo $pid_path
 
 # gunicorn 실행 명령어
 start_gunicorn() {
-    gunicorn app.main:app --bind 0.0.0.0:8010 -c gunicorn.conf.py -D --pid $pid_path
+    gunicorn app.main:app --bind 0.0.0.0:9010 -c gunicorn.conf.py -D --pid $pid_path
     sleep 2
     pid=$(cat $pid_path)
     echo "Gunicorn started. PID: $pid"
