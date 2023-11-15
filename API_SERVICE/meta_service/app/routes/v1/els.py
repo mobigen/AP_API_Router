@@ -282,7 +282,10 @@ def autocomplete(input: Prefix):
             return {"result": 1, "data": []}
 
         # lower() 대소문자 구별 없이 검색하기 위한 방법
-        prefix_data = [word for data in prefix_dict for word in data.values() if keyword.lower() in word.lower()]
+        prefix_data = [
+            word for data in prefix_dict for word in data.values() if word and keyword.lower() in word.lower()
+        ]
+
         # 데이터셋에서 해당 되는 데이터가 여러개 있을 수 있어 prefix_data에 size를 줌
         result = {"result": 1, "data": prefix_data[: docmanager.size]}
     except Exception as e:
