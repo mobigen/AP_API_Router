@@ -61,9 +61,21 @@ def base_query(len_query: int, queryOption: list) -> list:
         query_type = "phrase_prefix"
 
         return [
-            {query_func: {"query": str(query.keywords[0]), "fields": query.field, "type": query_type}}
+            {
+                query_func: {
+                    "query": str(query.keywords[0]),
+                    "fields": query.field,
+                    "type": query_type,
+                }
+            }
             if len(query.keywords) == 1
-            else {query_func: {"query": " ".join(query.keywords), "fields": query.field, "operator": query.operator}}
+            else {
+                query_func: {
+                    "query": " ".join(query.keywords),
+                    "fields": query.field,
+                    "operator": query.operator,
+                }
+            }
             for query in queryOption
         ]
 
@@ -87,7 +99,6 @@ def check_query(query_dict, item_list):
 
 
 def search_count(es, item_list, query_dict):
-
     # data_srttn 순서 고정
     # totalCount에 해외데이터는 포함되지 않는다
     data_srttn = {
@@ -99,6 +110,7 @@ def search_count(es, item_list, query_dict):
         "해외데이터": "overseaCount",
     }
     data_dict = dict()
+    index = "biz_meta,v_biz_meta_oversea_els"
 
     # set query count dict
     query_dict, item_list = check_query(query_dict, item_list)
@@ -106,10 +118,13 @@ def search_count(es, item_list, query_dict):
     for ko_nm, eng_nm in data_srttn.items():
         if ko_nm != "전체":
             item_list = item_list[:srttn_index]
-            cnt_query = make_format("match", "data_srttn", {"operator": "OR", "query": ko_nm})
+            cnt_query = make_format(
+                "match", "data_srttn", {"operator": "OR", "query": ko_nm}
+            )
             item_list.append(cnt_query)
 
         query_dict["query"]["bool"]["filter"] = item_list
+        es.index = index
         cnt = es.count(body=query_dict)
         data_dict[eng_nm] = cnt
 
