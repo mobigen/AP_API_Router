@@ -3,8 +3,6 @@ import json
 import logging
 from typing import Dict, List, Union, Tuple, Optional
 
-from sqlalchemy.ext.automap import automap_base
-
 import sqlalchemy
 from fastapi import FastAPI
 from sqlalchemy import Column, MetaData, and_, create_engine, not_, or_, Table
@@ -24,11 +22,10 @@ class TableNotFoundException(Exception):
 class SQLAlchemyConnector(Connector):
     def __init__(self, base=None, app: FastAPI = None, **kwargs):
         self._engine = None
-        self._session = None
         self._Base = base
+        self._session = None
         self._metadata = None
         self._schemas = []
-
         if app is not None:
             self.init_app(app=app, **kwargs)
 
@@ -248,7 +245,7 @@ class OrmExecutor(Executor):
             return
 
     def get_column_info(self, table_nm, schema=None) -> List[Dict[str, str]]:
-        ...
+        raise Exception("NOT IMPLE...")
 
     def close(self):
         self._session.close()
