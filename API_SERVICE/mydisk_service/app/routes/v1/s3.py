@@ -1,5 +1,7 @@
+import json
 import logging
 import os
+from datetime import datetime
 
 import boto3
 from botocore.exceptions import ClientError
@@ -13,6 +15,11 @@ router = APIRouter(prefix="/v1")
 logger = logging.getLogger()
 
 
+def convert_datetime_to_str(obj):
+    if isinstance(obj, datetime):
+        return obj.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+
 def get_s3_client():
     s3 = boto3.client("s3", aws_access_key_id=S3KEY, aws_secret_access_key=S3SECRET, endpoint_url=settings.S3_URL)
     try:
@@ -21,15 +28,21 @@ def get_s3_client():
         s3.close()
 
 
-@router.get("/buckets")
+@router.get("/bucket/list")
 async def get_bucket_list(s3=Depends(get_s3_client)):
     response = s3.list_buckets()
+    logger.debug(f"list bucket :: {response}")
     return JSONResponse(
-        status_code=200, content={"result": 1, "errorMessage": "", "data": {"body": list(response["Buckets"])}}
+        status_code=200,
+        content={
+            "result": 1,
+            "errorMessage": "",
+            "data": {"body": json.dumps(response["Buckets"], default=convert_datetime_to_str)},
+        },
     )
 
 
-@router.get("/buckets/one")
+@router.get("/bucket/info")
 async def bucket_info(bucket_name: str, s3=Depends(get_s3_client)):
     try:
         res = s3.head_bucket(Bucket=bucket_name)
@@ -46,7 +59,7 @@ async def bucket_info(bucket_name: str, s3=Depends(get_s3_client)):
             return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
-@router.post("/buckets/{bucket_name}/p")
+@router.post("/bucket")
 async def create_bucket(bucket_name: str, s3=Depends(get_s3_client)):
     try:
         s3.create_bucket(Bucket=bucket_name)
@@ -58,7 +71,7 @@ async def create_bucket(bucket_name: str, s3=Depends(get_s3_client)):
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
-@router.post("/buckets/{bucket_name}/d")
+@router.post("/bucket/del")
 async def delete_bucket(bucket_name: str, s3=Depends(get_s3_client)):
     try:
         s3.delete_bucket(Bucket=bucket_name)
@@ -70,20 +83,25 @@ async def delete_bucket(bucket_name: str, s3=Depends(get_s3_client)):
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
-@router.get("/buckets/{bucket_name}/objects")
+@router.get("/object/list")
 async def get_object_list(bucket_name: str, s3=Depends(get_s3_client)):
     try:
         response = s3.list_objects_v2(Bucket=bucket_name)
 
         return JSONResponse(
-            status_code=200, content={"result": 1, "errorMessage": "", "data": {"body": response.get("Contents", [])}}
+            status_code=200,
+            content={
+                "result": 1,
+                "errorMessage": "",
+                "data": {"body": json.dumps(response.get("Contents", []), default=convert_datetime_to_str)},
+            },
         )
     except ClientError as e:
         logger.error(f"Error listing objects: {e}")
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
-@router.get("/buckets/{bucket_name}/objects/{object_name}")
+@router.get("/object/download")
 async def get_object_one(bucket_name: str, object_name: str, s3=Depends(get_s3_client)):
     try:
         response = s3.get_object(Bucket=bucket_name, Key=object_name)
@@ -99,7 +117,7 @@ async def get_object_one(bucket_name: str, object_name: str, s3=Depends(get_s3_c
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
 
-@router.post("/buckets/{bucket_name}/objects/{object_name}")
+@router.post("/object")
 async def upload_object_one(bucket_name: str, object_name: str, s3=Depends(get_s3_client)):
     try:
         s3.head_bucket(Bucket=bucket_name)
