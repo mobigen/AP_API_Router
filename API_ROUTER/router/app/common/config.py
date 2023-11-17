@@ -58,8 +58,8 @@ class LocalSettings(Settings):
         DB_URL=str(
             PostgresDsn.build(
                 scheme="postgresql",
-                host="192.168.100.126",
-                port="25432",
+                host="localhost",
+                port="5432",
                 user="dpmanager",
                 password="hello.dp12#$",
                 path="/dataportal",
