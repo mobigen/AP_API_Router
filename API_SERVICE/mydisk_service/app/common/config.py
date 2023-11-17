@@ -60,6 +60,8 @@ class Settings(BaseSettings):
     KEYCLOAK_INFO: KeycloakInfo
     MYDISK_INFO: MydiskInfo
 
+    S3_URL: str
+
 
 class ProdSettings(Settings):
     TESTING: bool = False
@@ -121,6 +123,8 @@ class LocalSettings(Settings):
         client_id="86e9aaff5afc7d7828035500e11cb48c",
         client_secret="lfb5RQK9SH3GcRqGgq0QcLlW5mJf0JDBNkrn1729",
     )
+
+    S3_URL: str = "http://10.10.30.51:8085"
 
 
 @lru_cache
