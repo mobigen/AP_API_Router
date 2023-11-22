@@ -106,12 +106,12 @@ async def get_object_one(bucket_name: str, object_name: str, s3=Depends(get_s3_c
     try:
         response = s3.get_object(Bucket=bucket_name, Key=object_name)
         data = response["Body"].read().decode("utf-8")
-        # with open("path", "w") as f:
-        #     f.write(data)
+        with open(os.path.join(settings.MYDISK_INFO.ROOT_DIR, bucket_name, object_name), "w") as f:
+            f.write(data)
 
         logger.debug(f"{object_name} object content :: {data}")
 
-        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": "", "data": {"body": data}})
+        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     except ClientError as e:
         logger.error(f"Error getting object: {e}")
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
@@ -126,16 +126,8 @@ async def upload_object_one(bucket_name: str, object_name: str, s3=Depends(get_s
         logger.info(f"Bucket {bucket_name} created successfully (with upload)")
 
     try:
-        with open(os.path.join("", object_name), "rb") as data:
+        with open(os.path.join(settings.MYDISK_INFO.ROOT_DIR, bucket_name, object_name), "rb") as data:
             s3.upload_fileobj(data, bucket_name, object_name)
         logger.debug(f"Object {object_name} uploaded to {bucket_name} successfully")
     except ClientError as e:
         print(f"Error uploading object: {e}")
-
-
-# create_new_bucket("test-bucket-1020")
-# print_bucket_list()
-# # delete_bucket('test-buecket-1020')
-# # print_bucket_list()
-# upload_object_to_bucket("./upload_example.txt", "upload_example.txt", "test-bucket-1020")
-# print_object_list("test-bucket-1020")
