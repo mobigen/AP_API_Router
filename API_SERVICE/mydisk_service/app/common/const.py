@@ -6,6 +6,9 @@ ALGORITHM = "HS256"
 EXPIRE_DELTA = 1
 COOKIE_NAME = "user-katech-access-token"
 
+S3KEY = "WL5Z2I1BN0NBB60QAO1G"
+S3SECRET = "Z7Gy5HhhdIRnsL4G2pDHzxV4Sb5fCsBBagkg9aWM"
+
 
 class LoginTable:
     table_nm = "tb_user_info"

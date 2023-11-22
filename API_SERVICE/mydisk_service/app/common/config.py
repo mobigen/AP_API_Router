@@ -2,6 +2,7 @@ import logging.config
 import os
 from functools import lru_cache
 from typing import Optional
+from urllib.parse import quote
 
 from pydantic import BaseSettings, PostgresDsn
 
@@ -60,6 +61,8 @@ class Settings(BaseSettings):
     KEYCLOAK_INFO: KeycloakInfo
     MYDISK_INFO: MydiskInfo
 
+    S3_URL: str
+
 
 class ProdSettings(Settings):
     TESTING: bool = False
@@ -85,10 +88,10 @@ class LocalSettings(Settings):
         DB_URL=str(
             PostgresDsn.build(
                 scheme="postgresql",
-                host="192.168.100.126",
-                port="25432",
+                host="localhost",
+                port="5432",
                 user="dpmanager",
-                password="hello.dp12#$",
+                password=quote("hello.dp12#$", safe=""),
                 path="/dataportal",
             )
         ),
@@ -121,6 +124,8 @@ class LocalSettings(Settings):
         client_id="86e9aaff5afc7d7828035500e11cb48c",
         client_secret="lfb5RQK9SH3GcRqGgq0QcLlW5mJf0JDBNkrn1729",
     )
+
+    S3_URL: str = "http://10.10.30.51:8085"
 
 
 @lru_cache

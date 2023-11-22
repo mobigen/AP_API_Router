@@ -22,7 +22,7 @@ async def me(request: Request):
     return {"result": 1, "errorMessage": "", "data": request.scope["client"][0]}
 
 
-@router.api_route("{route_path:path}", methods=["GET", "POST"])
+@router.api_route("{route_path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def index(request: Request, route_path: str, session: Executor = Depends(db.get_db)):
     method = request.method
     headers = get_headers(request.headers)
@@ -32,8 +32,7 @@ async def index(request: Request, route_path: str, session: Executor = Depends(d
     }
     query_params.update(request.query_params.items())
     data = None
-    status = 200
-    if method == "POST":
+    if method in ["POST", "PUT", "DELETE"]:
         try:
             data = await request.json()
         except json.JSONDecodeError:
