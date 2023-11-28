@@ -100,6 +100,8 @@ class RegisterInfoWrap(BaseModel):
         limit_cpu: Optional[str]
         limit_mem: Optional[str]
         limit_app_count: Optional[str]
+        company: Optional[str]
+        companyImagePath: Optional[str]
 
     data: RegisterInfo
 
@@ -765,6 +767,8 @@ async def alter_user_info(user_id: str, user_sttus: str = None, **kwargs):
                  'limit_cpu': Optional[str],
                  'limit_mem': Optional[str],
                  'limit_app_count': Optional[str]
+                 'company': Optional[str]
+                 'companyImagePath': Optional[str]
             }
         }
     ]
@@ -786,6 +790,8 @@ async def alter_user_info(user_id: str, user_sttus: str = None, **kwargs):
         limit_cpu = attributes.get("limit_cpu")
         limit_mem = attributes.get("limit_mem")
         limit_app_count = attributes.get("limit_app_count")
+        company = attributes.get("company")
+        companyImagePath = attributes.get("companyImagePath")
 
         if openstack_default_project is None:
             openstack_default_project = ""
@@ -797,6 +803,10 @@ async def alter_user_info(user_id: str, user_sttus: str = None, **kwargs):
             limit_mem = "2048"
         if limit_app_count is None:
             limit_app_count = "5"
+        if company is None:
+            company = ""
+        if companyImagePath is None:
+            companyImagePath = ""
 
         # user_sttus 처리를 위해 attributes 값을 만든다.
         if user_sttus is not None:
@@ -823,6 +833,8 @@ async def alter_user_info(user_id: str, user_sttus: str = None, **kwargs):
                 "limit_cpu": limit_cpu,
                 "limit_mem": limit_mem,
                 "limit_app_count": limit_app_count,
+                "company": company,
+                "companyImagePath": companyImagePath,
             },
         }
 
@@ -879,6 +891,8 @@ async def modify_keycloak_user(**kwargs):
     limit_cpu = kwargs.get("limit_cpu")
     limit_mem = kwargs.get("limit_mem")
     limit_app_count = kwargs.get("limit_app_count")
+    company = kwargs.get("company")
+    companyImagePath = kwargs.get("companyImagePath")
 
     if openstack_default_project is None:
         openstack_default_project = ""
@@ -890,6 +904,10 @@ async def modify_keycloak_user(**kwargs):
         limit_mem = "2048"
     if limit_app_count is None:
         limit_app_count = "5"
+    if company is None:
+        company = ""
+    if companyImagePath is None:
+        companyImagePath = ""
 
     reg_data = {
         # key 이름이 "attributes"가 아닌 것은 value가 존재할때만 넣어주어야 함
@@ -923,6 +941,8 @@ async def modify_keycloak_user(**kwargs):
             "limit_cpu": limit_cpu,
             "limit_mem": limit_mem,
             "limit_app_count": limit_app_count,
+            "company": company,
+            "companyImagePath": companyImagePath,
         },
     }
 
@@ -984,6 +1004,8 @@ async def create_keycloak_user(**kwargs):
             "limit_cpu": "2",
             "limit_mem": "2048",
             "limit_app_count": "5",
+            "company": "",
+            "companyImagePath": "",
         },
     }
     res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
