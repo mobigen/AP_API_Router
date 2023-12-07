@@ -20,7 +20,7 @@ logger = logging.getLogger()
 router = APIRouter()
 
 base_url = "https://b-iris.mobigen.com"
-# base_url = "http://studio.bigdata-car.kr:32180"
+# base_url = "http://studio.bigdata-car.kr"
 
 
 def get_exception_info():
