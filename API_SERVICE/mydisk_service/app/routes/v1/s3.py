@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime
+from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
@@ -104,16 +105,25 @@ async def get_object_list(bucket_name: str, s3=Depends(get_s3_client)):
 
 
 @router.get("/object/download")
-async def get_object_one(bucket_name: str, object_name: str, download_path: str = "", s3=Depends(get_s3_client)):
-    try:
-        response = s3.get_object(Bucket=bucket_name, Key=object_name)
-        data = response["Body"].read().decode("utf-8")
-        with open(
-            os.path.join(settings.MYDISK_INFO.ROOT_DIR, "ADMIN", bucket_name, download_path, object_name), "w"
-        ) as f:
-            f.write(data)
+async def get_object(bucket_name: str, object_path: str, type: str, download_path: str = "/", force: str = False, s3=Depends(get_s3_client)):
+    if type not in ["dir", "file"]:
+        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "type은 (dir, file)만 허용"})
 
-        logger.debug(f"{object_name} object content :: {data}")
+    try:
+        download_base_dir = os.path.join(settings.MYDISK_INFO.ROOT_DIR, "ADMIN", bucket_name)
+        if type == "file":
+            s3.download_file(bucket_name, object_path, os.path.join(download_base_dir, download_path))
+        else:
+            response = s3.list_objects_v2(Bucket=bucket_name, Prefix=object_path)
+            print(logger.debug(response.get("Contents", [])))
+            for obj in response.get("Contents", []):
+                s3_key = obj["Key"]
+                download_path = os.path.join(download_base_dir, s3_key)
+                os.makedirs(os.path.dirname(download_path), exist_ok=True)
+                if force or not os.path.exists:
+                    s3.download_file(bucket_name, s3_key, download_path)
+
+        logger.debug(f"{object_path} download to :: {download_path}")
 
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     except ClientError as e:
@@ -122,7 +132,7 @@ async def get_object_one(bucket_name: str, object_name: str, download_path: str 
 
 
 @router.post("/object")
-async def upload_object_one(bucket_name: str, object_name: str, upload_path: str = "", s3=Depends(get_s3_client)):
+async def upload_object(bucket_name: str, object_path: Optional[str] = "/", s3=Depends(get_s3_client)):
     try:
         s3.head_bucket(Bucket=bucket_name)
     except ClientError:
@@ -130,11 +140,25 @@ async def upload_object_one(bucket_name: str, object_name: str, upload_path: str
         logger.info(f"Bucket {bucket_name} created successfully (with upload)")
 
     try:
-        with open(
-            os.path.join(settings.MYDISK_INFO.ROOT_DIR, "ADMIN", bucket_name, upload_path, object_name), "rb"
-        ) as data:
-            s3.upload_fileobj(data, bucket_name, object_name)
-        logger.debug(f"Object {object_name} uploaded to {bucket_name} successfully")
+        object_full_path = os.path.join(settings.MYDISK_INFO.ROOT_DIR, "ADMIN", bucket_name, object_path)
+        if os.path.isdir(object_full_path):
+            for root, dirs, files in os.walk(object_full_path):
+                for file in files:
+                    local_path = os.path.join(root, file)
+                    await upload_file_one(
+                        bucket_name=bucket_name,
+                        local_path=local_path,
+                        s3_path=object_path,
+                        s3=s3
+                    )
+                logger.debug(f"Object {local_path} uploaded to {bucket_name} successfully")
+        else:
+            await upload_file_one(bucket_name, object_full_path, object_path, s3)
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     except ClientError as e:
         print(f"Error uploading object: {e}")
+
+
+async def upload_file_one(bucket_name, local_path, s3_path, s3):
+    with open(local_path, "rb") as data:
+        s3.upload_fileobj(data, bucket_name, s3_path)
