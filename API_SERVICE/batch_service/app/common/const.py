@@ -60,10 +60,11 @@ class BizDataTable(Base):
 
 
 class CkanDataTable(Base):
-    table_nm = "v_biz_meta_ckan"
+    # 해외데이터
+    table_nm = "v_biz_meta_oversea_els"
     key_column = "biz_dataset_id"
 
-
+# 서울대 데이터
 class RecommendKeyTable(Base):
     table_nm = "tb_recommend_keyword"
     key_column = "keyword"

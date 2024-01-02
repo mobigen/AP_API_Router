@@ -28,12 +28,13 @@ scheduler = BackgroundScheduler()
 
 @app.on_event("startup")
 def _app_startup():
+    # 서울대 DB 데이터 확인후 활성화 필요
     scheduler.add_job(send_email.send_mail, "cron", second="*/5", id="email")
-    scheduler.add_job(recommend_word.recommend_search_word, "cron", hour="23", minute="59", id="recommend")
+    # scheduler.add_job(recommend_word.recommend_search_word, "cron", hour="23", minute="59", id="recommend")
     scheduler.add_job(els_update.insert_meta, "cron", hour="00", minute="15", id="update_meta")
     scheduler.add_job(els_update.insert_ckan, "cron", hour="00", minute="40", id="update_ckan")
-    scheduler.add_job(seoul_db_upload.update_ddr, "cron", hour="23", minute="59", id="update_ddr")
-    scheduler.add_job(seoul_db_upload.update_rr, "cron", hour="23", minute="59", id="update_rr")
+    # scheduler.add_job(seoul_db_upload.update_ddr, "cron", hour="23", minute="59", id="update_ddr")
+    # scheduler.add_job(seoul_db_upload.update_rr, "cron", hour="23", minute="59", id="update_rr")
 
     scheduler.start()
 

@@ -20,8 +20,7 @@ def insert_meta():
         docmanager = default_search_set(host=els_host, port=els_port, index=index_nm)
 
         with db.get_db_manager() as session:
-            query = BizDataTable.get_select_query("")
-            query.pop("where_info")
+            query = BizDataTable.get_select_query("D")
             meta_list = session.query(**query).all()[0]
 
         logger.info(len(meta_list))
@@ -35,7 +34,7 @@ def insert_meta():
 
 
 def insert_ckan():
-    index_nm = "ckan_data"
+    index_nm = "v_biz_meta_oversea_els"
     els_host = settings.ELS_INFO.ELS_HOST
     els_port = settings.ELS_INFO.ELS_PORT
     try:
