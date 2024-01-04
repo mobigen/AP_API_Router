@@ -17,11 +17,14 @@ class Index:
     def create(self, index: str, path: str = None) -> dict:
         """
         :param index: 생성할 index 이름
-        :param path: 생성할 index의 mapping 파일 위치
+        :param path: 생성할 index의 mapping 폴더 위치
         :return: els에 요청한 결과 성공/실패는 bool 타입으로 반환 된다
         """
+        file_name = f"{index}.json"
         if path is None:
-            path = f"{ELKSearch_PATH}/mapping/{index}.json"
+            path = f"{ELKSearch_PATH}/mapping/{file_name}"
+        else:
+            path = os.path.join(path, file_name)
 
         with open(path, "r") as fp:
             mapping = json.load(fp)
