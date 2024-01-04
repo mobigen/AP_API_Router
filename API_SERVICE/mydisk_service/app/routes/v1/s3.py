@@ -151,7 +151,7 @@ async def upload_object(bucket_name: str, object_path: Optional[str] = "/", s3=D
                         s3_path=object_path,
                         s3=s3
                     )
-                logger.debug(f"Object {local_path} uploaded to {bucket_name} successfully")
+                    logger.debug(f"Object {local_path} uploaded to {bucket_name} successfully")
         else:
             await upload_file_one(bucket_name, object_full_path, object_path, s3)
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
