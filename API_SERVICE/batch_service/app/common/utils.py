@@ -1,5 +1,4 @@
 import re
-from datetime import datetime
 
 from batch_service.app.ELKSearch.Utils.base import set_els
 from batch_service.app.ELKSearch.document import DocumentManager
@@ -22,21 +21,25 @@ def index_set(host, port):
     return Index(es)
 
 
-def data_process(row):
-    row["re_ctgry"] = re.sub("[ ]", "", str(row["ctgry"]))
-    row["re_data_shap"] = re.sub("[ ]", "", str(row["data_shap"]))
-    row["re_data_prv_desk"] = re.sub("[ ]", "", str(row["data_prv_desk"]))
-    row = default_process(row)
-    return row
+def data_process(data):
+    for k, v in data.items():
+        if not v:
+            continue
 
+        if k in ["re_ctgry", "re_data_shap", "re_data_prv_desk"]:
+            data[k] = re.sub("[ ]", "", str(v))
 
-def default_process(row):
-    if "updt_dt" in row.keys() and row["updt_dt"] and len(row["updt_dt"]) > 25:
-        if row["updt_dt"][-3:] == "+09":
-            row["updt_dt"] = row["updt_dt"][:-3]
-        row["updt_dt"] = datetime.strptime(row["updt_dt"], "%Y-%m-%d %H:%M:%S.%f")
-    if "reg_date" in row.keys() and row["reg_date"] and len(row["reg_date"]) > 25:
-        if row["reg_date"][-3:] == "+09":
-            row["reg_date"] = row["reg_date"][:-3]
-        row["reg_date"] = datetime.strptime(row["reg_date"], "%Y-%m-%d %H:%M:%S.%f")
-    return row
+        if isinstance(v, str):
+            match = re.match(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\.(\d+)", v)
+            if match:
+                date_time_field = match.group(1).replace(" ", "T")
+                micro_time_field = match.group(2)
+
+                if "+" in micro_time_field:
+                    micro_time_field = micro_time_field.split("+")[0]
+                    if len(micro_time_field) < 6:
+                        micro_time_field = micro_time_field + "0"
+
+                data[k] = f"{date_time_field}.{micro_time_field}"
+
+    return {"_id": data["biz_dataset_id"], "_source": data}

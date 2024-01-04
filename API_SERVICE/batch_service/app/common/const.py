@@ -3,8 +3,10 @@ import os
 from batch_service.app.common.config import base_dir
 from libs.database.dml_controller import Base
 
-log_dir = f"{os.path.dirname(os.path.dirname(base_dir))}/API-SERVICE/log/meta"
+# recommend
+log_dir = f"{os.path.dirname(os.path.dirname(base_dir))}/API_SERVICE/meta_service/log"
 
+# send_email
 template_dir = os.path.join(base_dir, "resources", "template")
 msg_setting = {
     "register": {
@@ -54,6 +56,7 @@ class EmailSendInfoTable(Base):
         }
 
 
+# els update
 class BizDataTable(Base):
     table_nm = "v_biz_meta_info"
     key_column = "status"
@@ -63,6 +66,7 @@ class CkanDataTable(Base):
     # 해외데이터
     table_nm = "v_biz_meta_oversea_els"
     key_column = "biz_dataset_id"
+
 
 # 서울대 데이터
 class RecommendKeyTable(Base):
