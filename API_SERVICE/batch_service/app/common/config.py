@@ -59,9 +59,9 @@ class ProdSettings(Settings):
     RELOAD = False
     TESTING = False
 
-    DB_INFO = PGInfo()
-    SEOUL_DB_INFO = SeoulPGInfo()
-    ELS_INFO = ELSInfo()
+    DB_INFO = PGInfo(DB_URL="")
+    SEOUL_DB_INFO = SeoulPGInfo(DB_URL="")
+    ELS_INFO = ELSInfo(host="",port=0)
 
     class Config:
         env_file = f"{base_dir}/.env"

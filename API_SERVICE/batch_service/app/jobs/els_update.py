@@ -11,13 +11,14 @@ logger = logging.getLogger()
 
 # els update condition
 def time_check_cond(query, table_nm, date, op=""):
-    return query["where_info"].append({
+    query["where_info"].append({
         "table_nm": table_nm,
         "key": "modified_dt",
         "value": date,
-        "compare_op": "=",
+        "compare_op": ">=",
         "op": op,
     })
+    return query
 
 
 def insert_meta(retv_update=False):
@@ -71,7 +72,6 @@ def insert_ckan(retv_update=False):
             else:
                 query.pop("where_info")
             oversea_list = session.query(**query).all()[0]
-        logger.info(oversea_list)
         logger.info(len(oversea_list))
 
         for oversea in oversea_list:
