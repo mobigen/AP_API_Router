@@ -105,25 +105,24 @@ async def get_object_list(bucket_name: str, s3=Depends(get_s3_client)):
 
 
 @router.get("/object/download")
-async def get_object(bucket_name: str, object_path: str, type: str, download_path: str = "/", force: str = False, s3=Depends(get_s3_client)):
-    if type not in ["dir", "file"]:
-        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "type은 (dir, file)만 허용"})
-
+async def get_object(
+    bucket_name: str,
+    object_path: str = "",
+    force: str = False,
+    s3=Depends(get_s3_client),
+):
     try:
         download_base_dir = os.path.join(settings.MYDISK_INFO.ROOT_DIR, "ADMIN", bucket_name)
-        if type == "file":
-            s3.download_file(bucket_name, object_path, os.path.join(download_base_dir, download_path))
-        else:
-            response = s3.list_objects_v2(Bucket=bucket_name, Prefix=object_path)
-            print(logger.debug(response.get("Contents", [])))
-            for obj in response.get("Contents", []):
-                s3_key = obj["Key"]
-                download_path = os.path.join(download_base_dir, s3_key)
-                os.makedirs(os.path.dirname(download_path), exist_ok=True)
-                if force or not os.path.exists:
-                    s3.download_file(bucket_name, s3_key, download_path)
+        response = s3.list_objects_v2(Bucket=bucket_name, Prefix=object_path)
+        logger.debug(response.get("Contents", []))
+        for obj in response.get("Contents", []):
+            s3_key = obj["Key"]
+            download_path = os.path.join(download_base_dir, s3_key)
+            os.makedirs(os.path.dirname(download_path), exist_ok=True)
+            if force or not os.path.exists(download_path):
+                s3.download_file(bucket_name, s3_key, download_path)
 
-        logger.debug(f"{object_path} download to :: {download_path}")
+        logger.debug(f"{object_path} download to :: {download_base_dir}/{object_path}")
 
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     except ClientError as e:
@@ -132,7 +131,7 @@ async def get_object(bucket_name: str, object_path: str, type: str, download_pat
 
 
 @router.post("/object")
-async def upload_object(bucket_name: str, object_path: Optional[str] = "/", s3=Depends(get_s3_client)):
+async def upload_object(bucket_name: str, object_path: Optional[str] = "", s3=Depends(get_s3_client)):
     try:
         s3.head_bucket(Bucket=bucket_name)
     except ClientError:
@@ -140,20 +139,19 @@ async def upload_object(bucket_name: str, object_path: Optional[str] = "/", s3=D
         logger.info(f"Bucket {bucket_name} created successfully (with upload)")
 
     try:
-        object_full_path = os.path.join(settings.MYDISK_INFO.ROOT_DIR, "ADMIN", bucket_name, object_path)
+        local_base_dir = os.path.join(settings.MYDISK_INFO.ROOT_DIR, "ADMIN", bucket_name)
+        object_full_path = os.path.join(local_base_dir, object_path)
+        logger.debug(object_full_path)
         if os.path.isdir(object_full_path):
             for root, dirs, files in os.walk(object_full_path):
                 for file in files:
                     local_path = os.path.join(root, file)
-                    await upload_file_one(
-                        bucket_name=bucket_name,
-                        local_path=local_path,
-                        s3_path=object_path,
-                        s3=s3
-                    )
-                    logger.debug(f"Object {local_path} uploaded to {bucket_name} successfully")
+                    s3_path = os.path.relpath(local_path, local_base_dir)
+                    await upload_file_one(bucket_name=bucket_name, local_path=local_path, s3_path=s3_path, s3=s3)
+                    logger.debug(f"Object {local_path} uploaded to {bucket_name}/{s3_path} successfully")
         else:
             await upload_file_one(bucket_name, object_full_path, object_path, s3)
+            logger.debug(f"upload one {object_full_path}/{object_path}")
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     except ClientError as e:
         print(f"Error uploading object: {e}")
