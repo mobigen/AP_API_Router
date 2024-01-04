@@ -68,17 +68,18 @@ class CkanDataTable(Base):
     key_column = "biz_dataset_id"
 
 
-# 서울대 데이터
+# 추천 검색어
 class RecommendKeyTable(Base):
     table_nm = "tb_recommend_keyword"
     key_column = "keyword"
 
 
-class DatasetDomesticTable(Base):
-    table_nm = "tbdataset_domestic_recommendation"
+# 서울대 데이터
+class SeoulDataKor(Base):
+    table_nm = "tbdataset_total_95_kor"
     key_column = "ds_id"
 
 
-class ResourceReportTable(Base):
-    table_nm = "tbresource_report"
-    key_column = "rp_id"
+class SeoulDataWorld(Base):
+    table_nm = "tbdataset_total_95_world"
+    key_column = "ds_id"
