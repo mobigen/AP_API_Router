@@ -52,7 +52,7 @@ async def seoul_test(kor_check: bool = True, session: Executor = Depends(db.get_
 @router.get("/update_meta_els")
 async def meta_test(session: Executor = Depends(db.get_db)):
     index_nm = "biz_meta"
-    els_host = "192.168.101.44"
+    els_host = "10.10.10.62"
     els_port = "39200"
     try:
         index = index_set(host=els_host, port=els_port)
@@ -66,6 +66,29 @@ async def meta_test(session: Executor = Depends(db.get_db)):
 
         for meta in meta_list:
             insert_body = data_process(meta)
+            docmanager.set_body(insert_body["_source"])
+            res = docmanager.insert(insert_body["_id"])
+            logger.info(res)
+    except Exception as e:
+        print(e)
+
+
+@router.get("/update_oversea_els")
+async def oversea_test(session: Executor = Depends(db.get_db)):
+    index_nm = "v_biz_meta_oversea_els"
+    els_host = "10.10.10.62"
+    els_port = "39200"
+    try:
+        index = index_set(host=els_host, port=els_port)
+        docmanager = default_search_set(host=els_host, port=els_port, index=index_nm)
+
+        query = CkanDataTable.get_select_query("")
+        query.pop("where_info")
+        oversea_list = session.query(**query).all()[0]
+        logger.info(len(oversea_list))
+
+        for oversea in oversea_list:
+            insert_body = data_process(oversea)
             docmanager.set_body(insert_body["_source"])
             res = docmanager.insert(insert_body["_id"])
             logger.info(res)
