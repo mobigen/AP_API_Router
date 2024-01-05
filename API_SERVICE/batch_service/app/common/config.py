@@ -56,6 +56,7 @@ class Settings(BaseSettings):
 
 
 class ProdSettings(Settings):
+    SERVICE = "batch"
     RELOAD = False
     TESTING = False
 
@@ -69,6 +70,7 @@ class ProdSettings(Settings):
 
 
 class LocalSettings(Settings):
+    SERVICE = "batch"
     TESTING: bool = False
     RELOAD: bool = False
 
@@ -113,6 +115,7 @@ class LocalSettings(Settings):
 
 
 class TestSettings(LocalSettings):
+    SERVICE = "batch"
     TESTING = True
     RELOAD = True
 

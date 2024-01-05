@@ -21,6 +21,7 @@ def time_check_cond(query, table_nm, date, op=""):
     return query
 
 
+# todo: ckan이랑 중복되는 코드 함수로 변경
 def insert_meta(retv_update=False):
     index_nm = "biz_meta"
     els_host = settings.ELS_INFO.ELS_HOST
@@ -36,7 +37,8 @@ def insert_meta(retv_update=False):
         with db.get_db_manager() as session:
             query = BizDataTable.get_select_query("D")
             if retv_update:
-                today = datetime.today().strftime("%Y-%m-%d %H:%M:00")
+                st = datetime.today() - timedelta(minutes=30)
+                today = st.strftime("%Y-%m-%d %H:%M:00")
                 query = time_check_cond(query, BizDataTable.table_nm, today, "and")
             meta_list = session.query(**query).all()[0]
 
@@ -66,7 +68,8 @@ def insert_ckan(retv_update=False):
         with db.get_db_manager() as session:
             query = CkanDataTable.get_select_query("")
             if retv_update:
-                today = datetime.today().strftime("%Y-%m-%d %H:%M:00")
+                st = datetime.today() - timedelta(minutes=30)
+                today = st.strftime("%Y-%m-%d %H:%M:00")
                 query = time_check_cond(query, CkanDataTable.table_nm, today, "and")
                 query["where_info"] = query["where_info"][1:]
             else:
