@@ -107,12 +107,13 @@ async def get_object_list(bucket_name: str, s3=Depends(get_s3_client)):
 @router.get("/object/download")
 async def get_object(
     bucket_name: str,
+    download_uuid: str,
     object_path: str = "",
     force: str = False,
     s3=Depends(get_s3_client),
 ):
     try:
-        download_base_dir = os.path.join(settings.MYDISK_INFO.ROOT_DIR, "ADMIN", bucket_name)
+        download_base_dir = os.path.join(settings.MYDISK_INFO.ROOT_DIR, "ADMIN", download_uuid)
         response = s3.list_objects_v2(Bucket=bucket_name, Prefix=object_path)
         logger.debug(response.get("Contents", []))
         for obj in response.get("Contents", []):
