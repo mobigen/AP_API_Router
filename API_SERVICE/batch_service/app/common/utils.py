@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 
 from batch_service.app.ELKSearch.Utils.base import set_els
 from batch_service.app.ELKSearch.document import DocumentManager
@@ -22,12 +23,14 @@ def index_set(host, port):
 
 
 def data_process(data):
+    pre_data = deepcopy(data)
     for k, v in data.items():
         if not v:
             continue
 
-        if k in ["re_ctgry", "re_data_shap", "re_data_prv_desk"]:
-            data[k] = re.sub("[ ]", "", str(v))
+        if k in ["ctgry", "data_shap", "data_prv_desk"]:
+            key = f"re_{k}"
+            pre_data[key] = re.sub("[ ]", "", str(v))
 
         if isinstance(v, str):
             match = re.match(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\.(\d+)", v)
@@ -40,6 +43,6 @@ def data_process(data):
                     if len(micro_time_field) < 6:
                         micro_time_field = micro_time_field + "0"
 
-                data[k] = f"{date_time_field}.{micro_time_field}"
+                pre_data[k] = f"{date_time_field}.{micro_time_field}"
 
-    return {"_id": data["biz_dataset_id"], "_source": data}
+    return {"_id": pre_data["biz_dataset_id"], "_source": pre_data}
