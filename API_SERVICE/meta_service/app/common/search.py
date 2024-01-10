@@ -85,7 +85,7 @@ def base_query(len_query: int, queryOption: list) -> list:
 
 def delete_srttn(item_list):
     for i, item in enumerate(item_list):
-        if "data_srttn" in item.keys():
+        if "fields" in item["multi_match"].keys() and item["multi_match"]["fields"][0] == "data_srttn":
             del item_list[i]
             break
     return item_list
