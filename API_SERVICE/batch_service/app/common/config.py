@@ -22,13 +22,9 @@ class PGInfo(DBInfo):
         env_file_encoding = "utf-8"
 
 
-class SeoulPGInfo(DBInfo):
-    SEOUL_DB_URL: str = Field(..., alias="DB_URL")
-    SEOUL_SCHEMA: str = Field(..., alias="SCHEMA")
-
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
+class SeoulPGInfo(PGInfo):
+    SEOUL_DB_URL: str = Field(..., validation_alias="DB_URL")
+    SEOUL_SCHEMA: str = Field(..., validation_alias="SCHEMA")
 
 
 class ELSInfo(BaseSettings):
@@ -60,9 +56,9 @@ class ProdSettings(Settings):
     RELOAD = False
     TESTING = False
 
-    DB_INFO = PGInfo(DB_URL="")
-    SEOUL_DB_INFO = SeoulPGInfo(DB_URL="")
-    ELS_INFO = ELSInfo(host="",port=0)
+    DB_INFO = PGInfo()
+    SEOUL_DB_INFO = SeoulPGInfo()
+    ELS_INFO = ELSInfo()
 
     class Config:
         env_file = f"{base_dir}/.env"
@@ -128,6 +124,8 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+settings.SEOUL_DB_INFO.DB_URL = settings.SEOUL_DB_INFO.SEOUL_DB_URL
+settings.SEOUL_DB_INFO.SCHEMA = settings.SEOUL_DB_INFO.SEOUL_SCHEMA
 print(settings)
 
 log_config = {
