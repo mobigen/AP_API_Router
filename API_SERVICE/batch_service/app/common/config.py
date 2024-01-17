@@ -124,8 +124,6 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
-settings.SEOUL_DB_INFO.DB_URL = settings.SEOUL_DB_INFO.SEOUL_DB_URL
-settings.SEOUL_DB_INFO.SCHEMA = settings.SEOUL_DB_INFO.SEOUL_SCHEMA
 print(settings)
 
 log_config = {
