@@ -3,19 +3,22 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 
 from batch_service.app.common.config import settings
-from batch_service.app.database.conn import seoul_db, db
+from batch_service.app.database.conn import db #,seoul_db
 from batch_service.app.jobs import send_email, recommend_word, els_update, seoul_db_upload
-from batch_service.app.routes.v1 import update_data
+from batch_service.app.routes.v1 import els_update#, seoul_update
 
+"""
+서울대 DB connection Error 발생 이슈로 관련 코드 전부 주석처리
+"""
 
 def create_app():
     app_ = FastAPI()
     print(settings.dict())
     db.init_app(app_, **settings.dict())
 
-    seoul_db.init_app(app_, DB_INFO=settings.SEOUL_DB_INFO.dict(by_alias=True), **settings.dict(exclude={"DB_INFO"}))
+    # seoul_db.init_app(app_, DB_INFO=settings.SEOUL_DB_INFO.dict(by_alias=True), **settings.dict(exclude={"DB_INFO"}))
 
-    app_.include_router(update_data.router, prefix="/portal/api/batch")
+    app_.include_router(els_update.router, prefix="/portal/api/batch")
 
     return app_
 

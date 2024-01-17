@@ -3,4 +3,4 @@ from libs.database.orm import SQLAlchemyConnector
 
 Base = automap_base()
 db = SQLAlchemyConnector(Base)
-seoul_db = SQLAlchemyConnector(Base)
+# seoul_db = SQLAlchemyConnector(Base)
