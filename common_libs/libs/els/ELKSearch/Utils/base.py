@@ -4,7 +4,7 @@ from elasticsearch import Elasticsearch
 
 
 def set_els(host, port):
-    return Elasticsearch(f"http://{host}:{port}")
+    return Elasticsearch(f"http://{host}:{port}", timeout=600)
 
 
 def make_format(key, inner_key, value) -> dict:
