@@ -62,6 +62,8 @@ class Settings(BaseSettings):
     MYDISK_INFO: MydiskInfo
 
     S3_URL: str
+    S3KEY: str
+    S3SECRET: str
 
 
 class ProdSettings(Settings):
@@ -97,15 +99,6 @@ class LocalSettings(Settings):
         ),
     )
 
-    # KEYCLOAK_INFO = KeycloakInfo(
-    #    keycloak_url="http://192.168.101.44:8080",
-    #    admin_username="admin",
-    #    admin_password="zxcv1234!",
-    #    realm="kadap",
-    #    client_id="uyuni",
-    #    client_secret="8UDolCR5j1vHt4rsyHnwTDlYkuRmOUp8",
-    # )
-
     KEYCLOAK_INFO = KeycloakInfo(
         keycloak_url="https://auth.bigdata-car.kr",
         admin_username="admin",
@@ -126,6 +119,8 @@ class LocalSettings(Settings):
     )
 
     S3_URL: str = "http://10.10.30.51:8085"
+    S3KEY = ""
+    S3SECRET = ""
 
 
 @lru_cache
