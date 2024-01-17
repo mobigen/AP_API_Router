@@ -10,7 +10,6 @@ from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse
 
 from mydisk_service.app.common.config import settings
-from mydisk_service.app.common.const import S3KEY, S3SECRET
 
 router = APIRouter(prefix="/v1")
 logger = logging.getLogger()
@@ -22,7 +21,7 @@ def convert_datetime_to_str(obj):
 
 
 def get_s3_client():
-    s3 = boto3.client("s3", aws_access_key_id=S3KEY, aws_secret_access_key=S3SECRET, endpoint_url=settings.S3_URL)
+    s3 = boto3.client("s3", aws_access_key_id=settings.S3KEY, aws_secret_access_key=settings.S3SECRET, endpoint_url=settings.S3_URL)
     try:
         yield s3
     finally:
