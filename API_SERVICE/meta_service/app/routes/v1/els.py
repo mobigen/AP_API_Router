@@ -178,7 +178,7 @@ def els_update(index: str):
     return result
 
 
-@router.post("/updateElsBizMetaBulk", response_model=dict)
+@router.get("/updateElsBizMetaBulk", response_model=dict)
 def els_update(session: Executor = Depends(db.get_db)):
     key = "biz_dataset_id"
     table_nm = "v_biz_meta_info"
