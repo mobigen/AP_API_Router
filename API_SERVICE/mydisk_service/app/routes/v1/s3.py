@@ -133,7 +133,7 @@ async def get_object(
 @router.post("/object")
 async def upload_object(bucket_name: str, prefix: Optional[str] = "", object_path: Optional[str] = "", s3=Depends(get_s3_client)):
     try:
-        s3.head_bucket(Bucket=bucket_name)
+        s3.head_bucket(Bucket=prefix+bucket_name)
     except ClientError:
         s3.create_bucket(Bucket=bucket_name)
         logger.info(f"Bucket {bucket_name} created successfully (with upload)")
@@ -154,7 +154,7 @@ async def upload_object(bucket_name: str, prefix: Optional[str] = "", object_pat
             logger.debug(f"upload one {object_full_path}/{object_path}")
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     except ClientError as e:
-        print(f"Error uploading object: {e}")
+        logger.error(f"Error uploading object: {e}")
 
 
 async def upload_file_one(bucket_name, local_path, s3_path, s3):
