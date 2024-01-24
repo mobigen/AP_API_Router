@@ -109,6 +109,9 @@ def search_count(es, item_list, query_dict):
         "외부데이터": "externalCount",
         "해외데이터": "overseaCount",
     }
+    if "sort" in query_dict.keys():
+        del query_dict["sort"]
+
     data_dict = dict()
     index = "biz_meta,v_biz_meta_oversea_els"
 

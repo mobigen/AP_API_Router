@@ -17,10 +17,11 @@ class DocumentManager:
         self.page = size * from_
 
     def set_body(self,body: dict):
-        self.body = body
+        self.body.update(body)
 
     def set_sort(self, sort_list: list):
-        self.body["sort"] = sort_list
+        sort_option = {sort_item.field: sort_item.order for sort_item in sort_list}
+        self.body["sort"] = sort_option
 
     def insert(self, doc_id: str):
         """
