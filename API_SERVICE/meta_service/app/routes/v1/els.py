@@ -2,6 +2,7 @@ import decimal
 import logging
 import os.path
 
+from typing import Optional
 from fastapi import Depends, APIRouter
 from pydantic import BaseModel
 
@@ -22,7 +23,8 @@ router = APIRouter()
 logger = logging.getLogger()
 
 
-class Record(BaseModel):
+class DeleteData(BaseModel):
+    index: Optional[str] = None
     biz_dataset_id: str
 
 
@@ -148,7 +150,7 @@ def search(input: SearchModel):
 def els_doc_delete(input: DeleteData):
     try:
         pk_key = "biz_dataset_id"
-        docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, index)
+        docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, input.index)
         docmanager.delete(pk_key, input.biz_dataset_id)
 
         result = {"result": 1, "data": f"{input.biz_dataset_id} delete"}
@@ -159,11 +161,27 @@ def els_doc_delete(input: DeleteData):
 
 
 @router.post("/updateElsBizMeta", response_model=dict)
-def els_doc_update(input: Record):
+def els_doc_update(input: DeleteData, session: Executor = Depends(db.get_db)):
+    key = "biz_dataset_id"
+    table_nm = "v_biz_meta_info"
+    index = "biz_meta"
+    data_query = {
+        "table_nm": table_nm,
+        "where_info": [{"table_nm": table_nm, "key": "status", "value": "D", "compare_op": "=", "op": ""}],
+    }
     try:
-        index = "biz_meta"
-        docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, index)
-        docmanager.update(input.biz_dataset_id)
+        rows, _ = session.query(**data_query).all()
+        columns = list(rows[0].keys())
+
+        docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, input.index)
+
+        for row in rows:
+            for k, v in row.items():
+                if isinstance(v, decimal.Decimal):
+                    row[k] = int(v)
+
+            docmanager.set_body(row)
+            logger.info(docmanager.update(input.biz_dataset_id))
 
         result = {"result": 1, "data": f"{input.biz_dataset_id} update"}
     except Exception as e:
