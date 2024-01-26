@@ -145,7 +145,7 @@ def search(input: SearchModel):
 
 
 @router.post("/deleteElsBizMeta")
-def els_delete(input: Record):
+def els_doc_delete(input: DeleteData):
     try:
         pk_key = "biz_dataset_id"
         docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, index)
@@ -193,7 +193,7 @@ def els_index_update(index: str):
 
 
 @router.get("/updateElsBizMetaBulk", response_model=dict)
-def els_update(session: Executor = Depends(db.get_db)):
+def els_update_bulk(session: Executor = Depends(db.get_db)):
     key = "biz_dataset_id"
     table_nm = "v_biz_meta_info"
     index = "biz_meta"
@@ -225,7 +225,7 @@ def els_update(session: Executor = Depends(db.get_db)):
 
 
 @router.post("/insertElsBizMeta", response_model=dict)
-def els_update(input: Record, session: Executor = Depends(db.get_db)):
+def els_doc_insert(input: Record, session: Executor = Depends(db.get_db)):
 
     data_query = {
         "table_nm": input.index,
