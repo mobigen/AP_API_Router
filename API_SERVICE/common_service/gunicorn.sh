@@ -17,7 +17,7 @@ LISTEN_ADDRESS="0.0.0.0:30001"
 
 # gunicorn 실행 명령어
 start_gunicorn() {
-    gunicorn app.main:app --bind ${LISTEN_ADDRESS} -c gunicorn.conf.py --pid $pid_path
+    gunicorn app.main:app --bind ${LISTEN_ADDRESS} -c gunicorn.conf.py -D --pid $pid_path
     sleep 2
     pid=$(cat $pid_path)
     echo "Gunicorn started. PID: $pid"

@@ -11,29 +11,21 @@ print(f"batch base_dir :: {base_dir}")
 class DBInfo(BaseSettings):
     DB_POOL_RECYCLE: int = Field(default=900)
     DB_ECHO: bool = Field(default=False)
+    DB_URL: str
 
 
 class PGInfo(DBInfo):
-    DB_URL: str
     SCHEMA: str
-
-    class Config:  # TODO: Config 사용없이 개별로 env 읽어서 할당
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
 
 
 class SeoulPGInfo(PGInfo):
-    SEOUL_DB_URL: str = Field(..., validation_alias="DB_URL")
-    SEOUL_SCHEMA: str = Field(..., validation_alias="SCHEMA")
+    DB_URL: str = Field(..., env="SEOUL_DB_URL")
+    SCHEMA: str = Field(..., env="SEOUL_SCHEMA")
 
 
 class ELSInfo(BaseSettings):
-    ELS_HOST: str = Field(..., alias="host")
-    ELS_PORT: int = Field(..., alias="port")
-
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
+    ELS_HOST: str = Field(..., env="ELS_HOST")
+    ELS_PORT: int = Field(..., env="ELS_PORT")
 
 
 class Settings(BaseSettings):
@@ -59,10 +51,6 @@ class ProdSettings(Settings):
     DB_INFO = PGInfo()
     SEOUL_DB_INFO = SeoulPGInfo()
     ELS_INFO = ELSInfo()
-
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
 
 
 class LocalSettings(Settings):
@@ -107,7 +95,7 @@ class LocalSettings(Settings):
         ),
     )
 
-    ELS_INFO = ELSInfo(host="192.168.101.44", port=39200)
+    ELS_INFO = ELSInfo(ELS_HOST="192.168.101.44", ELS_PORT=39200)
 
 
 class TestSettings(LocalSettings):
