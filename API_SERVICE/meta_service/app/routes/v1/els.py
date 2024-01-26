@@ -24,7 +24,7 @@ logger = logging.getLogger()
 
 
 class DeleteData(BaseModel):
-    index: Optional[str] = None
+    index: Optional[str] = "biz_meta"
     biz_dataset_id: str
 
 
@@ -167,20 +167,18 @@ def els_doc_update(input: DeleteData, session: Executor = Depends(db.get_db)):
     index = "biz_meta"
     data_query = {
         "table_nm": table_nm,
-        "where_info": [{"table_nm": table_nm, "key": "status", "value": "D", "compare_op": "=", "op": ""}],
+        "where_info": [{"table_nm": table_nm, "key": key, "value": input.biz_dataset_id, "compare_op": "=", "op": ""}],
     }
     try:
         rows, _ = session.query(**data_query).all()
-        columns = list(rows[0].keys())
-
-        docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, input.index)
+        docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, index)
 
         for row in rows:
             for k, v in row.items():
                 if isinstance(v, decimal.Decimal):
                     row[k] = int(v)
-
-            docmanager.set_body(row)
+            insert_body = data_process(row)
+            docmanager.set_body(insert_body["_source"])
             logger.info(docmanager.update(input.biz_dataset_id))
 
         result = {"result": 1, "data": f"{input.biz_dataset_id} update"}
