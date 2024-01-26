@@ -18,14 +18,14 @@ def create_app():
     logger.info(settings.dict())
     db.init_app(app_, **settings.dict())
 
-    keycloak.set_url(settings.KEYCLOAK_INFO.keycloak_url)
+    keycloak.set_url(settings.KEYCLOAK_INFO.KEYCLOAK_URL)
     app_.add_middleware(
         BaseHTTPMiddleware,
         dispatch=refresh_token_from_cookie_wrapper(
             keycloak=keycloak,
-            realm=settings.KEYCLOAK_INFO.realm,
-            client_id=settings.KEYCLOAK_INFO.client_id,
-            client_secret=settings.KEYCLOAK_INFO.client_secret,
+            realm=settings.KEYCLOAK_INFO.REALM,
+            client_id=settings.KEYCLOAK_INFO.CLIENT_ID,
+            client_secret=settings.KEYCLOAK_INFO.CLIENT_SECRET,
             logger=logger,
         ),
     )
