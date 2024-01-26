@@ -22,7 +22,7 @@ router = APIRouter()
 logger = logging.getLogger()
 
 
-class DeleteData(BaseModel):
+class Record(BaseModel):
     biz_dataset_id: str
 
 
@@ -145,11 +145,11 @@ def search(input: SearchModel):
 
 
 @router.post("/deleteElsBizMeta")
-def els_delete(input: DeleteData):
+def els_delete(input: Record):
     try:
-        index = "biz_dataset_id"
+        pk_key = "biz_dataset_id"
         docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, index)
-        docmanager.delete(index, input.biz_dataset_id)
+        docmanager.delete(pk_key, input.biz_dataset_id)
 
         result = {"result": 1, "data": f"{input.biz_dataset_id} delete"}
     except Exception as e:
@@ -158,8 +158,22 @@ def els_delete(input: DeleteData):
     return result
 
 
+@router.post("/updateElsBizMeta", response_model=dict)
+def els_doc_update(input: Record):
+    try:
+        index = "biz_meta"
+        docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, index)
+        docmanager.update(input.biz_dataset_id)
+
+        result = {"result": 1, "data": f"{input.biz_dataset_id} update"}
+    except Exception as e:
+        result = {"result": 0, "errorMessage": str(e)}
+        logger.error(e, exc_info=True)
+    return result
+
+
 @router.post("/els-index-create", response_model=dict)
-def els_update(index: str):
+def els_index_update(index: str):
     try:
         es = set_els(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT)
         ind_manager = Index(es)
