@@ -5,6 +5,16 @@ pid_path="$root_path/gunicorn-login.pid"
 
 echo $pid_path
 
+env_path="./.env"
+if [ -f "$env_path" ]; then
+    while IFS= read -r line; do
+        export $line
+        echo "$line"
+    done < "$env_path"
+fi
+
+LISTEN_ADDRESS="0.0.0.0:21000"
+
 # gunicorn 실행 명령어
 start_gunicorn() {
     gunicorn app.main:app --bind 0.0.0.0:21000 -c gunicorn.conf.py -D --pid $pid_path

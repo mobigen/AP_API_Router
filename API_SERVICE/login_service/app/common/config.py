@@ -18,22 +18,14 @@ class DBInfo(BaseSettings):
 class PGInfo(DBInfo):
     SCHEMA: str
 
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
-
 
 class KeycloakInfo(BaseSettings):
-    keycloak_url: Optional[str]
-    admin_username: Optional[str]
-    admin_password: Optional[str]
-    realm: Optional[str]
-    client_id: Optional[str]
-    client_secret: Optional[str]
-
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
+    KEYCLOAK_URL: Optional[str]
+    ADMIN_USERNAME: Optional[str]
+    ADMIN_PASSWORD: Optional[str]
+    REALM: Optional[str]
+    CLIENT_ID: Optional[str]
+    CLIENT_SECRET: Optional[str]
 
 
 class Settings(BaseSettings):
@@ -51,10 +43,6 @@ class ProdSettings(Settings):
 
     DB_INFO = PGInfo()
     KEYCLOAK_INFO = KeycloakInfo()
-
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
 
 
 class LocalSettings(Settings):
@@ -78,12 +66,12 @@ class LocalSettings(Settings):
     )
 
     KEYCLOAK_INFO = KeycloakInfo(
-        keycloak_url="https://auth.bigdata-car.kr",
-        admin_username="admin",
-        admin_password="2021@katech",
-        realm="mobigen",
-        client_id="katech",
-        client_secret="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
+        KEYCLOAK_URL="https://auth.bigdata-car.kr",
+        ADMIN_USERNAME="admin",
+        ADMIN_PASSWORD="2021@katech",
+        REALM="mobigen",
+        CLIENT_ID="katech",
+        CLIENT_SECRET="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
     )
 
 

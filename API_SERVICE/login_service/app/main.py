@@ -16,7 +16,7 @@ def create_app():
     app_ = FastAPI()
     print(settings.dict())
     db.init_app(app_, **settings.dict())
-    keycloak.set_url(settings.KEYCLOAK_INFO.keycloak_url)
+    keycloak.set_url(settings.KEYCLOAK_INFO.KEYCLOAK_URL)
 
     app_.include_router(authV1.router, prefix="/portal/api/common")
     app_.include_router(authV2.router, prefix="/portal/api/common")
