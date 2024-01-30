@@ -18,19 +18,6 @@ class DBInfo(BaseSettings):
 class PGInfo(DBInfo):
     SCHEMA: str
 
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
-
-    """
-        pydantic validator를 통한 변수할당 예시
-        @validator("DB_URL", pre=True, always=True)
-        def assemble_db_url(cls, v, values):
-            if all(value is not None for value in values.values()):
-                return values.get("DB_INFO").get_dsn()
-            raise ValueError("Not all PostgreSQL database connection values were provided.")
-    """
-
 
 class Settings(BaseSettings):
     BASE_DIR = base_dir
