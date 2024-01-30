@@ -4,7 +4,7 @@ from functools import lru_cache
 from typing import Optional
 from urllib.parse import quote
 
-from pydantic import BaseSettings, PostgresDsn
+from pydantic import BaseSettings, Field, PostgresDsn
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 print(f"mydisk base_dir :: {base_dir}")
@@ -19,37 +19,31 @@ class DBInfo(BaseSettings):
 class PGInfo(DBInfo):
     SCHEMA: str
 
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
-
 
 class KeycloakInfo(BaseSettings):
-    keycloak_url: Optional[str]
-    admin_username: Optional[str]
-    admin_password: Optional[str]
-    realm: Optional[str]
-    client_id: Optional[str]
-    client_secret: Optional[str]
-
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
+    KEYCLOAK_URL: Optional[str]
+    ADMIN_USERNAME: Optional[str]
+    ADMIN_PASSWORD: Optional[str]
+    REALM: Optional[str]
+    CLIENT_ID: Optional[str]
+    CLIENT_SECRET: Optional[str]
 
 
 class MydiskInfo(BaseSettings):
     ROOT_DIR: str
 
-    mydisk_url: Optional[str]
-    admin_username: Optional[str]
-    admin_password: Optional[str]
-    scope: Optional[str]
-    client_id: Optional[str]
-    client_secret: Optional[str]
+    MYDISK_URL: Optional[str]
+    ADMIN_USERNAME: Optional[str]
+    ADMIN_PASSWORD: Optional[str]
+    SCOPE: Optional[str]
+    CLIENT_ID: Optional[str]
+    CLIENT_SECRET: Optional[str]
 
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
+
+class S3Info(BaseSettings):
+    S3_URL: str = Field(..., env="S3_URL")
+    S3_KEY: str = Field(..., env="S3_KEY")
+    S3_SECRET: str = Field(..., env="S3_SECRET")
 
 
 class Settings(BaseSettings):
@@ -60,10 +54,7 @@ class Settings(BaseSettings):
     DB_INFO: DBInfo
     KEYCLOAK_INFO: KeycloakInfo
     MYDISK_INFO: MydiskInfo
-
-    S3_URL: str
-    S3KEY: str
-    S3SECRET: str
+    S3_INFO: S3Info
 
 
 class ProdSettings(Settings):
@@ -72,11 +63,8 @@ class ProdSettings(Settings):
 
     DB_INFO: PGInfo = PGInfo()
     KEYCLOAK_INFO: KeycloakInfo = KeycloakInfo()
-    MYDISK_INFO: MydiskInfo() = MydiskInfo()
-
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
+    MYDISK_INFO: MydiskInfo = MydiskInfo()
+    S3_INFO: S3Info = S3Info()
 
 
 class LocalSettings(Settings):
@@ -100,27 +88,29 @@ class LocalSettings(Settings):
     )
 
     KEYCLOAK_INFO = KeycloakInfo(
-        keycloak_url="https://auth.bigdata-car.kr",
-        admin_username="admin",
-        admin_password="2021@katech",
-        realm="mobigen",
-        client_id="katech",
-        client_secret="pwLZG5EaWph1nJAOjwYJ32YGtXdAj5SL",
+        KEYCLOAK_URL="https://auth.bigdata-car.kr",
+        ADMIN_USERNAME="admin",
+        ADMIN_PASSWORD="2021@katech",
+        REALM="mobigen",
+        CLIENT_ID="katech",
+        CLIENT_SECRET="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
     )
 
     MYDISK_INFO = MydiskInfo(
         ROOT_DIR="./",
-        mydisk_url="https://mydisk.bigdata-car.kr",
-        admin_username="superuser",
-        admin_password="35ldxxhbd1",
-        scope="download",
-        client_id="86e9aaff5afc7d7828035500e11cb48c",
-        client_secret="lfb5RQK9SH3GcRqGgq0QcLlW5mJf0JDBNkrn1729",
+        MYDISK_URL="https://mydisk.bigdata-car.kr",
+        ADMIN_USERNAME="superuser",
+        ADMIN_PASSWORD="35ldxxhbd1",
+        SCOPE="download",
+        CLIENT_ID="86e9aaff5afc7d7828035500e11cb48c",
+        CLIENT_SECRET="lfb5RQK9SH3GcRqGgq0QcLlW5mJf0JDBNkrn1729",
     )
 
-    S3_URL: str = "http://10.10.30.51:8085"
-    S3KEY = ""
-    S3SECRET = ""
+    S3_INFO = S3Info(
+        S3_URL="http://10.10.30.51:8085",
+        S3_KEY="",
+        S3_SECRET=""
+    )
 
 
 @lru_cache

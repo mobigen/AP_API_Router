@@ -16,8 +16,8 @@ def create_app():
     app_ = FastAPI()
     print(settings.dict())
     db.init_app(app_, **settings.dict())
-    keycloak.set_url(settings.KEYCLOAK_INFO.keycloak_url)
-    mydisk.set_url(settings.MYDISK_INFO.mydisk_url)
+    keycloak.set_url(settings.KEYCLOAK_INFO.KEYCLOAK_URL)
+    mydisk.set_url(settings.MYDISK_INFO.MYDISK_URL)
 
     app_.include_router(disk.router, prefix="/portal/api/mydisk")
     app_.include_router(s3.router, prefix="/portal/api/s3")
