@@ -8,9 +8,8 @@ from pydantic import BaseModel
 
 from libs.database.connector import Executor
 from libs.els.ELKSearch.Utils.base import make_format
-from libs.els.ELKSearch.Utils.base import set_els
 from libs.els.ELKSearch.Utils.document_utils import search_filter
-from libs.els.ELKSearch.index import Index
+
 from meta_service.app.common.config import settings
 from meta_service.app.common.const import Prefix
 from meta_service.app.common.search import SearchModel
@@ -182,26 +181,6 @@ def els_doc_update(input: DeleteData, session: Executor = Depends(db.get_db)):
             logger.info(docmanager.update(input.biz_dataset_id))
 
         result = {"result": 1, "data": f"{input.biz_dataset_id} update"}
-    except Exception as e:
-        result = {"result": 0, "errorMessage": str(e)}
-        logger.error(e, exc_info=True)
-    return result
-
-
-@router.post("/els-index-create", response_model=dict)
-def els_index_update(index: str):
-    try:
-        es = set_els(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT)
-        ind_manager = Index(es)
-        indices = ind_manager.all_index().keys()
-        if index not in indices:
-            logger.info(
-                ind_manager.create(
-                    index=index, path=os.path.join(settings.BASE_DIR, "resources", "mapping", f"{index}.json")
-                )
-            )
-        result = {"result": 1, "data": "success"}
-
     except Exception as e:
         result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
