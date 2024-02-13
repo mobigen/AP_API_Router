@@ -18,3 +18,10 @@ class MetaTempTable(Base):
 class MetaHtmlTable(Base):
     table_nm = "tb_meta_html"
     key_column = "emid"
+
+
+class CkanDataTable(Base):
+    # 해외데이터
+    table_nm = "v_biz_meta_oversea_els"
+    key_column = "biz_dataset_id"
+

@@ -11,7 +11,7 @@ from libs.els.ELKSearch.Utils.base import make_format
 from libs.els.ELKSearch.Utils.document_utils import search_filter
 
 from meta_service.app.common.config import settings
-from meta_service.app.common.const import Prefix
+from meta_service.app.common.const import Prefix, CkanDataTable
 from meta_service.app.common.search import SearchModel
 from meta_service.app.common.search import default_search_set, base_query, record_keyword, search_count, Record
 from meta_service.app.common.utils import data_process
@@ -302,3 +302,23 @@ def autocomplete(input: Prefix):
         logger.error(e, exc_info=True)
 
     return result
+
+
+@router.get("/updateElsOverSeaBulk")
+async def oversea_test(session: Executor = Depends(db.get_db)):
+    index = "v_biz_meta_oversea_els"
+
+    try:
+        docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, index=index)
+        query = CkanDataTable.get_select_query("")
+        query.pop("where_info")
+        oversea_list = session.query(**query).all()[0]
+        logger.info(len(oversea_list))
+
+        for oversea in oversea_list:
+            insert_body = data_process(oversea)
+            docmanager.set_body(insert_body["_source"])
+            res = docmanager.insert(insert_body["_id"])
+            logger.info(res)
+    except Exception as e:
+        print(e)
