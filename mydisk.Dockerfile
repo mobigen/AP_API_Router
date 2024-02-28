@@ -14,4 +14,9 @@ RUN pip install --no-cache --upgrade pip && pip install -r requirements.txt
 ENV APP_ENV=prod
 ENV PYTHONPATH=/app/source:/app/common_libs
 
+EXPOSE 8000
+
+RUN mkdir -p /kadap-portal/USER
+RUN mkdir -p /kadap-portal/ADMIN
+
 CMD [ "gunicorn", "app.main:app", "-c", "gunicorn.conf.py"]
