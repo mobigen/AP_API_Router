@@ -188,7 +188,7 @@ def els_doc_update(input: DeleteData, session: Executor = Depends(db.get_db)):
 
 
 @router.get("/updateElsBizMetaBulk", response_model=dict)
-def els_update_bulk(session: Executor = Depends(db.get_db)):
+def meta_update_bulk(session: Executor = Depends(db.get_db)):
     key = "biz_dataset_id"
     table_nm = "v_biz_meta_info"
     index = "biz_meta"
@@ -305,7 +305,7 @@ def autocomplete(input: Prefix):
 
 
 @router.get("/updateElsOverSeaBulk")
-async def oversea_test(session: Executor = Depends(db.get_db)):
+def oversea_update_bulk(session: Executor = Depends(db.get_db)):
     index = "v_biz_meta_oversea_els"
 
     try:
