@@ -16,6 +16,8 @@ class Index:
 
     def init_els_all_index(self, path: str):
         for index_file in os.listdir(path):
+            if index_file[:-5] in self.all_index().keys():
+                self.delete(index_file[:-5])
             self.create(index_file[:-5], path)
 
     def create(self, index: str, path: str = None) -> dict:
