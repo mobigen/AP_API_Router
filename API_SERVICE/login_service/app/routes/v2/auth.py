@@ -867,7 +867,9 @@ async def get_user_info_from_request(request: Request):
     if not token:
         msg = "TokenDoesNotExist"
         logger.info(msg)
-        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+        # swyang 2024-03-04 bug fix
+        # return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
+        return {"status_code": 404, "data": {"error_description": msg}}
 
     token = literal_eval(token)
     userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.REALM)

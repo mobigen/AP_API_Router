@@ -26,6 +26,7 @@ def create_app():
             realm=settings.KEYCLOAK_INFO.REALM,
             client_id=settings.KEYCLOAK_INFO.CLIENT_ID,
             client_secret=settings.KEYCLOAK_INFO.CLIENT_SECRET,
+            domain=settings.KEYCLOAK_INFO.DOMAIN,
             logger=logger,
         ),
     )
