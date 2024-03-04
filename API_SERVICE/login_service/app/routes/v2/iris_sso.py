@@ -67,7 +67,7 @@ async def api(request: Request, session: Executor = Depends(db.get_db)) -> JSONR
         return JSONResponse(status_code=200, content={"result": 0, "errorMessage": msg})
 
     token = literal_eval(token)
-    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm)
+    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.REALM)
     if userInfo.get("status_code") != 200:
         return JSONResponse(
             status_code=400, content={"result": 0, "errorMessage": userInfo.get("data").get("error_description")}

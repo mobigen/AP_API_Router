@@ -17,18 +17,10 @@ class DBInfo(BaseSettings):
 class PGInfo(DBInfo):
     SCHEMA: str
 
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
-
 
 class ELSInfo(BaseSettings):
-    ELS_HOST: str = Field(..., alias="host")
-    ELS_PORT: int = Field(..., alias="port")
-
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
+    ELS_HOST: str = Field(..., env="ELS_HOST")
+    ELS_PORT: int = Field(..., env="ELS_PORT")
 
 
 class Settings(BaseSettings):
@@ -46,10 +38,6 @@ class ProdSettings(Settings):
 
     DB_INFO = PGInfo()
     ELS_INFO = ELSInfo()
-
-    class Config:
-        env_file = f"{base_dir}/.env"
-        env_file_encoding = "utf-8"
 
 
 class LocalSettings(Settings):
@@ -73,7 +61,7 @@ class LocalSettings(Settings):
     )
 
     # ELS_INFO = ELSInfo(host="192.168.101.44", port=39200)
-    ELS_INFO = ELSInfo(host="localhost", port=9200)
+    ELS_INFO = ELSInfo(ELS_HOST="localhost", ELS_PORT=9200)
 
 
 class TestSettings(LocalSettings):

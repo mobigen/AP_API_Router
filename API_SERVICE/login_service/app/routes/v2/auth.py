@@ -413,7 +413,7 @@ async def socialLink(params: RegisterSocialInfoWrap):
 
     admin_token = await get_admin_token()
     res = await keycloak.get_query(
-        token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query=f"username={social_email}&exact=true"
+        token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, query=f"username={social_email}&exact=true"
     )
 
     userList = res.get("data")
@@ -424,7 +424,7 @@ async def socialLink(params: RegisterSocialInfoWrap):
     user_info = userList[0]
     sub = user_info.get("id")
 
-    token = await keycloak.social_link(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub, **param.dict())
+    token = await keycloak.social_link(token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, sub=sub, **param.dict())
     logger.info(f"token :: {token}")
 
     if token["status_code"] == 204:
@@ -522,7 +522,7 @@ async def adminGetUser(request: Request, params: UserInfoWrap):
 
         admin_token = await get_admin_token()
         res = await keycloak.get_query(
-            token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query=f"username={userName}&exact=true"
+            token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, query=f"username={userName}&exact=true"
         )
 
         userList = res.get("data")
@@ -557,7 +557,7 @@ async def adminCheckSocialtype(request: Request):
 
         sub = userInfo.get("sub")
         logger.info(f"userInfo :: {userInfo}")
-        res = await keycloak.check_idp(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub)
+        res = await keycloak.check_idp(token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, sub=sub)
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": "", "data": res.get("data")})
     except Exception as e:
         logger.error(e, exc_info=True)
@@ -614,7 +614,7 @@ async def checkClientInfo(params: ClientInfoWrap):
     client_name = params.client_name
     try:
         admin_token = await get_admin_token()
-        res = await keycloak.check_client_id(token=admin_token, realm=settings.KEYCLOAK_INFO.realm)
+        res = await keycloak.check_client_id(token=admin_token, realm=settings.KEYCLOAK_INFO.REALM)
         client_list = res.get("data")
         client_info = list(filter(lambda item: item["clientId"] == client_name, client_list))
         logger.info(f"client_info :: {client_info}")
@@ -633,7 +633,7 @@ async def checkClientRole(params: ClientRoleWrap):
     try:
         admin_token = await get_admin_token()
         res = await keycloak.check_client_role(
-            token=admin_token, realm=settings.KEYCLOAK_INFO.realm, client_sub=client_sub
+            token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, client_sub=client_sub
         )
         client_role = res.get("data")
         logger.info(f"client_role :: {client_role}")
@@ -651,7 +651,7 @@ async def setRoleMapping(params: ClientRoleMappingWrap):
     try:
         admin_token = await get_admin_token()
         res = await keycloak.get_query(
-            token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query=f"username={user_id}&exact=true"
+            token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, query=f"username={user_id}&exact=true"
         )
 
         userList = res.get("data")
@@ -668,7 +668,7 @@ async def setRoleMapping(params: ClientRoleMappingWrap):
         }
 
         resToken = await keycloak.set_client_role_mapping(
-            token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **kwargs
+            token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, **kwargs
         )
         if resToken["status_code"] == 204:
             return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
@@ -776,7 +776,7 @@ async def alter_user_info(user_id: str, user_sttus: str = None, **kwargs):
 
     try:
         admin_token = await get_admin_token()
-        res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query="")
+        res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, query="")
         userList = res.get("data")
         user_info = list(filter(lambda item: item["username"] == user_id, userList))
         if len(user_info) == 0:
@@ -838,7 +838,7 @@ async def alter_user_info(user_id: str, user_sttus: str = None, **kwargs):
             },
         }
 
-        resToken = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=sub, **kwargs)
+        resToken = await keycloak.alter_user(token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, sub=sub, **kwargs)
         logger.info(f"resToken = {resToken}")
         if resToken["status_code"] == 204:
             return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
@@ -870,13 +870,13 @@ async def get_user_info_from_request(request: Request):
         return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
 
     token = literal_eval(token)
-    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm)
+    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.REALM)
     return userInfo
 
 
 async def get_query_keycloak(query):
     admin_token = await get_admin_token()
-    res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, query=query)
+    res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, query=query)
     logger.info(f"res :: {res}")
     if res["status_code"] != 200:
         raise CreateKeycloakFailError(f"CreateKeycloakFailError :: {res}")
@@ -956,7 +956,7 @@ async def modify_keycloak_user(**kwargs):
 
     try:
         resToken = await keycloak.alter_user(
-            token=admin_token, realm=settings.KEYCLOAK_INFO.realm, sub=kwargs.get("sub"), **reg_data
+            token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, sub=kwargs.get("sub"), **reg_data
         )
         logger.info(f"resToken :: {resToken}")
         if resToken["status_code"] == 204:
@@ -1008,7 +1008,7 @@ async def create_keycloak_user(**kwargs):
             "companyImagePath": "",
         },
     }
-    res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
+    res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, **reg_data)
     logger.info(f"res :: {res}")
     if res["status_code"] != 201:
         raise CreateKeycloakFailError(f"CreateKeycloakFailError :: {res}")
@@ -1016,8 +1016,8 @@ async def create_keycloak_user(**kwargs):
 
 async def get_admin_token() -> None:
     res = await keycloak.generate_admin_token(
-        username=settings.KEYCLOAK_INFO.admin_username,
-        password=settings.KEYCLOAK_INFO.admin_password,
+        username=settings.KEYCLOAK_INFO.ADMIN_USERNAME,
+        password=settings.KEYCLOAK_INFO.ADMIN_PASSWORD,
         grant_type="password",
     )
 
@@ -1026,9 +1026,9 @@ async def get_admin_token() -> None:
 
 async def get_normal_token(**kwargs):
     return await keycloak.generate_normal_token(
-        realm=settings.KEYCLOAK_INFO.realm,
-        client_id=settings.KEYCLOAK_INFO.client_id,
-        client_secret=settings.KEYCLOAK_INFO.client_secret,
+        realm=settings.KEYCLOAK_INFO.REALM,
+        client_id=settings.KEYCLOAK_INFO.CLIENT_ID,
+        client_secret=settings.KEYCLOAK_INFO.CLIENT_SECRET,
         grant_type=kwargs.pop("grant_type", "password"),
         **kwargs,
     )
@@ -1036,9 +1036,9 @@ async def get_normal_token(**kwargs):
 
 async def get_social_token(**kwargs):
     return await keycloak.generate_normal_token(
-        realm=settings.KEYCLOAK_INFO.realm,
-        client_id=settings.KEYCLOAK_INFO.client_id,
-        client_secret=settings.KEYCLOAK_INFO.client_secret,
+        realm=settings.KEYCLOAK_INFO.REALM,
+        client_id=settings.KEYCLOAK_INFO.CLIENT_ID,
+        client_secret=settings.KEYCLOAK_INFO.CLIENT_SECRET,
         requested_token_type="urn:ietf:params:oauth:token-type:refresh_token",
         subject_issuer=kwargs.get("social_type"),
         subject_token=kwargs.get("access_token"),
@@ -1048,17 +1048,17 @@ async def get_social_token(**kwargs):
 
 async def keycloak_logout(**kwargs):
     return await keycloak.logout(
-        realm=settings.KEYCLOAK_INFO.realm,
+        realm=settings.KEYCLOAK_INFO.REALM,
         refresh_token=kwargs.get("refresh_token"),
-        client_id=settings.KEYCLOAK_INFO.client_id,
-        client_secret=settings.KEYCLOAK_INFO.client_secret,
+        client_id=settings.KEYCLOAK_INFO.CLIENT_ID,
+        client_secret=settings.KEYCLOAK_INFO.CLIENT_SECRET,
     )
 
 
 async def get_token_info(**kwargs):
     return await keycloak.token_info(
-        realm=settings.KEYCLOAK_INFO.realm,
+        realm=settings.KEYCLOAK_INFO.REALM,
+        client_id=settings.KEYCLOAK_INFO.CLIENT_ID,
+        client_secret=settings.KEYCLOAK_INFO.CLIENT_SECRET,
         token=kwargs.get("token"),
-        client_id=settings.KEYCLOAK_INFO.client_id,
-        client_secret=settings.KEYCLOAK_INFO.client_secret,
     )
