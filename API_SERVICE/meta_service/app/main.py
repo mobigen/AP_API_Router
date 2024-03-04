@@ -28,8 +28,12 @@ app = create_app()
 
 @app.on_event("startup")
 def _init_elasticsearch():
-    es = set_els(**settings.ELS_INFO)
-    Index(es).init_els_all_index(f"{base_dir}/resources/mapping")
+    es = set_els(host=settings.ELS_INFO.ELS_HOST, port=settings.ELS_INFO.ELS_PORT)
+    logger.info(Index(es).init_els_all_index(f"{base_dir}/resources/ELK/elasticsearch/mapping"))
+
+    with db.get_db_manager() as session:
+        logger.info(els.meta_update_bulk(session))
+        logger.info(els.oversea_update_bulk(session))
 
 
 if __name__ == "__main__":
