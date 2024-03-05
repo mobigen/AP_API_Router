@@ -28,6 +28,12 @@ class KeycloakInfo(BaseSettings):
     CLIENT_SECRET: Optional[str]
 
 
+class IrisInfo(BaseSettings):
+    IRIS_DOMAIN: Optional[str]
+    IRIS_ROOT_USER: Optional[str]
+    IRIS_ROOT_PASS: Optional[str]
+
+
 class Settings(BaseSettings):
     BASE_DIR = base_dir
     RELOAD: bool
@@ -72,6 +78,12 @@ class LocalSettings(Settings):
         REALM="mobigen",
         CLIENT_ID="katech",
         CLIENT_SECRET="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
+    )
+
+    IRIS_INFO = IrisInfo(
+        IRIS_DOMAIN="https://b-iris.mobigen.com",
+        IRIS_ROOT_USER="root",
+        IRIS_ROOT_PASS="!dufmaQkdgkr202208"
     )
 
 
