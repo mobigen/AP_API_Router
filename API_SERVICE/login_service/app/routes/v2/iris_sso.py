@@ -19,7 +19,6 @@ from login_service.app.database.conn import db
 logger = logging.getLogger()
 router = APIRouter()
 
-base_url = "https://b-iris.mobigen.com"
 # base_url = "http://studio.bigdata-car.kr"
 
 
@@ -37,7 +36,7 @@ def get_token(iris_info, header):
     iris_id = iris_info[0]["iris_id"]
     iris_pw = iris_info[0]["iris_pw"]
     login_iris = {"userId": iris_id, "userPass": iris_pw}
-    res = requests.post(f"{base_url}/authenticate", data=json.dumps(login_iris), verify=False, headers=header)
+    res = requests.post(f"{settings.IRIS_INFO.IRIS_DOMAIN}/authenticate", data=json.dumps(login_iris), verify=False, headers=header)
 
     return res.json()
 
@@ -122,14 +121,14 @@ async def api(request: Request, session: Executor = Depends(db.get_db)) -> JSONR
             logger.info(join_info)
 
             # login
-            iris_root = [{"iris_id": "root", "iris_pw": "!dufmaQkdgkr202208"}]  # "Katech12#$"
+            iris_root = [{"iris_id": settings.IRIS_INFO.IRIS_ROOT_USER, "iris_pw": settings.IRIS_INFO.IRIS_ROOT_PASS}]  # "Katech12#$"
             root_token = get_token(iris_root, header)["token"]
             header["x-access-token"] = root_token
 
             logger.info(root_token)
             logger.info(header)
 
-            res = requests.post(f"{base_url}/meta/account", data=json.dumps(join_info), verify=False, headers=header)
+            res = requests.post(f"{settings.IRIS_INFO.IRIS_DOMAIN}/meta/account", data=json.dumps(join_info), verify=False, headers=header)
             logger.info(res.text)
 
             iris_table.key_column = "user_id"
