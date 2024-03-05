@@ -60,7 +60,7 @@ def refresh_token_from_cookie_wrapper(keycloak: KeycloakManager, **kwargs):
             res = token
 
         api_response = await call_next(request)
-        api_response.set_cookie(key=cookie_name, value=res)
+        api_response.set_cookie(key=cookie_name, value=res, domain=kwargs.get("domain"))
         return api_response
 
     return refresh_with_cookie

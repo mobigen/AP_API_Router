@@ -359,7 +359,7 @@ async def login(params: LoginInfoWrap) -> JSONResponse:
     if token["status_code"] == 200:
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
         token["create_time"] = datetime.now().strftime("%s")
-        response.set_cookie(key=COOKIE_NAME, value=token)
+        response.set_cookie(key=COOKIE_NAME, value=token, domain=settings.KEYCLOAK_INFO.DOMAIN)
         return response
     else:
         return JSONResponse(
@@ -380,7 +380,7 @@ async def loginAuth(params: LoginAuthInfoWrap) -> JSONResponse:
     if token["status_code"] == 200:
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
         token["create_time"] = datetime.now().strftime("%s")
-        response.set_cookie(key=COOKIE_NAME, value=token)
+        response.set_cookie(key=COOKIE_NAME, value=token, domain=settings.KEYCLOAK_INFO.DOMAIN)
         return response
     else:
         return JSONResponse(
@@ -397,7 +397,7 @@ async def loginSocial(params: RegisterSocialInfoWrap):
     if token["status_code"] == 200:
         token["create_time"] = datetime.now().strftime("%s")
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
-        response.set_cookie(key=COOKIE_NAME, value=token)
+        response.set_cookie(key=COOKIE_NAME, value=token, domain=settings.KEYCLOAK_INFO.DOMAIN)
         return response
     else:
         return JSONResponse(

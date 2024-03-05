@@ -155,7 +155,7 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
             token = await get_normal_token(grant_type="password", username=param.user_id, password=param.user_password)
 
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
-        response.set_cookie(key=COOKIE_NAME, value=token)
+        response.set_cookie(key=COOKIE_NAME, value=token, domain=settings.KEYCLOAK_INFO.DOMAIN)
         return response
     except Exception as e:
         logger.error(e, exc_info=True)
