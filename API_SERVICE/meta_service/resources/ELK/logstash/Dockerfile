@@ -1,4 +1,4 @@
-FROM logstash:7.17.14
+FROM docker.elastic.co/logstash/logstash:7.15.0
 
 RUN /usr/share/logstash/bin/logstash-plugin install logstash-integration-jdbc
 RUN /usr/share/logstash/bin/logstash-plugin install logstash-filter-aggregate
