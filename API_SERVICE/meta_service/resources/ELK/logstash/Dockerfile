@@ -1,0 +1,7 @@
+FROM logstash:7.17.14
+
+RUN /usr/share/logstash/bin/logstash-plugin install logstash-integration-jdbc
+RUN /usr/share/logstash/bin/logstash-plugin install logstash-filter-aggregate
+RUN /usr/share/logstash/bin/logstash-plugin install logstash-filter-mutate
+
+COPY postgresql-42.7.0.jar /usr/share/logstash/logstash-core/lib/jars/postgresql.jar
