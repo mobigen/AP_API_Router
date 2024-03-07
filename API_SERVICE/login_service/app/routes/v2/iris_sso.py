@@ -19,8 +19,6 @@ from login_service.app.database.conn import db
 logger = logging.getLogger()
 router = APIRouter()
 
-# base_url = "http://studio.bigdata-car.kr"
-
 
 def get_exception_info():
     ex_type, ex_value, ex_traceback = sys.exc_info()
@@ -121,6 +119,7 @@ async def api(request: Request, session: Executor = Depends(db.get_db)) -> JSONR
             logger.info(join_info)
 
             # login
+
             iris_root = [{"iris_id": settings.IRIS_INFO.IRIS_ROOT_USER, "iris_pw": settings.IRIS_INFO.IRIS_ROOT_PASS}]  # "Katech12#$"
             root_token = get_token(iris_root, header)["token"]
             header["x-access-token"] = root_token

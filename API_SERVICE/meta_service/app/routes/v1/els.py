@@ -8,11 +8,10 @@ from pydantic import BaseModel
 
 from libs.database.connector import Executor
 from libs.els.ELKSearch.Utils.base import make_format
-from libs.els.ELKSearch.Utils.base import set_els
 from libs.els.ELKSearch.Utils.document_utils import search_filter
-from libs.els.ELKSearch.index import Index
+
 from meta_service.app.common.config import settings
-from meta_service.app.common.const import Prefix
+from meta_service.app.common.const import Prefix, CkanDataTable
 from meta_service.app.common.search import SearchModel
 from meta_service.app.common.search import default_search_set, base_query, record_keyword, search_count, Record
 from meta_service.app.common.utils import data_process
@@ -188,28 +187,8 @@ def els_doc_update(input: DeleteData, session: Executor = Depends(db.get_db)):
     return result
 
 
-@router.post("/els-index-create", response_model=dict)
-def els_index_update(index: str):
-    try:
-        es = set_els(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT)
-        ind_manager = Index(es)
-        indices = ind_manager.all_index().keys()
-        if index not in indices:
-            logger.info(
-                ind_manager.create(
-                    index=index, path=os.path.join(settings.BASE_DIR, "resources", "mapping", f"{index}.json")
-                )
-            )
-        result = {"result": 1, "data": "success"}
-
-    except Exception as e:
-        result = {"result": 0, "errorMessage": str(e)}
-        logger.error(e, exc_info=True)
-    return result
-
-
 @router.get("/updateElsBizMetaBulk", response_model=dict)
-def els_update_bulk(session: Executor = Depends(db.get_db)):
+def meta_update_bulk(session: Executor = Depends(db.get_db)):
     key = "biz_dataset_id"
     table_nm = "v_biz_meta_info"
     index = "biz_meta"
@@ -323,3 +302,23 @@ def autocomplete(input: Prefix):
         logger.error(e, exc_info=True)
 
     return result
+
+
+@router.get("/updateElsOverSeaBulk")
+def oversea_update_bulk(session: Executor = Depends(db.get_db)):
+    index = "v_biz_meta_oversea_els"
+
+    try:
+        docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, index=index)
+        query = CkanDataTable.get_select_query("")
+        query.pop("where_info")
+        oversea_list = session.query(**query).all()[0]
+        logger.info(len(oversea_list))
+
+        for oversea in oversea_list:
+            insert_body = data_process(oversea)
+            docmanager.set_body(insert_body["_source"])
+            res = docmanager.insert(insert_body["_id"])
+            logger.info(res)
+    except Exception as e:
+        print(e)
