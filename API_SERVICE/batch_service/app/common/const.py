@@ -3,8 +3,6 @@ import os
 from batch_service.app.common.config import base_dir
 from libs.database.dml_controller import Base
 
-# recommend
-log_dir = f"{os.path.dirname(os.path.dirname(base_dir))}/API_SERVICE/meta_service/log"
 
 # send_email
 template_dir = os.path.join(base_dir, "resources", "template")

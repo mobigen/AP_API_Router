@@ -4,8 +4,8 @@ import re
 from collections import Counter
 from datetime import datetime
 
-from batch_service.app.common.config import base_dir
-from batch_service.app.common.const import log_dir, RecommendKeyTable
+from batch_service.app.common.config import base_dir, settings
+from batch_service.app.common.const import RecommendKeyTable
 from batch_service.app.database.conn import db
 
 logger = logging.getLogger()
@@ -15,7 +15,7 @@ def recommend_search_word():
     """ """
     with db.get_db_manager() as session:
         # 검색어 로그 불러오기
-        search_file_name = f"{log_dir}/{datetime.today().date().strftime('%Y%m%d')}_search.log"
+        search_file_name = f"{settings.LOG_DIR}/{datetime.today().date().strftime('%Y%m%d')}_search.log"
         with open(search_file_name, "r") as fp:
             search_log_file = fp.read().split("\n")[:-1]
 

@@ -1,5 +1,6 @@
 import logging.config
 import os
+import typing
 from functools import lru_cache
 
 from pydantic import BaseSettings, PostgresDsn, Field
@@ -48,6 +49,8 @@ class ProdSettings(Settings):
     RELOAD = False
     TESTING = False
 
+    RECOMMEND_WORD_DIR: typing.Optional[str] = None
+
     DB_INFO = PGInfo()
     SEOUL_DB_INFO = SeoulPGInfo()
     ELS_INFO = ELSInfo()
@@ -57,6 +60,8 @@ class LocalSettings(Settings):
     SERVICE = "batch"
     TESTING: bool = False
     RELOAD: bool = False
+
+    RECOMMEND_WORD_DIR = f"{os.path.dirname(os.path.dirname(base_dir))}/API_SERVICE/meta_service/log"
 
     SMTP_SERVER = "smtp.office365.com"
     SMTP_PORT = "587"
