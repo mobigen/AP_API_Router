@@ -64,7 +64,7 @@ async def api(request: Request, session: Executor = Depends(db.get_db)) -> JSONR
         return JSONResponse(status_code=200, content={"result": 0, "errorMessage": msg})
 
     token = literal_eval(token)
-    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.realm)
+    userInfo = await keycloak.user_info(token=token["data"]["access_token"], realm=settings.KEYCLOAK_INFO.REALM)
     if userInfo.get("status_code") != 200:
         return JSONResponse(
             status_code=400, content={"result": 0, "errorMessage": userInfo.get("data").get("error_description")}
@@ -119,7 +119,8 @@ async def api(request: Request, session: Executor = Depends(db.get_db)) -> JSONR
             logger.info(join_info)
 
             # login
-            iris_root = [{"iris_id": settings.IRIS_INFO.IRIS_USER, "iris_pw": settings.IRIS_INFO.IRIS_PASS}]  # "Katech12#$"
+
+            iris_root = [{"iris_id": settings.IRIS_INFO.IRIS_ROOT_USER, "iris_pw": settings.IRIS_INFO.IRIS_ROOT_PASS}]  # "Katech12#$"
             root_token = get_token(iris_root, header)["token"]
             header["x-access-token"] = root_token
 

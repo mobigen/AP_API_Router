@@ -26,6 +26,13 @@ class KeycloakInfo(BaseSettings):
     REALM: Optional[str]
     CLIENT_ID: Optional[str]
     CLIENT_SECRET: Optional[str]
+    DOMAIN: str
+
+
+class IrisInfo(BaseSettings):
+    IRIS_DOMAIN: Optional[str]
+    IRIS_ROOT_USER: Optional[str]
+    IRIS_ROOT_PASS: Optional[str]
 
 
 class IrisInfo(BaseSettings):
@@ -49,6 +56,7 @@ class ProdSettings(Settings):
 
     DB_INFO = PGInfo()
     KEYCLOAK_INFO = KeycloakInfo()
+    IRIS_INFO = IrisInfo()
 
 
 class LocalSettings(Settings):
@@ -78,6 +86,13 @@ class LocalSettings(Settings):
         REALM="mobigen",
         CLIENT_ID="katech",
         CLIENT_SECRET="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
+        DOMAIN="bigdata-car.kr"
+    )
+
+    IRIS_INFO = IrisInfo(
+        IRIS_DOMAIN="https://b-iris.mobigen.com",
+        IRIS_ROOT_USER="root",
+        IRIS_ROOT_PASS="!dufmaQkdgkr202208"
     )
 
     IRIS_INFO = IrisInfo(

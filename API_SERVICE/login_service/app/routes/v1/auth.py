@@ -155,7 +155,7 @@ async def login(params: LoginInfoWrap, session: Executor = Depends(db.get_db)) -
             token = await get_normal_token(grant_type="password", username=param.user_id, password=param.user_password)
 
         response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
-        response.set_cookie(key=COOKIE_NAME, value=token)
+        response.set_cookie(key=COOKIE_NAME, value=token, domain=settings.KEYCLOAK_INFO.DOMAIN)
         return response
     except Exception as e:
         logger.error(e, exc_info=True)
@@ -214,14 +214,14 @@ async def info(request: Request, session: Executor = Depends(db.get_db)):
 @router.post("/user/commonLogout")
 async def logout():
     response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
-    response.delete_cookie(COOKIE_NAME, domain="bigdata-car.kr")
+    response.delete_cookie(COOKIE_NAME, domain=settings.KEYCLOAK_INFO.DOMAIN)
     return response
 
 
 async def get_admin_token() -> None:
     res = await keycloak.generate_admin_token(
-        username=settings.KEYCLOAK_INFO.admin_username,
-        password=settings.KEYCLOAK_INFO.admin_password,
+        username=settings.KEYCLOAK_INFO.ADMIN_USERNAME,
+        password=settings.KEYCLOAK_INFO.ADMIN_PASSWORD,
         grant_type="password",
     )
 
@@ -239,7 +239,7 @@ async def create_keycloak_user(password, **kwargs):
         "credentials": [{"value": password}],
         "attributes": json.dumps(kwargs, default=str),
     }
-    res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.realm, **reg_data)
+    res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, **reg_data)
     logger.info(f"res :: {res}")
     if res["status_code"] != 201:
         raise CreateKeycloakFailError(f"CreateKeycloakFailError :: {res}")
@@ -247,9 +247,9 @@ async def create_keycloak_user(password, **kwargs):
 
 async def get_normal_token(**kwargs):
     return await keycloak.generate_normal_token(
-        realm=settings.KEYCLOAK_INFO.realm,
-        client_id=settings.KEYCLOAK_INFO.client_id,
-        client_secret=settings.KEYCLOAK_INFO.client_secret,
+        realm=settings.KEYCLOAK_INFO.REALM,
+        client_id=settings.KEYCLOAK_INFO.CLIENT_ID,
+        client_secret=settings.KEYCLOAK_INFO.CLIENT_SECRET,
         grant_type=kwargs.pop("grant_type", "password"),
         **kwargs,
     )
@@ -257,7 +257,7 @@ async def get_normal_token(**kwargs):
 
 async def username_from_token(access_token: str):
     res = await keycloak.user_info(
-        realm=settings.KEYCLOAK_INFO.realm,
+        realm=settings.KEYCLOAK_INFO.REALM,
         token=access_token,
     )
     logger.info(f"token info res :: {res}")
@@ -272,7 +272,7 @@ async def delete_user(**kwargs):
     """
     admin_token = await get_admin_token()
     res = await keycloak.delete_user(
-        token=admin_token, realm=settings.KEYCLOAK_INFO.realm, user_id=kwargs.get("user_id")
+        token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, user_id=kwargs.get("user_id")
     )
     logger.info(f"delete res :: {res}")
 
