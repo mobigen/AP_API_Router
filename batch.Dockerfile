@@ -8,6 +8,7 @@ RUN apk add --update alpine-sdk && \
 COPY ./API_SERVICE/batch_service /app/source/batch_service
 COPY ./common_libs /app/common_libs
 WORKDIR /app/source/batch_service
+RUN mkdir -p /meta_service/log
 
 RUN pip install --no-cache --upgrade pip && pip install -r requirements.txt
 

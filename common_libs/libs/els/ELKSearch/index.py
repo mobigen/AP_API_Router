@@ -1,4 +1,5 @@
 import os
+import time
 import json
 # ELKSearch 경로
 ELKSearch_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -18,6 +19,7 @@ class Index:
         for index_file in os.listdir(path):
             if index_file[:-5] in self.all_index().keys():
                 self.delete(index_file[:-5])
+                time.sleep(15)
             self.create(index_file[:-5], path)
 
     def create(self, index: str, path: str = None) -> dict:
