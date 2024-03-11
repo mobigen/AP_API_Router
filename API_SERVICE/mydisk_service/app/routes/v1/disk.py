@@ -274,7 +274,7 @@ async def label(params: LabelParams):
 
 @router.get("/v1/linkImage/")
 async def linkImage(dataset_id: str, fileloc: str):
-    fileBase = "/home/deep/workspace/ysw/katech/filebrowser_datas/file_data/ADMIN/"
+    fileBase = settings.LABEL_FILE_BASE
     imageSrc = f"{fileBase}/{dataset_id}/LABEL_DATA/raw/{fileloc}"
     try:
         return FileResponse(imageSrc)

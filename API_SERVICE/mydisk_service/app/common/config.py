@@ -61,15 +61,20 @@ class ProdSettings(Settings):
     TESTING: bool = False
     RELOAD: bool = False
 
+    LABEL_FILE_BASE: Optional[str] = None
+
     DB_INFO: PGInfo = PGInfo()
     KEYCLOAK_INFO: KeycloakInfo = KeycloakInfo()
     MYDISK_INFO: MydiskInfo = MydiskInfo()
     S3_INFO: S3Info = S3Info()
 
 
+
 class LocalSettings(Settings):
     TESTING: bool = False
     RELOAD: bool = False
+
+    LABEL_FILE_BASE: Optional[str] = "/home/deep/workspace/ysw/katech/filebrowser_datas/file_data/ADMIN/"
 
     DB_INFO = PGInfo(
         DB_POOL_RECYCLE=900,
