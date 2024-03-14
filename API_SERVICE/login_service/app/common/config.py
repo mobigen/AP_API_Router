@@ -26,7 +26,7 @@ class KeycloakInfo(BaseSettings):
     REALM: Optional[str]
     CLIENT_ID: Optional[str]
     CLIENT_SECRET: Optional[str]
-    DOMAIN: str
+    DOMAIN: Optional[str]
 
 
 class IrisInfo(BaseSettings):
@@ -80,7 +80,7 @@ class LocalSettings(Settings):
         REALM="mobigen",
         CLIENT_ID="katech",
         CLIENT_SECRET="ZWY7WDimS4rxzaXEfwEShYMMly00i8L0",
-        DOMAIN="bigdata-car.kr"
+        DOMAIN=None
     )
 
     IRIS_INFO = IrisInfo(
