@@ -21,7 +21,7 @@ def convert_datetime_to_str(obj):
 
 
 def get_s3_client():
-    s3 = boto3.client("s3", aws_access_key_id=settings.S3KEY, aws_secret_access_key=settings.S3SECRET, endpoint_url=settings.S3_URL)
+    s3 = boto3.client("s3", aws_access_key_id=settings.S3_KEY, aws_secret_access_key=settings.S3_SECRET, endpoint_url=settings.S3_URL)
     try:
         yield s3
     finally:
