@@ -50,8 +50,8 @@ async def bucket_info(bucket_name: str, s3=Depends(get_s3_client)):
         res = s3.head_bucket(Bucket=bucket_name)
         return JSONResponse(status_code=200, content={"result": 1, "errorMessage": "", "data": {"body": res}})
     except ClientError as e:
-        error_code = e.response["Error"]["Code"]
-        if error_code == "404":
+        error_code = int(e.response["Error"]["Code"])
+        if error_code == 404:
             logger.debug(f"Bucket {bucket_name} does not exist")
             return JSONResponse(
                 status_code=error_code, content={"result": 1, "errorMessage": f"{bucket_name} not found"}
