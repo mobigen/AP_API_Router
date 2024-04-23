@@ -16,7 +16,6 @@ ENV PYTHONPATH=/app/source:/app/common_libs
 
 EXPOSE 8000
 
-RUN mkdir -p /kadap-portal/USER
-RUN mkdir -p /kadap-portal/ADMIN
+RUN mkdir -p /kadap-portal
 
 CMD [ "gunicorn", "app.main:app", "-c", "gunicorn.conf.py"]
