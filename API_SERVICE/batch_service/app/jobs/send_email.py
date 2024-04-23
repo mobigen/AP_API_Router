@@ -43,7 +43,7 @@ def send_mail():
                 html = html.replace("CONTENTS1", content[0])
                 html = html.replace("CONTENTS2", content[1])
 
-            if category in ["analysisRequest", "toolApply", "blng_noty"]:
+            if row["tmplt_cd"] in ["analysisRequest", "toolApply", "blng_noty"]:
                 category["sub"] = category["sub"].format(row["title"])
 
             # send
