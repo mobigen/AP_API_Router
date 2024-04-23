@@ -31,6 +31,10 @@ msg_setting = {
         "tmplt": os.path.join(template_dir, "toolApplyEmail.html"),
         "sub": "[자동차데이터포털] {0} 신청 메일입니다.",
     },
+    "blng_noty": {
+        "tmplt": os.path.join(template_dir, "BlngNoty.html"),
+        "sub": "{0}"
+    }
 }
 
 
