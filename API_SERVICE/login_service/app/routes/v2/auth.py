@@ -171,6 +171,13 @@ class ClientRoleMappingWrap(BaseModel):
     data: ClientRoleMapping
 
 
+class getUserRoleWrap(BaseModel):
+    class getUserRole(BaseModel):
+        user_sub: str
+
+    data: getUserRole
+
+
 router = APIRouter()
 
 
@@ -699,6 +706,22 @@ async def getUyuniRole(request: Request):
                 status_code=400,
                 content={"result": 0, "errorMessage": res["data"]["error_description"]},
             )
+    except Exception as e:
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+@router.post("/user/v2/getUserRole")
+async def getUserRole(params: getUserRoleWrap):
+    params = params.data
+    user_sub = params.user_sub
+    try:
+        admin_token = await get_admin_token()
+        res = await keycloak.get_user_role(
+            token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, user_sub=user_sub
+        )
+        user_role = res.get("data")
+        logger.info(f"user_role :: {user_role}")
+        return JSONResponse(status_code=200, content={"result": 1, "data": user_role})
     except Exception as e:
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
