@@ -288,9 +288,31 @@ async def register(request: Request, session: Executor = Depends(db.get_db)):
         request (Request): _description_
         session (Executor, optional): _description_. Defaults to Depends(db.get_db).
     """
+    admin_token = await get_admin_token()
     userInfo = await get_user_info_from_request(request)
+
     userData = userInfo.get("data")
     userId = userData.get("user_id")
+    userSub = userData.get("sub")
+    userDetailRes = await keycloak.user_info_detail(
+        token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, user_id=userSub
+    )
+    userRoleRes = await keycloak.get_user_role(
+        token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, user_sub=userSub
+    )
+    userAttribute = userDetailRes.get("data").get("attributes")
+    openstack_user_domain = userAttribute.get("openstack-user-domain")[0]
+    cloud_auth = "Y" if openstack_user_domain == "Default" else "N"
+
+    market_auth = "N"
+    try:
+        userRole = userRoleRes.get("data").get("clientMappings").get("cmp-portal").get("mappings")
+        logger.info(userRole)
+        RoleNames = [item['name'] for item in userRole]
+        if "ROLE_PROJECT_MANAGER" in RoleNames : market_auth = "Y"
+    except Exception as e:
+        logger.info(userRoleRes.get("data"))
+        logger.error(e, exc_info=True)
 
     if userId is None:
         msg = userInfo.get("data").get("error_description")
@@ -317,6 +339,8 @@ async def register(request: Request, session: Executor = Depends(db.get_db)):
         "reg_date": userData.get("reg_date"),
         "amd_user": userData.get("amd_user"),
         "amd_date": userData.get("amd_date"),
+        "cloud_auth": cloud_auth,
+        "market_auth": market_auth
     }
 
     return await user_upsert(session, **userParam)
