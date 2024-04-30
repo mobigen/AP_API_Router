@@ -237,6 +237,14 @@ class KeycloakManager:
             ) as response:
                 return {"status_code": response.status, "data": await response.read()}
 
+    async def get_user_role(self, token, realm, **kwargs):
+        headers = {"Content-Type": "application/json", "Authorization": "bearer " + token}
+        user_sub = kwargs.get("user_sub")
+
+        return await self._request_to_keycloak(
+            api_url=f"{self.base_url}/admin/realms/{realm}/users/{user_sub}/role-mappings", method="GET", headers=headers
+        )
+
 if __name__ == "__main__":
     import asyncio
 
