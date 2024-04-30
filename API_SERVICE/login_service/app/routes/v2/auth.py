@@ -102,6 +102,9 @@ class RegisterInfoWrap(BaseModel):
         limit_app_count: Optional[str]
         company: Optional[str]
         companyImagePath: Optional[str]
+        cloud_auth: Optional[str]
+        vpn_auth: Optional[str]
+        market_auth: Optional[str]
 
     data: RegisterInfo
 
@@ -345,6 +348,9 @@ async def admin_register(request: Request, params: RegisterInfoWrap, session: Ex
             "reg_date": param.reg_date.strftime("%Y-%m-%d %H:%M:%S"),
             "amd_user": param.amd_user,
             "amd_date": param.amd_date.strftime("%Y-%m-%d %H:%M:%S"),
+            "cloud_auth": param.cloud_auth,
+            "market_auth": param.market_auth,
+            "vpn_auth": param.vpn_auth,
         }
 
         return await user_upsert(session, **user_data)
