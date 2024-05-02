@@ -223,6 +223,7 @@ class KeycloakManager:
         headers = {"Content-Type": "application/json", "Authorization": "bearer " + token}
         user_sub = kwargs.get("user_sub")
         client_sub = kwargs.get("client_sub")
+        type = kwargs.get("type")
         params = [{
             "id": kwargs.get("role_sub"),
             "name": kwargs.get("role_name")
@@ -231,7 +232,7 @@ class KeycloakManager:
         async with aiohttp.ClientSession() as session:
             async with session.request(
                     url=f"{self.base_url}/admin/realms/{realm}/users/{user_sub}/role-mappings/clients/{client_sub}",
-                    method="POST",
+                    method=type,
                     headers=headers,
                     json=params,
             ) as response:

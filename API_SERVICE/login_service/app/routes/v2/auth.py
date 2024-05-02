@@ -681,9 +681,11 @@ async def checkClientRole(params: ClientRoleWrap):
 
 
 @router.post("/user/v2/setRoleMapping")
-async def setRoleMapping(params: ClientRoleMappingWrap):
+@router.delete("/user/v2/setRoleMapping")
+async def setRoleMapping(request: Request, params: ClientRoleMappingWrap):
     params = params.data
     user_id = params.user_id
+    type = "POST" if request.method == "POST" else "DELETE"
 
     try:
         admin_token = await get_admin_token()
@@ -702,6 +704,7 @@ async def setRoleMapping(params: ClientRoleMappingWrap):
             "client_sub": params.client_sub,
             "role_sub": params.role_sub,
             "role_name": params.role_name,
+            "type": type
         }
 
         resToken = await keycloak.set_client_role_mapping(
