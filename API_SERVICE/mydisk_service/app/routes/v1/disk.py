@@ -10,6 +10,7 @@ from typing import Optional, Union, Dict
 
 import pandas as pd
 from PIL import Image
+from pdf2image import convert_from_path
 from fastapi import APIRouter
 from pydantic import BaseModel
 from starlette.responses import FileResponse
@@ -119,10 +120,10 @@ async def head(params: PreviewParam):
         logger.info(f"path :: {path}")
         file_type = "txt"
 
-        if suffix in ["jpg", "jpeg", "png", "gif", "tiff", "tif", "bmp"]:
+        if suffix in ["jpg", "jpeg", "png", "gif", "tiff", "tif", "bmp", "pdf"]:
             file_type = "image"
             byte_str = BytesIO()
-            thumb_image = Image.open(path)
+            thumb_image = convert_from_path(path)[0] if suffix == "pdf" else Image.open(path)
             thumb_image.thumbnail((width, height))
             thumb_image.save(byte_str, format="png")
             image_base64str = base64.b64encode(byte_str.getvalue())
