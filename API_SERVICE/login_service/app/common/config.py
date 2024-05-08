@@ -35,6 +35,13 @@ class IrisInfo(BaseSettings):
     IRIS_ROOT_PASS: Optional[str]
 
 
+class VpnInfo(BaseSettings):
+    VPN_ID: Optional[str]
+    VPN_PASS: Optional[str]
+    VPN_URL: Optional[str]
+    VPN_INIT_PASS: Optional[str]
+
+
 class Settings(BaseSettings):
     BASE_DIR = base_dir
     RELOAD: bool
@@ -51,6 +58,7 @@ class ProdSettings(Settings):
     DB_INFO = PGInfo()
     KEYCLOAK_INFO = KeycloakInfo()
     IRIS_INFO = IrisInfo()
+    VPN_INFO = VpnInfo()
 
 
 class LocalSettings(Settings):
@@ -87,6 +95,13 @@ class LocalSettings(Settings):
         IRIS_DOMAIN="https://b-iris.mobigen.com",
         IRIS_ROOT_USER="root",
         IRIS_ROOT_PASS="!dufmaQkdgkr202208"
+    )
+
+    VPN_INFO = VpnInfo(
+        VPN_ID="katech",
+        VPN_PASS="katech@1147",
+        VPN_URL="https://172.16.0.79:50015",
+        VPN_INIT_PASS="katech@2021"
     )
 
 
