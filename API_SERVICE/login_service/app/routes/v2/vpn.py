@@ -1,6 +1,8 @@
+import json
 import logging
 import requests
 
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Request
 from starlette.responses import JSONResponse
 
@@ -14,40 +16,78 @@ logger = logging.getLogger()
 router = APIRouter()
 
 
-@router.post("/user/v2/VpnCheck")
-async def check_vpn(request: Request, session: Executor = Depends(db.get_db)) -> JSONResponse:
-    token = admin_login()
+class Input(BaseModel):
+    email: str
 
-    # 2. 안랩 장비에 API로 사용자 email 주소로 사용자 생성
-    # 2-1.
-    url = "/object/user/account"
-    payload = {
-        "name": "mobigen"
-    }
+
+@router.post("/user/v2/CheckVpn")
+async def check_vpn(input: Input) -> JSONResponse:
+    token = admin_login()
+    payload = json.dumps({"name": input.email})
+    headers = {'Authorization': token}
+    res = requests.get(url=f"{settings.VPN_INFO.VPN_URL}/object/user/account", headers=headers, data=payload, verify=False)
+    print(res.json())
+    if res.json()['code'] == 0:
+        print(res.json()['result'])
+        return JSONResponse(
+            status_code=200,
+            content={"result": 0, "errorMessage": ""},
+        )
+    else:
+        print(res.json()['message'])
+        return JSONResponse(
+            status_code=400,
+            content={"result": 0, "errorMessage": ""},
+        )
+
+
+@router.post("/user/v2/JoinVpn")
+def create_vpn(input: Input):
+    token = admin_login()
     headers = {
         'Authorization': token
     }
-    res = requests.get(url=url, headers=headers, data=payload, verify=False)
+    payload = json.dumps({
+        "name": input.email,
+        "password": settings.VPN_INFO.VPN_PASS,
+        "auth_type": "0",
+        "security_level": "0",
+        "max_fail_login_count": "0",
+        "password_change_interval": "0",
+        "expire_date": "20240522",
+        "certificate_issue_enable": "0",
+        "personal_id_enable": "0",
+        "new_name": "mobigentest"
+    })
+    res = requests.post(url=f"{settings.VPN_INFO.VPN_URL}/object/user/account", headers=headers, data=payload, verify=False)
+    print(res.json())
 
-    if res.json()['code'] == 0 :
-        return res.json()['result']
-    else :
-        return res.json()['message']
+    return res.json()['message']
 
-    # 3. 생성된 사용자를 VPN 그룹에 추가
-    # return JSONResponse({"result": 0})
+
+@router.post("/user/v2/DropVpn")
+def delete_vpn(input: Input):
+    token = admin_login()
+    payload = json.dumps({"name": input.email})
+    headers = {
+        'Authorization': token
+    }
+    res = requests.delete(url=f"{settings.VPN_INFO.VPN_URL}/object/user/account", headers=headers, data=payload, verify=False)
+
+    return res.json()['message']
 
 
 def admin_login():
-    payload = {
+    payload = json.dumps({
         "id": settings.VPN_INFO.VPN_ID,
         "password": settings.VPN_INFO.VPN_PASS
-    }
-    print(payload)
+    })
     res = requests.post(url=f"{settings.VPN_INFO.VPN_URL}/token", headers=json_headers, data=payload, verify=False)
-    print(res)
-    if res.json()["code"] == 0:
-        pass
+
+    if res.json()["code"] != 0:
+        print(res.json()["code"])
+        raise ValueError(res.json())
+
     token = res.json()['token']
     # 1-2. token check
     headers = {
