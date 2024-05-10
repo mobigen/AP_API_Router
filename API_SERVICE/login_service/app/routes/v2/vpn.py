@@ -26,19 +26,8 @@ async def check_vpn(input: Input) -> JSONResponse:
     payload = json.dumps({"name": input.email})
     headers = {'Authorization': token}
     res = requests.get(url=f"{settings.VPN_INFO.VPN_URL}/object/user/account", headers=headers, data=payload, verify=False)
-    print(res.json())
-    if res.json()['code'] == 0:
-        print(res.json()['result'])
-        return JSONResponse(
-            status_code=200,
-            content={"result": 0, "errorMessage": ""},
-        )
-    else:
-        print(res.json()['message'])
-        return JSONResponse(
-            status_code=400,
-            content={"result": 0, "errorMessage": ""},
-        )
+    logger.info(res.json())
+    return result_format(res)
 
 
 @router.post("/user/v2/JoinVpn")
@@ -57,9 +46,9 @@ def create_vpn(input: Input):
         "personal_id_enable": "0", # 개인식별번호 사용 안함
     })
     res = requests.post(url=f"{settings.VPN_INFO.VPN_URL}/object/user/account", headers=headers, data=payload, verify=False)
-    print(res.json())
+    logger.info(json)
+    return result_format(res)
 
-    return res.json()['message']
 
 
 @router.post("/user/v2/DropVpn")
@@ -70,8 +59,8 @@ def delete_vpn(input: Input):
         'Authorization': token
     }
     res = requests.delete(url=f"{settings.VPN_INFO.VPN_URL}/object/user/account", headers=headers, data=payload, verify=False)
-
-    return res.json()['message']
+    logger.info(res.json())
+    return result_format(res)
 
 
 def admin_login():
@@ -94,3 +83,16 @@ def admin_login():
     print("login", res.json())
     print(res.json()['message'])
     return token
+
+
+def result_format(res):
+    if res.json()["code"] == 0:
+        return JSONResponse(
+            status_code=200,
+            content={"result": 0, "errorMessage": "", "data": res.json()["message"]},
+        )
+    else:
+        return JSONResponse(
+            status_code=400,
+            content={"result": 0, "errorMessage": res.json()["message"]},
+        )
