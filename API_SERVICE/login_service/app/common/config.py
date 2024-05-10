@@ -40,6 +40,7 @@ class VpnInfo(BaseSettings):
     VPN_PASS: Optional[str]
     VPN_URL: Optional[str]
     VPN_INIT_PASS: Optional[str]
+    VPN_EXPIRE: Optional[str]
 
 
 class Settings(BaseSettings):
@@ -101,7 +102,8 @@ class LocalSettings(Settings):
         VPN_ID="katech",
         VPN_PASS="katech@1147",
         VPN_URL="https://172.16.0.79:50015",
-        VPN_INIT_PASS="katech@2021"
+        VPN_INIT_PASS="katech@2021",
+        VPN_EXPIRE="20281231"
     )
 
 
