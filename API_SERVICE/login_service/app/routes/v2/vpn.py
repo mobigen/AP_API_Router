@@ -50,14 +50,11 @@ def create_vpn(input: Input):
     payload = json.dumps({
         "name": input.email,
         "password": settings.VPN_INFO.VPN_PASS,
-        "auth_type": "0",
-        "security_level": "0",
-        "max_fail_login_count": "0",
-        "password_change_interval": "0",
-        "expire_date": "20240522",
-        "certificate_issue_enable": "0",
-        "personal_id_enable": "0",
-        "new_name": "mobigentest"
+        "auth_type": "0", # 인증 유형 password
+        "security_level": "0", # 보안 등급 높음
+        "expire_date": "20281231", # 다른 기준과 동일하게 변경
+        "certificate_issue_enable": "0", # 인증서 없음
+        "personal_id_enable": "0", # 개인식별번호 사용 안함
     })
     res = requests.post(url=f"{settings.VPN_INFO.VPN_URL}/object/user/account", headers=headers, data=payload, verify=False)
     print(res.json())
