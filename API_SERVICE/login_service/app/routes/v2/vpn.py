@@ -3,11 +3,8 @@ import logging
 import requests
 
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter
 from starlette.responses import JSONResponse
-
-from libs.database.connector import Executor
-from login_service.app.database.conn import db
 
 from login_service.app.common.const import json_headers
 from login_service.app.common.config import settings
@@ -46,7 +43,7 @@ def create_vpn(input: Input):
         "personal_id_enable": "0", # 개인식별번호 사용 안함
     })
     res = requests.post(url=f"{settings.VPN_INFO.VPN_URL}/object/user/account", headers=headers, data=payload, verify=False)
-    logger.info(json)
+    logger.info(res.json())
     return result_format(res)
 
 
@@ -71,7 +68,7 @@ def admin_login():
     res = requests.post(url=f"{settings.VPN_INFO.VPN_URL}/token", headers=json_headers, data=payload, verify=False)
 
     if res.json()["code"] != 0:
-        print(res.json()["code"])
+        logger.info(res.json()["code"])
         raise ValueError(res.json())
 
     token = res.json()['token']
@@ -80,8 +77,7 @@ def admin_login():
         'Authorization': token
     }
     res = requests.post(url=f"{settings.VPN_INFO.VPN_URL}/login", headers=headers, verify=False)
-    print("login", res.json())
-    print(res.json()['message'])
+    logger.info("login", res.json())
     return token
 
 
