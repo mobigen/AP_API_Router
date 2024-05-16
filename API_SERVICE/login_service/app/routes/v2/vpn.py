@@ -35,8 +35,10 @@ async def check_vpn(params: InfoWrap) -> JSONResponse:
             verify=False
         )
         logger.info(res.json())
+        admin_logout(header)
         return result_format(res)
     except Exception as e:
+        admin_logout(header)
         return result_error(e)
 
 
@@ -63,8 +65,10 @@ def create_vpn(params: InfoWrap) -> JSONResponse:
             verify=False
         )
         logger.info(res.json())
+        admin_logout(header)
         return result_format(res)
     except Exception as e:
+        admin_logout(header)
         return result_error(e)
 
 
@@ -84,8 +88,10 @@ def delete_vpn(params: InfoWrap) -> JSONResponse:
             verify=False
         )
         logger.info(res.json())
+        admin_logout(header)
         return result_format(res)
     except Exception as e:
+        admin_logout(header)
         return result_error(e)
 
 
@@ -114,6 +120,18 @@ def get_admin_header():
     )
     logger.info("login", res.json())
     return header
+
+
+def admin_logout(header):
+    try:
+        res = requests.post(
+            url=f"{settings.VPN_INFO.VPN_URL}/logout",
+            headers=header,
+            verify=False
+        )
+        logger.info(res.json())
+    except Exception as e:
+        return result_error(e)
 
 
 def result_format(res):
