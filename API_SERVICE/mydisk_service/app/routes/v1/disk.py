@@ -225,7 +225,7 @@ async def download(params: DownloadParams):
 async def create_user_dir(params: UserParams):
     target_path = params.get_path()
     logger.info(f"param target_path :: {target_path}")
-    dirs = ["favorite", "upload", "purchase", "tools/studio", "tools/labeller", "tools/ide", "apps"]
+    dirs = ["favorite", "upload", "purchase", "tools/studio", "tools/labeller", "tools/ide", "tools/agent", "apps"]
     try:
         # 디렉토리 미리 생성
         for dir in dirs:
