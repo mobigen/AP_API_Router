@@ -226,8 +226,10 @@ class KeycloakManager:
         type = kwargs.get("type")
         params = [{
             "id": kwargs.get("role_sub"),
-            "name": kwargs.get("role_name")
+            "name": kwargs.get("role_name"),
+            "description": kwargs.get("description")
         }]
+        if type == "DELETE": del params[0]["description"]
 
         async with aiohttp.ClientSession() as session:
             async with session.request(

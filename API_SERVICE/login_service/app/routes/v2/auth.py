@@ -170,6 +170,7 @@ class ClientRoleMappingWrap(BaseModel):
         client_sub: str
         role_sub: str
         role_name: str
+        description: str
 
     data: ClientRoleMapping
 
@@ -681,11 +682,12 @@ async def checkClientRole(params: ClientRoleWrap):
 
 
 @router.post("/user/v2/setRoleMapping")
-@router.delete("/user/v2/setRoleMapping")
+@router.post("/user/v2/delRoleMapping")
 async def setRoleMapping(request: Request, params: ClientRoleMappingWrap):
     params = params.data
     user_id = params.user_id
-    type = "POST" if request.method == "POST" else "DELETE"
+    url = f"{request.url}"
+    type = "POST" if "setRoleMapping" in url else "DELETE"
 
     try:
         admin_token = await get_admin_token()
@@ -704,6 +706,7 @@ async def setRoleMapping(request: Request, params: ClientRoleMappingWrap):
             "client_sub": params.client_sub,
             "role_sub": params.role_sub,
             "role_name": params.role_name,
+            "description": params.description,
             "type": type
         }
 
