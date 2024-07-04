@@ -100,6 +100,8 @@ class RegisterInfoWrap(BaseModel):
         limit_cpu: Optional[str]
         limit_mem: Optional[str]
         limit_app_count: Optional[str]
+        limit_disk: Optional[str]
+        limit_time: Optional[str]
         company: Optional[str]
         companyImagePath: Optional[str]
         cloud_auth: Optional[str]
@@ -826,6 +828,8 @@ async def alter_user_info(user_id: str, user_sttus: str = None, **kwargs):
                  'limit_cpu': Optional[str],
                  'limit_mem': Optional[str],
                  'limit_app_count': Optional[str]
+                 'limit_disk': Optional[str]
+                 'limit_time': Optional[str]
                  'company': Optional[str]
                  'companyImagePath': Optional[str]
             }
@@ -849,6 +853,8 @@ async def alter_user_info(user_id: str, user_sttus: str = None, **kwargs):
         limit_cpu = attributes.get("limit_cpu")
         limit_mem = attributes.get("limit_mem")
         limit_app_count = attributes.get("limit_app_count")
+        limit_disk = attributes.get("limit_disk")
+        limit_time = attributes.get("limit_time")
         company = attributes.get("company")
         companyImagePath = attributes.get("companyImagePath")
 
@@ -862,6 +868,10 @@ async def alter_user_info(user_id: str, user_sttus: str = None, **kwargs):
             limit_mem = "2048"
         if limit_app_count is None:
             limit_app_count = "5"
+        if limit_disk is None:
+            limit_disk = "10"
+        if limit_time is None:
+            limit_time = "24"
         if company is None:
             company = ""
         if companyImagePath is None:
@@ -892,6 +902,8 @@ async def alter_user_info(user_id: str, user_sttus: str = None, **kwargs):
                 "limit_cpu": limit_cpu,
                 "limit_mem": limit_mem,
                 "limit_app_count": limit_app_count,
+                "limit_disk": limit_disk,
+                "limit_time": limit_time,
                 "company": company,
                 "companyImagePath": companyImagePath,
             },
@@ -952,6 +964,8 @@ async def modify_keycloak_user(**kwargs):
     limit_cpu = kwargs.get("limit_cpu")
     limit_mem = kwargs.get("limit_mem")
     limit_app_count = kwargs.get("limit_app_count")
+    limit_disk = kwargs.get("limit_disk")
+    limit_time = kwargs.get("limit_time")
     company = kwargs.get("company")
     companyImagePath = kwargs.get("companyImagePath")
 
@@ -965,6 +979,10 @@ async def modify_keycloak_user(**kwargs):
         limit_mem = "2048"
     if limit_app_count is None:
         limit_app_count = "5"
+    if limit_disk is None:
+        limit_disk = "10"
+    if limit_time is None:
+        limit_time = "24"
     if company is None:
         company = ""
     if companyImagePath is None:
@@ -1002,6 +1020,8 @@ async def modify_keycloak_user(**kwargs):
             "limit_cpu": limit_cpu,
             "limit_mem": limit_mem,
             "limit_app_count": limit_app_count,
+            "limit_disk": limit_disk,
+            "limit_time": limit_time,
             "company": company,
             "companyImagePath": companyImagePath,
         },
@@ -1065,6 +1085,8 @@ async def create_keycloak_user(**kwargs):
             "limit_cpu": "2",
             "limit_mem": "2048",
             "limit_app_count": "5",
+            "limit_dist": "10",
+            "limit_time": "24",
             "company": "",
             "companyImagePath": "",
         },
