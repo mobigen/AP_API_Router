@@ -5,6 +5,7 @@ from login_service.app.routes.v1 import auth as authV1
 from login_service.app.routes.v2 import auth as authV2
 from login_service.app.routes.v2 import iris_sso
 from login_service.app.routes.v2 import vpn
+from login_service.app.routes.v2 import cmp
 
 from login_service.app.common.config import settings
 from login_service.app.database.conn import db
@@ -24,6 +25,7 @@ def create_app():
     app_.include_router(authV2.router, prefix="/portal/api/common")
     app_.include_router(iris_sso.router, prefix="/portal/api/common")
     app_.include_router(vpn.router, prefix="/portal/api/common")
+    app_.include_router(cmp.router, prefix="/portal/api/common")
 
     return app_
 
