@@ -99,7 +99,7 @@ async def create_project_user(params: UserInfoWrap) -> JSONResponse:
         )
         logger.info(res)
         status_code = res.status_code
-        if status_code == "200" :
+        if status_code == 200 :
             return JSONResponse(
                 status_code=200,
                 content={"result": 1, "errorMessage": "", "data": "success"}
@@ -136,7 +136,7 @@ async def register_project_user(params: UserInfoWrap) -> JSONResponse:
             verify=False
         )
         status_code = res.status_code
-        if status_code == "200" :
+        if status_code == 200 :
             return JSONResponse(
                 status_code=200,
                 content={"result": 1, "errorMessage": "", "data": "success"}
@@ -173,10 +173,41 @@ async def register_project_owner(params: UserInfoWrap) -> JSONResponse:
         )
         logger.info(res)
         status_code = res.status_code
-        if status_code == "200" :
+        if status_code == 200:
             return JSONResponse(
                 status_code=200,
                 content={"result": 1, "errorMessage": "", "data": "success"}
+            )
+        else:
+            return JSONResponse(
+                status_code=200,
+                content={"result": 0, "errorMessage": "Server Error"}
+            )
+    except Exception as e:
+        return result_error(e)
+
+
+@router.get("/cmp/v2/getProjectOwner")
+async def get_project_owner() -> JSONResponse:
+    try:
+        url = settings.CMP_INFO.CMP_API_BASE_URL
+        params = {
+            "size": 100,
+            "page": 0
+        }
+
+        res = requests.get(
+            url=f"{url}/users/adminList",
+            params=params,
+            verify=False
+        )
+        logger.info(res)
+        logger.info(res.json())
+        status_code = res.status_code
+        if status_code == 200:
+            return JSONResponse(
+                status_code=200,
+                content={"result": 1, "errorMessage": "", "data": res.json()["items"]}
             )
         else:
             return JSONResponse(
