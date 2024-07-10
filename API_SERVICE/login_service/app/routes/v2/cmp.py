@@ -36,6 +36,24 @@ async def get_project_list() -> JSONResponse:
         return result_error(e)
 
 
+@router.get("/cmp/v2/projectUser")
+async def get_project_user() -> JSONResponse:
+    try:
+        admin_header = get_admin_header()
+        url = settings.CMP_INFO.CMP_API_BASE_URL
+        res = requests.get(
+            url=f"{url}/users?token={admin_header['X-HEADER-TOKEN']}&page=0&size=200",
+            verify=False
+        )
+        logger.info(res.json())
+        return JSONResponse(
+            status_code=200,
+            content={"result": 1, "errorMessage": "", "data": res.json()["content"]}
+        )
+    except Exception as e:
+        return result_error(e)
+
+
 def get_project_detail(admin_header: dict, project_id: str) -> JSONResponse:
     try:
         url = settings.CMP_INFO.CMP_API_BASE_URL
