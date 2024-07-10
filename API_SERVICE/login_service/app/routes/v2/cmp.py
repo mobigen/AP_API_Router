@@ -136,6 +136,33 @@ async def register_project_user(params: UserInfoWrap) -> JSONResponse:
         return result_error(e)
 
 
+@router.post("/cmp/v2/registerProjectOwner")
+async def register_project_owner(params: UserInfoWrap) -> JSONResponse:
+    try:
+        url = settings.CMP_INFO.CMP_API_BASE_URL
+        param = params.data
+
+        payload = [{
+            "userId": param.user_id,
+            "email": param.email,
+            "name": param.name,
+            "role": "OWNER"
+        }]
+
+        res = requests.post(
+            url=f"{url}/users/createAdmin",
+            data=json.dumps(payload),
+            verify=False
+        )
+        logger.info(res)
+        return JSONResponse(
+            status_code=200,
+            content={"result": 1, "errorMessage": "", "data": "success"}
+        )
+    except Exception as e:
+        return result_error(e)
+
+
 def get_project_detail(admin_header: dict, project_id: str) -> JSONResponse:
     try:
         url = settings.CMP_INFO.CMP_API_BASE_URL
