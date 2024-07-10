@@ -98,10 +98,17 @@ async def create_project_user(params: UserInfoWrap) -> JSONResponse:
             verify=False
         )
         logger.info(res)
-        return JSONResponse(
-            status_code=200,
-            content={"result": 1, "errorMessage": "", "data": "success"}
-        )
+        status_code = res.status_code
+        if status_code == "200" :
+            return JSONResponse(
+                status_code=200,
+                content={"result": 1, "errorMessage": "", "data": "success"}
+            )
+        else:
+            return JSONResponse(
+                status_code=200,
+                content={"result": 0, "errorMessage": "Already Create User"}
+            )
     except Exception as e:
         return result_error(e)
 
@@ -111,6 +118,7 @@ async def register_project_user(params: UserInfoWrap) -> JSONResponse:
     try:
         url = settings.CMP_INFO.CMP_API_BASE_URL
         admin_header = get_admin_header()
+        admin_header.update(json_headers)
         param = params.data
         project_id = param.project_id
 
@@ -127,11 +135,17 @@ async def register_project_user(params: UserInfoWrap) -> JSONResponse:
             data=json.dumps(payload),
             verify=False
         )
-        logger.info(res)
-        return JSONResponse(
-            status_code=200,
-            content={"result": 1, "errorMessage": "", "data": "success"}
-        )
+        status_code = res.status_code
+        if status_code == "200" :
+            return JSONResponse(
+                status_code=200,
+                content={"result": 1, "errorMessage": "", "data": "success"}
+            )
+        else:
+            return JSONResponse(
+                status_code=200,
+                content={"result": 0, "errorMessage": "Already Register User"}
+            )
     except Exception as e:
         return result_error(e)
 
@@ -140,6 +154,8 @@ async def register_project_user(params: UserInfoWrap) -> JSONResponse:
 async def register_project_owner(params: UserInfoWrap) -> JSONResponse:
     try:
         url = settings.CMP_INFO.CMP_API_BASE_URL
+        admin_header = get_admin_header()
+        admin_header.update(json_headers)
         param = params.data
 
         payload = [{
@@ -151,14 +167,22 @@ async def register_project_owner(params: UserInfoWrap) -> JSONResponse:
 
         res = requests.post(
             url=f"{url}/users/createAdmin",
+            headers=admin_header,
             data=json.dumps(payload),
             verify=False
         )
         logger.info(res)
-        return JSONResponse(
-            status_code=200,
-            content={"result": 1, "errorMessage": "", "data": "success"}
-        )
+        status_code = res.status_code
+        if status_code == "200" :
+            return JSONResponse(
+                status_code=200,
+                content={"result": 1, "errorMessage": "", "data": "success"}
+            )
+        else:
+            return JSONResponse(
+                status_code=200,
+                content={"result": 0, "errorMessage": "Server Error"}
+            )
     except Exception as e:
         return result_error(e)
 
