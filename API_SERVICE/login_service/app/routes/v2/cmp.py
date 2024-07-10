@@ -6,18 +6,33 @@ from pydantic import BaseModel
 from fastapi import APIRouter
 from starlette.responses import JSONResponse
 
+from login_service.app.common.const import json_headers
 from login_service.app.common.config import settings
 
 logger = logging.getLogger()
 router = APIRouter()
 
 
+class UserInfoWrap(BaseModel):
+    class UserInfo(BaseModel):
+        user_id: str
+        email: str
+        name: str
+
+    data: UserInfo
+
+
 @router.get("/cmp/v2/projectList")
 async def get_project_list() -> JSONResponse:
     try:
         url = settings.CMP_INFO.CMP_API_BASE_URL
+        params = {
+            "page": 0,
+            "size": 200
+        }
         res = requests.get(
-            url=f"{url}/orgs/manage/all?size=100&page=0",
+            url=f"{url}/orgs/manage/all",
+            params=params,
             verify=False
         )
         data = res.json()
@@ -41,14 +56,48 @@ async def get_project_user() -> JSONResponse:
     try:
         admin_header = get_admin_header()
         url = settings.CMP_INFO.CMP_API_BASE_URL
+
+        params = {
+            "token": admin_header["X-HEADER-TOKEN"],
+            "page": 0,
+            "size": 200
+        }
         res = requests.get(
-            url=f"{url}/users?token={admin_header['X-HEADER-TOKEN']}&page=0&size=200",
+            url=f"{url}/users",
+            params=params,
             verify=False
         )
         logger.info(res.json())
         return JSONResponse(
             status_code=200,
             content={"result": 1, "errorMessage": "", "data": res.json()["content"]}
+        )
+    except Exception as e:
+        return result_error(e)
+
+
+@router.post("/cmp/v2/createUser")
+async def create_project_user(params: UserInfoWrap) -> JSONResponse:
+    try:
+        url = settings.CMP_INFO.CMP_API_BASE_URL
+        param = params.data
+
+        payload = {
+            "userId": param.user_id,
+            "email": param.email,
+            "name": param.name,
+            "userRole": "USER"
+        }
+        res = requests.post(
+            url=f"{url}/users",
+            headers=json_headers,
+            data=json.dumps(payload),
+            verify=False
+        )
+        logger.info(res)
+        return JSONResponse(
+            status_code=200,
+            content={"result": 1, "errorMessage": "", "data": "success"}
         )
     except Exception as e:
         return result_error(e)
@@ -71,10 +120,13 @@ def get_project_detail(admin_header: dict, project_id: str) -> JSONResponse:
 def get_admin_header():
     try:
         url = settings.CMP_INFO.CMP_API_BASE_URL
-        cmp_id = settings.CMP_INFO.CMP_ID
-        cmp_pass = settings.CMP_INFO.CMP_PASS
+        params = {
+            "email": settings.CMP_INFO.CMP_ID,
+            "password": settings.CMP_INFO.CMP_PASS
+        }
         res = requests.post(
-            url=f"{url}/adminLogin?email={cmp_id}&password={cmp_pass}",
+            url=f"{url}/adminLogin",
+            params=params,
             verify=False
         )
         logger.info(res.json())
