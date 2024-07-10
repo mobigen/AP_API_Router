@@ -2,6 +2,8 @@ import json
 import logging
 import requests
 
+from typing import Optional
+
 from pydantic import BaseModel
 from fastapi import APIRouter
 from starlette.responses import JSONResponse
@@ -18,6 +20,7 @@ class UserInfoWrap(BaseModel):
         user_id: str
         email: str
         name: str
+        project_id: Optional[str]
 
     data: UserInfo
 
@@ -91,6 +94,36 @@ async def create_project_user(params: UserInfoWrap) -> JSONResponse:
         res = requests.post(
             url=f"{url}/users",
             headers=json_headers,
+            data=json.dumps(payload),
+            verify=False
+        )
+        logger.info(res)
+        return JSONResponse(
+            status_code=200,
+            content={"result": 1, "errorMessage": "", "data": "success"}
+        )
+    except Exception as e:
+        return result_error(e)
+
+
+@router.post("/cmp/v2/registerUser")
+async def register_project_user(params: UserInfoWrap) -> JSONResponse:
+    try:
+        url = settings.CMP_INFO.CMP_API_BASE_URL
+        admin_header = get_admin_header()
+        param = params.data
+        project_id = param.project_id
+
+        payload = [{
+            "userId": param.user_id,
+            "email": param.email,
+            "name": param.name,
+            "userRole": "USER"
+        }]
+
+        res = requests.post(
+            url=f"{url}/orgs/{project_id}/orgUserAdd/multi",
+            headers=admin_header,
             data=json.dumps(payload),
             verify=False
         )
