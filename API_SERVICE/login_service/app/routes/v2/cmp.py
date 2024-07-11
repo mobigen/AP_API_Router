@@ -17,9 +17,9 @@ router = APIRouter()
 
 class UserInfoWrap(BaseModel):
     class UserInfo(BaseModel):
-        user_id: str
-        email: str
-        name: str
+        user_id: Optional[str]
+        email: Optional[str]
+        name: Optional[str]
         project_id: Optional[str]
 
     data: UserInfo
@@ -169,6 +169,40 @@ async def register_project_owner(params: UserInfoWrap) -> JSONResponse:
             url=f"{url}/users/createAdmin",
             headers=json_headers,
             data=json.dumps(payload),
+            verify=False
+        )
+        logger.info(res)
+        status_code = res.status_code
+        if status_code == 200:
+            return JSONResponse(
+                status_code=200,
+                content={"result": 1, "errorMessage": "", "data": "success"}
+            )
+        else:
+            return JSONResponse(
+                status_code=200,
+                content={"result": 0, "errorMessage": "Server Error"}
+            )
+    except Exception as e:
+        return result_error(e)
+
+
+@router.post("/cmp/v2/deleteProjectOwner")
+async def delete_project_owner(params: UserInfoWrap) -> JSONResponse:
+    try:
+        url = settings.CMP_INFO.CMP_API_BASE_URL
+        admin_header = get_admin_header()
+        param = params.data
+
+        payload = {
+            "delUserEmail": param.email,
+            "token": admin_header["X-HEADER-TOKEN"]
+        }
+
+        res = requests.delete(
+            url=f"{url}/users/deleteAdmin",
+            headers=json_headers,
+            params=payload,
             verify=False
         )
         logger.info(res)
