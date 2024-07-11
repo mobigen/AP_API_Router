@@ -99,7 +99,7 @@ async def create_project_user(params: UserInfoWrap) -> JSONResponse:
         )
         logger.info(res)
         status_code = res.status_code
-        if status_code == 200 :
+        if status_code == 200:
             return JSONResponse(
                 status_code=200,
                 content={"result": 1, "errorMessage": "", "data": "success"}
@@ -136,7 +136,7 @@ async def register_project_user(params: UserInfoWrap) -> JSONResponse:
             verify=False
         )
         status_code = res.status_code
-        if status_code == 200 :
+        if status_code == 200:
             return JSONResponse(
                 status_code=200,
                 content={"result": 1, "errorMessage": "", "data": "success"}
@@ -155,19 +155,19 @@ async def register_project_owner(params: UserInfoWrap) -> JSONResponse:
     try:
         url = settings.CMP_INFO.CMP_API_BASE_URL
         admin_header = get_admin_header()
-        admin_header.update(json_headers)
         param = params.data
 
-        payload = [{
+        payload = {
             "userId": param.user_id,
             "email": param.email,
             "name": param.name,
-            "role": "OWNER"
-        }]
+            "role": "OWNER",
+            "token": admin_header["X-HEADER-TOKEN"]
+        }
 
         res = requests.post(
             url=f"{url}/users/createAdmin",
-            headers=admin_header,
+            headers=json_headers,
             data=json.dumps(payload),
             verify=False
         )
