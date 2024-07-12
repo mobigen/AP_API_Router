@@ -43,6 +43,12 @@ class VpnInfo(BaseSettings):
     VPN_EXPIRE: Optional[str]
 
 
+class CmpInfo(BaseSettings):
+    CMP_API_BASE_URL: Optional[str]
+    CMP_ID: Optional[str]
+    CMP_PASS: Optional[str]
+
+
 class Settings(BaseSettings):
     BASE_DIR = base_dir
     RELOAD: bool
@@ -60,6 +66,7 @@ class ProdSettings(Settings):
     KEYCLOAK_INFO = KeycloakInfo()
     IRIS_INFO = IrisInfo()
     VPN_INFO = VpnInfo()
+    CMP_INFO = CmpInfo()
 
 
 class LocalSettings(Settings):
@@ -104,6 +111,12 @@ class LocalSettings(Settings):
         VPN_URL="https://172.16.0.79:50015",
         VPN_INIT_PASS="katech@2021",
         VPN_EXPIRE="20281231"
+    )
+
+    CMP_INFO = CmpInfo(
+        CMP_API_BASE_URL="https://cloud.bigdata-car.kr/comm-api/api/portal/v1",
+        CMP_ID="hjlim1@katech.re.kr",
+        CMP_PASS="katech@2021"
     )
 
 
