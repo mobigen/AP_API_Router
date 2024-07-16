@@ -229,11 +229,33 @@ class KeycloakManager:
             "name": kwargs.get("role_name"),
             "description": kwargs.get("description")
         }]
-        if type == "DELETE": del params[0]["description"]
+        if type == "DELETE":
+            del params[0]["description"]
 
         async with aiohttp.ClientSession() as session:
             async with session.request(
                     url=f"{self.base_url}/admin/realms/{realm}/users/{user_sub}/role-mappings/clients/{client_sub}",
+                    method=type,
+                    headers=headers,
+                    json=params,
+            ) as response:
+                return {"status_code": response.status, "data": await response.read()}
+
+    async def set_realm_role_mapping(self, token, realm, **kwargs):
+        headers = {"Content-Type": "application/json", "Authorization": "bearer " + token}
+        user_sub = kwargs.get("user_sub")
+        type = kwargs.get("type")
+        params = [{
+            "id": kwargs.get("role_sub"),
+            "name": kwargs.get("role_name"),
+            "description": kwargs.get("description")
+        }]
+        if type == "DELETE":
+            del params[0]["description"]
+
+        async with aiohttp.ClientSession() as session:
+            async with session.request(
+                    url=f"{self.base_url}/admin/realms/{realm}/users/{user_sub}/role-mappings/realm",
                     method=type,
                     headers=headers,
                     json=params,

@@ -177,6 +177,16 @@ class ClientRoleMappingWrap(BaseModel):
     data: ClientRoleMapping
 
 
+class RealmRoleMappingWrap(BaseModel):
+    class RealmRoleMapping(BaseModel):
+        user_id: str
+        role_sub: str
+        role_name: str
+        description: str
+
+    data: RealmRoleMapping
+
+
 class getUserRoleWrap(BaseModel):
     class getUserRole(BaseModel):
         user_sub: str
@@ -713,6 +723,45 @@ async def setRoleMapping(request: Request, params: ClientRoleMappingWrap):
         }
 
         resToken = await keycloak.set_client_role_mapping(
+            token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, **kwargs
+        )
+        if resToken["status_code"] == 204:
+            return JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
+        else:
+            return JSONResponse(status_code=400, content={"result": 0, "errorMessage": resToken["data"]})
+    except Exception as e:
+        logger.error(e, exc_info=True)
+        return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
+
+@router.post("/user/v2/setRealmRoleMapping")
+@router.post("/user/v2/delRealmRoleMapping")
+async def setRealmRoleMapping(request: Request, params: RealmRoleMappingWrap):
+    params = params.data
+    user_id = params.user_id
+    url = f"{request.url}"
+    type = "POST" if "setRealmRoleMapping" in url else "DELETE"
+
+    try:
+        admin_token = await get_admin_token()
+        res = await keycloak.get_query(
+            token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, query=f"username={user_id}&exact=true"
+        )
+
+        userList = res.get("data")
+        if len(userList) == 0:
+            return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
+
+        user_info = userList[0]
+        user_sub = user_info.get("id")
+        kwargs = {
+            "user_sub": user_sub,
+            "role_sub": params.role_sub,
+            "role_name": params.role_name,
+            "description": params.description,
+            "type": type
+        }
+
+        resToken = await keycloak.set_realm_role_mapping(
             token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, **kwargs
         )
         if resToken["status_code"] == 204:
