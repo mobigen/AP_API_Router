@@ -279,7 +279,7 @@ def get_admin_header():
             verify=False
         )
         logger.info(res.json())
-        access_token = res.json()["access_token"]
+        access_token = res.json()["token"]
         header = {'X-HEADER-TOKEN': access_token}
         return header
     except Exception as e:
