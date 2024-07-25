@@ -65,14 +65,16 @@ def create_vpn(params: InfoWrap) -> JSONResponse:
             verify=False
         )
         logger.info(res.json())
-
+        try:
+            edit_group(header, settings.VPN_INFO.VPN_GROUP, email, "add")
+        except Exception:
+            pass
         apply(header)
         admin_logout(header)
         return result_format(res)
     except Exception as e:
         admin_logout(header)
         return result_error(e)
-
 
 
 @router.post("/user/v2/DropVpn")
@@ -83,6 +85,10 @@ def delete_vpn(params: InfoWrap) -> JSONResponse:
     header = get_admin_header()
     payload = {"name": email}
     try:
+        try:
+            edit_group(header, settings.VPN_INFO.VPN_GROUP, email, "del")
+        except Exception:
+            pass
         res = requests.delete(
             url=f"{settings.VPN_INFO.VPN_URL}/object/user/account",
             headers=header,
@@ -90,7 +96,6 @@ def delete_vpn(params: InfoWrap) -> JSONResponse:
             verify=False
         )
         logger.info(res.json())
-
         apply(header)
         admin_logout(header)
         return result_format(res)
@@ -150,6 +155,42 @@ def apply(header):
         return result_error(e)
 
 
+def edit_group(header, group_name, email, mode):
+
+    res = get_group_info(header, group_name)
+    emailList = res[0]["member_list"].split(";")
+    if mode == "add":
+        if email not in emailList :
+            emailList.append(email)
+    else:  # del
+        if email in emailList :
+            emailList.pop(emailList.index(email))
+
+    payload = json.dumps({
+        "name": group_name,
+        "member_list": ";".join(emailList)
+    })
+
+    res = requests.put(url=f"{settings.VPN_INFO.VPN_URL}/object/user/group", data=payload, headers=header, verify=False)
+    if res.json()['code'] == 0:
+        return res.json()['message']
+    else:
+        return res.json()['message']
+
+
+def get_group_info(header, group_name):
+    payload = json.dumps({
+        "name": group_name
+    })
+
+    res = requests.get(url=f"{settings.VPN_INFO.VPN_URL}/object/user/group", data=payload, headers=header, verify=False)
+
+    if res.json()['code'] == 0:
+        return res.json()['result']
+    else:
+        return res.json()['message']
+
+
 def result_format(res):
     if res.json()["code"] == 0:
         return JSONResponse(
@@ -159,7 +200,7 @@ def result_format(res):
     else:
         return JSONResponse(
             status_code=200,
-            content={"result": 1, "errorMessage": "", "data":res.json()["message"]}
+            content={"result": 1, "errorMessage": "", "data": res.json()["message"]}
         )
 
 
