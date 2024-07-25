@@ -5,6 +5,7 @@ import requests
 from pydantic import BaseModel
 from fastapi import APIRouter
 from starlette.responses import JSONResponse
+from typing import Optional
 
 from login_service.app.common.const import json_headers
 from login_service.app.common.config import settings
@@ -16,6 +17,7 @@ router = APIRouter()
 class InfoWrap(BaseModel):
     class Info(BaseModel):
         email: str
+        name: Optional[str]
 
     data: Info
 
@@ -46,6 +48,7 @@ async def check_vpn(params: InfoWrap) -> JSONResponse:
 def create_vpn(params: InfoWrap) -> JSONResponse:
     param = params.data
     email = param.email
+    name = param.name
 
     header = get_admin_header()
     payload = {
@@ -56,12 +59,14 @@ def create_vpn(params: InfoWrap) -> JSONResponse:
         "expire_date": settings.VPN_INFO.VPN_EXPIRE,
         "certificate_issue_enable": "0",    # 인증서 없음
         "personal_id_enable": "0",          # 개인식별번호 사용 안함
+        "user_real_name": name,
+        "email_address": email
     }
     try:
         res = requests.post(
             url=f"{settings.VPN_INFO.VPN_URL}/object/user/account",
             headers=header,
-            data=json.dumps(payload),
+            data=json.dumps(payload, ensure_ascii=False).encode('utf-8'),
             verify=False
         )
         logger.info(res.json())
