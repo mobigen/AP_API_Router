@@ -43,6 +43,22 @@ msg_setting = {
         "tmplt": os.path.join(template_dir, "VpnDeleteNotyEmail.html"),
         "sub": "[자동차데이터플랫폼] VPN 계정 삭제 메일 입니다.",
     },
+    "cloud_create_noty": {
+        "tmplt": os.path.join(template_dir, "CloudCreateNotyEmail.html"),
+        "sub": "[자동차데이터플랫폼] 클라우드(Server) 사용 권한이 부여 되었습니다",
+    },
+    "cloud_delete_noty": {
+        "tmplt": os.path.join(template_dir, "CloudDeleteNotyEmail.html"),
+        "sub": "[자동차데이터플랫폼] 클라우드(Server) 사용 권한이 회수 되었습니다.",
+    },
+    "vdi_create_noty": {
+        "tmplt": os.path.join(template_dir, "VdiCreateNotyEmail.html"),
+        "sub": "[자동차데이터플랫폼] 클라우드(PC) 사용 권한이 부여 되었습니다.",
+    },
+    "vdi_delete_noty": {
+        "tmplt": os.path.join(template_dir, "VdiDeleteNotyEmail.html"),
+        "sub": "[자동차데이터플랫폼] 클라우드(PC) 사용 권한이 회수 되었습니다.",
+    },
 }
 
 

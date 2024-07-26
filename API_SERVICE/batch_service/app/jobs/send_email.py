@@ -30,12 +30,13 @@ def send_mail():
             category = msg_setting[row["tmplt_cd"]]
 
             # template
-            with open(category["tmplt"],"r") as fp:
+            with open(category["tmplt"], "r") as fp:
                 html = "\n".join(fp.readlines())
 
             # replace
             # todo 함수화
-            if row["tmplt_cd"] in ["register","password","share"]:
+            if row["tmplt_cd"] in ["register", "password", "share",
+                                   "cloud_create_noty", "cloud_delete_noty", "vdi_create_noty", "vdi_delete_noty"]:
                 html = html.replace("CONTENTS1", row['contents'])
             else:
                 content = row["contents"].split("|")
