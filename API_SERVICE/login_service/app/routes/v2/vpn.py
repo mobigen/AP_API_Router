@@ -53,7 +53,7 @@ def create_vpn(params: InfoWrap) -> JSONResponse:
     header = get_admin_header()
     payload = {
         "name": email,
-        "password": settings.VPN_INFO.VPN_PASS,
+        "password": settings.VPN_INFO.VPN_INIT_PASS,
         "auth_type": "0",                   # 인증 유형 password
         "security_level": "0",              # 보안 등급 높음
         "expire_date": settings.VPN_INFO.VPN_EXPIRE,
