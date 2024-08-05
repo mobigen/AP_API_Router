@@ -60,7 +60,8 @@ def create_vpn(params: InfoWrap) -> JSONResponse:
         "certificate_issue_enable": "0",    # 인증서 없음
         "personal_id_enable": "0",          # 개인식별번호 사용 안함
         "user_real_name": name,
-        "email_address": email
+        "email_address": email,
+        "password_reset_enable": "1"
     }
     try:
         res = requests.post(
