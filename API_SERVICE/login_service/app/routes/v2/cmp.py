@@ -21,8 +21,66 @@ class UserInfoWrap(BaseModel):
         email: Optional[str]
         name: Optional[str]
         project_id: Optional[str]
+        position: Optional[str]
+        project_count: Optional[int]
 
     data: UserInfo
+
+@router.post("/cmp/v2/getProjectCount")
+async def get_project_count(params: UserInfoWrap) -> JSONResponse:
+    try:
+        url = settings.CMP_INFO.CMP_API_BASE_URL
+        param = params.data
+        email = param.email
+
+        res = requests.get(
+            url=f"{url}/users/{email}/search",
+            params=params,
+            verify=False
+        )
+        data = res.json()
+        logger.info(data)
+
+        return JSONResponse(
+            status_code=200,
+            content={"result": 1, "errorMessage": "", "data": res.json()}
+        )
+    except Exception as e:
+        return result_error(e)
+
+@router.post("/cmp/v2/setProjectCount")
+async def set_project_count(params: UserInfoWrap) -> JSONResponse:
+    try:
+        url = settings.CMP_INFO.CMP_API_BASE_URL
+        param = params.data
+        user_id = param.user_id
+        admin_header = get_admin_header()
+        admin_header.update(json_headers)
+
+        payload = {
+            "email": param.email,
+            "user_id": user_id,
+            "user_name": param.name,
+            "position": param.position,
+            "projectCount": param.project_count,
+            "token": admin_header["X-HEADER-TOKEN"]
+        }
+        res = requests.put(
+            url=f"{url}/users/{user_id}",
+            headers=json_headers,
+            data=json.dumps(payload),
+            verify=False
+        )
+
+        data = res.json()
+        logger.info(data)
+
+        return JSONResponse(
+            status_code=200,
+            content={"result": 1, "errorMessage": "", "data": res.json()}
+        )
+    except Exception as e:
+        return result_error(e)
 
 
 @router.get("/cmp/v2/projectList")
