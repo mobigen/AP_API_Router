@@ -797,6 +797,7 @@ async def getUyuniRole(request: Request):
         logger.error(e, exc_info=True)
         return JSONResponse(status_code=500, content={"result": 0, "errorMessage": str(e)})
 
+
 @router.post("/user/v2/getUserRole")
 async def getUserRole(params: getUserRoleWrap):
     params = params.data
