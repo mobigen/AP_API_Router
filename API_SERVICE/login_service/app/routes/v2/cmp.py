@@ -55,7 +55,6 @@ async def set_project_count(params: UserInfoWrap) -> JSONResponse:
         param = params.data
         user_id = param.user_id
         admin_header = get_admin_header()
-        admin_header.update(json_headers)
 
         payload = {
             "email": param.email,
