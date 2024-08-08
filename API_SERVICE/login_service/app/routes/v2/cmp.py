@@ -154,6 +154,7 @@ async def create_project_user(params: UserInfoWrap) -> JSONResponse:
             data=json.dumps(payload),
             verify=False
         )
+        logger.info(payload)
         logger.info(res)
         status_code = res.status_code
         if status_code == 200:
@@ -219,6 +220,7 @@ async def register_project_owner(params: UserInfoWrap) -> JSONResponse:
             "email": param.email,
             "name": param.name,
             "role": "OWNER",
+            "projectCount": param.project_count,
             "token": admin_header["X-HEADER-TOKEN"]
         }
 
@@ -228,6 +230,7 @@ async def register_project_owner(params: UserInfoWrap) -> JSONResponse:
             data=json.dumps(payload),
             verify=False
         )
+        logger.info(payload)
         logger.info(res)
         status_code = res.status_code
         if status_code == 200:
