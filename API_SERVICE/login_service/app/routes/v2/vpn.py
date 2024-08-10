@@ -199,14 +199,15 @@ def get_group_info(header, group_name):
 
 def result_format(res):
     if res.json()["code"] == 0:
+        message = res.json()["result"] if "result" in res.json() else []
         return JSONResponse(
             status_code=200,
-            content={"result": 1, "errorMessage": "", "data": res.json()["message"]}
+            content={"result": 1, "errorMessage": "", "data": res.json()["message"], "message": message}
         )
     else:
         return JSONResponse(
             status_code=200,
-            content={"result": 1, "errorMessage": "", "data": res.json()["message"]}
+            content={"result": 1, "errorMessage": "", "data": res.json()["message"], "message": []}
         )
 
 
