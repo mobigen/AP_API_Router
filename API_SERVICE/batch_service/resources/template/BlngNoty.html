@@ -1,46 +1,80 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta charset="UTF-8">
+    <title>자동차데이터포털</title>
 </head>
-
-<body>
-<div style="position: relative;max-width: 800px;padding: 15px;background-color: #00A0E9;">
-    <div style="position: relative;padding: 5%;background-color: #fff;border-radius: 10px;">
-        <h1 style="margin-bottom: 50px;padding-bottom: 20px;border-bottom: 1px solid #00A0E9;font-size: 0;">
-            <!--a th:href="${portalUrl}" target="_blank">
-                <img th:src="|${portalUrl}/images/logo_dataon.png|" alt="" style="width: 25%;max-width: 160px;">
-            </a-->
-        </h1>
-        <div style="padding: 0 25px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="table-layout:fixed;border-collapse: collapse">
+<body style="margin:0; padding:0; background-color:#ffffff;">
+<table style="width:100%; border-collapse:collapse; border-spacing:0;">
+    <tbody>
+    <tr>
+        <td style="padding: 40px 0;">
+            <table style="width:600px; margin:0 auto; border-collapse:collapse; border-spacing:0; color:#00010D;">
+                <thead>
+                <tr style="border-bottom:2px solid #001F60">
+                    <th style="padding-bottom: 12px; text-align: left;">
+                        <a href="https://portal.bigdata-car.kr" style="border: none; text-decoration: none;">
+                            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIwAAABGCAYAAAAes3zsAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAABfKSURBVHgB7VxbjCTXWf5PdY93Eiy2kABvWLRTGxwUxbKnFhF7nQem9oEQ85DtQQIFCXmqHxABCc0Mwci7sTQ9wdn1g5WZ4YGAkJgeeEGAsj0gkSAhbe0Lsi2k7QUn4gFpa42NLAhxb3zb3emqk/8/l6pTt77tdcb97fZ0d51Lna7zne+/1OlmMIXApxvPOyzacyHmThzHczHEh1kMJ4BHNo9i4Jw7+AB8AVjOeRwDA7iOzz0OvAcx9Djvh8DZtagfh8yywvrD73XDoNODAwQGH0G4jZYNs+D2+7cWkAAeMsBFDtjIAiAi6AeRI3lPZFHPijhEGgbyvSAQgqln0VaWQQ//dLGTAMC6VIcb3bC7f0n0kSGM6yNJorrP+/FpDhEpiR1HUZEYghSxJAOyCJsyUU8TBg+YbcB8nx4jCiF7OBPt5IGERJJAEDAOu2++/vcB7CMcaMJ4Kxv2u+9GqCB8OYr6CzzGicfJx1llBjnkJMc02VRGvBBEIgboevK1JET2tVKVnAJxRsdNkgCkyiSfmazHkDfQsTh0ZmZmLoXdvwnhAcaBJIy3sm2/98F7yzHfW0H/4zCyBNWCyIKeSRRxSQxBhsSsIEnwD01iTPXIxjAwiBArgjCDIBmSKPJoH0crjrrAzCwXdRSpRKkiFJEVWwUWsJ2ZmbjzIJquA0WYkyt/4aGSLCErfK7MjXiOlGLE/URZiDhkMgyi4GHlk5iqQgSjudXHIWOSUrUx1ISnz6IcysySfi9fiCcxGckhcaa2ZcHOm693AnhAcCAIc/L5bQduxWtx1PchQxJNlIj8EPGccWpzfkssicCUwlA5SxTGMD+Gv5IljFSbtB4hJQ69YyahGGiucKU+IAnGmCpT7GHsKr7/GqpOgKoTwn3EviaM17pg30DTw6J+K45TkogJjkxFiaSZIf9FkCYCRQ6SC6k4iR8j/RphNoT5ipmhHOK9qRxpPzyNpghF1dEmiStTpXwcURmIIkhZyRbZXtYvgLfxNOtv/+f9IU4N9imefuFvl+O9Gx2csS+IGYjVxVcOJc6+nmguo5XYPCY70SRQEwiCKGqpqygHUj9E9QugfY88CUAd1+qQmW3GtMVhgizqje5Z1FBk0X4PHWeqna6D/108tPLjP/0Z5/Ajj13/4f9+L4R7iH2nMKgqTp/3t3k/WkDFkD6GUg2hLuTYxv0ePofIoi7f619DyxEC7AFgQg36keinj//oP/T7tLbtPsQOJupsDLvnsUMbF7sb8+hwSaRk+jTauU3ec0WqEn8mNTP6uIbpw4AmG0sJmUXuGLtoWdbX7lV4vq8I80t/vLuMdqKFJKEcCo9p8uP+dZzgLj5fQvPQ/Tg8FASbzTsSXTz2y7/n3ogtB09yGp0gF+fP5XkiFCMm7cMo7yTJx2SiJB1iC+VRjoywTAlbkmEUSEN9IUmYSTrsJcAAff1uO8j7gjDkq8DsoW0kymne32Nxv/8Ohjc7PNrbrc/2u0GreU/CT8f7slODyMPAagmnzRNEIWfaCJu5Jo1SGhGKK1IUfJpkwsnsyJiarJA4lBEgXmKaUsjuue7prhLnwSDM5as2JtBtfOVALXJwWDZw67DFwPnE/12Hn/+vt3FyIhv24h2I+p2gtRjAfYbj+RiZWR7mgZfQfC0IU6Sd3jLHFyDJAidkykZKyn+CjLnKkcU8rN0is0yTqYukab4144bQbd3RxXTvCHMRSbG358AMuJZVm0dC2BhvuDiAOSy1uekwqiaffPs6/+R///+Vfhy34YP3d5AoD+Q9GOek72CEcxpHvoKkcMTBnOmSh4rH0ueku4RQUKImJrSypM90A5Rt/c/3vtUC9w89iPi26mYd/uMbbbgDuHuEufCaC5a1YNVqbmxZHli1OVbDoMyqMTyOfLHog+q8g3Qe1Xg+drMPj77VCx7pvb/+L6unAthH+Nlf/C2PoergB/HQGjk5hzdxnBNSJETRJGKJr6OIIBSGp7JTpihYBy5F0aHm27OfRof/XSJKQ9UOMThsuo8+3IUPHsJ5YN3ud86EMCHuHGEuXLThRq1hMWshrrMGY3UbajWO5ECCIFFqFj7q6j0SBskjDLdWW7qQ+PSJH7wXHv3++81/++2nA9jnOPoLX/LxQyX+DsHwY9QBaVl4zLONywmTJwtdvuv4d/2t735rE574yjIebeFhW9Zg61Dvb7pHHsGID4hEDh3Gq7/a/eezmzAizm9824EYvFpU694+Yba/jXa8vozqgey1iCRAROEMiYHPjAhSF0SR6lITzyDes8wi6/3k9Rvr3//iZ0b+IPsFjvslB131FqZ5FpACDk8Joy+AUlpIFSdxbNKjRaVhHYwMV1FVMJ2wR4TwVFEAtf6q69hh/OHsGplK1SDES950jhzpxvGtZRxLCw/3sKCLnXb/YefLq62NC/YhmF1mMXNjhuaVWw6etYt1mmdWnwknJ8w3/9Fj9doaSpxHyiFMjDA5SkGQFFjOExOk1EaZJQ41RRoh0RDgamjCqeMhHHAcdX/dR99iCRniiQPcuC1AEVKGIqWgkmvoBzZF7sVUFfRhIEJV+e7Lm49//hyqPNsApSpYtm7N3tx07EdczGEmaiOL0MexZjefmj/iopJs86QNo3zW+tnnfnUzrTsuti/Y1oewhtKxIiddTbxSltTk1A2CWEQofF2XdVBlSIEYKVHM/wBO/dyBU5VhOOI2HCuycPWjKnDh+KvcC09uD/BUZRLg6vqTmQ+hFdqfcnAyNyCrKk00P9TDBvJP+DBImoBF1qpz9KfCmN9aw/YrSV8YggOLVt35nwkfgo+tYbY8VyZVJXN+GAP1jb/zIgvZWbMcpRjAhJlJycKFGTKUhnwVS/ovkjTKJNWskLOZRVSVLnzEcfTxX/NxBS3jS5er2xM5KFXhzTfrLiYpf7iG9eXkGqryxK+8RH20sLqNpOthpnv939FXafjf9DKqgm3Q5Kx3/vp3Ns+9/E8NnKBtaiPLiqpiYjTCYOKMPfzhNhKgwWuCJMLkaH+ESCBMkPZfkjKhKlxFRanzC/UtOHSohWQ5UPtdbxdHH2u46Oqu4KScRnGx0xLWeuiDeCu0H3VVqOyogjbmrVZRVWysT6bEE7VJVYCTr4Jh9s1tpFsj6UkoB28+Ne8QDbexnZctK6qKieGEObfdQBL8JU62zRIFEQ4tmK8Tv0WZIPJdtF+D5ilEX0e+tqwmPPN4AFNUwnEa9t6PQQNX3mkM0ddFAi6rKiJUhtdfDp74/Pk1nOkVrSrooK5i2NxuPPtnyxyMiIlUBcs67d9tv/SN7yzHXCqRLBusKiaqCdPaxogn2kY1IVURTipTKqGJggQJ0dR0oc6QEEgKwBCvPoM3+PADzc4C/ObTIUxx+3j8K238uyRec9iCetSSoTLfoLvXdBjVoc1mb66iU4tqw0hVPN0cibNlWYda6NTak6iKiXLCvPCnDVZHu4aqopUD6jUMrWoBkuMK2pUurP7GR973uKdwVxy84W67nyoPlVFVgi8+++drTB7XqhLSLQJUlQBzKWvox6xMoiomsoRpbdjsVl36KpYVYpZ2N7ZYByJUkXt0g2+K4XC/cN6LyS9BM5OGyhaqDXd1HUNVXB6hEjGWlI2rKiZSwvzRyxi31zYwptvBRFsAL/5+AFM88MAIiLKwLfQX5mn7BbIBbzzGGCof6WZCZTyO97kuWZx1zjz3TAATgsFKCyXqUANJEsLLzwUwxYHB+fOY0kecOTO+kkwxxRRTTDHFA45iWO34eG+DL6OTtANhu1NS3sByygm4aS8YSYXtVRiGY89SkskDCvs4dDGZt47twoFtHN9X53MG1ApVf1tD+5sUjm+jA4njT7OmpeMgMLaLfzt3bSz3EVnCOM9SNrElSzCTGLbbaRleMM4vAKRJH4UQ654aenGOLW2Qi13S9gS2LQ/ZzfGMCo637N/4q3W4k3B82gh1EQaT9t6M5T6jnrySF6VVWkuWEVncXAkm89jiiCqxUlaCISEdb1WcswXjgiHBji058MZOM9NXkegmQqDPUkVc2daBScbi+Nex3wNzN75uvC6X2qrVhTe48O/igIucgvO1yjKG5s/xN0v6cXLvQ3XOwgiBi4RVerOOgY99XjEmiszoBgzDsaV2qZnk/HTmPZlg2niUH4cwtdzNtV3DsbRHuk77ACZh7EKp47tKWZzMcY7+zbW2D6NAqotjHAlBXmw3OW8sCDXYByKyhO1mxTlQqWJMXrGldIyZiWrjYxmGqQQRjX5gyPHzJjZ/bVYrVbW4wKgtfdYADgDqlSUxX8ALSKsye7Fon+gb7RaMiry6ENks2mEnLqoE+TaOP7nDKtv5MLdEG5E8dZTGTaopSUMkIPNnwXyudV4VaMJpC8EpmHQsjr8rAgezzxy8FrdvqGuLt2l7QYuVKtDJllxsr7TwBm9FWb692Xceuh9dp+zcVf0SLKgCrbbSk8bVmwfzIHXJXqxQkC1sB5BfcfEAszUqKLLL9Gn4XDSRb7TJX1rExxY+dtSDXuejQU+o66SI+eHckQIZ3u9DK96Dq/T4YA/eeeosv6AnivDZF/gyPt7RdZ78Kr/65BmeuA2fa3HXbI/ll3X79/bA12Xmg+9BskixzWXV9nJh+Htwgcpu9As+6wCFqYJw5JohhNs7Q+sW1IW3lQMKEEWoNJaX9iv8jh1FpkkRZt5ZkE6cTBesCZMzGuhidSvL9OfIwlH+Tt4fLPRjcZhX23dDvH9H38tqwC0RtTaePEvjVIEAgy7jotzBz3Phc2f5iX89x7r9vlyITH1mLCcCESGO1zg4nInjjuqjhxV6PJZm/7NnuQ/pQnaIaFp5XFQevCsuiDJbLxk3DAetjjBzhMebFRcsRVFdJNk4vyoelrVdaMNvW2WczLuYvoIBpl/hwZ0A+XXUX/GRfh9Ig7F2manFCdX7WJp6IvHYvFAJJsmCZFh97UV24uYMnABFugiE8oPeXYcvdqkP1a1DpubVc2zlta+z47oNTvIivX/tPOtQ/1hfXmcmlRWVJxnzbKoqpWZyGGFknoTyLFnS2OICVZFG5mwmmXxPKMGkyJ/TUmavMkKiVaUfcOejGBnVFZx5MiegtmC+8mIa+eFEhrExYa9+nW3Siy5NHINdcVT5YKRQog0WI4n061BPslAKKCpFfEtsxHKYDAS0lUiiwD5PiFyqroNMUjYh5/iLeOFNezfAOYzR4WMOTAI56cE4TRRBM1+dABp/mqnO+2LFZCNFVDKjfPuQRNnJJD4NaHOC6D71Vb4RS3+xF0ulcdXXtTIERrM0J5xHpZpCobj4xZtlJie5x6J0Lkgp1G9gJUpB6oJmqyW6wYw1i3GBMqlWpExUr8ZgQf3O0aWysdcHfOhsPiJsd/GiruZWqycyuG/spKtIyr+f6Ytjyt6q9Ae0AthJn2UqQ77H3NLFktbF3IcefzWkiZpbMvu3YVSIPbTK3GURwuAEoIZcxRyu4aTRtbny8YegQxN28gVuq7DCeeoMX3n1PNvEY7Rhyhdt0EEnhervyetlRbAY19FxJcWqCyLSGIRSWJBVCjQ9iQKTX4SdJZ/5/UhGlEgWR53nnbIIbTynlxJheXMjQ+JraZIsXsqpi45OqiFJlvZJrymDLFeZ/lAODMujJO2RLNeM1c3YpRJn14HJsXs794lwshbkVxkheOUlMRltXUYm6skXeId2+nMLNp4kBUrj0p1XzrE2lmufo0vtUaXWsQrVo0jrBE1wXinI0cXXvtjSiUqkzgvYF/qVsGbFsKDGIciMbTeRYJvKdCX5r1Gc3izCdquwekkhSBXExGfu/YTK/xkGIpupQJ4Y+GCVKAPaerZakifK939fweXKDqv8BHR0F7HOFkv9xpC+uYiOq09vmFSBkKnPJHwdLKc9vKaKiHaRcnyZ8F2ovy1NFnFcmv+QoqyTzwtFCfVD/NZMBJk5YMkrGdWYNnx9YIgrsquZRBipAbH5tHp9BWiixkmJZ8dwSZBTHqM+B5mM0c4n+1qA0ZCG+HTrAjIJv0U4IKn+KaaYYooppphiiimmmCIHBuOC9vTGGLVYIoppV9RxYDT0hkY1lB8oO1c6jitj72iTiUF6dEU2+JiIgg5jX+sT5VeO+RTK0s3B3dJ90KONqfqz3kvQtYlFpNrD9EThtkZ2i+Zg6Ml11dYHQrvkhJiLgaswGgIYvO+EUtdLFeeS4+Cij83CGKogCeFRsgrbt4G2NjARtlMburcSwrhggnz0uAbmVgk5DmdASzMrXP1Zh28xzaOTWYjD5oSJhdLStdX8hlByHywlDIdhm5wDGHdTERtyTyjOJa4oiwzGRnF1gw242E7QUkd7QxVF/gCgV1IS4uM4jAqZa1oG+U0BkWzDvtu48rZG7MEXxKwCE2MZJZ/jqc80GuTWhqCiNCw5NnJOqW6cpJt0Jm9myQvE1LF4gkxp2B6PYPLrJ2UX2FVjEr1CXlEGjCAZf9p2NMhVedm436LVdRPm0HwwODVG8i6sWDzjtG/D6KjuV26FCLO9i12CclGQWRzgqNSNRovJ6zlf7h1hItvZgkkxylaFbDa5J+RRg8tb8SC+naBu74+zDUFKbRsmgVRcW+0Zaaptno467lZ+26EcYeV+5JFaqx2KVX5O6kMN34DGoXgD1/GP43H5A4pDvNqqm4+O+BsPTMdXoQf6pmHZ4IpIhyhXbCt5P+efVjWu3RZxx4XYnZeY59VESeRKXBfmgYH6PbnbPI++1vKHEYeh3H9MfahLQ3uQliS/6Gihkr9CCmP6UgUUCSPuRidb++arGub8io7Y/kCQK/GEus90WNXVPkCQMxHVkKvZVe3nB9UsHUexPz/xAzgMPbt6DkuipkA922KMo0VVHpI/e1ZpYphS0VFRpa6Oeg5hOJoV10g6644Pg8ZUpjAN47UnCFRuq1O/gkjg+FTHSUqtzMZq2SfHFZC35dpsFaXUM2uJeuVy6yR+D1P7UcphbjW1ASZST93W7HMU9Ap1aSOUZSwgLiI1d0g/uq4D1WMqaYWknvNDkNfqMr4u1mHi2xVDzWaRMKnTKc1KLGxbs+QEJH9t9S6AYRGBbLM2oI5559wx6hEBXPU+KGlH/s2WMY5yyPyIXkWtIWOlenIHX5GoejtjOIbT24VrlQGAHpNjOPZZaB8lJYqLx8yoSRKGPtMxf6k0l0NOOv3wkFVp+q6oZ72wwrJK9dzA9C9Hh+IEMkrwwWkGJd8SuJr77nV3TE++GtoBM8chdvfh+IrJpN4Ax3YyFSEizPk0kQ1hxshvobGQw5nu5l8fo8dJ1QzUuTzIKq5t+DImPGPZtTMl+rtb8usz5eORat8DBpVKYybuaPWvqAanlIO3Ki6Y/HrITwzMf5grOO3TVnkMPUi5mXlQ5CJXjjRhTO07EfuJ0YGm3X3HfMpADp4scpLJYyBb7PgdY1+yA6NOHl00uaLdxPfRk8Ehu6OvGqF6dkXYqrPAMt9kgyTkafE5B4+FPm9+wS6JX8qUUdxuxXmLkIvRg9HGXshZScLQJKk9o8Jb1heYJlabBzoRqcioEF+zFZNs5wbcwNW7XJrHIOllyTiahiPdTchLX8GgL7gPBhGbHDdXZDi1zZZuZ6DM6WDIsZ1QtyA84cBLv6ODZAlgNNBkanNyITcOEx4MHktQOJamLK6MlTpggnjVn18GGI2qYkv9XRfhlpzENmQH2xIrQBIpgFFBF0jnMahfhhdfSp1MgMWFn/6gcWyB+oXHknG0VR+rQzO9RDDKonK8OGlCMlRj2YVxQKpAe5LJIZTPwRhte8qkZseRjmVdXfMO7BNIhZGKcqKy1rgfKM1j9DIJQXL+ZNhOvxWzUHIeItOpAePowqh7c7XNLh9fC+4VBo1jGNIbgUVwdf3IpB3zyx1Zy8ghpe2oPw8mxPhflR0NepDFXEWMksdgitHgVDi3JlzlI5aBfJ/ySI5UzxoYpJS2uzuEISVI4/6L4pcZaADyPoUv6rCCEzdFEYEwWZOiPKkoiUAKHw9NYRaipbulMKBst7wDLj3zSaKMuwWZa4hhmPN8fyEnPIQ7CVqoMt8zinrdEcJ0VHYyHFhLftjj6i6olkyaqDaSZdSE1yjjGL8v6TSnjrO+jzLp5KRh7+hRZBFtkFnwEO4mdPpj9E1uU0wxxRT3CD8CuFJTsB6GfZYAAAAASUVORK5CYII=">
+                        </a>
+                    </th>
+                </tr>
+                </thead>
                 <tbody>
                 <tr>
-                    <td style="padding-bottom: 20px;font-size: 24px;text-align: center;">
-                        <strong>자동차데이터포털</strong> 사용자 <strong style="color:#0355a3"> 회원가입 알림 (소속기관 :기타)</strong>
+                    <!--타이틀 영역-->
+                    <th style="padding: 60px 20px 0 20px; font-size: 24px; font-weight: 500; line-height: 36px; color: #00010D; text-align: center;">
+                        자동차데이터포털 사용자 회원가입 알림<br>
+                        (소속기관 :기타)
+                    </th>
+                </tr>
+                <tr>
+                    <!--텍스트 영역-->
+                    <td style="padding: 60px 20px 30px 20px; font-size: 15px; font-weight: 400; line-height: 24px; color: #5D5D62; text-align: left;">
+                        자동차데이터포털에서 소속기관(기타) 로 가입한 사용자 정보입니다.
                     </td>
                 </tr>
                 <tr>
-                    <td>
-                        <div style="line-height: 2;padding: 50px 20px;background-color: #EFEFEF;border-radius: 10px;font-weight: bold;text-align: center;">
-                            <p>자동차데이터포털에서 소속기관(기타) 로 가입한 사용자 정보입니다.</p>
-                            <div style="display: block;width:500px;height: 100px;line-height: 50px;margin: 30px auto 0;background-color: #00A0E9;
-										text-align: center;color: #fff;border-radius: 8px;text-decoration: none;font-size: 20px;">
-                                <p style="margin:0 !important">Email : <span>CONTENTS1</span></p>
-                                <p style="margin:0 !important">소속기관 : <span>CONTENTS2</span></p>
-                            </div><br/>
-                            <span style="text-align:left;line-height: 28px;white-space: normal; word-break: break-all; padding:12px 32px;background-color: #00C0E9; color: #fff;border-radius: 8px;text-decoration: none;font-size: 18px;">
-                                <a href="https://www.bigdata-car.kr/admin/ui/users/belonging-organization/index.html" style="text-decoration: none;font-size: 18px;color: #FFFFFF">소속기관관리 바로가기</a>
-                            </span>
+                    <!--블럭 컨텐츠 영역-->
+                    <td style="border-radius: 10px; background-color: #EDEFF5; padding: 30px;">
+                        <div style="width:100%; display: flex; justify-content: flex-start;">
+                            <table style="border-collapse:collapse; border-spacing:0;">
+                                <tbody>
+                                <tr>
+                                    <!--컨텐츠 텍스트-->
+                                    <td style="color: #00010D; font-size: 16px; text-align: left; line-height: 32px;">
+                                        ·&nbsp;&nbsp;Email : CONTENTS1<br>
+                                        ·&nbsp;&nbsp;소속기관 : CONTENTS2
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </td>
                 </tr>
+                <tr>
+                    <!--하단 여백 영역-->
+                    <td style="height: 60px;">&nbsp;</td>
+                </tr>
                 </tbody>
+                <tfoot>
+                <tr style="border-top:2px solid #001F60;">
+                    <th style="font-size: 12px; font-weight: 400; color: #5D5D62; text-align: center; padding-top: 20px;">
+                        본 메일은 발신전용입니다.<br>
+                        궁금하신 사항은 자동차 데이터 포털
+                        <a href="https://portal.bigdata-car.kr/portal/ui/board/information/faq/index.html" style="cursor: pointer; color: #00010D; text-decoration: underline;">고객센터</a>를
+                        이용해 주시기 바랍니다.
+                    </th>
+                </tr>
+                <tr>
+                    <td style="font-size: 12px; font-weight: 400; color: #8D8F95; padding-top: 12px; text-align: center;">
+                        Copyright(c) 2022 KATECH(Korea Automotive Technology Institute) All right reserved.
+                    </td>
+                </tr>
+                </tfoot>
             </table>
-        </div>
-    </div>
-</div>
+        </td>
+    </tr>
+    </tbody>
+</table>
 </body>
-
 </html>
