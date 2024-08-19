@@ -35,14 +35,10 @@ def send_mail():
 
             # replace
             # todo 함수화
-            if row["tmplt_cd"] in ["register", "password", "share",
-                                   "cloud_create_noty", "cloud_delete_noty", "vdi_create_noty", "vdi_delete_noty"]:
-                html = html.replace("CONTENTS1", row['contents'])
-            else:
-                content = row["contents"].split("|")
-                html = html.replace("TITLE", row['title'])
-                html = html.replace("CONTENTS1", content[0])
-                html = html.replace("CONTENTS2", content[1])
+            html = html.replace("TITLE", row['title'])
+            content = row["contents"].split("|")
+            for i in range(len(content)):
+                html = html.replace(f"CONTENTS{i+1}", content[i])
 
             if row["tmplt_cd"] in ["analysisRequest", "toolApply", "blng_noty"]:
                 category["sub"] = category["sub"].format(row["title"])
