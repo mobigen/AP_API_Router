@@ -155,8 +155,10 @@
             },
             "share_num":{
                 "type":"integer"
+            },
+            "status":{
+                "type":"keyword"
             }
-
         }
     }
 }
