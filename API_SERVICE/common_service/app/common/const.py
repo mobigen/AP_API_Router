@@ -10,6 +10,12 @@ subject_dict = {
         "share": "[자동차데이터포털] 자동차데이터포털에서 공유한 데이터입니다."
 }
 
+# file
+ATTACH_BASE_DIR = "/attach"
+
+class AttachFileTable(Base):
+    table_nm = "tb_attach_file_info"
+    key_column = "link"
 
 class EmailAuthTable(Base):
     table_nm = "tb_email_athn_info"
