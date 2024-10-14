@@ -1,5 +1,7 @@
 FROM python:3.9-alpine
 
+RUN mkdir /attach
+
 RUN apk add --update alpine-sdk && \
    apk add --update --no-cache postgresql-client && \
    apk add --update --no-cache --virtual .tmp-build-deps \

@@ -6,7 +6,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from common_service.app.common.config import settings
 from common_service.app.database.conn import db
-from common_service.app.routes.v1 import code_info, select, execute, auth_email
+from common_service.app.routes.v1 import code_info, select, execute, auth_email, file
 from libs.auth.keycloak import keycloak
 from libs.middlewares.keycloak_middleware import refresh_token_from_cookie_wrapper
 
@@ -35,6 +35,7 @@ def create_app():
     app_.include_router(execute.router, prefix="/portal/api/common")
     app_.include_router(auth_email.router, prefix="/portal/api/common")
     app_.include_router(code_info.router, prefix="/portal/api/sitemng")
+    app_.include_router(file.router, prefix="/portal/api/common")
 
     return app_
 
