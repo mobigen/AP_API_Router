@@ -23,6 +23,10 @@ msg_setting = {
         "tmplt": os.path.join(template_dir, "notyEmail.html"),
         "sub": "[자동차데이터포털] 자동차데이터포털에서 보내는 알림 메일입니다.",
     },
+    "notice": {
+        "tmplt": os.path.join(template_dir, "noticeEmail.html"),
+        "sub": "[자동차데이터포털] 공지 메일입니다.",
+    },
     "analysisRequest": {
         "tmplt": os.path.join(template_dir, "analysisRequestEmail.html"),
         "sub": "[자동차데이터포털] {0} 신청 메일입니다.",
