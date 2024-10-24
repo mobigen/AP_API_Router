@@ -32,7 +32,7 @@ scheduler = BackgroundScheduler()
 @app.on_event("startup")
 def _app_startup():
 
-    scheduler.add_job(send_email.send_mail, "cron", second="*/5", id="email")
+    scheduler.add_job(send_email.send_mail, "cron", second="*/5", id="email", max_instances=1) # 이전 작업이 완료 되지 않으면 실행하지 않도록 한다.
     scheduler.add_job(recommend_word.recommend_search_word, "cron", hour="23", minute="59", id="recommend")
 
     # els update
