@@ -104,7 +104,8 @@ class RegisterInfoWrap(BaseModel):
         limit_time: Optional[str]
         company: Optional[str]
         companyImagePath: Optional[str]
-        cloud_auth: Optional[str]
+        cloud_pc_auth: Optional[str]
+        cloud_server_auth: Optional[str]
         vpn_auth: Optional[str]
         market_auth: Optional[str]
 
@@ -305,27 +306,6 @@ async def register(request: Request, session: Executor = Depends(db.get_db)):
     userInfo = await get_user_info_from_request(request)
 
     userData = userInfo.get("data")
-    userId = userData.get("user_id")
-    userSub = userData.get("sub")
-    userDetailRes = await keycloak.user_info_detail(
-        token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, user_id=userSub
-    )
-    userRoleRes = await keycloak.get_user_role(
-        token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, user_sub=userSub
-    )
-    userAttribute = userDetailRes.get("data").get("attributes")
-    openstack_user_domain = userAttribute.get("openstack-user-domain")[0]
-    cloud_auth = "Y" if openstack_user_domain == "Default" else "N"
-
-    market_auth = "N"
-    try:
-        userRole = userRoleRes.get("data").get("clientMappings").get("cmp-portal").get("mappings")
-        logger.info(userRole)
-        RoleNames = [item['name'] for item in userRole]
-        if "ROLE_PROJECT_MANAGER" in RoleNames : market_auth = "Y"
-    except Exception as e:
-        logger.info(userRoleRes.get("data"))
-        logger.error(e, exc_info=True)
 
     if userId is None:
         msg = userInfo.get("data").get("error_description")
@@ -352,8 +332,10 @@ async def register(request: Request, session: Executor = Depends(db.get_db)):
         "reg_date": userData.get("reg_date"),
         "amd_user": userData.get("amd_user"),
         "amd_date": userData.get("amd_date"),
-        "cloud_auth": cloud_auth,
-        "market_auth": market_auth
+        "cloud_pc_auth": userData.get("cloud_pc_auth"),
+        "cloud_server_auth": userData.get("cloud_server_auth"),
+        "market_auth": userData.get("market_auth"),
+        "vpn_auth": userData.get("vpn_auth"),
     }
 
     return await user_upsert(session, **userParam)
@@ -385,7 +367,8 @@ async def admin_register(request: Request, params: RegisterInfoWrap, session: Ex
             "reg_date": param.reg_date.strftime("%Y-%m-%d %H:%M:%S"),
             "amd_user": param.amd_user,
             "amd_date": param.amd_date.strftime("%Y-%m-%d %H:%M:%S"),
-            "cloud_auth": param.cloud_auth,
+            "cloud_pc_auth": param.cloud_pc_auth,
+            "cloud_server_auth": param.cloud_server_auth,
             "market_auth": param.market_auth,
             "vpn_auth": param.vpn_auth,
         }
