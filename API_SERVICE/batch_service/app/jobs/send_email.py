@@ -1,5 +1,6 @@
 import logging
 import smtplib
+import time
 from datetime import datetime, timedelta
 
 from email.mime.text import MIMEText
@@ -12,7 +13,7 @@ logger = logging.getLogger()
 
 
 def send_mail():
-    st_time = datetime.today() - timedelta(minutes=1)
+    st_time = datetime.today() - timedelta(days=1)
     st_time = st_time.strftime("%Y-%m-%d %H:%M:00")
 
     with db.get_db_manager() as session:
@@ -61,3 +62,4 @@ def send_mail():
             # update
             row["sttus"] = "SEND"
             session.execute(**EmailSendInfoTable.get_execute_query("UPDATE", row))
+            time.sleep(3)
