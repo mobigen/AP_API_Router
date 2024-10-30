@@ -21,6 +21,8 @@ router = APIRouter()
 
 logger = logging.getLogger()
 
+index_set = set(['biz_meta', 'v_biz_meta_oversea_els'])
+
 
 class DeleteData(BaseModel):
     index: Optional[str] = "biz_meta"
@@ -28,6 +30,9 @@ class DeleteData(BaseModel):
 
     class Config:
         extra = "forbid"  # 추가 인자는 허용하지 않음
+
+def valid_index(indexes) :
+    return not len(set(indexes.split(",")) - index_set)
 
 
 @router.post("/bulk_update", response_model=dict)
@@ -95,6 +100,11 @@ def search(input: SearchModel):
         }
     }
     """
+
+    if not valid_index(input.index) :
+        logger.error(f"index = {input.index}")
+        return {"result": 0, "errorMessage": "not Valid Index"}
+
     try:
         len_search = len(input.searchOption)
         len_filter = len(input.filterOption)
@@ -274,6 +284,11 @@ def autocomplete(input: Prefix):
         "data": ["data1","data2"..."data5"]
     }
     """
+
+    if not valid_index(input.index) :
+        logger.error(f"index = {input.index}")
+        return {"result": 0, "errorMessage": "not Valid Index"}
+
     try:
         keyword = input.query
         docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, input.index, input.size)
