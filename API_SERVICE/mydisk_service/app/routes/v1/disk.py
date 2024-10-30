@@ -24,6 +24,9 @@ logger = logging.getLogger()
 class UserParams(BaseModel):
     uuid: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
     def get_path(self) -> Path:
         return Path(
             os.path.join(
@@ -36,6 +39,9 @@ class UserParams(BaseModel):
 
 class DownloadParams(BaseModel):
     src_target_path: str
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
     def get_path(self) -> Path:
         return Path(
@@ -50,6 +56,9 @@ class CopyParams(BaseModel):
     src_path: str
     force: Union[bool, str]
     dst_path: str
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
     def is_force(self):
         if isinstance(self.force, bool):
@@ -72,6 +81,9 @@ class CopyParams(BaseModel):
 class TreeParams(BaseModel):
     target_directory: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
     def get_path(self) -> Path:
         print(f"target path :: {settings.MYDISK_INFO.ROOT_DIR}")
         return Path(
@@ -85,6 +97,9 @@ class TreeParams(BaseModel):
 class LabelParams(BaseModel):
     data_set_id: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
     def get_path(self) -> Path:
         return Path(os.path.join(settings.MYDISK_INFO.ROOT_DIR, "ADMIN", self.data_set_id, "LABEL_DATA"))
 
@@ -94,6 +109,9 @@ class PreviewParam(BaseModel):
     width: Optional[int] = 90
     height: Optional[int] = 90
     rows: int
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
     def get_path(self) -> Path:
         return Path(

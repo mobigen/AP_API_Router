@@ -24,7 +24,13 @@ class UserInfoWrap(BaseModel):
         position: Optional[str]
         project_count: Optional[int]
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: UserInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 @router.post("/cmp/v2/getProjectCount")
 async def get_project_count(params: UserInfoWrap) -> JSONResponse:

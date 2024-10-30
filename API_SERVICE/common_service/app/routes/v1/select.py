@@ -13,6 +13,9 @@ class JoinInfo(BaseModel):
     table_nm: str
     key: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 class WhereInfo(BaseModel):
     table_nm: str
@@ -22,16 +25,25 @@ class WhereInfo(BaseModel):
     op: Optional[str] = ""
     sub: Optional[List["WhereInfo"]] = None
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 class OrderInfo(BaseModel):
     table_nm: str
     key: str
     order: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 class PageInfo(BaseModel):
     per_page: int
     cur_page: int
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class CommonSelect(BaseModel):
@@ -42,6 +54,8 @@ class CommonSelect(BaseModel):
     order_info: Optional[OrderInfo] = None
     page_info: Optional[PageInfo] = None
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 router = APIRouter()
 

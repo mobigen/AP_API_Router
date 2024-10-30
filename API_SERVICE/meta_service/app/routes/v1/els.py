@@ -3,7 +3,7 @@ import logging
 import os.path
 
 from typing import Optional
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, HTTPException
 from pydantic import BaseModel
 
 from libs.database.connector import Executor
@@ -21,10 +21,18 @@ router = APIRouter()
 
 logger = logging.getLogger()
 
+index_set = set(['biz_meta', 'v_biz_meta_oversea_els'])
+
 
 class DeleteData(BaseModel):
     index: Optional[str] = "biz_meta"
     biz_dataset_id: str
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
+def valid_index(indexes) :
+    return not len(set(indexes.split(",")) - index_set)
 
 
 @router.post("/bulk_update", response_model=dict)
@@ -56,8 +64,8 @@ def els_update(index: str, key: str = "biz_dataset_id", session: Executor = Depe
         result = {"result": 1, "data": "test"}
 
     except Exception as e:
-        result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
+        raise HTTPException(status_code=404, detail=str(e))
     return result
 
 
@@ -92,6 +100,11 @@ def search(input: SearchModel):
         }
     }
     """
+
+    if not valid_index(input.index) :
+        logger.error(f"index = {input.index}")
+        raise HTTPException(status_code=404, detail="not Valid Index")
+
     try:
         len_search = len(input.searchOption)
         len_filter = len(input.filterOption)
@@ -140,8 +153,9 @@ def search(input: SearchModel):
 
         result = {"result": 1, "errorMessage": "", "data": data_dict}
     except Exception as e:
-        result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
+        raise HTTPException(status_code=404, detail=str(e))
+
     return result
 
 
@@ -154,8 +168,8 @@ def els_doc_delete(input: DeleteData):
 
         result = {"result": 1, "data": f"{input.biz_dataset_id} delete"}
     except Exception as e:
-        result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
+        raise HTTPException(status_code=404, detail=str(e))
     return result
 
 
@@ -182,8 +196,8 @@ def els_doc_update(input: DeleteData, session: Executor = Depends(db.get_db)):
 
         result = {"result": 1, "data": f"{input.biz_dataset_id} update"}
     except Exception as e:
-        result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
+        raise HTTPException(status_code=404, detail=str(e))
     return result
 
 
@@ -214,8 +228,8 @@ def meta_update_bulk(session: Executor = Depends(db.get_db)):
         result = {"result": 1, "data": "test"}
 
     except Exception as e:
-        result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
+        raise HTTPException(status_code=404, detail=str(e))
     return result
 
 
@@ -247,8 +261,8 @@ def els_doc_insert(input: Record, session: Executor = Depends(db.get_db)):
         result = {"result": 1, "data": "test"}
 
     except Exception as e:
-        result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
+        raise HTTPException(status_code=404, detail=str(e))
     return result
 
 
@@ -271,6 +285,11 @@ def autocomplete(input: Prefix):
         "data": ["data1","data2"..."data5"]
     }
     """
+
+    if not valid_index(input.index) :
+        logger.error(f"index = {input.index}")
+        raise HTTPException(status_code=404, detail="not Valid Index")
+
     try:
         keyword = input.query
         docmanager = default_search_set(settings.ELS_INFO.ELS_HOST, settings.ELS_INFO.ELS_PORT, input.index, input.size)
@@ -298,8 +317,8 @@ def autocomplete(input: Prefix):
         # 데이터셋에서 해당 되는 데이터가 여러개 있을 수 있어 prefix_data에 size를 줌
         result = {"result": 1, "data": prefix_data[: docmanager.size]}
     except Exception as e:
-        result = {"result": 0, "errorMessage": str(e)}
         logger.error(e, exc_info=True)
+        raise HTTPException(status_code=404, detail=str(e))
 
     return result
 

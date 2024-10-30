@@ -19,7 +19,13 @@ class InfoWrap(BaseModel):
         email: str
         name: Optional[str]
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: Info
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 @router.post("/user/v2/CheckVpn")
