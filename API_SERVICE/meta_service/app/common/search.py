@@ -13,6 +13,9 @@ class Record(BaseModel):
     key: str
     ids: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 class SearchModel(InputModel):
     chk: bool = False

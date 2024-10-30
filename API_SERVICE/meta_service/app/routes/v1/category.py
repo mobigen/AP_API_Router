@@ -17,6 +17,8 @@ class UpdateCategory(BaseModel):
     node_id: str
     node_nm: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 @router.post("/updateCategory")
 def update_category(update: UpdateCategory, session: Executor = Depends(db.get_db)):
@@ -62,6 +64,8 @@ def update_category(update: UpdateCategory, session: Executor = Depends(db.get_d
 class DeleteData(BaseModel):
     biz_dataset_id: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 @router.get("/getCategoryNmCount")
 def update_category(nms: str):

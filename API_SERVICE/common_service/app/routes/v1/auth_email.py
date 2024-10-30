@@ -34,6 +34,9 @@ class EmailAthnPass(BaseModel):
     athn_no: str
     new_password: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 # emailAthnSend
 class EmailNotAuth(Exception):
@@ -48,6 +51,9 @@ class EmailAthnSend(BaseModel):
     email: str
     msg_type: str  # register or password
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 # emailAthnCnfm
 class EmailAuthFail(Exception):
@@ -58,6 +64,8 @@ class EmailAthnCnfm(BaseModel):
     email: str
     athn_no: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 # emailDataShare
 class EmailInfo(BaseModel):
@@ -65,6 +73,8 @@ class EmailInfo(BaseModel):
     msg_type: str  # share
     message: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 # emailAthnSend
 def make_auth_no():

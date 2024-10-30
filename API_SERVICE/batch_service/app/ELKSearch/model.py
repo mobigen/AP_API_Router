@@ -6,6 +6,9 @@ class ElkServerConfig(BaseModel):
     host: str
     port: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 @dataclasses.dataclass
 class ElkIndexConfig(BaseModel):
@@ -13,21 +16,33 @@ class ElkIndexConfig(BaseModel):
     port: str
     index: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 class CoreOption(BaseModel):
     field: Union[list, str]
     keywords: Union[list, str]
     operator: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 class SortOption(BaseModel):
     field: str
     order: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 class RangeOption(BaseModel):
     field: str
     compare_dict: dict
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class InputModel(BaseModel):

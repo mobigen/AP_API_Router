@@ -48,7 +48,13 @@ class QueryInfoWrap(BaseModel):
     class QueryInfo(BaseModel):
         query: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: QueryInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class LoginInfoWrap(BaseModel):
@@ -56,7 +62,13 @@ class LoginInfoWrap(BaseModel):
         user_id: str
         user_password: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: LoginInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class LoginAuthInfoWrap(BaseModel):
@@ -65,7 +77,13 @@ class LoginAuthInfoWrap(BaseModel):
         scope: str
         redirect_uri: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: LoginAuthInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class RegisterInfoWrap(BaseModel):
@@ -109,7 +127,13 @@ class RegisterInfoWrap(BaseModel):
         vpn_auth: Optional[str]
         market_auth: Optional[str]
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: RegisterInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class RegisterSocialInfoWrap(BaseModel):
@@ -119,7 +143,13 @@ class RegisterSocialInfoWrap(BaseModel):
         social_email: Optional[str]
         access_token: Optional[str]
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: RegisterSocialInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class ActivateInfoWrap(BaseModel):
@@ -127,14 +157,26 @@ class ActivateInfoWrap(BaseModel):
         user_id: str
         athn_no: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: ActivateInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class UserInfoWrap(BaseModel):
     class UserInfo(BaseModel):
         user_id: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: UserInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class PasswordInfoWrap(BaseModel):
@@ -143,28 +185,52 @@ class PasswordInfoWrap(BaseModel):
         athn_no: str
         new_password: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: PasswordInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class PurchaseInfoWrap(BaseModel):
     class PurchaseInfo(BaseModel):
         data_id: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: PurchaseInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class ClientInfoWrap(BaseModel):
     class ClientInfo(BaseModel):
         client_name: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: ClientInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class ClientRoleWrap(BaseModel):
     class ClientRole(BaseModel):
         client_sub: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: ClientRole
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class ClientRoleMappingWrap(BaseModel):
@@ -175,7 +241,13 @@ class ClientRoleMappingWrap(BaseModel):
         role_name: str
         description: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: ClientRoleMapping
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class RealmRoleMappingWrap(BaseModel):
@@ -185,14 +257,26 @@ class RealmRoleMappingWrap(BaseModel):
         role_name: str
         description: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: RealmRoleMapping
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class getUserRoleWrap(BaseModel):
     class getUserRole(BaseModel):
         user_sub: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: getUserRole
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 router = APIRouter()

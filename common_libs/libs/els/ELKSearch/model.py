@@ -34,3 +34,6 @@ class InputModel(BaseModel):
     searchOption: List[CoreOption] = []
     filterOption: List[CoreOption] = []
     rangeOption: List[RangeOption] = []
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음

@@ -17,6 +17,9 @@ class CommonExecute(BaseModel):
     data: Dict
     key: Optional[List[str]] = None
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 router = APIRouter()
 

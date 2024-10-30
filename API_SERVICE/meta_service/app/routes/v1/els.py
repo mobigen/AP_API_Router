@@ -26,6 +26,9 @@ class DeleteData(BaseModel):
     index: Optional[str] = "biz_meta"
     biz_dataset_id: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 @router.post("/bulk_update", response_model=dict)
 def els_update(index: str, key: str = "biz_dataset_id", session: Executor = Depends(db.get_db)):

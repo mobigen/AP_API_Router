@@ -33,7 +33,13 @@ class LoginInfoWrap(BaseModel):
         user_password: str
         login_type: str
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: LoginInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 class RegisterInfoWrap(BaseModel):
@@ -67,7 +73,13 @@ class RegisterInfoWrap(BaseModel):
         user_normal: Optional[str]
         adm_yn: Optional[str]
 
+        class Config:
+            extra = "forbid"  # 추가 인자는 허용하지 않음
+
     data: RegisterInfo
+
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
 
 
 router = APIRouter()

@@ -17,6 +17,9 @@ class AttachFileInfo(BaseModel):
     file_type: str
     file_name: str
 
+    class Config:
+        extra = "forbid"  # 추가 인자는 허용하지 않음
+
 
 logger = logging.getLogger()
 router = APIRouter()
