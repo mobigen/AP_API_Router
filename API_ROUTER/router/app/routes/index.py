@@ -57,7 +57,7 @@ async def index(request: Request, route_path: str, session: Executor = Depends(d
     if cookies:
         for k, v in cookies.items():
             logger.debug(f"k :: {k} {type(k)}, v :: {v} {type(v)}")
-            response.set_cookie(key=k, value=v, domain=v.get("domain"), max_age=3600, secure=False, httponly=False)
+            response.set_cookie(key=k, value=v, domain=v.get("domain"), max_age=3600, secure=False, httponly=False, samesite="strict")
 
     return response
 
