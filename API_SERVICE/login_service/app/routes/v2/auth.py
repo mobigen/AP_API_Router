@@ -386,15 +386,9 @@ async def register(request: Request, session: Executor = Depends(db.get_db)):
         request (Request): _description_
         session (Executor, optional): _description_. Defaults to Depends(db.get_db).
     """
-    admin_token = await get_admin_token()
     userInfo = await get_user_info_from_request(request)
 
     userData = userInfo.get("data")
-
-    if userId is None:
-        msg = userInfo.get("data").get("error_description")
-        logger.info(msg)
-        return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
 
     userParam = {
         "keycloak_uuid": userData.get("sub"),
