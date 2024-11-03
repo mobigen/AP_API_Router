@@ -610,7 +610,7 @@ async def getCount(params: QueryInfoWrap, session: Executor = Depends(db.get_db)
         res = await get_query_keycloak(query)
         logger.info(res)
         objectCount = len(res.get("data"))
-        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": "", "data": objectCount})
+        return JSONResponse(status_code=200, content={"result": 1, "errorMessage": "", "data": objectCount, "detail": res.get("data")})
     except Exception as e:
         session.rollback()
         logger.error(e, exc_info=True)
