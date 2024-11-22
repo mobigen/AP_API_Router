@@ -1205,13 +1205,41 @@ async def create_keycloak_user(**kwargs):
     res = await keycloak.create_user(token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, **reg_data)
     logger.info(f"res :: {res}")
     if res["status_code"] != 201:
-        raise CreateKeycloakFailError(f"CreateKeycloakFailError :: {res}")
+        raise CreateKeycloakFailError(f"CreateKeycloakFailError Kadap Keycloak :: {res}")
+
+    # exchange_user 생성
+    exchange_admin_token = await get_exchange_admin_token()
+    exchange_reg_data = {
+        "firstName":kwargs.get("user_nm"),
+        "lastName":"",
+        "email":kwargs.get("email"),
+        "roles":["QX User"],
+        "userName":kwargs.get("user_id"),
+        "userId":kwargs.get("user_uuid")
+    }
+
+    exchange_res = await keycloak.create_exchange_user(token=exchange_admin_token, **exchange_reg_data)
+    logger.info(f"exchange_res :: {exchange_res}")
+    if exchange_res["status_code"] != 201:
+        raise CreateKeycloakFailError(f"CreateKeycloakFailError EXCHANGE Keycloak:: {exchange_res}")
 
 
 async def get_admin_token() -> None:
     res = await keycloak.generate_admin_token(
         username=settings.KEYCLOAK_INFO.ADMIN_USERNAME,
         password=settings.KEYCLOAK_INFO.ADMIN_PASSWORD,
+        grant_type="password",
+    )
+
+    return res.get("data").get("access_token")
+
+async def get_exchange_admin_token() -> None:
+    res = await keycloak.generate_exchange_admin_token(
+        username="2179d8c4-25d6-4ba4-b033-c1f06baf64db",
+        password="qVNM3409031091Z51234",
+        scope="openid",
+        client_id="sa-cl2-04",
+        client_secret="T7Gjcmcaf2ujcSxPgcPOO5GwansAx6ur",
         grant_type="password",
     )
 

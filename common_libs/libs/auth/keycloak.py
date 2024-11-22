@@ -62,6 +62,26 @@ class KeycloakManager:
             **kwargs,
         )
 
+    async def generate_exchange_admin_token(self, **kwargs) -> Dict:
+        """
+            관리자계정에 대한 토큰 발급
+
+        Args:
+            username (str):
+            password (str):
+            grant_type (str): refresh_token or password
+
+        Returns:
+            Dict: _description_
+        """
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        return await self._request_to_keycloak(
+            api_url="https://exchange-centralidp.bigdata-car.kr/auth/realms/QX-Central/protocol/openid-connect/token",
+            method="POST",
+            headers=headers,
+            **kwargs,
+        )
+
     async def generate_normal_token(self, realm, **kwargs) -> Dict:
         """
             일반회원의 토큰 발급
@@ -113,6 +133,18 @@ class KeycloakManager:
                 method="POST",
                 headers=headers,
                 json=kwargs,
+            ) as response:
+                return {"status_code": response.status, "data": await response.read()}
+
+    async def create_exchange_user(self, token, **kwargs):
+        headers = {"Content-Type": "application/json", "Authorization": "bearer " + token}
+
+        async with aiohttp.ClientSession() as session:
+            async with session.request(
+                    url="https://exchange-kadap-x-backend.bigdata-car.kr/api/administration/user/owncompany/identityprovider/ed635673-c382-4ead-800a-8372dd0946d3/user/add",
+                    method="POST",
+                    headers=headers,
+                    json=kwargs,
             ) as response:
                 return {"status_code": response.status, "data": await response.read()}
 
