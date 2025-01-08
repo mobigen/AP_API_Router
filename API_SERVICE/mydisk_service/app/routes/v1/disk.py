@@ -18,6 +18,9 @@ from starlette.responses import FileResponse
 from libs.disk.mydisk import mydisk
 from mydisk_service.app.common.config import settings
 
+# 기본적인 이미지 크기 제한을 제거
+#Image.MAX_IMAGE_PIXELS = None  # None으로 설정하면 크기 제한이 없어집니다.
+
 logger = logging.getLogger()
 
 
@@ -149,7 +152,7 @@ async def head(params: PreviewParam):
             logger.info(f"image str :: {image_base64str[:30]}...")
             contents = image_base64str
         else:  # txt, csv
-            df = pd.read_excel(path, header=None) if suffix in ["xls", "xlsx"] else pd.read_csv(path, header=None)
+            df = pd.read_excel(path, header=None) if suffix in ["xls", "xlsx"] else pd.read_csv(path, header=None, on_bad_lines='skip')
             df = df.fillna("")
             contents = df[:lines].values.tolist()
 
