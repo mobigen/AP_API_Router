@@ -161,6 +161,7 @@ async def head(params: PreviewParam):
 @router.post("/v1/listdir")
 async def walk(param: TreeParams) -> Dict:
     id = 0
+    max_list = 100
 
     def nodes(p: Path):
         nonlocal id
@@ -176,6 +177,9 @@ async def walk(param: TreeParams) -> Dict:
                 data["type"] = "directory"
 
             lst.append(data)
+            if id >= max_list :
+                lst.append({"text": "use Mydisk..", "id": id + 1, "type": "none"})
+                break
         return lst
 
     try:
