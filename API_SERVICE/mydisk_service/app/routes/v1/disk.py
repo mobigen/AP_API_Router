@@ -39,6 +39,7 @@ class UserParams(BaseModel):
 
 class DownloadParams(BaseModel):
     src_target_path: str
+    type: str
 
     class Config:
         extra = "forbid"  # 추가 인자는 허용하지 않음
