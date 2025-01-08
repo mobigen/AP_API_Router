@@ -169,9 +169,10 @@ async def walk(param: TreeParams) -> Dict:
             id += 1
             data = {"text": i.name, "id": id, "type": "file"}
             if i.is_dir():
-                node = nodes(i)
-                if node:
-                    data["nodes"] = node
+                # NODE : 1 Depth 씩 처리하고 UI 에서 순차적으로 호출하므로 다음의 코드는 주석 처리한다.
+                # node = nodes(i)
+                # if node:
+                #     data["nodes"] = node
                 data["type"] = "directory"
 
             lst.append(data)
