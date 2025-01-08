@@ -182,7 +182,7 @@ async def walk(param: TreeParams) -> Dict:
 
             lst.append(data)
             if id >= max_list :
-                lst.append({"text": "use Mydisk..", "id": id + 1, "type": "none"})
+                lst.append({"text": "use Mydisk.", "id": id + 1, "type": "guide"})
                 break
         return lst
 
