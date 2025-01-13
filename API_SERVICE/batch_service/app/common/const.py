@@ -106,10 +106,20 @@ class RecommendKeyTable(Base):
 
 # 서울대 데이터
 class SeoulDataKor(Base):
-    table_nm = "tbdataset_total_95_kor"
+    table_nm = "tbdataset_kor"
     key_column = "ds_id"
 
 
 class SeoulDataWorld(Base):
+    table_nm = "tbdataset_world"
+    key_column = "ds_id"
+
+
+class SeoulDataKorKatech(Base):
+    table_nm = "tbdataset_total_95_kor"
+    key_column = "ds_id"
+
+
+class SeoulDataWorldKatech(Base):
     table_nm = "tbdataset_total_95_world"
     key_column = "ds_id"

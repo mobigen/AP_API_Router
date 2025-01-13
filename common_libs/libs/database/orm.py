@@ -91,7 +91,7 @@ class OrmExecutor(Executor):
 
     def query(self, **kwargs) -> "OrmExecutor":
         base_table = self.get_table(kwargs["table_nm"])
-        logger.info(base_table)
+        #logger.info(base_table)
         key = kwargs.get("key")
         # Join
         if join_info := kwargs.get("join_info"):
