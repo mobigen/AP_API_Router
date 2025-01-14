@@ -138,6 +138,10 @@
         "type":"date",
         "format":"strict_date_optional_time_nanos||yyyy-MM-dd||yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||date_hour_minute_second"
       },
+      "modified_dt":{
+        "type":"date",
+        "format":"strict_date_optional_time_nanos||yyyy-MM-dd||yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||date_hour_minute_second"
+      },
       "data_global_nm":{
         "type":"text"
       },
