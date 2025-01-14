@@ -33,18 +33,21 @@ scheduler = BackgroundScheduler()
 def _app_startup():
 
     scheduler.add_job(send_email.send_mail, "cron", second="*/5", id="email", max_instances=1) # 이전 작업이 완료 되지 않으면 실행하지 않도록 한다.
-    scheduler.add_job(recommend_word.recommend_search_word, "cron", hour="23", minute="59", id="recommend")
+    scheduler.add_job(recommend_word.recommend_search_word, "cron", hour="12", minute="59", id="recommend")
 
     # els update
-    scheduler.add_job(els_update.insert_meta, "cron", args=[False], hour="00", minute="15", id="update_meta")
-    scheduler.add_job(els_update.insert_ckan, "cron", args=[False], hour="00", minute="40", id="update_ckan")
+    scheduler.add_job(els_update.insert_meta, "cron", args=[False], hour="13", minute="15", id="update_meta")
+    scheduler.add_job(els_update.insert_ckan, "cron", args=[False], hour="13", minute="40", id="update_ckan")
 
     scheduler.add_job(els_update.insert_meta, "cron", args=[True], minute="*/5", id="update_meta_retv")
     scheduler.add_job(els_update.insert_ckan, "cron", args=[True], minute="*/5", id="update_ckan_retv")
 
-    # 서울대 DB 데이터 확인후 활성화 필요
-    scheduler.add_job(seoul_db_upload.insert_db, "cron", args=[True], hour="23", minute="59", id="insert_db_kor")
-    scheduler.add_job(seoul_db_upload.insert_db, "cron", args=[False], hour="23", minute="59", id="insert_db_world")
+    # 서울대 DB 데이터
+    scheduler.add_job(seoul_db_upload.insert_db, "cron", args=[True], hour="15", minute="59", id="insert_db_kor")
+    scheduler.add_job(seoul_db_upload.insert_db, "cron", args=[False], hour="15", minute="59", id="insert_db_world")
+
+    # 인덱스 재생성
+    scheduler.add_job(seoul_db_upload.init_els, "cron", hour="17", minute="59", id="init_els")
 
     scheduler.start()
 
