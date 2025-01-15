@@ -950,12 +950,14 @@ async def alter_user_info(user_id: str, user_sttus: str = None, **kwargs):
 
     try:
         admin_token = await get_admin_token()
-        res = await keycloak.get_query(token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, query="")
-        userList = res.get("data")
-        user_info = list(filter(lambda item: item["username"] == user_id, userList))
-        if len(user_info) == 0:
+        res = await keycloak.get_query(
+            token=admin_token, realm=settings.KEYCLOAK_INFO.REALM, query=f"username={user_id}&exact=true"
+        )
+        user_list = res.get("data")
+        if len(user_list) == 0:
             return JSONResponse(status_code=400, content={"result": 0, "errorMessage": "Invalid User!!"})
-        user_info = user_info[0]
+        logger.info(f"res :: {res}")
+        user_info = user_list[0]
         attributes = user_info.get("attributes")
         sub = user_info.get("id")
         attributes_user_sttus = attributes.get("user_sttus")[0]
