@@ -286,8 +286,6 @@ router = APIRouter()
 async def logout():
     response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
     response.delete_cookie(COOKIE_NAME)
-    # studio cookie 삭제
-    response.delete_cookie("x-access-token")
     return response
 
 
@@ -311,8 +309,6 @@ async def logout_keycloak(request: Request):
         return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
 
     response.delete_cookie(COOKIE_NAME)
-    # studio cookie 삭제
-    response.delete_cookie("x-access-token")
     return response
 
 
