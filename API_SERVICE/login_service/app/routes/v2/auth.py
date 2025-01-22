@@ -285,7 +285,7 @@ router = APIRouter()
 @router.post("/user/v2/commonLogout")
 async def logout():
     response = JSONResponse(status_code=200, content={"result": 1, "errorMessage": ""})
-    response.delete_cookie(COOKIE_NAME)
+    response.delete_cookie(COOKIE_NAME, domain=settings.KEYCLOAK_INFO.DOMAIN)
     return response
 
 
@@ -308,7 +308,7 @@ async def logout_keycloak(request: Request):
         msg = res.get("data").get("error_description")
         return JSONResponse(status_code=400, content={"result": 0, "errorMessage": msg})
 
-    response.delete_cookie(COOKIE_NAME)
+    response.delete_cookie(COOKIE_NAME, domain=settings.KEYCLOAK_INFO.DOMAIN)
     return response
 
 
